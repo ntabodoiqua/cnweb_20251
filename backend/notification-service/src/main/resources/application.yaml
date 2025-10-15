@@ -1,0 +1,41 @@
+server:
+  port: 8084 # Port m?i cho service
+spring:
+  application:
+    name: notification-service
+  kafka:
+    consumer:
+      bootstrap-servers: localhost:9092
+      group-id: notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+    listener:
+      retry:
+        max-attempts: 3
+        back-off-period: 1000
+      dead-letter:
+        topic: welcome-email-topic.DLT
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: noreply.innolearn@gmail.com
+    password: nmfa wrcx niwd owol
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+management:
+  tracing:
+    sampling:
+      # Tỷ lệ lấy mẫu.
+      probability: 1.0
+  zipkin:
+    tracing:
+      # Địa chỉ của Zipkin server
+      endpoint: http://localhost:9411/api/v2/spans
