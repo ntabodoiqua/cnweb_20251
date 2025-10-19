@@ -129,6 +129,7 @@ public class AdminServiceImp implements AdminService{
     @PreAuthorize("hasRole('ADMIN')")
     @Cacheable(value = "user-stats")
     public UserStatisticResponse getUserStatistic() {
+
         log.info("Fetching user statistics");
 
         try {
