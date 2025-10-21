@@ -24,10 +24,10 @@ public enum ErrorCode {
     USER_ALREADY_ENABLED(1211, "error.1211", HttpStatus.BAD_REQUEST),
     USER_ALREADY_DISABLED(1212, "error.1212", HttpStatus.BAD_REQUEST),
     ADMIN_CANNOT_DISABLE_SELF(1213, "error.1213", HttpStatus.BAD_REQUEST),
-    EMAIL_NOT_VERIFIED(1214, "Email is not verified. Please verify your email first", HttpStatus.FORBIDDEN),
+    EMAIL_NOT_VERIFIED(1214, "error.1214", HttpStatus.FORBIDDEN),
     // Lỗi OTP (13xx)
-    OTP_EXPIRED(1301, "OTP code has expired or not found", HttpStatus.BAD_REQUEST),
-    OTP_INVALID(1302, "Invalid OTP code", HttpStatus.BAD_REQUEST),
+    OTP_EXPIRED(1301, "error.1301", HttpStatus.BAD_REQUEST),
+    OTP_INVALID(1302, "error.1302", HttpStatus.BAD_REQUEST),
     // Lỗi File (14xx)
     FILE_CANNOT_STORED(1401, "error.1401", HttpStatus.INTERNAL_SERVER_ERROR),
     FILE_NOT_FOUND(1402, "error.1402", HttpStatus.NOT_FOUND),
