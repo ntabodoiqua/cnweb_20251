@@ -21,12 +21,13 @@ public class EmailService {
     JavaMailSender mailSender;
     TemplateEngine templateEngine; // Thêm TemplateEngine
 
-    public void sendWelcomeEmail(String to, String username) {
+    public void sendWelcomeEmail(String to, String username, String otpCode) {
         // Chuẩn bị các biến cho template
-        final String subject = "Chào mừng đến với NTA VDT_2025!";
+        final String subject = "Chào mừng đến với NTA VDT_2025 - Xác thực email của bạn!";
         Context context = new Context();
         context.setVariable("username", username);
         context.setVariable("subject", subject);
+        context.setVariable("otpCode", otpCode);
 
         // Render template HTML thành một chuỗi String
         String htmlContent = templateEngine.process("welcome-email", context);
@@ -41,7 +42,7 @@ public class EmailService {
             helper.setText(htmlContent, true); // true để chỉ định đây là nội dung HTML
 
             mailSender.send(mimeMessage);
-            log.info("Welcome email sent to {}", to);
+            log.info("Welcome email with OTP sent to {}", to);
         } catch (MessagingException e) {
             log.error("Failed to send welcome email to {}: {}", to, e.getMessage());
             throw new RuntimeException("Failed to send welcome email", e);

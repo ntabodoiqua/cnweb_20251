@@ -29,8 +29,12 @@ public class RabbitMQConsumerService {
     public void listen(UserCreatedEvent userCreatedEvent) {
         log.info("Received UserCreatedEvent from RabbitMQ: {}", userCreatedEvent);
         try {
-            emailService.sendWelcomeEmail(userCreatedEvent.getEmail(), userCreatedEvent.getUsername());
-            log.info("Sent welcome email to user: {}", userCreatedEvent.getEmail());
+            emailService.sendWelcomeEmail(
+                userCreatedEvent.getEmail(), 
+                userCreatedEvent.getUsername(),
+                userCreatedEvent.getOtpCode()
+            );
+            log.info("Sent welcome email with OTP to user: {}", userCreatedEvent.getEmail());
         } catch (Exception e) {
             log.error("Failed to send welcome email to user: {}", userCreatedEvent.getEmail(), e);
             // Gửi vào Dead Letter Queue sau khi retry hết

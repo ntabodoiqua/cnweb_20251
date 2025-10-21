@@ -1,6 +1,8 @@
 package com.cnweb2025.user_service.controller;
 
 import com.cnweb2025.user_service.dto.ApiResponse;
+import com.cnweb2025.user_service.dto.request.otp.ResendOtpRequest;
+import com.cnweb2025.user_service.dto.request.otp.VerifyEmailRequest;
 import com.cnweb2025.user_service.dto.request.user.UserChangePasswordRequest;
 import com.cnweb2025.user_service.dto.request.user.UserCreationRequest;
 import com.cnweb2025.user_service.dto.request.user.UserUpdateRequest;
@@ -76,6 +78,26 @@ public class UserController {
         var result = userService.disableMyAccount();
         return ApiResponse.<String>builder()
                 .message("Account disabled successfully")
+                .result(result)
+                .build();
+    }
+
+    // Controller xác thực email bằng OTP
+    @PostMapping("/verify-email")
+    public ApiResponse<String> verifyEmail(@RequestBody @Valid VerifyEmailRequest request) {
+        var result = userService.verifyEmail(request.getUsername(), request.getOtpCode());
+        return ApiResponse.<String>builder()
+                .message("Email verification successful")
+                .result(result)
+                .build();
+    }
+
+    // Controller gửi lại OTP
+    @PostMapping("/resend-otp")
+    public ApiResponse<String> resendOtp(@RequestBody @Valid ResendOtpRequest request) {
+        var result = userService.resendOtp(request.getUsername());
+        return ApiResponse.<String>builder()
+                .message("OTP resent successfully")
                 .result(result)
                 .build();
     }

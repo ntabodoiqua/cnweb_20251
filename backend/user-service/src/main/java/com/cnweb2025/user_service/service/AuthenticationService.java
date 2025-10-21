@@ -111,6 +111,12 @@ public class AuthenticationService {
         if (!user.isEnabled()) {
             throw new AppException(ErrorCode.USER_DISABLED);
         }
+        
+        // Kiểm tra xem người dùng đã xác thực email chưa
+        if (!user.isVerified()) {
+            throw new AppException(ErrorCode.EMAIL_NOT_VERIFIED);
+        }
+        
         // Kiểm tra mật khẩu
         boolean authenticated = passwordEncoder.matches(
                 request.getPassword(), user.getPassword());

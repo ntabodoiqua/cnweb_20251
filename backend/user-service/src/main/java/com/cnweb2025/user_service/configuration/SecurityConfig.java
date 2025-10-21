@@ -33,7 +33,9 @@ public class SecurityConfig {
     };
 
     private static final String[] PUBLIC_POST_ENDPOINTS = {
-            "/users"
+            "/users",
+            "/users/verify-email",
+            "/users/resend-otp",
     };
 
     @Autowired

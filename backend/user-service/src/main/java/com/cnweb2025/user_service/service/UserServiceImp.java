@@ -1,5 +1,6 @@
 package com.cnweb2025.user_service.service;
 
+import com.cnweb2025.user_service.dto.response.RoleResponse;
 import com.vdt2025.common_dto.dto.UserCreatedEvent;
 import com.vdt2025.common_dto.service.FileServiceClient;
 import com.cnweb2025.user_service.constant.PredefinedRole;
@@ -8,6 +9,7 @@ import com.cnweb2025.user_service.dto.request.user.UserUpdateRequest;
 import com.cnweb2025.user_service.dto.response.UserResponse;
 import com.cnweb2025.user_service.entity.Role;
 import com.cnweb2025.user_service.entity.User;
+import com.cnweb2025.user_service.enums.OtpType;
 import com.cnweb2025.user_service.exception.AppException;
 import com.cnweb2025.user_service.exception.ErrorCode;
 import com.cnweb2025.user_service.mapper.UserMapper;
@@ -42,6 +44,7 @@ public class UserServiceImp implements UserService{
     PasswordEncoder passwordEncoder;
     FileServiceClient fileServiceClient;
     RabbitTemplate rabbitTemplate;
+    OtpService otpService;
     // FileStorageService fileStorageService;
 
     @Override
@@ -62,16 +65,24 @@ public class UserServiceImp implements UserService{
         user.setRoles(roles);
         // Gán trạng thái kích hoạt cho người dùng
         user.setEnabled(true);
+        // Đặt trạng thái chưa xác thực email
+        user.setVerified(false);
         // Lưu người dùng vào cơ sở dữ liệu
         try {
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
+        
+        // Tạo OTP code cho việc xác thực email
+        String otpCode = otpService.createOtpCode(user.getId(), OtpType.EMAIL_VERIFICATION);
+        log.info("OTP code created for user: {}", user.getUsername());
+        
         com.vdt2025.common_dto.dto.UserCreatedEvent event = UserCreatedEvent.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .otpCode(otpCode)
                 .build();
         rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, event);
         log.info("User {} created successfully with ID {}", user.getUsername(), user.getId());
@@ -183,6 +194,61 @@ public class UserServiceImp implements UserService{
         userRepository.save(user);
         log.info("User {} disabled their account successfully", username);
         return "Account disabled successfully";
+    }
+
+    @Override
+    public String verifyEmail(String username, String otpCode) {
+        log.info("Verifying email for user: {}", username);
+        
+        // Tìm user theo username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        
+        // Kiểm tra xem user đã được xác thực chưa
+        if (user.isVerified()) {
+            log.warn("User {} already verified", username);
+            return "Email already verified";
+        }
+        
+        // Xác thực OTP code
+        otpService.verifyOtpCode(user.getId(), otpCode, OtpType.EMAIL_VERIFICATION);
+        
+        // Cập nhật trạng thái xác thực
+        user.setVerified(true);
+        userRepository.save(user);
+        
+        log.info("User {} verified their email successfully", username);
+        return "Email verified successfully";
+    }
+
+    @Override
+    public String resendOtp(String username) {
+        log.info("Resending OTP for user: {}", username);
+        
+        // Tìm user theo username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        
+        // Kiểm tra xem user đã được xác thực chưa
+        if (user.isVerified()) {
+            log.warn("User {} already verified", username);
+            return "Email already verified";
+        }
+        
+        // Tạo OTP code mới
+        String otpCode = otpService.createOtpCode(user.getId(), OtpType.EMAIL_VERIFICATION);
+        
+        // Gửi OTP qua RabbitMQ
+        UserCreatedEvent event = UserCreatedEvent.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .otpCode(otpCode)
+                .build();
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, event);
+        
+        log.info("OTP resent for user: {}", username);
+        return "OTP code has been resent to your email";
     }
 
 }
