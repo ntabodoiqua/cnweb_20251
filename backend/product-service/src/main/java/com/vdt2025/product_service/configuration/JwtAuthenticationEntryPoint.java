@@ -3,15 +3,23 @@ package com.vdt2025.product_service.configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vdt2025.product_service.dto.response.ApiResponse;
 import com.vdt2025.product_service.exception.ErrorCode;
+import com.vdt2025.product_service.service.MessageService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 
+@Component
+@RequiredArgsConstructor
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+    
+    private final MessageService messageService;
+    
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         ErrorCode errorcode = ErrorCode.UNAUTHENTICATED;
@@ -21,7 +29,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
         ApiResponse<?> apiResponse = ApiResponse.builder()
                 .code(errorcode.getCode())
-                .message(errorcode.getMessage())
+                .message(messageService.getMessage(errorcode.getMessageKey()))
                 .build();
 
         ObjectMapper objectMapper = new ObjectMapper();

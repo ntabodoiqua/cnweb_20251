@@ -5,54 +5,54 @@ import org.springframework.http.HttpStatusCode;
 
 public enum ErrorCode {
     // Lỗi xác thực (11xx)
-    UNAUTHORIZED(1101, "You do not have permission", HttpStatus.FORBIDDEN),
-    UNAUTHENTICATED(1102, "You are not authenticated", HttpStatus.UNAUTHORIZED),
-    WRONG_PASSWORD(1103, "Wrong password", HttpStatus.UNAUTHORIZED),
-    OLD_PASSWORD_SAME_AS_NEW(1104, "Old password cannot be the same as new password", HttpStatus.BAD_REQUEST),
+    UNAUTHORIZED(1101, "error.1101", HttpStatus.FORBIDDEN),
+    UNAUTHENTICATED(1102, "error.1102", HttpStatus.UNAUTHORIZED),
+    WRONG_PASSWORD(1103, "error.1103", HttpStatus.UNAUTHORIZED),
+    OLD_PASSWORD_SAME_AS_NEW(1104, "error.1104", HttpStatus.BAD_REQUEST),
 
     // Lỗi người dùng (12xx)
-    USER_NOT_FOUND(1201, "User not found", HttpStatus.NOT_FOUND),
-    USER_DISABLED(1202, "User is disabled", HttpStatus.FORBIDDEN),
-    USER_EXISTED(1203, "User already exists", HttpStatus.CONFLICT),
-    USERNAME_INVALID(1204, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
-    INVALID_PASSWORD(1205, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
-    INVALID_DOB(1206, "User must be at least {min} years old", HttpStatus.BAD_REQUEST),
-    INVALID_EMAIL(1207, "Email is invalid", HttpStatus.BAD_REQUEST),
-    INVALID_PHONE(1208, "Phone number is invalid", HttpStatus.BAD_REQUEST),
-    MISSING_USERNAME(1209, "Username is required", HttpStatus.BAD_REQUEST),
-    MISSING_PASSWORD(1210, "Password is required", HttpStatus.BAD_REQUEST),
-    USER_ALREADY_ENABLED(1211, "User is already enabled", HttpStatus.BAD_REQUEST),
-    USER_ALREADY_DISABLED(1212, "User is already disabled", HttpStatus.BAD_REQUEST),
-    ADMIN_CANNOT_DISABLE_SELF(1213, "Admin cannot disable themselves", HttpStatus.BAD_REQUEST),
+    USER_NOT_FOUND(1201, "error.1201", HttpStatus.NOT_FOUND),
+    USER_DISABLED(1202, "error.1202", HttpStatus.FORBIDDEN),
+    USER_EXISTED(1203, "error.1203", HttpStatus.CONFLICT),
+    USERNAME_INVALID(1204, "error.1204", HttpStatus.BAD_REQUEST),
+    INVALID_PASSWORD(1205, "error.1205", HttpStatus.BAD_REQUEST),
+    INVALID_DOB(1206, "error.1206", HttpStatus.BAD_REQUEST),
+    INVALID_EMAIL(1207, "error.1207", HttpStatus.BAD_REQUEST),
+    INVALID_PHONE(1208, "error.1208", HttpStatus.BAD_REQUEST),
+    MISSING_USERNAME(1209, "error.1209", HttpStatus.BAD_REQUEST),
+    MISSING_PASSWORD(1210, "error.1210", HttpStatus.BAD_REQUEST),
+    USER_ALREADY_ENABLED(1211, "error.1211", HttpStatus.BAD_REQUEST),
+    USER_ALREADY_DISABLED(1212, "error.1212", HttpStatus.BAD_REQUEST),
+    ADMIN_CANNOT_DISABLE_SELF(1213, "error.1213", HttpStatus.BAD_REQUEST),
     // Lỗi File (13xx)
-    FILE_CANNOT_STORED(1301, "File cannot be stored", HttpStatus.INTERNAL_SERVER_ERROR),
-    FILE_NOT_FOUND(1302, "File cannot be found", HttpStatus.NOT_FOUND),
-    INVALID_IMAGE_TYPE(1303, "Invalid image type", HttpStatus.BAD_REQUEST),
+    FILE_CANNOT_STORED(1301, "error.1301", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_NOT_FOUND(1302, "error.1302", HttpStatus.NOT_FOUND),
+    INVALID_IMAGE_TYPE(1303, "error.1303", HttpStatus.BAD_REQUEST),
     // Lỗi vai trò (14xx)
-    ROLE_NOT_FOUND(1401, "Role not found", HttpStatus.NOT_FOUND),
-    ROLE_EXISTED(1402, "Role already exists", HttpStatus.CONFLICT),
-    ROLE_IN_USE(1403, "Role is in use by users", HttpStatus.CONFLICT),
+    ROLE_NOT_FOUND(1401, "error.1401", HttpStatus.NOT_FOUND),
+    ROLE_EXISTED(1402, "error.1402", HttpStatus.CONFLICT),
+    ROLE_IN_USE(1403, "error.1403", HttpStatus.CONFLICT),
     // Lỗi danh mục (15xx)
-    CATEGORY_NOT_FOUND(1501, "Category not found", HttpStatus.NOT_FOUND),
-    CATEGORY_EXISTED(1502, "Category already exists", HttpStatus.CONFLICT),
+    CATEGORY_NOT_FOUND(1501, "error.1501", HttpStatus.NOT_FOUND),
+    CATEGORY_EXISTED(1502, "error.1502", HttpStatus.CONFLICT),
     // Lỗi sản phẩm (16xx)
-    PRODUCT_NOT_FOUND(1601, "Product not found", HttpStatus.NOT_FOUND),
-    PRODUCT_EXISTED(1602, "Product already exists", HttpStatus.CONFLICT),
+    PRODUCT_NOT_FOUND(1601, "error.1601", HttpStatus.NOT_FOUND),
+    PRODUCT_EXISTED(1602, "error.1602", HttpStatus.CONFLICT),
     // Lỗi khác (99xx)
-    UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
-    INVALID_KEY(9998, "Invalid key", HttpStatus.BAD_REQUEST),
-    DATA_INTEGRITY_VIOLATION(9997, "Data integrity violation", HttpStatus.CONFLICT),
+    UNCATEGORIZED_EXCEPTION(9999, "error.9999", HttpStatus.INTERNAL_SERVER_ERROR),
+    INVALID_KEY(9998, "error.9998", HttpStatus.BAD_REQUEST),
+    DATA_INTEGRITY_VIOLATION(9997, "error.9997", HttpStatus.CONFLICT),
     ;
-    ErrorCode(int code, String message, HttpStatusCode statusCode) {
+    ErrorCode(int code, String messageKey, HttpStatusCode statusCode) {
         this.code = code;
-        this.message = message;
+        this.messageKey = messageKey;
         this.statusCode = statusCode;
     }
     public int getCode() {
         return code;
     }
-    public String getMessage() {
-        return message;
+    public String getMessageKey() {
+        return messageKey;
     }
     public HttpStatusCode getStatusCode() {
         return statusCode;
@@ -60,7 +60,7 @@ public enum ErrorCode {
 
     private final int code;
 
-    private final String message;
+    private final String messageKey;
 
     private final HttpStatusCode statusCode;
 
