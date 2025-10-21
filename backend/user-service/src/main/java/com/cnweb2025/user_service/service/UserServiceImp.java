@@ -28,6 +28,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.cnweb2025.user_service.configuration.RabbitMQConfig;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -52,9 +55,11 @@ public class UserServiceImp implements UserService{
             guestRole.setDescription("Guest role to be assigned to new users. Can view products and categories.");
             roleRepository.save(guestRole);
         }
-        // Gán vai trò cho người dùng
-        user.setRole(roleRepository.findById(PredefinedRole.GUEST_ROLE)
-                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND)));
+        // Gán role mặc định
+        Set<Role> roles = new HashSet<>();
+        roleRepository.findById(PredefinedRole.USER_ROLE)
+                .ifPresent(roles::add);
+        user.setRoles(roles);
         // Gán trạng thái kích hoạt cho người dùng
         user.setEnabled(true);
         // Lưu người dùng vào cơ sở dữ liệu
