@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,31 +26,54 @@ public class User {
     @Column(name = "username", unique = true, nullable = false)
     String username;
 
-    @Column(nullable = false)
+    @Column(name = "password")
     String password;
+
+    @Column(name = "first_name")
     String firstName;
+
+    @Column(name = "last_name")
     String lastName;
+
+    @Column(name = "dob")
     LocalDate dob;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "email", unique = true, nullable = false)
     String email;
 
-    @Column(unique = true, nullable = false)
+    @Column(name = "phone", unique = true, nullable = false)
     String phone;
+
+    @Column(name = "avatar_name")
     String avatarName;
 
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(nullable = false)
+    @Column(name = "updated_at", nullable = false)
     LocalDateTime updatedAt;
 
-    @Column(nullable = false)
+    @Column(name = "enabled", nullable = false)
     boolean enabled; // Trạng thái tài khoản
 
-    @ManyToOne
-    @JoinColumn(name = "role_id", nullable = false)
-    Role role;
+    @Column(name = "is_verified", nullable = false)
+    boolean isVerified; // Trạng thái xác thực email
+
+    @ManyToMany
+    @JoinTable(
+            name = "user_role", // tên bảng trung gian
+            joinColumns = @JoinColumn(name = "user_id"), // cột FK trỏ đến User
+            inverseJoinColumns = @JoinColumn(name = "role_id") // cột FK trỏ đến Role
+    )
+    Set<Role> roles;
+
+    // One-to-Many relationship with Address
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    Set<Address> addresses;
+
+    // One-to-One relationship with SellerProfile
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    SellerProfile sellerProfile;
 }

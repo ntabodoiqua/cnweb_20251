@@ -95,7 +95,7 @@ public class ExcelServiceImp implements ExcelService{
                 row.createCell(8).setCellValue(user.isEnabled() ? "Yes" : "No");
                 row.createCell(9).setCellValue(user.getCreatedAt().toString());
                 row.createCell(10).setCellValue(user.getUpdatedAt().toString());
-                row.createCell(11).setCellValue(user.getRole().getName());
+//                row.createCell(11).setCellValue(user.getRole().getName());
             }
             response.setContentType("application/octet-stream");
             response.setHeader("Content-Disposition", "attachment; filename=users.xlsx");

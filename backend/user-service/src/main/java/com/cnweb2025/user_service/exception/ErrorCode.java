@@ -24,22 +24,26 @@ public enum ErrorCode {
     USER_ALREADY_ENABLED(1211, "User is already enabled", HttpStatus.BAD_REQUEST),
     USER_ALREADY_DISABLED(1212, "User is already disabled", HttpStatus.BAD_REQUEST),
     ADMIN_CANNOT_DISABLE_SELF(1213, "Admin cannot disable themselves", HttpStatus.BAD_REQUEST),
-    // Lỗi File (13xx)
-    FILE_CANNOT_STORED(1301, "File cannot be stored", HttpStatus.INTERNAL_SERVER_ERROR),
-    FILE_NOT_FOUND(1302, "File cannot be found", HttpStatus.NOT_FOUND),
-    INVALID_IMAGE_TYPE(1303, "Invalid image type", HttpStatus.BAD_REQUEST),
-    EXCEL_IMPORT_ERROR(1304, "Error importing Excel file", HttpStatus.INTERNAL_SERVER_ERROR),
-    EXCEL_EXPORT_ERROR(1305, "Error exporting Excel file", HttpStatus.INTERNAL_SERVER_ERROR),
-    // Lỗi vai trò (14xx)
-    ROLE_NOT_FOUND(1401, "Role not found", HttpStatus.NOT_FOUND),
-    ROLE_EXISTED(1402, "Role already exists", HttpStatus.CONFLICT),
-    ROLE_IN_USE(1403, "Role is in use by users", HttpStatus.CONFLICT),
+    EMAIL_NOT_VERIFIED(1214, "Email is not verified. Please verify your email first", HttpStatus.FORBIDDEN),
+    // Lỗi OTP (13xx)
+    OTP_EXPIRED(1301, "OTP code has expired or not found", HttpStatus.BAD_REQUEST),
+    OTP_INVALID(1302, "Invalid OTP code", HttpStatus.BAD_REQUEST),
+    // Lỗi File (14xx)
+    FILE_CANNOT_STORED(1401, "File cannot be stored", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_NOT_FOUND(1402, "File cannot be found", HttpStatus.NOT_FOUND),
+    INVALID_IMAGE_TYPE(1403, "Invalid image type", HttpStatus.BAD_REQUEST),
+    EXCEL_IMPORT_ERROR(1404, "Error importing Excel file", HttpStatus.INTERNAL_SERVER_ERROR),
+    EXCEL_EXPORT_ERROR(1405, "Error exporting Excel file", HttpStatus.INTERNAL_SERVER_ERROR),
+    // Lỗi vai trò (15xx)
+    ROLE_NOT_FOUND(1501, "Role not found", HttpStatus.NOT_FOUND),
+    ROLE_EXISTED(1502, "Role already exists", HttpStatus.CONFLICT),
+    ROLE_IN_USE(1503, "Role is in use by users", HttpStatus.CONFLICT),
     // Lỗi danh mục (15xx)
     CATEGORY_NOT_FOUND(1501, "Category not found", HttpStatus.NOT_FOUND),
-    CATEGORY_EXISTED(1502, "Category already exists", HttpStatus.CONFLICT),
-    // Lỗi sản phẩm (16xx)
-    PRODUCT_NOT_FOUND(1601, "Product not found", HttpStatus.NOT_FOUND),
-    PRODUCT_EXISTED(1602, "Product already exists", HttpStatus.CONFLICT),
+    CATEGORY_EXISTED(1602, "Category already exists", HttpStatus.CONFLICT),
+    // Lỗi sản phẩm (17xx)
+    PRODUCT_NOT_FOUND(1701, "Product not found", HttpStatus.NOT_FOUND),
+    PRODUCT_EXISTED(1702, "Product already exists", HttpStatus.CONFLICT),
     // Lỗi khác (99xx)
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(9998, "Invalid key", HttpStatus.BAD_REQUEST),
