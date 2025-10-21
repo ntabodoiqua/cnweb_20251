@@ -18,8 +18,6 @@ public interface AdminService {
 
     UserResponse updateUser(String id, UserUpdateRequest request);
 
-    UserResponse updateUserRole(String id, String roleName);
-
     String enableUser(String id);
 
     String disableUser(String id);

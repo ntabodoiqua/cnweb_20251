@@ -70,15 +70,4 @@ public class AdminController {
                 .build();
     }
 
-    // Cập nhật vai trò của người dùng
-    @PutMapping("/{userId}/role")
-    public ApiResponse<UserResponse> updateUserRole(
-            @PathVariable String userId,
-            @RequestBody UserRoleChangeRequest request
-    ) {
-        return ApiResponse.<UserResponse>builder()
-                .result(adminService.updateUserRole(userId, request.getRoleName()))
-                .message("User role updated successfully")
-                .build();
-    }
 }

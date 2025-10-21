@@ -24,22 +24,26 @@ public enum ErrorCode {
     USER_ALREADY_ENABLED(1211, "error.1211", HttpStatus.BAD_REQUEST),
     USER_ALREADY_DISABLED(1212, "error.1212", HttpStatus.BAD_REQUEST),
     ADMIN_CANNOT_DISABLE_SELF(1213, "error.1213", HttpStatus.BAD_REQUEST),
-    // Lỗi File (13xx)
-    FILE_CANNOT_STORED(1301, "error.1301", HttpStatus.INTERNAL_SERVER_ERROR),
-    FILE_NOT_FOUND(1302, "error.1302", HttpStatus.NOT_FOUND),
-    INVALID_IMAGE_TYPE(1303, "error.1303", HttpStatus.BAD_REQUEST),
-    EXCEL_IMPORT_ERROR(1304, "error.1304", HttpStatus.INTERNAL_SERVER_ERROR),
-    EXCEL_EXPORT_ERROR(1305, "error.1305", HttpStatus.INTERNAL_SERVER_ERROR),
-    // Lỗi vai trò (14xx)
-    ROLE_NOT_FOUND(1401, "error.1401", HttpStatus.NOT_FOUND),
-    ROLE_EXISTED(1402, "error.1402", HttpStatus.CONFLICT),
-    ROLE_IN_USE(1403, "error.1403", HttpStatus.CONFLICT),
-    // Lỗi danh mục (15xx)
-    CATEGORY_NOT_FOUND(1501, "error.1501", HttpStatus.NOT_FOUND),
-    CATEGORY_EXISTED(1502, "error.1502", HttpStatus.CONFLICT),
-    // Lỗi sản phẩm (16xx)
-    PRODUCT_NOT_FOUND(1601, "error.1601", HttpStatus.NOT_FOUND),
-    PRODUCT_EXISTED(1602, "error.1602", HttpStatus.CONFLICT),
+    EMAIL_NOT_VERIFIED(1214, "Email is not verified. Please verify your email first", HttpStatus.FORBIDDEN),
+    // Lỗi OTP (13xx)
+    OTP_EXPIRED(1301, "OTP code has expired or not found", HttpStatus.BAD_REQUEST),
+    OTP_INVALID(1302, "Invalid OTP code", HttpStatus.BAD_REQUEST),
+    // Lỗi File (14xx)
+    FILE_CANNOT_STORED(1401, "error.1401", HttpStatus.INTERNAL_SERVER_ERROR),
+    FILE_NOT_FOUND(1402, "error.1402", HttpStatus.NOT_FOUND),
+    INVALID_IMAGE_TYPE(1403, "error.1403", HttpStatus.BAD_REQUEST),
+    EXCEL_IMPORT_ERROR(1404, "error.1404", HttpStatus.INTERNAL_SERVER_ERROR),
+    EXCEL_EXPORT_ERROR(1405, "error.1405", HttpStatus.INTERNAL_SERVER_ERROR),
+    // Lỗi vai trò (15xx)
+    ROLE_NOT_FOUND(1501, "error.1501", HttpStatus.NOT_FOUND),
+    ROLE_EXISTED(1502, "error.1502", HttpStatus.CONFLICT),
+    ROLE_IN_USE(1503, "error.1503", HttpStatus.CONFLICT),
+    // Lỗi danh mục (16xx)
+    CATEGORY_NOT_FOUND(1601, "error.1601", HttpStatus.NOT_FOUND),
+    CATEGORY_EXISTED(1602, "error.1602", HttpStatus.CONFLICT),
+    // Lỗi sản phẩm (17xx)
+    PRODUCT_NOT_FOUND(1701, "error.1701", HttpStatus.NOT_FOUND),
+    PRODUCT_EXISTED(1702, "error.1702", HttpStatus.CONFLICT),
     // Lỗi khác (99xx)
     UNCATEGORIZED_EXCEPTION(9999, "error.9999", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(9998, "error.9998", HttpStatus.BAD_REQUEST),
