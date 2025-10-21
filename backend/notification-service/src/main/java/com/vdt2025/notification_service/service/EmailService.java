@@ -23,7 +23,7 @@ public class EmailService {
 
     public void sendWelcomeEmail(String to, String username, String otpCode) {
         // Chuẩn bị các biến cho template
-        final String subject = "Chào mừng đến với NTA VDT_2025 - Xác thực email của bạn!";
+        final String subject = "Chào mừng đến với HUSTBuy - Xác thực email của bạn!";
         Context context = new Context();
         context.setVariable("username", username);
         context.setVariable("subject", subject);
