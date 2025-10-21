@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   zookeeper:
     image: confluentinc/cp-zookeeper:7.0.1
@@ -14,12 +14,8 @@ services:
     depends_on: [zookeeper]
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_INTERNAL:PLAINTEXT
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,PLAINTEXT_INTERNAL://kafka:29092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-  zipkin:
-    image: openzipkin/zipkin:latest
-    ports:
-      - "9411:9411"

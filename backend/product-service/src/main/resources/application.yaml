@@ -43,13 +43,3 @@ file:
 
 app:
   default-admin-id: d50f8589-da20-49e8-a3f3-6a115d1f68d7
-
-management:
-  tracing:
-    sampling:
-      # Tỷ lệ lấy mẫu.
-      probability: 1.0
-  zipkin:
-    tracing:
-      # Địa chỉ của Zipkin server
-      endpoint: http://localhost:9411/api/v2/spans
