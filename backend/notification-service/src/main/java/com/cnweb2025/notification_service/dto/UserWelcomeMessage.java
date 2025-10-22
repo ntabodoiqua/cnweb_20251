@@ -1,4 +1,4 @@
-package com.vdt2025.notification_service.dto;
+package com.cnweb2025.notification_service.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

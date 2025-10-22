@@ -1,4 +1,4 @@
-package com.vdt2025.notification_service.configuration;
+package com.cnweb2025.notification_service.configuration;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;

@@ -1,7 +1,7 @@
-package com.vdt2025.notification_service.service;
+package com.cnweb2025.notification_service.service;
 
 import com.vdt2025.common_dto.dto.UserCreatedEvent;
-import com.vdt2025.notification_service.configuration.RabbitMQConfig;
+import com.cnweb2025.notification_service.configuration.RabbitMQConfig;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

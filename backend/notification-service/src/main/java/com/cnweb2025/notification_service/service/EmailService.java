@@ -1,4 +1,4 @@
-package com.vdt2025.notification_service.service;
+package com.cnweb2025.notification_service.service;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
