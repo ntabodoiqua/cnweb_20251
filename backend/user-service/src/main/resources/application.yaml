@@ -46,3 +46,8 @@ jwt:
 file:
   directory: ./uploads/
   max-size: 10MB
+
+logging:
+  level:
+    org.springframework.data.redis: DEBUG
+    io.lettuce.core: DEBUG

@@ -21,9 +21,11 @@ public class UserResponse {
     String phone;
     String email;
     String avatarName;
-    boolean enabled;
-    boolean isVerified;
+    Boolean enabled;
+    Boolean isVerified;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
     Set<RoleResponse> roles;
+    Set<AddressResponse> addresses;
+    SellerProfileResponse sellerProfile;
 }

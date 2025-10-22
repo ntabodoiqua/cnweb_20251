@@ -1,7 +1,8 @@
 package com.cnweb2025.user_service.service;
 
-import com.cnweb2025.user_service.dto.response.RoleResponse;
+import com.vdt2025.common_dto.dto.MessageType;
 import com.vdt2025.common_dto.dto.UserCreatedEvent;
+import com.vdt2025.common_dto.dto.UserForgotPasswordEvent;
 import com.vdt2025.common_dto.service.FileServiceClient;
 import com.cnweb2025.user_service.constant.PredefinedRole;
 import com.cnweb2025.user_service.dto.request.user.UserCreationRequest;
@@ -15,11 +16,11 @@ import com.cnweb2025.user_service.exception.ErrorCode;
 import com.cnweb2025.user_service.mapper.UserMapper;
 import com.cnweb2025.user_service.repository.RoleRepository;
 import com.cnweb2025.user_service.repository.UserRepository;
+import com.cnweb2025.user_service.messaging.RabbitMQMessagePublisher;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -28,7 +29,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.cnweb2025.user_service.configuration.RabbitMQConfig;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -43,7 +43,7 @@ public class UserServiceImp implements UserService{
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
     FileServiceClient fileServiceClient;
-    RabbitTemplate rabbitTemplate;
+    RabbitMQMessagePublisher messagePublisher;
     OtpService otpService;
     // FileStorageService fileStorageService;
 
@@ -84,7 +84,7 @@ public class UserServiceImp implements UserService{
                 .email(user.getEmail())
                 .otpCode(otpCode)
                 .build();
-        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, event);
+        messagePublisher.publish(MessageType.USER_CREATED, event);
         log.info("User {} created successfully with ID {}", user.getUsername(), user.getId());
         return userMapper.toUserResponse(user);
     }
@@ -245,10 +245,54 @@ public class UserServiceImp implements UserService{
                 .email(user.getEmail())
                 .otpCode(otpCode)
                 .build();
-        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, event);
+        messagePublisher.publish(MessageType.EMAIL_VERIFICATION, event);
         
         log.info("OTP resent for user: {}", username);
         return "OTP code has been resent to your email";
     }
+
+    @Override
+    public String forgotPassword(String username) {
+        log.info("Processing forgot password for user: {}", username);
+
+        // Tìm user theo username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Tạo OTP code cho việc đặt lại mật khẩu
+        String otpCode = otpService.createOtpCode(user.getId(), OtpType.PASSWORD_RESET);
+
+        // Gửi OTP qua RabbitMQ
+        UserForgotPasswordEvent event = UserForgotPasswordEvent.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .otpCode(otpCode)
+                .build();
+        messagePublisher.publish(MessageType.PASSWORD_RESET, event);
+
+        log.info("Forgot password OTP sent for user: {}", username);
+        return "Password reset OTP has been sent to your email";
+    }
+
+    @Override
+    public String resetPassword(String username, String otpCode, String newPassword) {
+        log.info("Resetting password for user: {}", username);
+
+        // Tìm user theo username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Xác thực OTP code
+        otpService.verifyOtpCode(user.getId(), otpCode, OtpType.PASSWORD_RESET);
+
+        // Cập nhật mật khẩu mới
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        log.info("Password reset successfully for user: {}", username);
+        return "Password has been reset successfully";
+    }
+
 
 }

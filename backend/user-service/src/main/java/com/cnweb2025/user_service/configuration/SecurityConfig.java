@@ -36,6 +36,8 @@ public class SecurityConfig {
             "/users",
             "/users/verify-email",
             "/users/resend-otp",
+            "/users/forgot-password",
+            "/users/reset-password"
     };
 
     @Autowired
