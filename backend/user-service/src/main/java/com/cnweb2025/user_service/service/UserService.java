@@ -24,4 +24,8 @@ public interface UserService {
     String verifyEmail(String username, String otpCode);
     
     String resendOtp(String username);
+
+    String forgotPassword(String username);
+
+    String resetPassword(String username, String otpCode, String newPassword);
 }

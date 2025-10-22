@@ -1,5 +1,6 @@
 package com.cnweb2025.user_service.configuration;
 
+import com.vdt2025.common_dto.dto.MessageType;
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Queue;
@@ -11,11 +12,22 @@ import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Cấu hình RabbitMQ với khả năng mở rộng cho nhiều queue
+ * Tự động tạo queue và binding cho tất cả các MessageType
+ */
 @Configuration
 public class RabbitMQConfig {
     
     public static final String EXCHANGE_NAME = "notification-exchange";
-    public static final String QUEUE_NAME = "welcome-email-queue";
+    
+    // Backward compatibility - giữ lại constants cũ
+    @Deprecated
+    public static final String WELCOME_EMAIL_QUEUE = "welcome-email-queue";
+    @Deprecated
     public static final String ROUTING_KEY = "user.created";
     
     @Bean
@@ -23,17 +35,34 @@ public class RabbitMQConfig {
         return new TopicExchange(EXCHANGE_NAME);
     }
     
+    /**
+     * Tự động tạo tất cả các queue từ MessageType enum
+     */
     @Bean
-    public Queue queue() {
-        return new Queue(QUEUE_NAME, true); // durable = true
+    public List<Queue> queues() {
+        List<Queue> queues = new ArrayList<>();
+        for (MessageType messageType : MessageType.values()) {
+            queues.add(new Queue(messageType.getQueueName(), true)); // durable = true
+        }
+        return queues;
     }
     
+    /**
+     * Tự động tạo binding cho tất cả các queue với routing key tương ứng
+     */
     @Bean
-    public Binding binding(Queue queue, TopicExchange exchange) {
-        return BindingBuilder
-                .bind(queue)
-                .to(exchange)
-                .with(ROUTING_KEY);
+    public List<Binding> bindings(List<Queue> queues, TopicExchange exchange) {
+        List<Binding> bindings = new ArrayList<>();
+        MessageType[] messageTypes = MessageType.values();
+        
+        for (int i = 0; i < queues.size() && i < messageTypes.length; i++) {
+            bindings.add(BindingBuilder
+                    .bind(queues.get(i))
+                    .to(exchange)
+                    .with(messageTypes[i].getRoutingKey()));
+        }
+        
+        return bindings;
     }
     
     @Bean

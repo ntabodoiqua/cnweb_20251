@@ -49,6 +49,56 @@ public class EmailService {
         }
     }
 
+    public void sendVerificationEmail(String to, String username, String otpCode) {
+        final String subject = "Xác thực email của bạn - HUSTBuy";
+        Context context = new Context();
+        context.setVariable("username", username);
+        context.setVariable("subject", subject);
+        context.setVariable("otpCode", otpCode);
+
+        String htmlContent = templateEngine.process("verification-email", context);
+
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+            log.info("Verification email with OTP sent to {}", to);
+        } catch (MessagingException e) {
+            log.error("Failed to send verification email to {}: {}", to, e.getMessage());
+            throw new RuntimeException("Failed to send verification email", e);
+        }
+    }
+
+    public void sendPasswordResetEmail(String to, String username, String otpCode) {
+        final String subject = "Đặt lại mật khẩu - HUSTBuy";
+        Context context = new Context();
+        context.setVariable("username", username);
+        context.setVariable("subject", subject);
+        context.setVariable("otpCode", otpCode);
+
+        String htmlContent = templateEngine.process("password-reset-email", context);
+
+        try {
+            MimeMessage mimeMessage = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
+
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(mimeMessage);
+            log.info("Password reset email with OTP sent to {}", to);
+        } catch (MessagingException e) {
+            log.error("Failed to send password reset email to {}: {}", to, e.getMessage());
+            throw new RuntimeException("Failed to send password reset email", e);
+        }
+    }
+
     public void sendErrorEmailToAdmin(String errorMessage) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setTo("anhnta2004@gmail.com");
