@@ -1,5 +1,6 @@
 package com.cnweb2025.user_service.entity;
 
+import com.cnweb2025.user_service.enums.SigninStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -30,4 +31,8 @@ public class LoginHistory {
 
     @Column(name = "user_agent")
     String userAgent;
+
+    @Column(name = "status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    SigninStatus status; // e.g., SUCCESS, FAILED
 }
