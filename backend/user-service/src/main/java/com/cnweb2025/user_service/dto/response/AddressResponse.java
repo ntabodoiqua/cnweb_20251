@@ -16,5 +16,6 @@ public class AddressResponse {
     String receiverPhone;
     String street;
     WardResponse ward;
-    boolean isDefault;
+    Boolean isDefault;
+    String userId;
 }
