@@ -26,11 +26,13 @@ public class Address {
     @Column(name = "street", nullable = false)
     String street;
 
-    @Column(name = "ward", nullable = false)
-    String ward;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ward_id", nullable = false)
+    Ward ward;
 
-    @Column(name = "province", nullable = false)
-    String province;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "province_id", nullable = false)
+    Province province;
 
     @Column(name = "is_default", nullable = false)
     boolean isDefault;

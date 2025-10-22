@@ -40,6 +40,11 @@ public class SecurityConfig {
             "/users/reset-password"
     };
 
+    private static final String[] PUBLIC_GET_ENDPOINTS = {
+            "/wards/**",
+            "/provinces/**",
+    };
+
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
 
@@ -58,6 +63,8 @@ public class SecurityConfig {
                                 .requestMatchers(AUTH_ENDPOINTS).permitAll()
                                 // Allow POST to create users
                                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                                // Allow GET for public data
+                                .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                                 // All other requests need authentication
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 ->
