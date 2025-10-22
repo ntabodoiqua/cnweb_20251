@@ -92,7 +92,7 @@ public class ExcelServiceImp implements ExcelService{
                 row.createCell(5).setCellValue(user.getPhone());
                 row.createCell(6).setCellValue(user.getEmail());
                 row.createCell(7).setCellValue(user.getAvatarName() != null ? user.getAvatarName() : "");
-                row.createCell(8).setCellValue(user.isEnabled() ? "Yes" : "No");
+//                row.createCell(8).setCellValue(user.isEnabled() ? "Yes" : "No");
                 row.createCell(9).setCellValue(user.getCreatedAt().toString());
                 row.createCell(10).setCellValue(user.getUpdatedAt().toString());
 //                row.createCell(11).setCellValue(user.getRole().getName());

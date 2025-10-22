@@ -10,6 +10,7 @@ import org.mapstruct.*;
 public interface UserMapper {
     User toUser(UserCreationRequest request);
 
+    @Mapping(source = "verified", target = "isVerified")
     UserResponse toUserResponse(User user);
 
     // Cập nhật thông tin người dùng từ request
