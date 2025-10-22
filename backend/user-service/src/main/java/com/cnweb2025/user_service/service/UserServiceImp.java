@@ -51,13 +51,6 @@ public class UserServiceImp implements UserService{
     public UserResponse createUser(UserCreationRequest request) {
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        // Kiểm tra xem vai trò đã được định nghĩa chưa, nếu chưa thì tạo mới
-        if (roleRepository.findById(PredefinedRole.GUEST_ROLE).isEmpty()) {
-            Role guestRole = new Role();
-            guestRole.setName(PredefinedRole.GUEST_ROLE);
-            guestRole.setDescription("Guest role to be assigned to new users. Can view products and categories.");
-            roleRepository.save(guestRole);
-        }
         // Gán role mặc định
         Set<Role> roles = new HashSet<>();
         roleRepository.findById(PredefinedRole.USER_ROLE)
@@ -115,7 +108,7 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'GUEST', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SELLER')")
     public String changeMyPassword(String oldPassword, String newPassword) {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
@@ -141,7 +134,7 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'GUEST', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SELLER')")
     public String setMyAvatar(MultipartFile file) {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
@@ -162,7 +155,7 @@ public class UserServiceImp implements UserService{
     @Override
     @CacheEvict(value = "userCache",
             key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GUEST', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SELLER')")
     public UserResponse updateMyInfo(UserUpdateRequest request) {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
