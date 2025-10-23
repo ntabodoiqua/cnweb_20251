@@ -4,8 +4,6 @@ on:
   push:
     tags:
       - "dev_*" # Trigger on tags like dev_23.10.2025_v1
-    branches:
-      - be/test-deploy
 
 env:
   REGISTRY: ghcr.io
