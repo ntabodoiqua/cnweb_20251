@@ -6,19 +6,18 @@ FROM maven:3.9.9-eclipse-temurin-21-alpine AS build
 WORKDIR /app
 
 # Copy common-dto first (dependency)
-COPY ../common-dto/pom.xml ../common-dto/pom.xml
-COPY ../common-dto/src ../common-dto/src
-RUN cd ../common-dto && mvn clean install -DskipTests
+COPY common-dto/pom.xml common-dto/pom.xml
+COPY common-dto/src common-dto/src
+RUN cd common-dto && mvn clean install -DskipTests
 
-# Copy pom.xml and download dependencies
-COPY pom.xml .
-RUN mvn dependency:go-offline -B
+# Copy api-gateway files
+COPY api-gateway/pom.xml api-gateway/pom.xml
+RUN cd api-gateway && mvn dependency:go-offline -B
 
-# Copy source code
-COPY src ./src
+COPY api-gateway/src api-gateway/src
 
 # Build the application
-RUN mvn clean package -DskipTests
+RUN cd api-gateway && mvn clean package -DskipTests
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
@@ -30,7 +29,7 @@ RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
 
 # Copy the JAR from build stage
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/api-gateway/target/*.jar app.jar
 
 # Expose port
 EXPOSE 8080
