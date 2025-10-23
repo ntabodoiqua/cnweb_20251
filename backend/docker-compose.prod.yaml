@@ -1,0 +1,156 @@
+version: "3.8"
+
+services:
+  # Discovery Service - Must start first
+  discovery-service:
+    build:
+      context: .
+      dockerfile: discovery-service/Dockerfile
+    container_name: discovery-service
+    image: ghcr.io/ntabodoiqua/cnweb-discovery-service:${TAG:-latest}
+    ports:
+      - "8761:8761"
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8761/actuator/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  # API Gateway - Depends on Discovery Service
+  api-gateway:
+    build:
+      context: .
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    image: ghcr.io/ntabodoiqua/cnweb-api-gateway:${TAG:-latest}
+    ports:
+      - "8080:8080"
+    networks:
+      - microservices-network
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8080/actuator/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # User Service - Depends on Discovery Service
+  user-service:
+    build:
+      context: .
+      dockerfile: user-service/Dockerfile
+    container_name: user-service
+    image: ghcr.io/ntabodoiqua/cnweb-user-service:${TAG:-latest}
+    ports:
+      - "8081:8081"
+    networks:
+      - microservices-network
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25060/user_service?sslmode=require
+      - SPRING_DATASOURCE_USERNAME=doadmin
+      - SPRING_DATASOURCE_PASSWORD=AVNS_yX_L2SKXt73ktjTiGbU
+      - SPRING_DATA_REDIS_HOST=db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
+      - SPRING_DATA_REDIS_PORT=25061
+      - SPRING_DATA_REDIS_USERNAME=default
+      - SPRING_DATA_REDIS_PASSWORD=AVNS_N-gwsyNb6xBC3fXPdQp
+      - SPRING_DATA_REDIS_SSL_ENABLED=true
+      - SPRING_RABBITMQ_ADDRESSES=amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
+      - SPRING_RABBITMQ_USERNAME=xqjmojji
+      - SPRING_RABBITMQ_PASSWORD=hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH
+      - SPRING_RABBITMQ_VIRTUAL_HOST=xqjmojji
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - JWT_SIGNERKEY=cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2
+    volumes:
+      - user-uploads:/app/uploads
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8081/actuator/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+  # Notification Service - Depends on Discovery Service
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-service/Dockerfile
+    container_name: notification-service
+    image: ghcr.io/ntabodoiqua/cnweb-notification-service:${TAG:-latest}
+    ports:
+      - "8084:8084"
+    networks:
+      - microservices-network
+    environment:
+      - SPRING_RABBITMQ_ADDRESSES=amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
+      - SPRING_RABBITMQ_USERNAME=xqjmojji
+      - SPRING_RABBITMQ_PASSWORD=hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH
+      - SPRING_RABBITMQ_VIRTUAL_HOST=xqjmojji
+      - SPRING_MAIL_HOST=smtp.gmail.com
+      - SPRING_MAIL_PORT=587
+      - SPRING_MAIL_USERNAME=noreply.innolearn@gmail.com
+      - SPRING_MAIL_PASSWORD=nmfa wrcx niwd owol
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8084/actuator/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  user-uploads:
+    driver: local
