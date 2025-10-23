@@ -1,6 +1,7 @@
 package com.cnweb2025.user_service.service;
 
 import com.cnweb2025.user_service.dto.request.address.UserAddressCreationRequest;
+import com.cnweb2025.user_service.dto.request.address.UserAddressUpdateRequest;
 import com.cnweb2025.user_service.dto.response.AddressResponse;
 import com.cnweb2025.user_service.entity.Address;
 import com.cnweb2025.user_service.entity.Province;
@@ -8,6 +9,7 @@ import com.cnweb2025.user_service.entity.User;
 import com.cnweb2025.user_service.entity.Ward;
 import com.cnweb2025.user_service.exception.AppException;
 import com.cnweb2025.user_service.exception.ErrorCode;
+import com.cnweb2025.user_service.mapper.AddressMapper;
 import com.cnweb2025.user_service.mapper.UserMapper;
 import com.cnweb2025.user_service.mapper.WardMapper;
 import com.cnweb2025.user_service.repository.AddressRepository;
@@ -32,6 +34,7 @@ public class AddressServiceImp implements AddressService{
     UserRepository userRepository;
     WardMapper wardMapper;
     UserMapper userMapper;
+    AddressMapper addressMapper;
 
     @Override
     public AddressResponse createAddress(UserAddressCreationRequest request) {
@@ -56,8 +59,10 @@ public class AddressServiceImp implements AddressService{
                 .getAuthentication().getName();
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        // Nếu địa chỉ này là mặc định, set các địa chỉ khác thành không mặc định
+        if (request.getIsDefault() == true)
+            addressRepository.resetDefaultAddress(user.getId());
         // Tạo và lưu địa chỉ mới
-
         Address address = Address.builder()
                 .receiverName(request.getReceiverName())
                 .receiverPhone(request.getReceiverPhone())
@@ -78,5 +83,39 @@ public class AddressServiceImp implements AddressService{
                 .isDefault(savedAddress.isDefault())
                 .userId(user.getId())
                 .build();
+    }
+
+    @Override
+    public AddressResponse updateAddress(String id, UserAddressUpdateRequest request) {
+        var address = addressRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
+        // Nếu địa chỉ đặt là mặc định, chạy reset
+        if (request.getIsDefault() == true && !address.isDefault()) {
+            addressRepository.resetDefaultAddress(address.getUser().getId());
+            log.info("Default address with ID: {}", address.getUser().getId());
+        }
+        addressMapper.updateAddress(address, request);
+        if (request.getProvinceId() != null) {
+            Province province = provinceRepository.findById(request.getProvinceId())
+                    .orElseThrow(() -> {
+                        log.error("Province not found with ID: {}", request.getProvinceId());
+                        return new AppException(ErrorCode.PROVINCE_NOT_FOUND);
+                    });
+            address.setProvince(province);
+        }
+        if (request.getWardId() != null) {
+            Ward ward = wardRepository.findById(request.getWardId())
+                    .orElseThrow(() -> {
+                        log.error("Ward not found with ID: {}", request.getWardId());
+                        return new AppException(ErrorCode.WARD_NOT_FOUND);
+                    });
+            address.setWard(ward);
+        }
+        // Kiểm tra xem ward có thuộc về province không
+        if (address.getWard().getProvince().equals(address.getProvince())) {
+            log.error("Ward ID: {} does not belong to Province ID: {}", address.getWard().getId(), address.getProvince().getId());
+            throw new AppException(ErrorCode.WARD_PROVINCE_MISMATCH);
+        }
+        return addressMapper.toAddressResponse(addressRepository.save(address));
     }
 }
