@@ -142,7 +142,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             # Wait for services to be healthy
-            sleep 30
+            sleep 180
 
             # Check service health
             echo "Checking Discovery Service..."

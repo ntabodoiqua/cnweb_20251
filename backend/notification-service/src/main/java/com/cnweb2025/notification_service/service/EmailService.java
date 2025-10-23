@@ -36,7 +36,7 @@ public class EmailService {
             // Sử dụng MimeMessage và MimeMessageHelper để gửi email HTML
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-
+            helper.setFrom("noreply@nguyentheanh-nta.id.vn");
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlContent, true); // true để chỉ định đây là nội dung HTML
