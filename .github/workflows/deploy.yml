@@ -108,7 +108,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             # Navigate to deployment directory
-            cd /opt/cnweb || exit 1
+            cd /opt/cnweb20251 || exit 1
 
             # Pull latest changes
             git pull origin be/test-deploy
