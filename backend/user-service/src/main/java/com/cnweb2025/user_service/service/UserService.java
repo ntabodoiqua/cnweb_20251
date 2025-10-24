@@ -20,4 +20,12 @@ public interface UserService {
     UserResponse getUserByUsername(String username);
 
     String disableMyAccount();
+    
+    String verifyEmail(String username, String otpCode);
+    
+    String resendOtp(String username);
+
+    String forgotPassword(String username);
+
+    String resetPassword(String username, String otpCode, String newPassword);
 }

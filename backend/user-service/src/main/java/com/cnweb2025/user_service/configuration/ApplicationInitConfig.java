@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.HashSet;
+
 @Configuration
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -30,12 +32,14 @@ public class ApplicationInitConfig {
                 adminRole.setName("ADMIN");
                 adminRole.setDescription("Administrator role with full access");
                 roleRepository.save(adminRole);
+                var roles = new HashSet<Role>();
+                roles.add(adminRole);
                 User user = User.builder()
                         .username("admin")
                         .password(passwordEncoder.encode("admin"))
                         .email("admin@gmail.com")
                         .phone("0123456789")
-                        .role(adminRole)
+                        .roles(roles)
                         .enabled(true)
                         .build();
                 userRepository.save(user);

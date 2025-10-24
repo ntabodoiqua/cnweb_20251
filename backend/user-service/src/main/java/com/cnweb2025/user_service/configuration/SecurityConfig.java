@@ -33,11 +33,23 @@ public class SecurityConfig {
     };
 
     private static final String[] PUBLIC_POST_ENDPOINTS = {
-            "/users"
+            "/users",
+            "/users/verify-email",
+            "/users/resend-otp",
+            "/users/forgot-password",
+            "/users/reset-password"
+    };
+
+    private static final String[] PUBLIC_GET_ENDPOINTS = {
+            "/wards/**",
+            "/provinces/**",
     };
 
     @Autowired
     private CustomJwtDecoder customJwtDecoder;
+
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
@@ -47,17 +59,22 @@ public class SecurityConfig {
                         request
                                 // Allow Swagger endpoints (highest priority)
                                 .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
+                                // Allow actuator endpoints
+                                .requestMatchers("/actuator/health").permitAll()
+                                .requestMatchers("/actuator/info").permitAll()
                                 // Allow auth endpoints
                                 .requestMatchers(AUTH_ENDPOINTS).permitAll()
                                 // Allow POST to create users
                                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                                // Allow GET for public data
+                                .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                                 // All other requests need authentication
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 ->
                         oauth2.jwt(jwtConfigurer ->
                                         jwtConfigurer.decoder(customJwtDecoder)
                                                 .jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                                .authenticationEntryPoint(new JwtAuthenticationEntryPoint()))
+                                .authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .csrf(AbstractHttpConfigurer::disable);
 
         return httpSecurity.build();

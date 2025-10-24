@@ -5,6 +5,8 @@ import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Set;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -19,8 +21,11 @@ public class UserResponse {
     String phone;
     String email;
     String avatarName;
-    boolean enabled;
+    Boolean enabled;
+    Boolean isVerified;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
-    RoleResponse role;
+    Set<RoleResponse> roles;
+    Set<AddressResponse> addresses;
+    SellerProfileResponse sellerProfile;
 }

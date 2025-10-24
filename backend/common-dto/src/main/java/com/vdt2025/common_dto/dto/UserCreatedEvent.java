@@ -12,4 +12,5 @@ public class UserCreatedEvent {
     String id;
     String username;
     String email;
+    String otpCode;
 }

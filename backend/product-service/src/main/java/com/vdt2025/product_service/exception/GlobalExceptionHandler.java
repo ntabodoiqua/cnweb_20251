@@ -1,7 +1,9 @@
 package com.vdt2025.product_service.exception;
 
 import com.vdt2025.product_service.dto.response.ApiResponse;
+import com.vdt2025.product_service.service.MessageService;
 import jakarta.validation.ConstraintViolation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -14,17 +16,20 @@ import java.util.Objects;
 
 @ControllerAdvice
 @Slf4j
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
 
     private static final String MIN_ATTRIBUTE = "min";
+    private final MessageService messageService;
 
     @ExceptionHandler(value = RuntimeException.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
         log.error("Exception: ", exception);
+        ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
         ApiResponse apiResponse = new ApiResponse();
 
-        apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
-        apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(messageService.getMessage(errorCode.getMessageKey()));
 
         return ResponseEntity.badRequest().body(apiResponse);
     }
@@ -35,7 +40,7 @@ public class GlobalExceptionHandler {
         ApiResponse apiResponse = new ApiResponse();
 
         apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(errorCode.getMessage());
+        apiResponse.setMessage(messageService.getMessage(errorCode.getMessageKey()));
 
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
@@ -47,7 +52,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getStatusCode())
                 .body(ApiResponse.builder()
                         .code(errorCode.getCode())
-                        .message(errorCode.getMessage())
+                        .message(messageService.getMessage(errorCode.getMessageKey()))
                         .build());
     }
 
@@ -74,17 +79,18 @@ public class GlobalExceptionHandler {
         ApiResponse apiResponse = new ApiResponse();
 
         apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(
-                Objects.nonNull(attributes)
-                        ? mapAttribute(errorCode.getMessage(), attributes)
-                        : errorCode.getMessage());
+        
+        // Get localized message with parameters
+        String localizedMessage;
+        if (Objects.nonNull(attributes)) {
+            String minValue = String.valueOf(attributes.get(MIN_ATTRIBUTE));
+            localizedMessage = messageService.getMessage(errorCode.getMessageKey(), new Object[]{minValue});
+        } else {
+            localizedMessage = messageService.getMessage(errorCode.getMessageKey());
+        }
+        
+        apiResponse.setMessage(localizedMessage);
 
         return ResponseEntity.badRequest().body(apiResponse);
-    }
-
-    private String mapAttribute(String message, Map<String, Object> attributes) {
-        String minValue = String.valueOf(attributes.get(MIN_ATTRIBUTE));
-
-        return message.replace("{" + MIN_ATTRIBUTE + "}", minValue);
     }
 }
