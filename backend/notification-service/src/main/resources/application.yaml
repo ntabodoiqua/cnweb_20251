@@ -17,14 +17,14 @@ spring:
           max-attempts: 3
           initial-interval: 1000
           multiplier: 2.0
-  mail:
-    host: smtp.sendgrid.net
-    port: 587
-    username: apikey
-    password: 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
-    properties:
-      mail.smtp.auth: true
-      mail.smtp.starttls.enable: true
+
+# SendGrid Configuration
+sendgrid:
+  api:
+    key: ${SENDGRID_API_KEY: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}
+  from:
+    email: noreply@nguyentheanh-nta.id.vn
+
 eureka:
   client:
     service-url:

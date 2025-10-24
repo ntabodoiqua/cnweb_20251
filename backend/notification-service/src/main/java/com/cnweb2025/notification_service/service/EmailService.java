@@ -1,52 +1,72 @@
 package com.cnweb2025.notification_service.service;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
+import com.cnweb2025.notification_service.config.SendGridConfig;
+import com.sendgrid.Method;
+import com.sendgrid.Request;
+import com.sendgrid.Response;
+import com.sendgrid.SendGrid;
+import com.sendgrid.helpers.mail.Mail;
+import com.sendgrid.helpers.mail.objects.Content;
+import com.sendgrid.helpers.mail.objects.Email;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class EmailService {
-    JavaMailSender mailSender;
-    TemplateEngine templateEngine; // Thêm TemplateEngine
+    SendGrid sendGrid;
+    SendGridConfig sendGridConfig;
+    TemplateEngine templateEngine;
+
+    /**
+     * Helper method to send email using SendGrid API
+     */
+    private void sendEmail(String toEmail, String subject, String htmlContent) {
+        try {
+            Email from = new Email(sendGridConfig.getFromEmail());
+            Email to = new Email(toEmail);
+            Content content = new Content("text/html", htmlContent);
+            Mail mail = new Mail(from, subject, to, content);
+
+            Request request = new Request();
+            request.setMethod(Method.POST);
+            request.setEndpoint("mail/send");
+            request.setBody(mail.build());
+
+            Response response = sendGrid.api(request);
+            
+            if (response.getStatusCode() >= 200 && response.getStatusCode() < 300) {
+                log.info("Email sent successfully to {}. Status code: {}", toEmail, response.getStatusCode());
+            } else {
+                log.warn("Email sent with non-2xx status code to {}. Status: {}, Body: {}", 
+                    toEmail, response.getStatusCode(), response.getBody());
+            }
+        } catch (IOException e) {
+            log.error("Failed to send email to {}: {}", toEmail, e.getMessage());
+            throw new RuntimeException("Failed to send email via SendGrid", e);
+        }
+    }
 
     public void sendWelcomeEmail(String to, String username, String otpCode) {
-        // Chuẩn bị các biến cho template
         final String subject = "Chào mừng đến với HUSTBuy - Xác thực email của bạn!";
         Context context = new Context();
         context.setVariable("username", username);
         context.setVariable("subject", subject);
         context.setVariable("otpCode", otpCode);
 
-        // Render template HTML thành một chuỗi String
         String htmlContent = templateEngine.process("welcome-email", context);
-
-        try {
-            // Sử dụng MimeMessage và MimeMessageHelper để gửi email HTML
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-            helper.setFrom("noreply@nguyentheanh-nta.id.vn");
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(htmlContent, true); // true để chỉ định đây là nội dung HTML
-
-            mailSender.send(mimeMessage);
-            log.info("Welcome email with OTP sent to {}", to);
-        } catch (MessagingException e) {
-            log.error("Failed to send welcome email to {}: {}", to, e.getMessage());
-            throw new RuntimeException("Failed to send welcome email", e);
-        }
+        
+        sendEmail(to, subject, htmlContent);
+        log.info("Welcome email with OTP sent to {}", to);
     }
 
     public void sendVerificationEmail(String to, String username, String otpCode) {
@@ -57,21 +77,9 @@ public class EmailService {
         context.setVariable("otpCode", otpCode);
 
         String htmlContent = templateEngine.process("verification-email", context);
-
-        try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(mimeMessage);
-            log.info("Verification email with OTP sent to {}", to);
-        } catch (MessagingException e) {
-            log.error("Failed to send verification email to {}: {}", to, e.getMessage());
-            throw new RuntimeException("Failed to send verification email", e);
-        }
+        
+        sendEmail(to, subject, htmlContent);
+        log.info("Verification email with OTP sent to {}", to);
     }
 
     public void sendPasswordResetEmail(String to, String username, String otpCode) {
@@ -82,38 +90,25 @@ public class EmailService {
         context.setVariable("otpCode", otpCode);
 
         String htmlContent = templateEngine.process("password-reset-email", context);
-
-        try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true, "UTF-8");
-
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(htmlContent, true);
-
-            mailSender.send(mimeMessage);
-            log.info("Password reset email with OTP sent to {}", to);
-        } catch (MessagingException e) {
-            log.error("Failed to send password reset email to {}: {}", to, e.getMessage());
-            throw new RuntimeException("Failed to send password reset email", e);
-        }
+        
+        sendEmail(to, subject, htmlContent);
+        log.info("Password reset email with OTP sent to {}", to);
     }
 
     public void sendErrorEmailToAdmin(String errorMessage) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo("anhnta2004@gmail.com");
-        message.setSubject("Lỗi trong dịch vụ thông báo NTA VDT_2025");
-        message.setText("Đã xảy ra lỗi trong dịch vụ thông báo NTA VDT_2025:\n\n" +
+        final String adminEmail = "anhnta2004@gmail.com";
+        final String subject = "Lỗi trong dịch vụ thông báo NTA VDT_2025";
+        
+        String textContent = "Đã xảy ra lỗi trong dịch vụ thông báo NTA VDT_2025:\n\n" +
                 errorMessage + "\n\n" +
                 "Vui lòng kiểm tra và xử lý kịp thời.\n\n" +
                 "Trân trọng,\n" +
-                "Đội ngũ NTA VDT_2025");
-        try {
-            mailSender.send(message);
-            log.info("Error email sent to admin");
-        } catch (Exception e) {
-            log.error("Failed to send error email to admin: {}", e.getMessage());
-            throw new RuntimeException("Failed to send error email to admin", e);
-        }
+                "Đội ngũ NTA VDT_2025";
+        
+        // Convert plain text to simple HTML
+        String htmlContent = "<html><body><pre>" + textContent + "</pre></body></html>";
+        
+        sendEmail(adminEmail, subject, htmlContent);
+        log.info("Error email sent to admin");
     }
 }
