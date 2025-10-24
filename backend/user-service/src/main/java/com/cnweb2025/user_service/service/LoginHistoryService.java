@@ -17,6 +17,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,11 +46,21 @@ public class LoginHistoryService {
     }
 
     @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('ADMIN')")
     public Page<LoginHistoryResponse> getLoginHistoryByUserId(String userId, Pageable pageable) {
         log.info("Fetching login history for user: {}", userId);
         // Kiểm tra xem userName có tồn tại không
         userRepository.findByUsername(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         return loginHistoryRepository.findByUserId(userId, pageable)
+                .map(loginHistoryMapper::toResponse);
+    }
+
+    @Transactional
+    public Page<LoginHistoryResponse> getMyLoginHistory(Pageable pageable) {
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        log.info("Fetching login history for current user: {}", username);
+        return loginHistoryRepository.findByUserId(username, pageable)
                 .map(loginHistoryMapper::toResponse);
     }
 }
