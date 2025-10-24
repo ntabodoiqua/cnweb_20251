@@ -10,11 +10,37 @@ env:
   IMAGE_PREFIX: ${{ github.repository_owner }}/cnweb
 
 jobs:
-  build-and-deploy:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.extract_tag.outputs.TAG }}
+    steps:
+      - name: Extract tag name
+        id: extract_tag
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "TAG=latest" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-push:
+    needs: prepare
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    strategy:
+      matrix:
+        service:
+          - name: discovery-service
+            path: discovery-service
+          - name: api-gateway
+            path: api-gateway
+          - name: user-service
+            path: user-service
+          - name: notification-service
+            path: notification-service
 
     steps:
       - name: Checkout code
@@ -27,15 +53,6 @@ jobs:
           distribution: "temurin"
           cache: maven
 
-      - name: Extract tag name
-        id: extract_tag
-        run: |
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
-          else
-            echo "TAG=latest" >> $GITHUB_OUTPUT
-          fi
-
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
@@ -46,59 +63,23 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      # Build and push Discovery Service
-      - name: Build and push Discovery Service
+      - name: Build and push ${{ matrix.service.name }}
         uses: docker/build-push-action@v5
         with:
           context: ./backend
-          file: ./backend/discovery-service/Dockerfile
+          file: ./backend/${{ matrix.service.path }}/Dockerfile
           push: true
           tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-discovery-service:${{ steps.extract_tag.outputs.TAG }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-discovery-service:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-${{ matrix.service.name }}:${{ needs.prepare.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-${{ matrix.service.name }}:latest
+          cache-from: type=gha,scope=${{ matrix.service.name }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.service.name }}
 
-      # Build and push API Gateway
-      - name: Build and push API Gateway
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          file: ./backend/api-gateway/Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api-gateway:${{ steps.extract_tag.outputs.TAG }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-api-gateway:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+  deploy:
+    needs: [prepare, build-and-push]
+    runs-on: ubuntu-latest
 
-      # Build and push User Service
-      - name: Build and push User Service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          file: ./backend/user-service/Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-user-service:${{ steps.extract_tag.outputs.TAG }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-user-service:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      # Build and push Notification Service
-      - name: Build and push Notification Service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          file: ./backend/notification-service/Dockerfile
-          push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-notification-service:${{ steps.extract_tag.outputs.TAG }}
-            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}-notification-service:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      # Deploy to server
+    steps:
       - name: Deploy to Production Server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -117,7 +98,7 @@ jobs:
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
             # Pull latest images
-            export TAG=${{ steps.extract_tag.outputs.TAG }}
+            export TAG=${{ needs.prepare.outputs.tag }}
             docker compose -f backend/docker-compose.prod.yaml pull
 
             # Stop and remove old containers
@@ -132,7 +113,6 @@ jobs:
             # Show running containers
             docker compose -f backend/docker-compose.prod.yaml ps
 
-#       Verify deployment - TEMPORARILY DISABLED
       - name: Verify Deployment
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -163,7 +143,7 @@ jobs:
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Deployment successful for tag ${{ steps.extract_tag.outputs.TAG }}"
+            echo "✅ Deployment successful for tag ${{ needs.prepare.outputs.tag }}"
           else
-            echo "❌ Deployment failed for tag ${{ steps.extract_tag.outputs.TAG }}"
+            echo "❌ Deployment failed for tag ${{ needs.prepare.outputs.tag }}"
           fi
