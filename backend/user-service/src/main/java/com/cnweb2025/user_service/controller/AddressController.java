@@ -2,6 +2,7 @@ package com.cnweb2025.user_service.controller;
 
 import com.cnweb2025.user_service.dto.ApiResponse;
 import com.cnweb2025.user_service.dto.request.address.UserAddressCreationRequest;
+import com.cnweb2025.user_service.dto.request.address.UserAddressUpdateRequest;
 import com.cnweb2025.user_service.dto.response.AddressResponse;
 import com.cnweb2025.user_service.service.AddressService;
 import jakarta.validation.Valid;
@@ -9,10 +10,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/address")
@@ -30,4 +30,26 @@ public class AddressController {
                 .result(addressResponse)
                 .build();
     }
+
+    @PutMapping("/{id}")
+    public ApiResponse<AddressResponse> updateAddress(
+            @RequestBody @Valid UserAddressUpdateRequest request,
+            @PathVariable String id) {
+        AddressResponse addressResponse = addressService.updateAddress(id, request);
+        return ApiResponse.<AddressResponse>builder()
+                .message("Address updated successfully")
+                .result(addressResponse)
+                .build();
+    }
+
+    @GetMapping
+    public ApiResponse<Page<AddressResponse>> findAllAddress(Pageable pageable) {
+        Page<AddressResponse> addressResponses = addressService.findAllAddressesOfUser(pageable);
+        return ApiResponse.<Page<AddressResponse>>builder()
+                .message("Addresses retrieved successfully")
+                .result(addressResponses)
+                .build();
+    }
+
+
 }
