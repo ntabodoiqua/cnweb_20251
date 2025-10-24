@@ -59,6 +59,9 @@ public class SecurityConfig {
                         request
                                 // Allow Swagger endpoints (highest priority)
                                 .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
+                                // Allow actuator endpoints
+                                .requestMatchers("/actuator/health").permitAll()
+                                .requestMatchers("/actuator/info").permitAll()
                                 // Allow auth endpoints
                                 .requestMatchers(AUTH_ENDPOINTS).permitAll()
                                 // Allow POST to create users
