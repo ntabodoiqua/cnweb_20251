@@ -140,5 +140,18 @@ public class AddressServiceImp implements AddressService{
         return addresses.map(addressMapper::toAddressResponse);
     }
 
-
+    @Override
+    @Transactional
+    public String deleteAddress(String id) {
+        // Lấy user hiện tại
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        User user = userRepository.findByUsernameAndEnabledTrueAndIsVerifiedTrue(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        var address = addressRepository.findByIdAndUserId(id, user.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
+        addressRepository.delete(address);
+        log.info("Deleted address with ID: {}", id);
+        return "success.address.deleted";
+    }
 }

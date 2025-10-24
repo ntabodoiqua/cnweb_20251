@@ -13,4 +13,6 @@ public interface AddressService {
     AddressResponse updateAddress(String id, UserAddressUpdateRequest request);
 
     Page<AddressResponse> findAllAddressesOfUser(Pageable pageable);
+
+    String deleteAddress(String id);
 }

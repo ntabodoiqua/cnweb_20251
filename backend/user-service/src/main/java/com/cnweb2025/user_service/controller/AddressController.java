@@ -26,7 +26,7 @@ public class AddressController {
     public ApiResponse<AddressResponse> createAddress(@RequestBody @Valid UserAddressCreationRequest request) {
         AddressResponse addressResponse = addressService.createAddress(request);
         return ApiResponse.<AddressResponse>builder()
-                .message("Address created successfully")
+                .message("success.address.created")
                 .result(addressResponse)
                 .build();
     }
@@ -37,7 +37,7 @@ public class AddressController {
             @PathVariable String id) {
         AddressResponse addressResponse = addressService.updateAddress(id, request);
         return ApiResponse.<AddressResponse>builder()
-                .message("Address updated successfully")
+                .message("success.address.updated")
                 .result(addressResponse)
                 .build();
     }
@@ -46,10 +46,17 @@ public class AddressController {
     public ApiResponse<Page<AddressResponse>> findAllAddress(Pageable pageable) {
         Page<AddressResponse> addressResponses = addressService.findAllAddressesOfUser(pageable);
         return ApiResponse.<Page<AddressResponse>>builder()
-                .message("Addresses retrieved successfully")
+                .message("success.address.retrieved")
                 .result(addressResponses)
                 .build();
     }
 
-
+    @DeleteMapping("/{id}")
+    public ApiResponse<String> deleteAddress(@PathVariable String id) {
+        String result = addressService.deleteAddress(id);
+        return ApiResponse.<String>builder()
+                .message("success.address.deleted")
+                .result(result)
+                .build();
+    }
 }
