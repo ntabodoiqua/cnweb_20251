@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SellerProfileResponse {
     String id;
+    String userId;
     String storeName;
     String storeDescription;
     String logoName;
@@ -24,8 +25,9 @@ public class SellerProfileResponse {
     String contactPhone;
     String shopAddress;
     VerificationStatus verificationStatus;
-    boolean isActive;
+    Boolean isActive;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
     LocalDateTime approvedAt;
+    WardResponse ward;
 }

@@ -47,7 +47,16 @@ public class SellerProfile {
     @Column(name = "shop_address", nullable = false)
     String shopAddress;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "province_id", nullable = false)
+    Province province;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ward_id", nullable = false)
+    Ward ward;
+
     @Column(name = "verification_status", nullable = false)
+    @Enumerated(EnumType.STRING)
     VerificationStatus verificationStatus;
 
     @Column(name = "is_active", nullable = false)
