@@ -20,8 +20,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +40,7 @@ public class AddressServiceImp implements AddressService{
     AddressMapper addressMapper;
 
     @Override
+    @Transactional
     public AddressResponse createAddress(UserAddressCreationRequest request) {
         // Lấy đối tượng ward và province từ id được cung cấp trong request
         Ward ward = wardRepository.findById(request.getWardId())
@@ -57,7 +61,7 @@ public class AddressServiceImp implements AddressService{
         // Lấy user hiện tại
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameAndEnabledTrueAndIsVerifiedTrue(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         // Nếu địa chỉ này là mặc định, set các địa chỉ khác thành không mặc định
         if (request.getIsDefault() == true)
@@ -86,8 +90,14 @@ public class AddressServiceImp implements AddressService{
     }
 
     @Override
+    @Transactional
     public AddressResponse updateAddress(String id, UserAddressUpdateRequest request) {
-        var address = addressRepository.findById(id)
+        // Lấy user hiện tại
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        User user = userRepository.findByUsernameAndEnabledTrueAndIsVerifiedTrue(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        var address = addressRepository.findByIdAndUserId(id, user.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.ADDRESS_NOT_FOUND));
         // Nếu địa chỉ đặt là mặc định, chạy reset
         if (request.getIsDefault() == true && !address.isDefault()) {
@@ -112,10 +122,23 @@ public class AddressServiceImp implements AddressService{
             address.setWard(ward);
         }
         // Kiểm tra xem ward có thuộc về province không
-        if (address.getWard().getProvince().equals(address.getProvince())) {
+        if (!address.getWard().getProvince().getId().equals(address.getProvince().getId())) { // <-- Thêm ! và .getId()
             log.error("Ward ID: {} does not belong to Province ID: {}", address.getWard().getId(), address.getProvince().getId());
             throw new AppException(ErrorCode.WARD_PROVINCE_MISMATCH);
         }
         return addressMapper.toAddressResponse(addressRepository.save(address));
     }
+
+    @Override
+    public Page<AddressResponse> findAllAddressesOfUser(Pageable pageable) {
+        // Lấy user hiện tại
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        User user = userRepository.findByUsernameAndEnabledTrueAndIsVerifiedTrue(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        Page<Address> addresses = addressRepository.findAllByUserId(user.getId(), pageable);
+        return addresses.map(addressMapper::toAddressResponse);
+    }
+
+
 }

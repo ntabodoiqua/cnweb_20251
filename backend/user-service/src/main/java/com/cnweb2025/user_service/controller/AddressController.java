@@ -10,6 +10,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -37,6 +39,15 @@ public class AddressController {
         return ApiResponse.<AddressResponse>builder()
                 .message("Address updated successfully")
                 .result(addressResponse)
+                .build();
+    }
+
+    @GetMapping
+    public ApiResponse<Page<AddressResponse>> findAllAddress(Pageable pageable) {
+        Page<AddressResponse> addressResponses = addressService.findAllAddressesOfUser(pageable);
+        return ApiResponse.<Page<AddressResponse>>builder()
+                .message("Addresses retrieved successfully")
+                .result(addressResponses)
                 .build();
     }
 

@@ -54,6 +54,7 @@ public enum ErrorCode {
     MISSING_WARD_ID(1807, "error.1807", HttpStatus.BAD_REQUEST),
     MISSING_STREET(1808, "error.1808", HttpStatus.BAD_REQUEST),
     WARD_PROVINCE_MISMATCH(1809, "error.1809", HttpStatus.BAD_REQUEST),
+    ADDRESS_USER_MISMATCH(1810, "error.1810", HttpStatus.BAD_REQUEST),
     // Lỗi khác (99xx)
     UNCATEGORIZED_EXCEPTION(9999, "error.9999", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(9998, "error.9998", HttpStatus.BAD_REQUEST),

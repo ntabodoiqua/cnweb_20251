@@ -16,5 +16,6 @@ public interface AddressMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "ward", ignore = true)
     @Mapping(target = "province", ignore = true)
+    @Mapping(source = "isDefault", target = "default")
     void updateAddress(@MappingTarget Address address, UserAddressUpdateRequest request);
 }
