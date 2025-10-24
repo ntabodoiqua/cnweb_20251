@@ -17,12 +17,15 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +37,7 @@ public class SellerProfileServiceImp implements SellerProfileService{
     WardRepository wardRepository;
     ProvinceRepository provinceRepository;
     SellerProfileMapper sellerProfileMapper;
+    MessageSource messageSource;
 
 
     @Override
@@ -96,5 +100,19 @@ public class SellerProfileServiceImp implements SellerProfileService{
                 .map(sellerProfileMapper::toAddressResponse);
         log.info("Retrieved all seller profiles, total: {}", profiles.getTotalElements());
         return profiles;
+    }
+
+    @Override
+    @Transactional
+    public String sendToReview(String sellerProfileId, Locale locale) {
+        var sellerProfile = sellerProfileRepository.findById(sellerProfileId)
+                .orElseThrow(() -> {
+                    log.error("Seller profile not found with ID: {}", sellerProfileId);
+                    return new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+                });
+        sellerProfile.setVerificationStatus(VerificationStatus.PENDING);
+        sellerProfileRepository.save(sellerProfile);
+        log.info("Seller profile with ID: {} sent for review", sellerProfileId);
+        return messageSource.getMessage("success.sellerProfile.sentForReview", null, locale);
     }
 }
