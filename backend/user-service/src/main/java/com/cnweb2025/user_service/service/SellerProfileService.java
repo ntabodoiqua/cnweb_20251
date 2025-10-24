@@ -2,8 +2,14 @@ package com.cnweb2025.user_service.service;
 
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileCreationRequest;
 import com.cnweb2025.user_service.dto.response.SellerProfileResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface SellerProfileService {
 
     SellerProfileResponse createSellerProfile(SellerProfileCreationRequest request);
+
+    SellerProfileResponse getSellerProfileOfCurrentUser();
+
+    Page<SellerProfileResponse> getAllSellerProfiles(Pageable pageable);
 }
