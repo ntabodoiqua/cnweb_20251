@@ -1,6 +1,7 @@
 package com.cnweb2025.user_service.service;
 
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileCreationRequest;
+import com.cnweb2025.user_service.dto.request.seller.SellerProfileUpdateRequest;
 import com.cnweb2025.user_service.dto.response.SellerProfileResponse;
 import com.cnweb2025.user_service.entity.Province;
 import com.cnweb2025.user_service.entity.Role;
@@ -15,6 +16,7 @@ import com.cnweb2025.user_service.repository.*;
 import com.vdt2025.common_dto.dto.MessageType;
 import com.vdt2025.common_dto.dto.SellerProfileApprovedEvent;
 import com.vdt2025.common_dto.dto.SellerProfileRejectedEvent;
+import com.vdt2025.common_dto.service.ProductServiceClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -43,6 +45,7 @@ public class SellerProfileServiceImp implements SellerProfileService{
     MessageSource messageSource;
     RabbitMQMessagePublisher rabbitMQMessagePublisher;
     RoleRepository roleRepository;
+    ProductServiceClient productServiceClient;
 
 
     @Override
@@ -81,7 +84,7 @@ public class SellerProfileServiceImp implements SellerProfileService{
         sellerProfile.setVerificationStatus(VerificationStatus.CREATED);
         var savedProfile = sellerProfileRepository.save(sellerProfile);
         log.info("Seller profile created for user: {}", username);
-        return sellerProfileMapper.toAddressResponse(savedProfile);
+        return sellerProfileMapper.toSellerResponse(savedProfile);
     }
 
     @Override
@@ -96,14 +99,14 @@ public class SellerProfileServiceImp implements SellerProfileService{
                     return new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
                 });
         log.info("Retrieved seller profile for user: {}", username);
-        return sellerProfileMapper.toAddressResponse(sellerProfile);
+        return sellerProfileMapper.toSellerResponse(sellerProfile);
     }
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public Page<SellerProfileResponse> getAllSellerProfiles(Pageable pageable) {
         Page<SellerProfileResponse> profiles = sellerProfileRepository.findAll(pageable)
-                .map(sellerProfileMapper::toAddressResponse);
+                .map(sellerProfileMapper::toSellerResponse);
         log.info("Retrieved all seller profiles, total: {}", profiles.getTotalElements());
         return profiles;
     }
@@ -116,6 +119,11 @@ public class SellerProfileServiceImp implements SellerProfileService{
                     log.error("Seller profile not found with ID: {}", sellerProfileId);
                     return new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
                 });
+        // Chỉ cho phép gửi hồ sơ nếu trạng thái hiện tại là CREATED
+        if (sellerProfile.getVerificationStatus() != VerificationStatus.CREATED) {
+            log.error("Seller profile with ID: {} is not in CREATED status", sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_NOT_PENDING);
+        }
         sellerProfile.setVerificationStatus(VerificationStatus.PENDING);
         sellerProfileRepository.save(sellerProfile);
         log.info("Seller profile with ID: {} sent for review", sellerProfileId);
@@ -222,5 +230,95 @@ public class SellerProfileServiceImp implements SellerProfileService{
         }
         log.info("Seller profile with ID: {} rejected", sellerProfileId);
         return messageSource.getMessage("success.sellerProfile.rejected", null, locale);
+    }
+
+    @Override
+    @Transactional
+    public SellerProfileResponse editSellerProfile(String sellerProfileId, SellerProfileUpdateRequest request) {
+        var sellerProfile = sellerProfileRepository.findById(sellerProfileId)
+                .orElseThrow(() -> {
+                    log.error("Seller profile not found with ID: {}", sellerProfileId);
+                    return new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+                });
+        // Kiểm tra quyền: Chỉ chủ sở hữu hồ sơ mới được phép chỉnh sửa
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        if (!sellerProfile.getUser().getUsername().equals(username)) {
+            log.error("User: {} is not the owner of seller profile ID: {}", username, sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+        }
+
+        // Chỉ cho phép chỉnh sửa nếu trạng thái là CREATED
+        if (sellerProfile.getVerificationStatus() != VerificationStatus.CREATED) {
+            log.error("Seller profile with ID: {} is not in CREATED status", sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_NOT_EDITABLE);
+        }
+        sellerProfileMapper.updateSellerProfile(sellerProfile, request);
+        if (request.getProvinceId() != null) {
+            Province province = provinceRepository.findById(request.getProvinceId())
+                    .orElseThrow(() -> {
+                        log.error("Province not found with ID: {}", request.getProvinceId());
+                        return new AppException(ErrorCode.PROVINCE_NOT_FOUND);
+                    });
+            sellerProfile.setProvince(province);
+        }
+        if (request.getWardId() != null) {
+            Ward ward = wardRepository.findById(request.getWardId())
+                    .orElseThrow(() -> {
+                        log.error("Ward not found with ID: {}", request.getWardId());
+                        return new AppException(ErrorCode.WARD_NOT_FOUND);
+                    });
+            sellerProfile.setWard(ward);
+        }
+        // Kiểm tra xem ward có thuộc về province không
+        if (!sellerProfile.getWard().getProvince().getId().equals(sellerProfile.getProvince().getId())) { // <-- Thêm ! và .getId()
+            log.error("Ward ID: {} does not belong to Province ID: {}", sellerProfile.getWard().getId(), sellerProfile.getProvince().getId());
+            throw new AppException(ErrorCode.WARD_PROVINCE_MISMATCH);
+        }
+        var updatedProfile = sellerProfileRepository.save(sellerProfile);
+        log.info("Seller profile with ID: {} updated successfully", sellerProfileId);
+        return sellerProfileMapper.toSellerResponse(updatedProfile);
+    }
+
+    @Override
+    @Transactional
+    public String deactivateSellerProfile(String sellerProfileId, Locale locale) {
+        var sellerProfile = sellerProfileRepository.findById(sellerProfileId)
+                .orElseThrow(() -> {
+                    log.error("Seller profile not found with ID: {}", sellerProfileId);
+                    return new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+                });
+        // Kiểm tra quyền: Chỉ chủ sở hữu hồ sơ mới được phép hủy kích hoạt
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        if (!sellerProfile.getUser().getUsername().equals(username)) {
+            log.error("User: {} is not the owner of seller profile ID: {}", username, sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+        }
+        // Kiểm tra trạng thái hồ sơ: Chỉ cho phép hủy kích hoạt nếu trạng thái là VERIFIED
+        if (sellerProfile.getVerificationStatus() != VerificationStatus.VERIFIED) {
+            log.error("Seller profile with ID: {} is not in VERIFIED status", sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_NOT_EDITABLE);
+        }
+        // Kểm tra hồ sơ đã được kích hoạt chưa
+        if (!sellerProfile.isActive()) {
+            log.error("Seller profile with ID: {} is already deactivated", sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_NOT_EDITABLE);
+        }
+        
+        try {
+            // Gọi đến product-service để hủy kích hoạt store tương ứng với seller profile này
+            productServiceClient.deactivateStore(sellerProfileId);
+            log.info("Successfully deactivated store in product-service for seller profile ID: {}", sellerProfileId);
+        } catch (Exception e) {
+            log.error("Failed to deactivate store in product-service for seller profile ID: {}: {}", 
+                    sellerProfileId, e.getMessage());
+            throw new AppException(ErrorCode.STORE_DEACTIVATION_FAILED);
+        }
+        
+        sellerProfile.setActive(false);
+        sellerProfileRepository.save(sellerProfile);
+        log.info("Seller profile with ID: {} deactivated by user: {}", sellerProfileId, username);
+        return messageSource.getMessage("success.sellerProfile.deactivated", null, locale);
     }
 }

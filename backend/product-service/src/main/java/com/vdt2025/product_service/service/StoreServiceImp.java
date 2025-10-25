@@ -73,4 +73,20 @@ public class StoreServiceImp implements StoreService {
         }
 
     }
+
+    @Override
+    @Transactional
+    public void deactivateStoreBySellerProfileId(String sellerProfileId) {
+        log.info("Deactivating store for seller profile ID: {}", sellerProfileId);
+        Store store = storeRepository.findBySellerProfileId(sellerProfileId)
+                .orElseThrow(() -> {
+                    log.error("Store not found for seller profile ID: {}", sellerProfileId);
+                    return new AppException(ErrorCode.STORE_NOT_FOUND);
+                });
+        
+        store.setActive(false);
+        storeRepository.save(store);
+        log.info("Store with ID: {} deactivated successfully for seller profile ID: {}", 
+                store.getId(), sellerProfileId);
+    }
 }

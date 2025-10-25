@@ -81,4 +81,13 @@ public class SellerProfileController {
                 .build();
     }
 
+    @PatchMapping("/{sellerProfileId}/deactivate")
+    public ApiResponse<String> deactivateSellerProfile(@PathVariable String sellerProfileId, Locale locale) {
+        var result = sellerProfileService.deactivateSellerProfile(sellerProfileId, locale);
+        return ApiResponse.<String>builder()
+                .result(result)
+                .message(messageSource.getMessage("success.sellerProfile.deactivated", null, locale))
+                .build();
+    }
+
 }

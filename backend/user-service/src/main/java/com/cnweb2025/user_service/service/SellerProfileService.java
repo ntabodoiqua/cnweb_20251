@@ -1,6 +1,7 @@
 package com.cnweb2025.user_service.service;
 
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileCreationRequest;
+import com.cnweb2025.user_service.dto.request.seller.SellerProfileUpdateRequest;
 import com.cnweb2025.user_service.dto.response.SellerProfileResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,4 +22,7 @@ public interface SellerProfileService {
 
     String rejectSellerProfile(String sellerProfileId, String reason, Locale locale);
 
+    SellerProfileResponse editSellerProfile(String sellerProfileId, SellerProfileUpdateRequest request);
+
+    String deactivateSellerProfile(String sellerProfileId, Locale locale);
 }

@@ -10,8 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Locale;
 
@@ -30,6 +29,15 @@ public class StoreController {
         return ApiResponse.<Page<StoreResponse>>builder()
                 .result(result)
                 .message(messageSource.getMessage("success.stores.retrieved", null, locale))
+                .build();
+    }
+
+    @PutMapping("/{sellerProfileId}/deactivate")
+    public ApiResponse<Void> deactivateStore(@PathVariable String sellerProfileId, Locale locale) {
+        log.info("Request to deactivate store for seller profile ID: {}", sellerProfileId);
+        storeService.deactivateStoreBySellerProfileId(sellerProfileId);
+        return ApiResponse.<Void>builder()
+                .message(messageSource.getMessage("success.store.deactivated", null, locale))
                 .build();
     }
 
