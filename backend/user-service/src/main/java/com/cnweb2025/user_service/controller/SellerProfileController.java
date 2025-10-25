@@ -2,6 +2,7 @@ package com.cnweb2025.user_service.controller;
 
 import com.cnweb2025.user_service.dto.ApiResponse;
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileCreationRequest;
+import com.cnweb2025.user_service.dto.request.seller.SellerProfileRejectionRequest;
 import com.cnweb2025.user_service.dto.response.SellerProfileResponse;
 import com.cnweb2025.user_service.service.SellerProfileService;
 import jakarta.validation.Valid;
@@ -60,8 +61,24 @@ public class SellerProfileController {
                 .build();
     }
 
+    @PatchMapping("/{sellerProfileId}/approve")
+    public ApiResponse<String> approveSellerProfile(@PathVariable String sellerProfileId, Locale locale) {
+        var result = sellerProfileService.approveSellerProfile(sellerProfileId, locale);
+        return ApiResponse.<String>builder()
+                .result(result)
+                .message(messageSource.getMessage("success.sellerProfile.approved", null, locale))
+                .build();
+    }
 
-
-
+    @PatchMapping("/{sellerProfileId}/reject")
+    public ApiResponse<String> rejectSellerProfile(@PathVariable String sellerProfileId,
+                                                   @Valid @RequestBody SellerProfileRejectionRequest request,
+                                                   Locale locale) {
+        var result = sellerProfileService.rejectSellerProfile(sellerProfileId, request.getRejectionReason(), locale);
+        return ApiResponse.<String>builder()
+                .result(result)
+                .message(messageSource.getMessage("success.sellerProfile.rejected", null, locale))
+                .build();
+    }
 
 }

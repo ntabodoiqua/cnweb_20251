@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title th:text="${subject}"></title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        width: 100%;
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        color: #333;
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #c8102e;
+      }
+      .logo {
+        font-size: 28px;
+        font-weight: bold;
+        color: #c8102e;
+        margin-bottom: 10px;
+      }
+      .logo-subtitle {
+        font-size: 12px;
+        color: #666;
+        font-weight: normal;
+      }
+      .content {
+        padding: 20px 0;
+        line-height: 1.6;
+        color: #555555;
+      }
+      .success-box {
+        background: linear-gradient(135deg, #f0fff4 0%, #c6f6d5 100%);
+        border: 2px solid #48bb78;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: center;
+      }
+      .store-name {
+        font-size: 28px;
+        font-weight: bold;
+        color: #2d3748;
+        margin: 10px 0;
+      }
+      .success-icon {
+        font-size: 48px;
+        margin-bottom: 10px;
+      }
+      .info-box {
+        background-color: #f8f9fa;
+        border-left: 4px solid #c8102e;
+        padding: 15px;
+        margin: 15px 0;
+      }
+      .info-box ul {
+        margin: 10px 0;
+        padding-left: 20px;
+      }
+      .info-box li {
+        margin: 5px 0;
+      }
+      .cta-button {
+        display: inline-block;
+        background-color: #c8102e;
+        color: white;
+        padding: 12px 30px;
+        text-decoration: none;
+        border-radius: 5px;
+        margin: 20px 0;
+        font-weight: bold;
+      }
+      .footer {
+        text-align: center;
+        font-size: 12px;
+        color: #999999;
+        padding-top: 20px;
+        border-top: 1px solid #eeeeee;
+      }
+      .footer-brand {
+        color: #c8102e;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">
+          🛒 HUSTBuy
+          <div class="logo-subtitle">
+            Sàn Thương Mại Điện Tử - Đại học Bách Khoa Hà Nội
+          </div>
+        </div>
+        <h2 th:text="${subject}">Cửa hàng đã được tạo thành công</h2>
+      </div>
+      <div class="content">
+        <div class="success-box">
+          <div class="success-icon">🎉</div>
+          <p style="margin: 0; font-size: 18px; color: #2d3748">
+            Chúc mừng! Cửa hàng của bạn đã được tạo thành công
+          </p>
+          <p class="store-name" th:text="${storeName}">Tên Cửa Hàng</p>
+        </div>
+
+        <p>
+          Chào mừng bạn đến với cộng đồng người bán trên
+          <strong>HUSTBuy</strong>!
+        </p>
+
+        <p>
+          Hồ sơ người bán của bạn đã được Admin phê duyệt và cửa hàng đã sẵn
+          sàng để bắt đầu kinh doanh trên nền tảng của chúng mình.
+        </p>
+
+        <div class="info-box">
+          <p><strong>📌 Các bước tiếp theo:</strong></p>
+          <ul>
+            <li>Đăng nhập vào tài khoản người bán của bạn</li>
+            <li>Hoàn thiện thông tin cửa hàng (logo, banner, mô tả)</li>
+            <li>Thêm sản phẩm đầu tiên của bạn</li>
+            <li>Bắt đầu tiếp cận hàng ngàn sinh viên Bách Khoa</li>
+          </ul>
+        </div>
+
+        <div class="info-box">
+          <p><strong>💡 Mẹo để thành công:</strong></p>
+          <ul>
+            <li>Sử dụng hình ảnh sản phẩm chất lượng cao</li>
+            <li>Viết mô tả sản phẩm chi tiết và chính xác</li>
+            <li>Đặt giá cạnh tranh cho sinh viên</li>
+            <li>Phản hồi khách hàng nhanh chóng</li>
+            <li>Duy trì đánh giá tốt từ người mua</li>
+          </ul>
+        </div>
+
+        <p style="text-align: center; margin: 30px 0">
+          <a href="#" class="cta-button">Quản lý cửa hàng ngay</a>
+        </p>
+
+        <p>
+          Nếu bạn cần hỗ trợ hoặc có bất kỳ câu hỏi nào, đội ngũ HUSTBuy luôn
+          sẵn sàng giúp đỡ bạn.
+        </p>
+
+        <p>Chúc bạn kinh doanh thành công trên HUSTBuy! 🚀</p>
+
+        <p>
+          Trân trọng,<br />
+          <strong>Đội ngũ phát triển HUSTBuy</strong><br />
+          <em>Đại học Bách Khoa Hà Nội</em>
+        </p>
+      </div>
+      <div class="footer">
+        <p class="footer-brand">HUSTBuy</p>
+        <p>Dự án Thương mại Điện tử - Đại học Bách Khoa Hà Nội</p>
+        <p>&copy; 2025 HUSTBuy. Đồ án sinh viên HUST.</p>
+      </div>
+    </div>
+  </body>
+</html>
