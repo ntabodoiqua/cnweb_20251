@@ -17,4 +17,6 @@ public interface SellerProfileService {
 
     String sendToReview(String sellerProfileId, Locale locale);
 
+    String approveSellerProfile(String sellerProfileId, Locale locale);
+
 }

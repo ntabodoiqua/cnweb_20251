@@ -60,8 +60,13 @@ public class SellerProfileController {
                 .build();
     }
 
-
-
-
+    @PatchMapping("/{sellerProfileId}/approve")
+    public ApiResponse<String> approveSellerProfile(@PathVariable String sellerProfileId, Locale locale) {
+        var result = sellerProfileService.approveSellerProfile(sellerProfileId, locale);
+        return ApiResponse.<String>builder()
+                .result(result)
+                .message(messageSource.getMessage("success.sellerProfile.approved", null, locale))
+                .build();
+    }
 
 }
