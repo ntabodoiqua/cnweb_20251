@@ -5,6 +5,8 @@ import com.cnweb2025.user_service.dto.response.SellerProfileResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Locale;
+
 public interface SellerProfileService {
 
     SellerProfileResponse createSellerProfile(SellerProfileCreationRequest request);
@@ -12,4 +14,7 @@ public interface SellerProfileService {
     SellerProfileResponse getSellerProfileOfCurrentUser();
 
     Page<SellerProfileResponse> getAllSellerProfiles(Pageable pageable);
+
+    String sendToReview(String sellerProfileId, Locale locale);
+
 }

@@ -51,5 +51,17 @@ public class SellerProfileController {
                 .build();
     }
 
+    @PatchMapping("/{sellerProfileId}/sendToReview")
+    public ApiResponse<String> sendToReviewSellerProfile(@PathVariable String sellerProfileId,Locale locale) {
+        var result = sellerProfileService.sendToReview(sellerProfileId, locale);
+        return ApiResponse.<String>builder()
+                .result(result)
+                .message(messageSource.getMessage("success.sellerProfile.sentToReview", null, locale))
+                .build();
+    }
+
+
+
+
 
 }
