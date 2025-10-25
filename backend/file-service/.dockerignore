@@ -1,0 +1,25 @@
+# Ignore target directories
+target/
+!file-service/target/*.jar
+
+# Ignore IDE files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+
+# Ignore git files
+.git/
+.gitignore
+
+# Ignore local files
+*.log
+*.tmp
+.env
+
+# Ignore uploads directory
+uploads/
+
+# Ignore documentation
+*.md
+!README.md

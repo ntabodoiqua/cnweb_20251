@@ -1,5 +1,10 @@
 package com.vdt2025.file_service.service;
 
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.vdt2025.common_dto.service.UserServiceClient;
 import com.vdt2025.file_service.entity.UploadedFile;
 import com.vdt2025.file_service.exception.AppException;
@@ -11,20 +16,16 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -38,28 +39,18 @@ public class FileStorageService {
     final UploadedFileRepository uploadedFileRepository;
     final FileStorageProperties fileStorageProperties;
     final UserServiceClient userServiceClient;
-
-    // Đường dẫn gốc để lưu trữ file, được khởi tạo một lần duy nhất.
-    Path fileStorageLocation;
+    final AmazonS3 amazonS3;
 
     /**
      * Phương thức này được gọi ngay sau khi service được khởi tạo.
-     * Nó khởi tạo đường dẫn lưu trữ và tạo thư mục nếu chưa tồn tại.
      */
     @PostConstruct
     public void init() {
-        try {
-            this.fileStorageLocation = Paths.get(fileStorageProperties.getDirectory()).toAbsolutePath().normalize();
-            Files.createDirectories(this.fileStorageLocation);
-            log.info("File storage directory initialized at: {}", this.fileStorageLocation);
-        } catch (IOException ex) {
-            log.error("Could not create the directory where the uploaded files will be stored.", ex);
-            throw new AppException(ErrorCode.FILE_STORAGE_INIT_ERROR);
-        }
+        log.info("Using S3 storage with bucket: {}", fileStorageProperties.getS3().getBucketName());
     }
 
     /**
-     * Lưu trữ file tải lên và ghi thông tin vào cơ sở dữ liệu.
+     * Lưu trữ file tải lên vào S3 và ghi thông tin vào cơ sở dữ liệu.
      *
      * @param file File được tải lên từ client.
      * @return Tên file duy nhất đã được lưu.
@@ -83,10 +74,22 @@ public class FileStorageService {
         String fileName = UUID.randomUUID() + "_" + originalFilename;
 
         try {
-            // Xây dựng đường dẫn đầy đủ để lưu file
-            Path targetLocation = this.fileStorageLocation.resolve(fileName);
-            // Sao chép nội dung file vào vị trí đích
-            Files.copy(file.getInputStream(), targetLocation, StandardCopyOption.REPLACE_EXISTING);
+            // Upload to S3
+            String bucketName = fileStorageProperties.getS3().getBucketName();
+
+            ObjectMetadata metadata = new ObjectMetadata();
+            metadata.setContentLength(file.getSize());
+            metadata.setContentType(file.getContentType());
+
+            PutObjectRequest putObjectRequest = new PutObjectRequest(
+                    bucketName,
+                    fileName,
+                    file.getInputStream(),
+                    metadata
+            );
+
+            amazonS3.putObject(putObjectRequest);
+            log.info("File uploaded to S3: {}/{}", bucketName, fileName);
 
             // Lấy thông tin người dùng hiện tại
             String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -112,39 +115,41 @@ public class FileStorageService {
     }
 
     /**
-     * Tải file dưới dạng Resource.
+     * Tải file từ S3 dưới dạng Resource.
      *
      * @param fileName Tên file cần tải.
      * @return Resource của file.
      */
     public Resource loadFile(String fileName) {
+        // [BẢO MẬT] Ngăn chặn Path Traversal
+        if (fileName.contains("..")) {
+            throw new AppException(ErrorCode.INVALID_FILE_PATH);
+        }
+
         try {
-            // [BẢO MẬT] Ngăn chặn Path Traversal
-            if (fileName.contains("..")) {
-                throw new AppException(ErrorCode.INVALID_FILE_PATH);
-            }
+            String bucketName = fileStorageProperties.getS3().getBucketName();
+            S3Object s3Object = amazonS3.getObject(bucketName, fileName);
+            S3ObjectInputStream inputStream = s3Object.getObjectContent();
 
-            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
-
-            // [BẢO MẬT] Đảm bảo đường dẫn cuối cùng không đi ra ngoài thư mục gốc
-            if (!filePath.startsWith(this.fileStorageLocation)) {
-                throw new AppException(ErrorCode.INVALID_FILE_PATH);
+            // Read the content into a byte array
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            byte[] buffer = new byte[8192];
+            int bytesRead;
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
             }
+            inputStream.close();
 
-            Resource resource = new UrlResource(filePath.toUri());
-            if (resource.exists()) {
-                return resource;
-            } else {
-                throw new AppException(ErrorCode.FILE_NOT_FOUND);
-            }
-        } catch (MalformedURLException ex) {
-            log.error("Malformed URL for file: {}", fileName, ex);
+            byte[] data = outputStream.toByteArray();
+            return new ByteArrayResource(data);
+        } catch (Exception ex) {
+            log.error("Error loading file from S3: {}", fileName, ex);
             throw new AppException(ErrorCode.FILE_NOT_FOUND);
         }
     }
 
     /**
-     * Xóa một file khỏi hệ thống và cơ sở dữ liệu.
+     * Xóa một file khỏi S3 và cơ sở dữ liệu.
      * Yêu cầu quyền ADMIN.
      *
      * @param fileName Tên file cần xóa.
@@ -157,17 +162,16 @@ public class FileStorageService {
                 .orElseThrow(() -> new AppException(ErrorCode.FILE_NOT_FOUND));
 
         try {
-            // 2. Xây dựng đường dẫn đến file vật lý
-            Path filePath = this.fileStorageLocation.resolve(fileName).normalize();
+            // 2. Xóa file từ S3
+            String bucketName = fileStorageProperties.getS3().getBucketName();
+            amazonS3.deleteObject(bucketName, fileName);
+            log.info("File deleted from S3: {}/{}", bucketName, fileName);
 
-            // 3. Xóa file vật lý khỏi hệ thống
-            Files.deleteIfExists(filePath);
-
-            // 4. Xóa bản ghi khỏi cơ sở dữ liệu
+            // 3. Xóa bản ghi khỏi cơ sở dữ liệu
             uploadedFileRepository.delete(fileEntity);
 
             log.info("File deleted successfully: {}", fileName);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             log.error("Error occurred while deleting file: {}", fileName, ex);
             // Ném exception để kích hoạt rollback của @Transactional
             throw new AppException(ErrorCode.FILE_CANNOT_DELETED);
