@@ -111,4 +111,16 @@ public class EmailService {
         sendEmail(adminEmail, subject, htmlContent);
         log.info("Error email sent to admin");
     }
+
+    public void sendStoreCreatedEmail(String to, String storeName) {
+        final String subject = "Chúc mừng! Cửa hàng của bạn đã được tạo thành công - HUSTBuy";
+        Context context = new Context();
+        context.setVariable("storeName", storeName);
+        context.setVariable("subject", subject);
+
+        String htmlContent = templateEngine.process("store-created-email", context);
+        
+        sendEmail(to, subject, htmlContent);
+        log.info("Store created email sent to {}", to);
+    }
 }

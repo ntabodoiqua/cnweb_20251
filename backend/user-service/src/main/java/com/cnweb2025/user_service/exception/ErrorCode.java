@@ -60,6 +60,7 @@ public enum ErrorCode {
     MISSING_STORE_NAME(1901, "error.1901", HttpStatus.BAD_REQUEST),
     SELLER_PROFILE_ALREADY_EXISTS(1902, "error.1902", HttpStatus.CONFLICT),
     SELLER_PROFILE_NOT_FOUND(1903, "error.1903", HttpStatus.NOT_FOUND),
+    SELLER_PROFILE_NOT_PENDING(1904, "error.1904", HttpStatus.BAD_REQUEST),
     // Lỗi khác (99xx)
     UNCATEGORIZED_EXCEPTION(9999, "error.9999", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(9998, "error.9998", HttpStatus.BAD_REQUEST),
