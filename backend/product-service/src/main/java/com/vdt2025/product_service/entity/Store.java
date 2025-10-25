@@ -1,6 +1,5 @@
-package com.cnweb2025.user_service.entity;
+package com.vdt2025.product_service.entity;
 
-import com.cnweb2025.user_service.enums.VerificationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -15,16 +14,18 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Table(name = "seller_profile")
+@Table(name = "stores")
 @Entity
-public class SellerProfile {
+public class Store {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    User user;
+    @Column(name = "seller_profile_id", nullable = false, unique = true)
+    String sellerProfileId;
+
+    @Column(name = "user_id", nullable = false)
+    String userId;
 
     @Column(name = "store_name", nullable = false)
     String storeName;
@@ -47,17 +48,11 @@ public class SellerProfile {
     @Column(name = "shop_address", nullable = false)
     String shopAddress;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "province_id", nullable = false)
-    Province province;
+    @Column(name = "province_id", nullable = false)
+    Integer provinceId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ward_id", nullable = false)
-    Ward ward;
-
-    @Column(name = "verification_status", nullable = false)
-    @Enumerated(EnumType.STRING)
-    VerificationStatus verificationStatus;
+    @Column(name = "ward_id", nullable = false)
+    Integer wardId;
 
     @Column(name = "is_active", nullable = false)
     boolean isActive;
@@ -69,13 +64,4 @@ public class SellerProfile {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     LocalDateTime updatedAt;
-
-    @Column(name = "approved_at")
-    LocalDateTime approvedAt;
-
-    @Column(name = "rejected_at")
-    LocalDateTime rejectedAt;
-
-    @Column(name = "rejection_reason")
-    String rejectionReason;
 }

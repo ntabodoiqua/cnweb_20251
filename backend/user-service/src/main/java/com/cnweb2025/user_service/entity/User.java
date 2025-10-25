@@ -73,7 +73,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     Set<Address> addresses;
 
-    // One-to-One relationship with SellerProfile
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    SellerProfile sellerProfile;
+    // One to many relationship with SellerProfile
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    Set<SellerProfile> sellerProfiles;
 }

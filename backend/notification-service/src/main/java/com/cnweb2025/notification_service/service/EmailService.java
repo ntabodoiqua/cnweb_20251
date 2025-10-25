@@ -17,6 +17,8 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -95,6 +97,25 @@ public class EmailService {
         log.info("Password reset email with OTP sent to {}", to);
     }
 
+    public void sendSellerProfileRejectedEmail(String to, String storeName, String reason, String sellerProfileId, LocalDateTime rejectedAt) {
+        final String subject = "Hồ sơ người bán của bạn đã bị từ chối - HUSTBuy";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'lúc' HH:mm");
+        String formattedRejectedAt = rejectedAt.format(formatter);
+
+        Context context = new Context();
+        context.setVariable("storeName", storeName);
+        context.setVariable("rejectionReason", reason);
+        context.setVariable("contactEmail", to);
+        context.setVariable("sellerProfileId", sellerProfileId);
+        context.setVariable("rejectedAt", formattedRejectedAt);
+        context.setVariable("subject", subject);
+
+        String htmlContent = templateEngine.process("seller-profile-rejected-email", context);
+
+        sendEmail(to, subject, htmlContent);
+        log.info("Seller profile rejected email sent to {}", to);
+    }
+
     public void sendErrorEmailToAdmin(String errorMessage) {
         final String adminEmail = "anhnta2004@gmail.com";
         final String subject = "Lỗi trong dịch vụ thông báo NTA VDT_2025";
@@ -110,5 +131,17 @@ public class EmailService {
         
         sendEmail(adminEmail, subject, htmlContent);
         log.info("Error email sent to admin");
+    }
+
+    public void sendStoreCreatedEmail(String to, String storeName) {
+        final String subject = "Chúc mừng! Cửa hàng của bạn đã được tạo thành công - HUSTBuy";
+        Context context = new Context();
+        context.setVariable("storeName", storeName);
+        context.setVariable("subject", subject);
+
+        String htmlContent = templateEngine.process("store-created-email", context);
+        
+        sendEmail(to, subject, htmlContent);
+        log.info("Store created email sent to {}", to);
     }
 }
