@@ -3,6 +3,7 @@ package com.cnweb2025.user_service.service;
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileCreationRequest;
 import com.cnweb2025.user_service.dto.response.SellerProfileResponse;
 import com.cnweb2025.user_service.entity.Province;
+import com.cnweb2025.user_service.entity.Role;
 import com.cnweb2025.user_service.entity.User;
 import com.cnweb2025.user_service.entity.Ward;
 import com.cnweb2025.user_service.enums.VerificationStatus;
@@ -10,12 +11,10 @@ import com.cnweb2025.user_service.exception.AppException;
 import com.cnweb2025.user_service.exception.ErrorCode;
 import com.cnweb2025.user_service.mapper.SellerProfileMapper;
 import com.cnweb2025.user_service.messaging.RabbitMQMessagePublisher;
-import com.cnweb2025.user_service.repository.ProvinceRepository;
-import com.cnweb2025.user_service.repository.SellerProfileRepository;
-import com.cnweb2025.user_service.repository.UserRepository;
-import com.cnweb2025.user_service.repository.WardRepository;
+import com.cnweb2025.user_service.repository.*;
 import com.vdt2025.common_dto.dto.MessageType;
 import com.vdt2025.common_dto.dto.SellerProfileApprovedEvent;
+import com.vdt2025.common_dto.dto.SellerProfileRejectedEvent;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -43,6 +42,7 @@ public class SellerProfileServiceImp implements SellerProfileService{
     SellerProfileMapper sellerProfileMapper;
     MessageSource messageSource;
     RabbitMQMessagePublisher rabbitMQMessagePublisher;
+    RoleRepository roleRepository;
 
 
     @Override
@@ -67,9 +67,10 @@ public class SellerProfileServiceImp implements SellerProfileService{
                 .getAuthentication().getName();
         User user = userRepository.findByUsernameAndEnabledTrueAndIsVerifiedTrue(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        // Kiểm tra xem user đã có seller profile chưa
-        if (sellerProfileRepository.existsByUserId(user.getId())) {
-            log.error("Seller profile already exists for user: {}", username);
+        // Điều kiên: User chưa có seller profile hoặc các seller profiles trước đó bị từ chối
+        if (sellerProfileRepository.existsByUserIdAndVerificationStatusNot(
+                user.getId(), VerificationStatus.REJECTED)) {
+            log.error("User: {} already has an active or pending seller profile", username);
             throw new AppException(ErrorCode.SELLER_PROFILE_ALREADY_EXISTS);
         }
         var sellerProfile = sellerProfileMapper.toSellerProfile(request);
@@ -141,6 +142,16 @@ public class SellerProfileServiceImp implements SellerProfileService{
         sellerProfile.setVerificationStatus(VerificationStatus.VERIFIED);
         sellerProfile.setActive(true);
         sellerProfile.setApprovedAt(LocalDateTime.now());
+
+        // thay đổi role của user thành SELLER
+        User user = sellerProfile.getUser();
+        Role sellerRole = roleRepository.findById("SELLER")
+                .orElseThrow(() -> {
+                    log.error("SELLER role not found in the system");
+                    return new AppException(ErrorCode.ROLE_NOT_FOUND);
+                });
+        user.getRoles().add(sellerRole);
+        userRepository.save(user);
         try {
             var savedProfile = sellerProfileRepository.save(sellerProfile);
 
@@ -171,5 +182,45 @@ public class SellerProfileServiceImp implements SellerProfileService{
             log.error("Error approving seller profile with ID: {}: {}", sellerProfileId, e.getMessage());
             throw new AppException(ErrorCode.SELLER_PROFILE_APPROVAL_FAILED);
         }
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public String rejectSellerProfile(String sellerProfileId, String reason, Locale locale) {
+        var sellerProfile = sellerProfileRepository.findById(sellerProfileId)
+                .orElseThrow(() -> {
+                    log.error("Seller profile not found with ID: {}", sellerProfileId);
+                    return new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+                });
+
+        // Kiểm tra trạng thái hiện tại
+        if (sellerProfile.getVerificationStatus() != VerificationStatus.PENDING) {
+            log.error("Seller profile with ID: {} is not in PENDING status", sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_NOT_PENDING);
+        }
+        sellerProfile.setVerificationStatus(VerificationStatus.REJECTED);
+        sellerProfile.setRejectionReason(reason);
+        sellerProfile.setRejectedAt(LocalDateTime.now());
+        sellerProfileRepository.save(sellerProfile);
+        try {
+            // Gửi email thông báo từ chối
+            SellerProfileRejectedEvent event = SellerProfileRejectedEvent.builder()
+                    .sellerProfileId(sellerProfile.getId())
+                    .userId(sellerProfile.getUser().getId())
+                    .contactEmail(sellerProfile.getContactEmail())
+                    .storeName(sellerProfile.getStoreName())
+                    .rejectedAt(sellerProfile.getRejectedAt())
+                    .rejectionReason(reason)
+                    .build();
+            // Publish message sang notification-service
+            rabbitMQMessagePublisher.publish(MessageType.SELLER_PROFILE_REJECTED, event);
+            log.info("Published SELLER_PROFILE_REJECTED event for seller profile ID: {}", sellerProfileId);
+        } catch (Exception e) {
+            log.error("Error publishing SELLER_PROFILE_REJECTED event for seller profile ID: {}: {}", sellerProfileId, e.getMessage());
+            throw new AppException(ErrorCode.SELLER_PROFILE_REJECTION_NOTIFICATION_FAILED);
+        }
+        log.info("Seller profile with ID: {} rejected", sellerProfileId);
+        return messageSource.getMessage("success.sellerProfile.rejected", null, locale);
     }
 }

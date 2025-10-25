@@ -19,4 +19,6 @@ public interface SellerProfileService {
 
     String approveSellerProfile(String sellerProfileId, Locale locale);
 
+    String rejectSellerProfile(String sellerProfileId, String reason, Locale locale);
+
 }

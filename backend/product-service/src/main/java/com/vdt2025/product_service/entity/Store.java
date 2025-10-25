@@ -24,7 +24,7 @@ public class Store {
     @Column(name = "seller_profile_id", nullable = false, unique = true)
     String sellerProfileId;
 
-    @Column(name = "user_id", nullable = false, unique = true)
+    @Column(name = "user_id", nullable = false)
     String userId;
 
     @Column(name = "store_name", nullable = false)
@@ -39,10 +39,10 @@ public class Store {
     @Column(name = "banner_name")
     String bannerName;
 
-    @Column(name = "contact_email", nullable = false, unique = true)
+    @Column(name = "contact_email", nullable = false)
     String contactEmail;
 
-    @Column(name = "contact_phone", nullable = false, unique = true)
+    @Column(name = "contact_phone", nullable = false)
     String contactPhone;
 
     @Column(name = "shop_address", nullable = false)

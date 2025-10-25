@@ -9,7 +9,8 @@ public enum MessageType {
     PASSWORD_RESET("user.password.reset", "password-reset-queue"),
     EMAIL_VERIFICATION("user.email.verification", "email-verification-queue"),
     SELLER_PROFILE_APPROVED("seller.profile.approved", "seller-profile-approved-queue"),
-    STORE_CREATED("store.created", "store-created-queue");
+    STORE_CREATED("store.created", "store-created-queue"),
+    SELLER_PROFILE_REJECTED("seller.profile.rejected", "seller-profile-rejected-queue");
 
     private final String routingKey;
     private final String queueName;

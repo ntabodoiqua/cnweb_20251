@@ -1,9 +1,6 @@
 package com.cnweb2025.notification_service.messaging;
 
-import com.vdt2025.common_dto.dto.MessageType;
-import com.vdt2025.common_dto.dto.UserCreatedEvent;
-import com.vdt2025.common_dto.dto.UserForgotPasswordEvent;
-import com.vdt2025.common_dto.dto.StoreCreatedEvent;
+import com.vdt2025.common_dto.dto.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Queue;
@@ -71,6 +68,15 @@ public class RabbitMQMessageConsumer {
     @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
     public void handleStoreCreated(StoreCreatedEvent event) {
         handleMessage(MessageType.STORE_CREATED, event);
+    }
+
+    /**
+     * Listener cho seller profile rejected
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).SELLER_PROFILE_REJECTED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleSellerProfileRejected(SellerProfileRejectedEvent event) {
+        handleMessage(MessageType.SELLER_PROFILE_REJECTED, event);
     }
 
     /**

@@ -17,6 +17,8 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 @Service
 @RequiredArgsConstructor
@@ -93,6 +95,25 @@ public class EmailService {
         
         sendEmail(to, subject, htmlContent);
         log.info("Password reset email with OTP sent to {}", to);
+    }
+
+    public void sendSellerProfileRejectedEmail(String to, String storeName, String reason, String sellerProfileId, LocalDateTime rejectedAt) {
+        final String subject = "Hồ sơ người bán của bạn đã bị từ chối - HUSTBuy";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'lúc' HH:mm");
+        String formattedRejectedAt = rejectedAt.format(formatter);
+
+        Context context = new Context();
+        context.setVariable("storeName", storeName);
+        context.setVariable("rejectionReason", reason);
+        context.setVariable("contactEmail", to);
+        context.setVariable("sellerProfileId", sellerProfileId);
+        context.setVariable("rejectedAt", formattedRejectedAt);
+        context.setVariable("subject", subject);
+
+        String htmlContent = templateEngine.process("seller-profile-rejected-email", context);
+
+        sendEmail(to, subject, htmlContent);
+        log.info("Seller profile rejected email sent to {}", to);
     }
 
     public void sendErrorEmailToAdmin(String errorMessage) {

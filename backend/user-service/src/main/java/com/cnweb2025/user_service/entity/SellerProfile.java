@@ -23,7 +23,7 @@ public class SellerProfile {
     String id;
 
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    @JoinColumn(name = "user_id", nullable = false)
     User user;
 
     @Column(name = "store_name", nullable = false)
@@ -38,10 +38,10 @@ public class SellerProfile {
     @Column(name = "banner_name")
     String bannerName;
 
-    @Column(name = "contact_email", nullable = false, unique = true)
+    @Column(name = "contact_email", nullable = false)
     String contactEmail;
 
-    @Column(name = "contact_phone", nullable = false, unique = true)
+    @Column(name = "contact_phone", nullable = false)
     String contactPhone;
 
     @Column(name = "shop_address", nullable = false)
@@ -72,4 +72,10 @@ public class SellerProfile {
 
     @Column(name = "approved_at")
     LocalDateTime approvedAt;
+
+    @Column(name = "rejected_at")
+    LocalDateTime rejectedAt;
+
+    @Column(name = "rejection_reason")
+    String rejectionReason;
 }
