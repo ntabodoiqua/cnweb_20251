@@ -107,6 +107,53 @@ services:
       retries: 5
       start_period: 60s
 
+  # Product Service - Depends on Discovery Service
+  product-service:
+    build:
+      context: .
+      dockerfile: product-service/Dockerfile
+    container_name: product-service
+    image: ghcr.io/ntabodoiqua/cnweb-product-service:${TAG:-latest}
+    ports:
+      - "8082:8082"
+    networks:
+      - microservices-network
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25060/product_service?sslmode=require
+      - SPRING_DATASOURCE_USERNAME=doadmin
+      - SPRING_DATASOURCE_PASSWORD=AVNS_yX_L2SKXt73ktjTiGbU
+      - SPRING_DATA_REDIS_HOST=db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
+      - SPRING_DATA_REDIS_PORT=25061
+      - SPRING_DATA_REDIS_USERNAME=default
+      - SPRING_DATA_REDIS_PASSWORD=AVNS_N-gwsyNb6xBC3fXPdQp
+      - SPRING_DATA_REDIS_SSL_ENABLED=true
+      - SPRING_RABBITMQ_ADDRESSES=amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
+      - SPRING_RABBITMQ_USERNAME=xqjmojji
+      - SPRING_RABBITMQ_PASSWORD=hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH
+      - SPRING_RABBITMQ_VIRTUAL_HOST=xqjmojji
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - JWT_SIGNERKEY=cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2
+    volumes:
+      - product-uploads:/app/uploads
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8082/actuator/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
   # Notification Service - Depends on Discovery Service
   notification-service:
     build:
@@ -150,4 +197,6 @@ networks:
 
 volumes:
   user-uploads:
+    driver: local
+  product-uploads:
     driver: local
