@@ -8,8 +8,6 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Setter
@@ -18,39 +16,25 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "categories")
-public class Category {
+@Table(name = "product_images")
+public class ProductImage {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @NotBlank(message = "Category name is required")
-    @Column(nullable = false, unique = true)
-    String name;
-
-    @Column(columnDefinition = "TEXT")
-    String description;
-
-    @Column(name = "image_name")
+    @NotBlank(message = "Image name is required")
+    @Column(name = "image_name", nullable = false)
     String imageName;
 
-    @Column(name = "parent_id")
-    String parentId; // Để hỗ trợ danh mục con (ví dụ: Thời trang > Thời trang nam)
+    @Column(name = "image_url")
+    String imageUrl; // URL đầy đủ nếu cần
 
     @Column(name = "display_order")
-    Integer displayOrder; // Thứ tự hiển thị
+    Integer displayOrder; // Thứ tự hiển thị ảnh
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_primary", nullable = false)
     @Builder.Default
-    boolean isActive = true;
-
-    // Relationship với Product
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    @Builder.Default
-    List<Product> products = new ArrayList<>();
-
-    @Column(name = "created_by")
-    String createdBy;
+    boolean isPrimary = false; // Ảnh chính của sản phẩm
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -59,4 +43,9 @@ public class Category {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     LocalDateTime updatedAt;
+
+    // Relationship với Product
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    Product product;
 }

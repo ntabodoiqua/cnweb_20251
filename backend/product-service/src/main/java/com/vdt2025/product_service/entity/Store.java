@@ -7,6 +7,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,7 +32,7 @@ public class Store {
     @Column(name = "store_name", nullable = false)
     String storeName;
 
-    @Column(name = "store_description")
+    @Column(name = "store_description", columnDefinition = "TEXT")
     String storeDescription;
 
     @Column(name = "logo_name")
@@ -55,7 +57,29 @@ public class Store {
     Integer wardId;
 
     @Column(name = "is_active", nullable = false)
-    boolean isActive;
+    @Builder.Default
+    boolean isActive = true;
+
+    // Thống kê của store
+    @Column(name = "total_products")
+    @Builder.Default
+    Integer totalProducts = 0;
+
+    @Column(name = "total_sold")
+    @Builder.Default
+    Integer totalSold = 0;
+
+    @Column(name = "average_rating")
+    Double averageRating; // Điểm đánh giá trung bình của store
+
+    @Column(name = "follower_count")
+    @Builder.Default
+    Integer followerCount = 0;
+
+    // Relationship với Product
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @Builder.Default
+    List<Product> products = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

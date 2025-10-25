@@ -1,15 +1,15 @@
 package com.vdt2025.product_service.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,42 +18,80 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
+@Table(name = "products")
 public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
-    @NotBlank
+
+    @NotBlank(message = "Product name is required")
     @Column(nullable = false)
     String name;
+
+    @Column(columnDefinition = "TEXT")
     String description;
-    String image_name;
 
-    @Min(value = 0, message = "Price must be at least 0")
-    @Column(nullable = false, precision = 19, scale = 2)
-    BigDecimal price;
+    @Column(name = "short_description", length = 500)
+    String shortDescription; // Mô tả ngắn hiển thị trên danh sách
 
-    @Column(nullable = false)
-    @Min(value = 0, message = "Quantity must be at least 0")
-    int quantity;
+    @Column(name = "view_count")
+    @Builder.Default
+    Long viewCount = 0L; // Số lượt xem
+
+    @Column(name = "sold_count")
+    @Builder.Default
+    Integer soldCount = 0; // Tổng số đã bán
+
+    @Column(name = "average_rating")
+    Double averageRating; // Điểm đánh giá trung bình
+
+    @Column(name = "rating_count")
+    @Builder.Default
+    Integer ratingCount = 0; // Số lượng đánh giá
+
+    @Column(name = "is_active", nullable = false)
+    @Builder.Default
+    boolean isActive = true;
 
     @CreationTimestamp
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(nullable = false)
+    @Column(name = "updated_at", nullable = false)
     LocalDateTime updatedAt;
 
-    // Mối quan hệ với Category
-    // Mỗi sản phẩm thuộc về một danh mục
-    @ManyToOne
+    // Relationship với Store
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id", nullable = false)
+    Store store;
+
+    // Relationship với Category
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     Category category;
 
-    // Mối quan hệ với User
-    // Sản phẩm được tạo bởi người dùng nào
-    String createdBy;
+    // Relationship với Brand
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id")
+    Brand brand;
 
-    @Column(nullable = false)
-    boolean active;
+    // Relationship với ProductVariant
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    List<ProductVariant> variants = new ArrayList<>();
+
+    // Relationship với ProductImage
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    List<ProductImage> images = new ArrayList<>();
+
+    // Relationship với ProductRating
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    List<ProductRating> ratings = new ArrayList<>();
+
+    // Người tạo sản phẩm
+    @Column(name = "created_by")
+    String createdBy;
 }
