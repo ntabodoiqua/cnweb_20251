@@ -1,10 +1,7 @@
 package com.vdt2025.file_service.service;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
-import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.services.s3.model.*;
 import com.amazonaws.HttpMethod;
 import com.vdt2025.common_dto.service.UserServiceClient;
 import com.vdt2025.file_service.entity.UploadedFile;
@@ -29,6 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -54,10 +52,11 @@ public class FileStorageService {
      * Lưu trữ file tải lên vào S3 và ghi thông tin vào cơ sở dữ liệu.
      *
      * @param file File được tải lên từ client.
+     * @param isPublic True nếu file public, False nếu private.
      * @return Tên file duy nhất đã được lưu.
      */
     @Transactional
-    public String storeFile(MultipartFile file) {
+    public String storeFile(MultipartFile file, boolean isPublic) {
         // Kiểm tra file rỗng
         if (file.isEmpty()) {
             throw new AppException(ErrorCode.FILE_IS_EMPTY);
@@ -107,10 +106,19 @@ public class FileStorageService {
                     metadata
             );
 
+            // Đặt ACL dựa trên isPublic
+            if (isPublic) {
+                putObjectRequest.setCannedAcl(CannedAccessControlList.PublicRead);
+                log.info("Setting file {} as PUBLIC", fileName);
+            } else {
+                putObjectRequest.setCannedAcl(CannedAccessControlList.Private);
+                log.info("Setting file {} as PRIVATE", fileName);
+            }
+
             amazonS3.putObject(putObjectRequest);
             log.info("File uploaded to S3: {}/{}", bucketName, fileName);
 
-            // Tạo và lưu thông tin file vào cơ sở dữ liệu với userId
+            // Tạo và lưu thông tin file vào cơ sở dữ liệu với userId và isPublic flag
             UploadedFile uploadedFile = UploadedFile.builder()
                     .fileName(fileName)
                     .originalFileName(originalFilename)
@@ -119,10 +127,12 @@ public class FileStorageService {
                     .uploadedAt(LocalDateTime.now())
                     .uploadedBy(currentUsername)
                     .uploadedById(user.getId()) // Lưu userId
+                    .isPublic(isPublic) // Lưu trạng thái public/private
                     .build();
             uploadedFileRepository.save(uploadedFile);
 
-            log.info("File stored successfully: {} by user: {} (ID: {})", fileName, currentUsername, user.getId());
+            log.info("File stored successfully: {} by user: {} (ID: {}), isPublic: {}", 
+                    fileName, currentUsername, user.getId(), isPublic);
             return fileName;
         } catch (IOException ex) {
             log.error("Could not store file {}. Please try again!", fileName, ex);
@@ -247,5 +257,164 @@ public class FileStorageService {
             // Ném exception để kích hoạt rollback của @Transactional
             throw new AppException(ErrorCode.FILE_CANNOT_DELETED);
         }
+    }
+
+    /**
+     * Liệt kê tất cả các file trong S3 bucket.
+     * 
+     * @return Danh sách các file summary từ S3.
+     */
+    public java.util.List<S3ObjectSummary> listFiles() {
+        try {
+            String bucketName = fileStorageProperties.getS3().getBucketName();
+            
+            ObjectListing objectListing = amazonS3.listObjects(bucketName);
+            java.util.List<S3ObjectSummary> files = objectListing.getObjectSummaries();
+            
+            log.info("Listed {} files from S3 bucket: {}", files.size(), bucketName);
+            return files;
+        } catch (Exception ex) {
+            log.error("Error listing files from S3", ex);
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
+    }
+
+    /**
+     * Liệt kê các file với prefix (folder).
+     * 
+     * @param prefix Prefix/folder để filter files.
+     * @return Danh sách các file summary từ S3.
+     */
+    public java.util.List<S3ObjectSummary> listFiles(String prefix) {
+        try {
+            String bucketName = fileStorageProperties.getS3().getBucketName();
+            
+            ListObjectsRequest listObjectsRequest = new ListObjectsRequest()
+                    .withBucketName(bucketName)
+                    .withPrefix(prefix);
+            
+            ObjectListing objectListing = amazonS3.listObjects(listObjectsRequest);
+            java.util.List<S3ObjectSummary> files = objectListing.getObjectSummaries();
+            
+            log.info("Listed {} files with prefix '{}' from S3 bucket: {}", 
+                    files.size(), prefix, bucketName);
+            return files;
+        } catch (Exception ex) {
+            log.error("Error listing files with prefix '{}' from S3", prefix, ex);
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
+    }
+
+    /**
+     * Kiểm tra xem user có quyền truy cập file không.
+     * - Admin: có quyền truy cập tất cả files
+     * - User thường: chỉ truy cập được file public hoặc file mình upload
+     * 
+     * @param fileName Tên file cần kiểm tra.
+     * @param currentUserId User ID của người đang request.
+     * @param isAdmin True nếu user là admin.
+     * @return True nếu có quyền, False nếu không.
+     */
+    public boolean hasAccessToFile(String fileName, String currentUserId, boolean isAdmin) {
+        // Admin có quyền truy cập tất cả
+        if (isAdmin) {
+            return true;
+        }
+
+        // Tìm file trong database
+        Optional<UploadedFile> fileOpt = uploadedFileRepository.findByFileName(fileName);
+        
+        if (fileOpt.isEmpty()) {
+            return false;
+        }
+
+        UploadedFile file = fileOpt.get();
+
+        // File public: mọi người đều xem được
+        if (file.getIsPublic()) {
+            return true;
+        }
+
+        // File private: chỉ owner mới xem được
+        return file.getUploadedById().equals(currentUserId);
+    }
+
+    /**
+     * Lấy presigned URL cho file private (với kiểm tra quyền).
+     * 
+     * @param fileName Tên file.
+     * @param expirationMinutes Thời gian hết hạn (phút).
+     * @return Presigned URL.
+     */
+    public String getPrivateFileUrl(String fileName, int expirationMinutes) {
+        // Lấy thông tin user hiện tại
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        
+        // Kiểm tra xem user có role ADMIN không
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+
+        // Lấy userId từ user-service
+        com.vdt2025.common_dto.dto.response.UserResponse user;
+        try {
+            user = userServiceClient.getUserByUsername(currentUsername).getResult();
+        } catch (Exception ex) {
+            log.error("Failed to get user information for username: {}", currentUsername, ex);
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+
+        // Kiểm tra quyền truy cập
+        if (!hasAccessToFile(fileName, user.getId(), isAdmin)) {
+            log.warn("User {} (ID: {}) attempted to access unauthorized file: {}", 
+                    currentUsername, user.getId(), fileName);
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // Tìm file trong database
+        UploadedFile fileEntity = uploadedFileRepository.findByFileName(fileName)
+                .orElseThrow(() -> new AppException(ErrorCode.FILE_NOT_FOUND));
+
+        // Nếu là file public, trả về public URL
+        if (fileEntity.getIsPublic()) {
+            return getFileUrl(fileName);
+        }
+
+        // Nếu là file private, tạo presigned URL
+        return getPresignedFileUrl(fileName, expirationMinutes);
+    }
+
+    /**
+     * Lấy danh sách file của user hiện tại.
+     * - Admin: xem tất cả files
+     * - User: chỉ xem file public và file mình upload
+     * 
+     * @return Danh sách files.
+     */
+    public java.util.List<UploadedFile> getMyFiles() {
+        // Lấy thông tin user hiện tại
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        
+        // Kiểm tra xem user có role ADMIN không
+        boolean isAdmin = SecurityContextHolder.getContext().getAuthentication()
+                .getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+
+        // Admin xem tất cả files
+        if (isAdmin) {
+            return uploadedFileRepository.findAll();
+        }
+
+        // User thường: lấy userId
+        com.vdt2025.common_dto.dto.response.UserResponse user;
+        try {
+            user = userServiceClient.getUserByUsername(currentUsername).getResult();
+        } catch (Exception ex) {
+            log.error("Failed to get user information for username: {}", currentUsername, ex);
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+
+        // Lấy file public hoặc file của user
+        return uploadedFileRepository.findByUploadedByIdOrIsPublic(user.getId(), true);
     }
 }

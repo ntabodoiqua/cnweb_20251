@@ -39,4 +39,7 @@ public class UploadedFile {
 
     @Column(name = "uploaded_by_id", nullable = false)
     String uploadedById; // User ID của người upload
+
+    @Column(name = "is_public", nullable = false)
+    Boolean isPublic; // True = Public, False = Private
 }
