@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -28,23 +27,20 @@ public class FileController {
      * Endpoint để tải lên một tệp tin.
      *
      * @param file Dữ liệu file được gửi từ client.
-     * @return ApiResponse chứa tên file duy nhất và đường dẫn để tải về.
+     * @return ApiResponse chứa tên file duy nhất và URL S3 để truy cập.
      */
     @PostMapping("/upload")
     public ApiResponse<String> uploadFile(@RequestParam("file") MultipartFile file) {
         String fileName = fileStorageService.storeFile(file);
 
-        // Tạo đường dẫn đầy đủ để client có thể truy cập file sau này
-        String fileDownloadUri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/uploads/")
-                .path(fileName)
-                .toUriString();
+        // Lấy URL S3 của file thay vì local URL
+        String fileUrl = fileStorageService.getFileUrl(fileName);
 
-        log.info("File uploaded successfully. Download URI: {}", fileDownloadUri);
+        log.info("File uploaded successfully. S3 URL: {}", fileUrl);
 
         return ApiResponse.<String>builder()
                 .result(fileName)
-                .message("File uploaded successfully. Download URI: " + fileDownloadUri)
+                .message("File uploaded successfully. S3 URL: " + fileUrl)
                 .build();
     }
 
@@ -89,17 +85,25 @@ public class FileController {
                 .build();
     }
 
-    // Lấy đường dẫn của file đã tải lên
-    // Thêm địa chỉ host + port + "/uploads/" vào tên file để tạo đường dẫn đầy đủ
+    // Lấy URL S3 của file đã tải lên
     @GetMapping("/path/{fileName}")
     public ApiResponse<String> getFilePath(@PathVariable String fileName) {
-        String filePath = ServletUriComponentsBuilder.fromCurrentContextPath()
-                .path("/uploads/")
-                .path(fileName)
-                .toUriString();
+        String s3Url = fileStorageService.getFileUrl(fileName);
         return ApiResponse.<String>builder()
-                .result(filePath)
-                .message("File path retrieved successfully.")
+                .result(s3Url)
+                .message("File S3 URL retrieved successfully.")
+                .build();
+    }
+
+    // Lấy Presigned URL của file (cho bucket private)
+    @GetMapping("/presigned-url/{fileName}")
+    public ApiResponse<String> getPresignedUrl(
+            @PathVariable String fileName,
+            @RequestParam(defaultValue = "60") int expirationMinutes) {
+        String presignedUrl = fileStorageService.getPresignedFileUrl(fileName, expirationMinutes);
+        return ApiResponse.<String>builder()
+                .result(presignedUrl)
+                .message("Presigned URL retrieved successfully. Expires in " + expirationMinutes + " minutes.")
                 .build();
     }
 }

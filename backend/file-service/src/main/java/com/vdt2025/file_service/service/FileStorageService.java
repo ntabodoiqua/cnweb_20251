@@ -5,6 +5,7 @@ import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.HttpMethod;
 import com.vdt2025.common_dto.service.UserServiceClient;
 import com.vdt2025.file_service.entity.UploadedFile;
 import com.vdt2025.file_service.exception.AppException;
@@ -70,6 +71,24 @@ public class FileStorageService {
             throw new AppException(ErrorCode.INVALID_FILE_PATH);
         }
 
+        // Lấy thông tin người dùng hiện tại từ SecurityContext
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        
+        // Gọi user-service để lấy thông tin đầy đủ của user
+        com.vdt2025.common_dto.dto.response.UserResponse user;
+        try {
+            user = userServiceClient.getUserByUsername(currentUsername).getResult();
+        } catch (Exception ex) {
+            log.error("Failed to get user information for username: {}", currentUsername, ex);
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        }
+
+        // Kiểm tra xem user có bị disable không
+        if (!user.isEnabled()) {
+            log.warn("User {} is disabled, cannot upload file", currentUsername);
+            throw new AppException(ErrorCode.USER_DISABLED);
+        }
+
         // Tạo tên file duy nhất để tránh trùng lặp
         String fileName = UUID.randomUUID() + "_" + originalFilename;
 
@@ -91,27 +110,79 @@ public class FileStorageService {
             amazonS3.putObject(putObjectRequest);
             log.info("File uploaded to S3: {}/{}", bucketName, fileName);
 
-            // Lấy thông tin người dùng hiện tại
-            String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
-            String userId = userServiceClient.getUserByUsername(currentUsername).getResult().getId();
-
-            // Tạo và lưu thông tin file vào cơ sở dữ liệu
+            // Tạo và lưu thông tin file vào cơ sở dữ liệu với userId
             UploadedFile uploadedFile = UploadedFile.builder()
                     .fileName(fileName)
                     .originalFileName(originalFilename)
                     .fileType(file.getContentType())
                     .fileSize(file.getSize())
                     .uploadedAt(LocalDateTime.now())
-                    .uploadedBy(userId)
+                    .uploadedBy(currentUsername)
+                    .uploadedById(user.getId()) // Lưu userId
                     .build();
             uploadedFileRepository.save(uploadedFile);
 
-            log.info("File stored successfully: {}", fileName);
+            log.info("File stored successfully: {} by user: {} (ID: {})", fileName, currentUsername, user.getId());
             return fileName;
         } catch (IOException ex) {
             log.error("Could not store file {}. Please try again!", fileName, ex);
             throw new AppException(ErrorCode.FILE_CANNOT_STORED);
         }
+    }
+
+    /**
+     * Tạo URL công khai để truy cập file trên S3.
+     * CHÚ Ý: URL này chỉ hoạt động nếu bucket được cấu hình PUBLIC ACCESS.
+     * Nếu bucket là PRIVATE, sử dụng getPresignedFileUrl() thay thế.
+     * 
+     * @param fileName Tên file.
+     * @return URL công khai của file trên S3.
+     */
+    public String getFileUrl(String fileName) {
+        String bucketName = fileStorageProperties.getS3().getBucketName();
+        String endpoint = fileStorageProperties.getS3().getEndpoint();
+        
+        // Format cho DigitalOcean Spaces (Virtual-hosted style):
+        // https://{bucket-name}.{region}.digitaloceanspaces.com/{filename}
+        // Ví dụ: https://hla.sgp1.digitaloceanspaces.com/filename.jpg
+        
+        // Trích xuất domain từ endpoint (remove https:// và region prefix nếu có)
+        String domain = endpoint.replace("https://", "").replace("http://", "");
+        
+        // Tạo URL theo format: https://{bucket}.{domain}/{filename}
+        return String.format("https://%s.%s/%s", bucketName, domain, fileName);
+    }
+
+    /**
+     * Tạo Presigned URL để truy cập file private trên S3.
+     * URL này có thời gian hết hạn, phù hợp cho bucket PRIVATE.
+     * 
+     * @param fileName Tên file.
+     * @param expirationMinutes Thời gian hết hạn (phút). Mặc định 60 phút.
+     * @return Presigned URL có thời gian hết hạn.
+     */
+    public String getPresignedFileUrl(String fileName, int expirationMinutes) {
+        String bucketName = fileStorageProperties.getS3().getBucketName();
+        
+        // Tạo thời gian hết hạn
+        java.util.Date expiration = new java.util.Date();
+        long expTimeMillis = expiration.getTime();
+        expTimeMillis += 1000L * 60 * expirationMinutes; // Thêm số phút
+        expiration.setTime(expTimeMillis);
+        
+        // Tạo presigned URL
+        java.net.URL url = amazonS3.generatePresignedUrl(bucketName, fileName, expiration, HttpMethod.GET);
+        return url.toString();
+    }
+
+    /**
+     * Tạo Presigned URL với thời gian hết hạn mặc định 60 phút.
+     * 
+     * @param fileName Tên file.
+     * @return Presigned URL có thời gian hết hạn 60 phút.
+     */
+    public String getPresignedFileUrl(String fileName) {
+        return getPresignedFileUrl(fileName, 60); // Mặc định 60 phút
     }
 
     /**
