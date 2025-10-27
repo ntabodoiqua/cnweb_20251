@@ -4,7 +4,7 @@ spring:
   application:
     name: user-service
   datasource:
-    url: jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25060/user_service?sslmode=require
+    url: jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25061/user_service?sslmode=require
     username: doadmin
     password: AVNS_yX_L2SKXt73ktjTiGbU
   jpa:

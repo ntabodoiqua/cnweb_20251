@@ -22,7 +22,7 @@ public class SellerProfile {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     User user;
 
@@ -34,6 +34,12 @@ public class SellerProfile {
 
     @Column(name = "logo_name")
     String logoName;
+
+    @Column(name = "logo_url", length = 1000)
+    String logoUrl;
+
+    @Column(name = "banner_url", length = 1000)
+    String bannerUrl;
 
     @Column(name = "banner_name")
     String bannerName;
@@ -47,7 +53,16 @@ public class SellerProfile {
     @Column(name = "shop_address", nullable = false)
     String shopAddress;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "province_id", nullable = false)
+    Province province;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ward_id", nullable = false)
+    Ward ward;
+
     @Column(name = "verification_status", nullable = false)
+    @Enumerated(EnumType.STRING)
     VerificationStatus verificationStatus;
 
     @Column(name = "is_active", nullable = false)
@@ -63,4 +78,16 @@ public class SellerProfile {
 
     @Column(name = "approved_at")
     LocalDateTime approvedAt;
+
+    @Column(name = "rejected_at")
+    LocalDateTime rejectedAt;
+
+    @Column(name = "rejection_reason")
+    String rejectionReason;
+
+    @Column(name = "document_name")
+    String documentName;
+
+    @Column(name = "document_uploaded_at")
+    LocalDateTime documentUploadedAt;
 }

@@ -47,6 +47,9 @@ public class User {
     @Column(name = "avatar_name")
     String avatarName;
 
+    @Column(name = "avatar_url", length = 1000)
+    String avatarUrl;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
@@ -73,7 +76,7 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     Set<Address> addresses;
 
-    // One-to-One relationship with SellerProfile
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    SellerProfile sellerProfile;
+    // One to many relationship with SellerProfile
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    Set<SellerProfile> sellerProfiles;
 }

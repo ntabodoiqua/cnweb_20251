@@ -21,6 +21,7 @@ public class UserResponse {
     String phone;
     String email;
     String avatarName;
+    String avatarUrl;
     Boolean enabled;
     Boolean isVerified;
     LocalDateTime createdAt;

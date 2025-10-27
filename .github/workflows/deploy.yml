@@ -41,6 +41,8 @@ jobs:
             path: user-service
           - name: notification-service
             path: notification-service
+          - name: file-service
+            path: file-service
 
     steps:
       - name: Checkout code
@@ -136,6 +138,9 @@ jobs:
 
             echo "Checking Notification Service..."
             curl -f http://localhost:8084/actuator/health || exit 1
+
+            echo "Checking File Service..."
+            curl -f http://localhost:8083/actuator/health || exit 1
 
             echo "All services are healthy!"
 

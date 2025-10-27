@@ -38,6 +38,11 @@ public enum ErrorCode {
     // Lỗi sản phẩm (16xx)
     PRODUCT_NOT_FOUND(1601, "error.1601", HttpStatus.NOT_FOUND),
     PRODUCT_EXISTED(1602, "error.1602", HttpStatus.CONFLICT),
+    // Lỗi store (17xx)
+    STORE_NOT_FOUND(1701, "error.1701", HttpStatus.NOT_FOUND),
+    STORE_ALREADY_EXISTS(1702, "error.1702", HttpStatus.CONFLICT),
+    SELLER_PROFILE_PROCESSING_FAILED(1703, "error.1703", HttpStatus.INTERNAL_SERVER_ERROR),
+    STORE_FETCH_FAILED(1704, "error.1704", HttpStatus.INTERNAL_SERVER_ERROR),
     // Lỗi khác (99xx)
     UNCATEGORIZED_EXCEPTION(9999, "error.9999", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(9998, "error.9998", HttpStatus.BAD_REQUEST),
