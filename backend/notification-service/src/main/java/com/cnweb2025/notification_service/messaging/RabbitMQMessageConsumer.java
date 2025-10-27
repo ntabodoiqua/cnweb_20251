@@ -53,6 +53,15 @@ public class RabbitMQMessageConsumer {
     }
 
     /**
+     * Listener cho user disabled
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).USER_DISABLED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleUserDisabled(UserDisabledEvent event) {
+        handleMessage(MessageType.USER_DISABLED, event);
+    }
+
+    /**
      * Listener cho user deleted
      */
     @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).USER_DELETED).name}")
