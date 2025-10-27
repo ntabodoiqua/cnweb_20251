@@ -95,6 +95,7 @@ public class FileController {
      * @param prefix Optional prefix để filter files (ví dụ: "images/")
      * @return ApiResponse chứa danh sách các file.
      */
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/list")
     public ApiResponse<List<S3FileInfo>> listFiles(
             @RequestParam(required = false) String prefix) {

@@ -34,6 +34,7 @@ public enum ErrorCode {
     INVALID_FILE_PATH(1306, "Filename contains invalid path sequence.", HttpStatus.BAD_REQUEST),
     FILE_STORAGE_INIT_ERROR(1307, "Could not initialize file storage.", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_FILE_NAME(1308, "Invalid file name.", HttpStatus.BAD_REQUEST),
+    FILE_SIZE_EXCEEDED(1309, "File size exceeds the maximum limit.", HttpStatus.BAD_REQUEST),
     // Lỗi vai trò (14xx)
     ROLE_NOT_FOUND(1401, "Role not found", HttpStatus.NOT_FOUND),
     ROLE_EXISTED(1402, "Role already exists", HttpStatus.CONFLICT),

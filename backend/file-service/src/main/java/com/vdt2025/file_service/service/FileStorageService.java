@@ -14,6 +14,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -34,6 +35,8 @@ import java.util.UUID;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FileStorageService {
+    @Value("${file.max-size:10485760}") // Mặc định 10MB
+    long maxFileSize;
 
     final UploadedFileRepository uploadedFileRepository;
     final FileStorageProperties fileStorageProperties;
@@ -60,6 +63,11 @@ public class FileStorageService {
         // Kiểm tra file rỗng
         if (file.isEmpty()) {
             throw new AppException(ErrorCode.FILE_IS_EMPTY);
+        }
+
+        // Kiểm tra kích thước file
+        if (file.getSize() > maxFileSize) {
+            throw new AppException(ErrorCode.FILE_SIZE_EXCEEDED);
         }
 
         // Lấy tên file gốc và làm sạch nó
@@ -183,16 +191,6 @@ public class FileStorageService {
         // Tạo presigned URL
         java.net.URL url = amazonS3.generatePresignedUrl(bucketName, fileName, expiration, HttpMethod.GET);
         return url.toString();
-    }
-
-    /**
-     * Tạo Presigned URL với thời gian hết hạn mặc định 60 phút.
-     * 
-     * @param fileName Tên file.
-     * @return Presigned URL có thời gian hết hạn 60 phút.
-     */
-    public String getPresignedFileUrl(String fileName) {
-        return getPresignedFileUrl(fileName, 60); // Mặc định 60 phút
     }
 
     /**

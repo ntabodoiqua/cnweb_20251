@@ -37,7 +37,7 @@ jwt:
   refreshable-duration: ${JWT_REFRESHABLE_DURATION:86400}
 
 file:
-  max-size: 10MB
+  max-size: 10485760
   s3:
     endpoint: ${S3_ENDPOINT:https://sgp1.digitaloceanspaces.com}
     region: ${S3_REGION:sgp1}
