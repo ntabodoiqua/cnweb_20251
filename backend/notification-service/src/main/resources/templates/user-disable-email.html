@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${subject}"></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            color: #333;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #c8102e;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #c8102e;
+            margin-bottom: 10px;
+        }
+        .logo-subtitle {
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
+        }
+        .content {
+            padding: 20px 0;
+            line-height: 1.6;
+            color: #555555;
+        }
+        .status-box {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+            border: 2px solid #c8102e;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .status-text {
+            font-size: 20px;
+            font-weight: bold;
+            color: #c8102e;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #c8102e;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .info-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .info-box li {
+            margin: 5px 0;
+        }
+        .recovery-box {
+            background-color: #e7f3ff;
+            border-left: 4px solid #0066cc;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .warning-box {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #999999;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+        }
+        .footer-brand {
+            color: #c8102e;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo">
+            🛒 HUSTBuy
+            <div class="logo-subtitle">Sàn Thương Mại Điện Tử - Đại học Bách Khoa Hà Nội</div>
+        </div>
+        <h2 th:text="${subject}">Tài khoản của bạn đã bị vô hiệu hóa</h2>
+    </div>
+    <div class="content">
+        <p>Xin chào <strong th:text="${username}">Bạn</strong>,</p>
+
+        <p>
+            Chúng mình gửi email này để thông báo rằng tài khoản của bạn trên
+            <strong>HUSTBuy</strong> đã được đánh dấu xóa và tạm thời vô hiệu hóa.
+        </p>
+
+        <div class="status-box">
+            <div class="status-icon">⏸️</div>
+            <p class="status-text">Tài khoản đã bị vô hiệu hóa</p>
+        </div>
+
+        <div class="info-box">
+            <p><strong>📋 Tình trạng tài khoản của bạn:</strong></p>
+            <ul>
+                <li>Tài khoản của bạn đã bị vô hiệu hóa và không thể đăng nhập</li>
+                <li>Dữ liệu cá nhân và lịch sử giao dịch của bạn vẫn được lưu trữ trong hệ thống</li>
+                <li>Bạn không thể thực hiện bất kỳ giao dịch nào trên nền tảng</li>
+                <li>Tài khoản có thể được khôi phục nếu bạn yêu cầu trong thời gian cho phép</li>
+            </ul>
+        </div>
+
+        <div class="recovery-box">
+            <p><strong>🔄 Khôi phục tài khoản:</strong></p>
+            <p>
+                Nếu bạn muốn khôi phục tài khoản, vui lòng liên hệ với đội ngũ hỗ trợ
+                của chúng mình trong vòng <strong>30 ngày</strong> kể từ ngày nhận email này.
+                Sau thời gian đó, tài khoản có thể bị xóa vĩnh viễn khỏi hệ thống.
+            </p>
+        </div>
+
+        <div class="warning-box">
+            <p><strong>⚠️ Nếu bạn không yêu cầu vô hiệu hóa tài khoản:</strong></p>
+            <p>
+                Nếu việc vô hiệu hóa tài khoản này không được thực hiện bởi bạn, vui lòng
+                liên hệ với đội ngũ hỗ trợ của chúng mình ngay lập tức để được bảo mật
+                và khôi phục tài khoản. Đây có thể là dấu hiệu tài khoản của bạn bị xâm nhập trái phép.
+            </p>
+        </div>
+
+        <p>
+            Nếu bạn có bất kỳ thắc mắc nào về việc vô hiệu hóa tài khoản hoặc muốn
+            được hỗ trợ khôi phục, đừng ngần ngại liên hệ với đội ngũ hỗ trợ của chúng mình.
+        </p>
+
+        <p>
+            Cảm ơn bạn đã là một phần của cộng đồng HUSTBuy. Chúng mình hy vọng sẽ sớm
+            được chào đón bạn trở lại! 🙏
+        </p>
+
+        <p>
+            Trân trọng,<br />
+            <strong>Đội ngũ phát triển HUSTBuy</strong><br />
+            <em>Đại học Bách Khoa Hà Nội</em>
+        </p>
+    </div>
+    <div class="footer">
+        <p class="footer-brand">HUSTBuy</p>
+        <p>Dự án Thương mại Điện tử - Đại học Bách Khoa Hà Nội</p>
+        <p>&copy; 2025 HUSTBuy. Đồ án sinh viên HUST.</p>
+    </div>
+</div>
+</body>
+</html>
