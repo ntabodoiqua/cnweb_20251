@@ -78,4 +78,10 @@ public class SellerProfile {
 
     @Column(name = "rejection_reason")
     String rejectionReason;
+
+    @Column(name = "document_name")
+    String documentName;
+
+    @Column(name = "document_uploaded_at")
+    LocalDateTime documentUploadedAt;
 }

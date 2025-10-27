@@ -32,4 +32,6 @@ public class SellerProfileResponse {
     WardResponse ward;
     LocalDateTime rejectedAt;
     String rejectionReason;
+    String documentName;
+    LocalDateTime documentUploadedAt;
 }

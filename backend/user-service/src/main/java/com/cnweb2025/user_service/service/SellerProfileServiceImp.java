@@ -15,6 +15,8 @@ import com.cnweb2025.user_service.repository.*;
 import com.vdt2025.common_dto.dto.MessageType;
 import com.vdt2025.common_dto.dto.SellerProfileApprovedEvent;
 import com.vdt2025.common_dto.dto.SellerProfileRejectedEvent;
+import com.vdt2025.common_dto.dto.response.FileInfoResponse;
+import com.vdt2025.common_dto.service.FileServiceClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -26,6 +28,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Locale;
@@ -43,6 +46,7 @@ public class SellerProfileServiceImp implements SellerProfileService{
     MessageSource messageSource;
     RabbitMQMessagePublisher rabbitMQMessagePublisher;
     RoleRepository roleRepository;
+    FileServiceClient fileServiceClient;
 
 
     @Override
@@ -222,5 +226,54 @@ public class SellerProfileServiceImp implements SellerProfileService{
         }
         log.info("Seller profile with ID: {} rejected", sellerProfileId);
         return messageSource.getMessage("success.sellerProfile.rejected", null, locale);
+    }
+
+    // Upload tài liệu cho seller profile
+    @Override
+    @Transactional
+    public FileInfoResponse uploadSellerDocument(String sellerProfileId, MultipartFile file, Locale locale) {
+        var sellerProfile = sellerProfileRepository.findById(sellerProfileId)
+                .orElseThrow(() -> {
+                    log.error("Seller profile not found with ID: {}", sellerProfileId);
+                    return new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+                });
+        // Kiểm tra trạng thái hiện tại
+        if (sellerProfile.getVerificationStatus() != VerificationStatus.CREATED) {
+            log.error("Seller profile with ID: {} is not in PENDING status", sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_NOT_EDITABLE);
+        }
+        if (sellerProfile.getDocumentName() != null) {
+            log.error("Seller profile with ID: {} already has a document uploaded", sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_ALREADY_HAS_DOCUMENT);
+        }
+
+        // validate file type and size
+        if (file.isEmpty() || file.getSize() == 0) {
+            log.error("Uploaded file is empty for seller profile ID: {}", sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_UPLOAD_DOCUMENT_EMPTY);
+        }
+        String contentType = file.getContentType();
+        try {
+            if (!contentType.equals("application/pdf")) {
+                log.error("Invalid file type: {} for seller profile ID: {}", contentType, sellerProfileId);
+                throw new AppException(ErrorCode.SELLER_PROFILE_UPLOAD_DOCUMENT_INVALID_TYPE);
+            }
+        } catch (Exception e) {
+            log.error("Error validating file type for seller profile ID: {}: {}", sellerProfileId, e.getMessage());
+            throw new AppException(ErrorCode.SELLER_PROFILE_UPLOAD_DOCUMENT_INVALID_TYPE);
+        }
+        // gọi đến dịch vụ upload file private
+        try {
+            var response = fileServiceClient.uploadPrivateFile(file);
+            FileInfoResponse result = response.getResult();
+            // Lưu tên file vào seller profile
+            sellerProfile.setDocumentName(result.getFileName());
+            sellerProfile.setDocumentUploadedAt(LocalDateTime.now());
+            sellerProfileRepository.save(sellerProfile);
+            return result;
+        } catch (Exception e) {
+            log.error("Error uploading document for seller profile ID: {}: {}", sellerProfileId, e.getMessage());
+            throw new AppException(ErrorCode.SELLER_PROFILE_UPLOAD_DOCUMENT_FAILED);
+        }
     }
 }
