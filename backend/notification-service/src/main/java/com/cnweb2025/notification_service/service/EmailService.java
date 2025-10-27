@@ -144,4 +144,14 @@ public class EmailService {
         sendEmail(to, subject, htmlContent);
         log.info("Store created email sent to {}", to);
     }
+
+    public void sendUserDisableEmail(String to, String username) {
+        final String subject = "Tài khoản của bạn đã bị vô hiệu hóa - HUSTBuy";
+        Context context = new Context();
+        context.setVariable("username", username);
+        context.setVariable("subject", subject);
+        String htmlContent = templateEngine.process("user-disable-email", context);
+        sendEmail(to, subject, htmlContent);
+        log.info("User disable email sent to {}", to);
+    }
 }

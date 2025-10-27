@@ -187,6 +187,15 @@ public class UserServiceImp implements UserService{
         // Đặt trạng thái người dùng là không hoạt động
         user.setEnabled(false);
         userRepository.save(user);
+
+        // Gửi sự kiện USER_DISABLED qua RabbitMQ
+        com.vdt2025.common_dto.dto.UserDisabledEvent event = com.vdt2025.common_dto.dto.UserDisabledEvent.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .build();
+        messagePublisher.publish(MessageType.USER_DISABLED, event);
+
         log.info("User {} disabled their account successfully", username);
         return "Account disabled successfully";
     }
