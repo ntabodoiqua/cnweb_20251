@@ -5,6 +5,7 @@ import { loginApi } from '../util/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../components/context/auth.context';
 import { ArrowLeftOutlined, LockOutlined, MailOutlined } from '@ant-design/icons';
+import { THEME_COLORS } from '../styles/theme';
 
 const { Title, Text } = Typography;
 
@@ -44,7 +45,7 @@ const LoginPage = () => {
     return (
         <div style={{
             minHeight: '100vh',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: THEME_COLORS.gradientPrimary,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

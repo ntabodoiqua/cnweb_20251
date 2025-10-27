@@ -3,6 +3,7 @@ import { Button, Card, Col, Divider, Form, Input, notification, Row, Typography 
 import { createUserApi } from '../util/api';
 import { Link, useNavigate } from 'react-router-dom';
 import { ArrowLeftOutlined, LockOutlined, MailOutlined, UserOutlined } from '@ant-design/icons';
+import { THEME_COLORS } from '../styles/theme';
 
 const { Title, Text } = Typography;
 
@@ -33,7 +34,7 @@ const RegisterPage = () => {
     return (
         <div style={{
             minHeight: '100vh',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            background: THEME_COLORS.gradientPrimary,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

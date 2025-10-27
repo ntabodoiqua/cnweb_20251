@@ -1,6 +1,7 @@
-import { CrownOutlined, LockOutlined, SafetyOutlined, ThunderboltOutlined } from '@ant-design/icons';
+import { CrownOutlined, SafetyOutlined, SmileOutlined, ThunderboltOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Result, Row, Space, Typography } from 'antd';
 import { Link } from 'react-router-dom';
+import { THEME_COLORS } from '../styles/theme';
 
 const { Title, Paragraph, Text } = Typography;
 
@@ -70,7 +71,7 @@ const HomePage = () => {
                                 borderRadius: '8px'
                             }}
                         >
-                            <LockOutlined style={{ fontSize: '48px', color: '#1890ff', marginBottom: '16px' }} />
+                            <SmileOutlined style={{ fontSize: '48px', color: '#1890ff', marginBottom: '16px' }} />
                             <Title level={4}>Dễ Sử Dụng</Title>
                             <Paragraph type="secondary">
                                 Giao diện thân thiện, dễ dàng đăng ký và đăng nhập
@@ -101,7 +102,7 @@ const HomePage = () => {
                         marginTop: '40px',
                         textAlign: 'center',
                         borderRadius: '8px',
-                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        background: THEME_COLORS.gradientPrimary,
                         color: 'white'
                     }}
                     bordered={false}
@@ -114,7 +115,7 @@ const HomePage = () => {
                     </Paragraph>
                     <Space size="large" style={{ marginTop: '20px' }}>
                         <Link to="/register">
-                            <Button type="primary" size="large" style={{ background: 'white', color: '#667eea', borderColor: 'white' }}>
+                            <Button type="primary" size="large" style={{ background: 'white', color: THEME_COLORS.primaryStart, borderColor: 'white' }}>
                                 Đăng Ký Ngay
                             </Button>
                         </Link>
