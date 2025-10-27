@@ -1,6 +1,7 @@
 package com.cnweb2025.user_service.service;
 
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileCreationRequest;
+import com.cnweb2025.user_service.dto.request.seller.SellerProfileUpdateRequest;
 import com.cnweb2025.user_service.dto.response.SellerProfileResponse;
 import com.vdt2025.common_dto.dto.response.FileInfoResponse;
 import org.springframework.data.domain.Page;
@@ -25,4 +26,7 @@ public interface SellerProfileService {
 
     FileInfoResponse uploadSellerDocument(String sellerProfileId, MultipartFile file, Locale locale);
 
+    SellerProfileResponse editSellerProfile(String sellerProfileId, SellerProfileUpdateRequest request);
+
+    String deactivateSellerProfile(String sellerProfileId, Locale locale);
 }

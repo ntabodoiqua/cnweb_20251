@@ -10,4 +10,6 @@ public interface StoreService {
     Store createStoreFromSellerProfile(SellerProfileApprovedEvent event);
 
     Page<StoreResponse> getAllStores(Pageable pageable);
+
+    void deactivateStoreBySellerProfileId(String sellerProfileId);
 }
