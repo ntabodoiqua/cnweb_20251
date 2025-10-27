@@ -35,6 +35,12 @@ public class SellerProfile {
     @Column(name = "logo_name")
     String logoName;
 
+    @Column(name = "logo_url", length = 1000)
+    String logoUrl;
+
+    @Column(name = "banner_url", length = 1000)
+    String bannerUrl;
+
     @Column(name = "banner_name")
     String bannerName;
 

@@ -44,6 +44,10 @@ file:
     bucket-name: ${S3_BUCKET_NAME:hla}
     access-key: ${S3_ACCESS_KEY:DO007GZR7WN63YHWKLVU}
     secret-key: ${S3_SECRET_KEY:LPB+xqPNyJ8RTN7Syg3932nDFqZOsGb2X3wa6jWV+yA}
+  cleanup:
+    enabled: ${FILE_CLEANUP_ENABLED:true}
+    cron: ${FILE_CLEANUP_CRON:0 0 2 * * *} # 2:00 AM mỗi ngày
+    batch-size: ${FILE_CLEANUP_BATCH_SIZE:100}
 
 app:
   default-admin-id: ${DEFAULT_ADMIN_ID:d50f8589-da20-49e8-a3f3-6a115d1f68d7}

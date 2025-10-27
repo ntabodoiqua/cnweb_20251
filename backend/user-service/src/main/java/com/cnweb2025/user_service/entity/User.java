@@ -47,6 +47,9 @@ public class User {
     @Column(name = "avatar_name")
     String avatarName;
 
+    @Column(name = "avatar_url", length = 1000)
+    String avatarUrl;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;

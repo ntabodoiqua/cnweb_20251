@@ -147,7 +147,8 @@ public class UserServiceImp implements UserService{
             throw new AppException(ErrorCode.INVALID_IMAGE_TYPE);
         }
         FileInfoResponse response = fileServiceClient.uploadPublicFile(file).getResult();
-        user.setAvatarName(response.getFileUrl());
+        user.setAvatarUrl(response.getFileUrl());
+        user.setAvatarName(response.getFileName());
         userRepository.save(user);
         return response.getFileUrl();
     }

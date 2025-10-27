@@ -42,4 +42,11 @@ public class UploadedFile {
 
     @Column(name = "is_public", nullable = false)
     Boolean isPublic; // True = Public, False = Private
+
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    Boolean isDeleted = false; // True = File đã bị xóa khỏi S3, False = File còn tồn tại
+    
+    @Column(name = "deleted_at")
+    LocalDateTime deletedAt; // Thời điểm file bị xóa
 }

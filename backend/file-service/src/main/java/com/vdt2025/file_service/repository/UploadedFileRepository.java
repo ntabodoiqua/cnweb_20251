@@ -17,4 +17,7 @@ public interface UploadedFileRepository extends JpaRepository<UploadedFile, Stri
     
     // Tìm các file của user và public
     List<UploadedFile> findByUploadedByIdOrIsPublic(String userId, Boolean isPublic);
+    
+    // Tìm các file theo danh sách file names
+    List<UploadedFile> findByFileNameIn(List<String> fileNames);
 }
