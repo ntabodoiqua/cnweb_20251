@@ -36,7 +36,7 @@ public class FileController {
      * @return ApiResponse chứa thông tin file và public URL.
      */
     @PostMapping("/upload/public")
-    public ApiResponse<FileInfoResponse> uploadPublicFile(@RequestParam("file") MultipartFile file) {
+    public ApiResponse<com.vdt2025.common_dto.dto.response.FileInfoResponse> uploadPublicFile(@RequestParam("file") MultipartFile file) {
         String fileName = fileStorageService.storeFile(file, true); // true = public
 
         // Tạo public URL
@@ -44,7 +44,7 @@ public class FileController {
 
         log.info("Public file uploaded successfully: {}", fileName);
 
-        FileInfoResponse response = FileInfoResponse.builder()
+        com.vdt2025.common_dto.dto.response.FileInfoResponse response = com.vdt2025.common_dto.dto.response.FileInfoResponse.builder()
                 .fileName(fileName)
                 .originalFileName(file.getOriginalFilename())
                 .fileType(file.getContentType())
@@ -53,7 +53,7 @@ public class FileController {
                 .isPublic(true)
                 .build();
 
-        return ApiResponse.<FileInfoResponse>builder()
+        return ApiResponse.<com.vdt2025.common_dto.dto.response.FileInfoResponse>builder()
                 .result(response)
                 .message("Public file uploaded successfully. URL: " + fileUrl)
                 .build();

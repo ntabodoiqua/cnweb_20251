@@ -28,4 +28,6 @@ public interface UserService {
     String forgotPassword(String username);
 
     String resetPassword(String username, String otpCode, String newPassword);
+
+    String getMyAvatarLink();
 }

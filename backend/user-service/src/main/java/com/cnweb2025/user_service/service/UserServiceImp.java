@@ -3,6 +3,7 @@ package com.cnweb2025.user_service.service;
 import com.vdt2025.common_dto.dto.MessageType;
 import com.vdt2025.common_dto.dto.UserCreatedEvent;
 import com.vdt2025.common_dto.dto.UserForgotPasswordEvent;
+import com.vdt2025.common_dto.dto.response.FileInfoResponse;
 import com.vdt2025.common_dto.service.FileServiceClient;
 import com.cnweb2025.user_service.constant.PredefinedRole;
 import com.cnweb2025.user_service.dto.request.user.UserCreationRequest;
@@ -28,6 +29,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;
@@ -134,21 +136,20 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SELLER')")
+    @Transactional
     public String setMyAvatar(MultipartFile file) {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameAndEnabledTrueAndIsVerifiedTrue(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new AppException(ErrorCode.INVALID_IMAGE_TYPE);
         }
-
-        String fileName = fileServiceClient.uploadFile(file).getResult();
-        user.setAvatarName(fileName);
+        FileInfoResponse response = fileServiceClient.uploadPublicFile(file).getResult();
+        user.setAvatarName(response.getFileUrl());
         userRepository.save(user);
-        return fileName;
+        return response.getFileUrl();
     }
 
 
@@ -285,6 +286,15 @@ public class UserServiceImp implements UserService{
 
         log.info("Password reset successfully for user: {}", username);
         return "Password has been reset successfully";
+    }
+
+    public String getMyAvatarLink() {
+        log.info("Fetching avatar link for current user");
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        User user = userRepository.findByUsernameAndEnabledTrueAndIsVerifiedTrue(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        return user.getAvatarName();
     }
 
 

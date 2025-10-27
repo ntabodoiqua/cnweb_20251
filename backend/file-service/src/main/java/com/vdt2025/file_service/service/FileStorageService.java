@@ -4,6 +4,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 import com.amazonaws.HttpMethod;
 import com.vdt2025.common_dto.service.UserServiceClient;
+import com.vdt2025.file_service.dto.FileInfoResponse;
 import com.vdt2025.file_service.entity.UploadedFile;
 import com.vdt2025.file_service.exception.AppException;
 import com.vdt2025.file_service.exception.ErrorCode;
@@ -414,5 +415,27 @@ public class FileStorageService {
 
         // Lấy file public hoặc file của user
         return uploadedFileRepository.findByUploadedByIdOrIsPublic(user.getId(), true);
+    }
+
+    /**
+     * Lấy thông tin file từ database.
+     *
+     * @param fileName Tên file.
+     * @return Thông tin UploadedFile.
+     */
+    public com.vdt2025.file_service.dto.FileInfoResponse getFileInfo(String fileName) {
+        var uploadedFile = uploadedFileRepository.findByFileName(fileName)
+                .orElseThrow(() -> new AppException(ErrorCode.FILE_NOT_FOUND));
+        return FileInfoResponse.builder()
+                .fileName(uploadedFile.getFileName())
+                .originalFileName(uploadedFile.getOriginalFileName())
+                .fileType(uploadedFile.getFileType())
+                .fileSize(uploadedFile.getFileSize())
+                .fileUrl(getFileUrl(uploadedFile.getFileName()))
+                .isPublic(uploadedFile.getIsPublic())
+                .uploadedAt(uploadedFile.getUploadedAt())
+                .uploadedBy(uploadedFile.getUploadedBy())
+                .uploadedById(uploadedFile.getUploadedById())
+                .build();
     }
 }

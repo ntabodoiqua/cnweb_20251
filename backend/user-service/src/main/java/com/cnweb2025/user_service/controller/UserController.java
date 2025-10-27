@@ -14,8 +14,11 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Locale;
 
 @RestController
 @RequestMapping("/users")
@@ -24,6 +27,7 @@ import org.springframework.web.multipart.MultipartFile;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
     UserServiceImp userService;
+    MessageSource messageSource;
 
     @PostMapping
     ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
@@ -56,10 +60,20 @@ public class UserController {
 
     // Controller người dùng cập nhật avatar
     @PostMapping("/avatar")
-    public ApiResponse<String> setAvatar(@RequestParam("file") MultipartFile file) {
+    public ApiResponse<String> setAvatar(@RequestParam("file") MultipartFile file, Locale locale) {
         var result = userService.setMyAvatar(file);
         return ApiResponse.<String>builder()
-                .message("Avatar updated successfully")
+                .message(messageSource.getMessage("user.avatar.update.success", null, locale))
+                .result(result)
+                .build();
+    }
+
+    // Controller người dùng lấy avatar
+    @GetMapping("/avatar")
+    public ApiResponse<String> getMyAvatarLink(Locale locale) {
+        var result = userService.getMyAvatarLink();
+        return ApiResponse.<String>builder()
+                .message(messageSource.getMessage("user.avatar.retrieved.success", null, locale))
                 .result(result)
                 .build();
     }
