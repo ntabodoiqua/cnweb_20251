@@ -12,20 +12,26 @@ function App() {
   useEffect(() => {
     const fetchAccount = async () => {
       setAppLoading(true);
-      const res = await axios.get(`/v1/api/account`);
-      if (res && !res.message) {
-        setAuth({
-          isAuthenticated: true,
-          user: {
-            email: res.email,
-            name: res.name
-          }
-        })
+      try {
+        const res = await axios.get(`/v1/api/account`);
+        if (res && !res.message) {
+          setAuth({
+            isAuthenticated: true,
+            user: {
+              email: res.email,
+              name: res.name
+            }
+          })
+        }
+      } catch (error) {
+        console.log("Error fetching account:", error);
+      } finally {
+        setAppLoading(false);
       }
-      setAppLoading(false);
     }
 
     fetchAccount()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
 
