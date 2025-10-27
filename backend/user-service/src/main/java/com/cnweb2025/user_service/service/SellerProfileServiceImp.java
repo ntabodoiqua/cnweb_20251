@@ -374,4 +374,32 @@ public class SellerProfileServiceImp implements SellerProfileService{
         log.info("Seller profile with ID: {} deactivated by user: {}", sellerProfileId, username);
         return messageSource.getMessage("success.sellerProfile.deactivated", null, locale);
     }
+
+    @Override
+    @Transactional
+    public String deleteSellerProfileDocument(String sellerProfileId, Locale locale) {
+        var sellerProfile = sellerProfileRepository.findById(sellerProfileId)
+                .orElseThrow(() -> {
+                    log.error("Seller profile not found with ID: {}", sellerProfileId);
+                    return new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+                });
+        // Kiểm tra quyền: Chỉ chủ sở hữu hồ sơ mới được phép xóa tài liệu
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        if (!sellerProfile.getUser().getUsername().equals(username)) {
+            log.error("User: {} is not the owner of seller profile ID: {}", username, sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+        }
+
+        // Chỉ cho phép xóa tài liệu nếu trạng thái là CREATED
+        if (sellerProfile.getVerificationStatus() != VerificationStatus.CREATED) {
+            log.error("Seller profile with ID: {} is not in CREATED status", sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_NOT_EDITABLE);
+        }
+        sellerProfile.setDocumentName(null);
+        sellerProfile.setDocumentUploadedAt(null);
+        sellerProfileRepository.save(sellerProfile);
+        log.info("Document deleted for seller profile ID: {} by user: {}", sellerProfileId, username);
+        return messageSource.getMessage("success.sellerProfile.document.deleted", null, locale);
+    }
 }

@@ -28,5 +28,7 @@ public interface SellerProfileService {
 
     SellerProfileResponse editSellerProfile(String sellerProfileId, SellerProfileUpdateRequest request);
 
+    String deleteSellerProfileDocument(String sellerProfileId, Locale locale);
+
     String deactivateSellerProfile(String sellerProfileId, Locale locale);
 }

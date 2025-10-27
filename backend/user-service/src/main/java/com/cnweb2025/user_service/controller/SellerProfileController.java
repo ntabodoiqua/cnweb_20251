@@ -3,6 +3,7 @@ package com.cnweb2025.user_service.controller;
 import com.cnweb2025.user_service.dto.ApiResponse;
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileCreationRequest;
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileRejectionRequest;
+import com.cnweb2025.user_service.dto.request.seller.SellerProfileUpdateRequest;
 import com.cnweb2025.user_service.dto.response.SellerProfileResponse;
 import com.cnweb2025.user_service.service.SellerProfileService;
 import com.vdt2025.common_dto.dto.response.FileInfoResponse;
@@ -111,6 +112,26 @@ public class SellerProfileController {
         return ApiResponse.<String>builder()
                 .result(result)
                 .message(messageSource.getMessage("success.sellerProfile.deactivated", null, locale))
+                .build();
+    }
+
+    @DeleteMapping("/{sellerProfileId}/document")
+    public ApiResponse<String> deleteSellerProfileDocument(@PathVariable String sellerProfileId, Locale locale) {
+        var result = sellerProfileService.deleteSellerProfileDocument(sellerProfileId, locale);
+        return ApiResponse.<String>builder()
+                .result(result)
+                .message(messageSource.getMessage("success.sellerProfile.document.deleted", null, locale))
+                .build();
+    }
+
+    @PutMapping("/{sellerProfileId}")
+    public ApiResponse<SellerProfileResponse> editSellerProfile(@PathVariable String sellerProfileId,
+                                                                @Valid @RequestBody SellerProfileUpdateRequest request,
+                                                                Locale locale) {
+        var result = sellerProfileService.editSellerProfile(sellerProfileId, request);
+        return ApiResponse.<SellerProfileResponse>builder()
+                .result(result)
+                .message(messageSource.getMessage("success.sellerProfile.updated", null, locale))
                 .build();
     }
 
