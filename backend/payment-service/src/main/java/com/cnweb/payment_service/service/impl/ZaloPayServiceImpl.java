@@ -136,12 +136,12 @@ public class ZaloPayServiceImpl implements ZaloPayService {
             );
             
             if (!computedMac.equalsIgnoreCase(callbackRequest.getMac())) {
-                log.error("❌ INVALID MAC - Computed: {}, Received: {}", 
+                log.error("INVALID MAC - Computed: {}, Received: {}",
                         computedMac, callbackRequest.getMac());
                 return buildCallbackResponse(-1, "mac not equal");
             }
             
-            log.info("✅ MAC verified successfully");
+            log.info("MAC verified successfully");
             
             // Bước 2: Parse callback data
             ZaloPayCallbackData callbackData = objectMapper.readValue(
@@ -162,14 +162,14 @@ public class ZaloPayServiceImpl implements ZaloPayService {
             
             if (existingTransaction != null && 
                 existingTransaction.getStatus() == ZaloPayTransaction.TransactionStatus.SUCCESS) {
-                log.warn("⚠️ Duplicate callback - Transaction already processed: {}", 
+                log.warn("Duplicate callback - Transaction already processed: {}",
                         callbackData.getAppTransId());
                 // Theo đặc tả ZaloPay: return_code = 2 khi trùng mã giao dịch
                 return buildCallbackResponse(2, "success");
             }
             
             // Bước 4: Cập nhật transaction trong database
-            log.info("💰 Processing payment success for AppTransId: {}", callbackData.getAppTransId());
+            log.info("Processing payment success for AppTransId: {}", callbackData.getAppTransId());
             updateTransactionOnCallback(callbackData);
             
             // TODO: Xử lý business logic khi thanh toán thành công
@@ -177,15 +177,15 @@ public class ZaloPayServiceImpl implements ZaloPayService {
             // - Gửi notification cho user
             // - Trigger các service khác (order, inventory, etc.)
             
-            log.info("✅ Callback processed successfully - AppTransId: {}", callbackData.getAppTransId());
+            log.info("Callback processed successfully - AppTransId: {}", callbackData.getAppTransId());
             return buildCallbackResponse(1, "success");
             
         } catch (JsonProcessingException e) {
-            log.error("❌ JSON parsing error in callback: {}", e.getMessage(), e);
+            log.error("JSON parsing error in callback: {}", e.getMessage(), e);
             // Return 0 để ZaloPay callback lại (tối đa 3 lần)
             return buildCallbackResponse(0, "Invalid JSON format: " + e.getMessage());
         } catch (Exception e) {
-            log.error("❌ Unexpected error handling ZaloPay callback: {}", e.getMessage(), e);
+            log.error("Unexpected error handling ZaloPay callback: {}", e.getMessage(), e);
             // Return 0 để ZaloPay callback lại (tối đa 3 lần)
             return buildCallbackResponse(0, e.getMessage());
         }
