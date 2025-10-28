@@ -43,6 +43,8 @@ jobs:
             path: notification-service
           - name: file-service
             path: file-service
+          - name: payment-service
+            path: payment-service
 
     steps:
       - name: Checkout code
@@ -141,6 +143,9 @@ jobs:
 
             echo "Checking File Service..."
             curl -f http://localhost:8083/actuator/health || exit 1
+
+            echo "Checking Payment Service..."
+            curl -f http://localhost:8086/actuator/health || exit 1
 
             echo "All services are healthy!"
 
