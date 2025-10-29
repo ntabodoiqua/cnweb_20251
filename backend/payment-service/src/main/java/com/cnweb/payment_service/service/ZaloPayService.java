@@ -1,6 +1,7 @@
 package com.cnweb.payment_service.service;
 
 import com.cnweb.payment_service.dto.zalopay.*;
+import com.cnweb.payment_service.entity.ZaloPayTransaction;
 
 /**
  * Service xử lý tích hợp ZaloPay
@@ -37,4 +38,19 @@ public interface ZaloPayService {
      * @return Response chứa danh sách các ngân hàng theo từng payment method
      */
     GetBankListResponse getBankList();
+    
+    /**
+     * Gửi thông báo thanh toán thành công
+     * 
+     * @param transaction Transaction đã thanh toán thành công
+     */
+    void sendPaymentSuccessNotification(ZaloPayTransaction transaction);
+    
+    /**
+     * Gửi thông báo thanh toán thất bại
+     * 
+     * @param transaction Transaction thất bại
+     * @param failureReason Lý do thất bại
+     */
+    void sendPaymentFailedNotification(ZaloPayTransaction transaction, String failureReason);
 }

@@ -153,6 +153,18 @@ public class ZaloPayTransaction {
     private LocalDateTime paidAt;
     
     /**
+     * Email người dùng (để gửi thông báo)
+     */
+    @Column(name = "email", length = 100)
+    private String email;
+    
+    /**
+     * Tiêu đề đơn hàng
+     */
+    @Column(name = "title", length = 256)
+    private String title;
+    
+    /**
      * Enum trạng thái giao dịch
      */
     public enum TransactionStatus {

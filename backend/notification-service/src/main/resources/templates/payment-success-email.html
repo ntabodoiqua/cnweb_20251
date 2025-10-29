@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title th:text="${subject}"></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f7fa;
+            margin: 0;
+            padding: 20px 0;
+            line-height: 1.6;
+        }
+        .email-wrapper {
+            width: 100%;
+            background-color: #f5f7fa;
+            padding: 20px 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        .header {
+            background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+            color: #ffffff;
+            padding: 32px 40px;
+            text-align: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .logo-icon {
+            font-size: 32px;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+        }
+        .logo-text {
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+        .logo-subtitle {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 400;
+            margin-top: 4px;
+        }
+        .header h2 {
+            font-size: 22px;
+            font-weight: 600;
+            margin-top: 20px;
+            color: #ffffff;
+        }
+        .content {
+            padding: 40px;
+            color: #2d3748;
+        }
+        .success-box {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            border: 2px solid #22c55e;
+            border-radius: 12px;
+            padding: 32px;
+            margin: 0 0 32px 0;
+            text-align: center;
+        }
+        .success-icon {
+            font-size: 56px;
+            margin-bottom: 16px;
+            display: inline-block;
+            animation: scaleIn 0.5s ease-out;
+        }
+        @keyframes scaleIn {
+            from {
+                transform: scale(0);
+            }
+            to {
+                transform: scale(1);
+            }
+        }
+        .success-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: #166534;
+            margin: 12px 0 8px 0;
+        }
+        .success-subtitle {
+            font-size: 15px;
+            color: #15803d;
+            margin: 0;
+        }
+        .greeting {
+            font-size: 16px;
+            color: #1e293b;
+            margin-bottom: 16px;
+            font-weight: 500;
+        }
+        .intro-text {
+            font-size: 15px;
+            color: #475569;
+            margin-bottom: 24px;
+            line-height: 1.7;
+        }
+        .amount-highlight {
+            font-size: 36px;
+            font-weight: 700;
+            color: #c8102e;
+            margin: 32px 0;
+            text-align: center;
+            letter-spacing: -1px;
+        }
+        .transaction-info {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 24px;
+            margin: 28px 0;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 14px 0;
+            border-bottom: 1px solid #e2e8f0;
+            gap: 16px;
+        }
+        .info-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .info-row:first-child {
+            padding-top: 0;
+        }
+        .info-label {
+            font-weight: 600;
+            color: #475569;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 140px;
+        }
+        .info-value {
+            color: #1e293b;
+            text-align: right;
+            font-size: 14px;
+            flex: 1;
+            word-break: break-word;
+        }
+        .transaction-code {
+            font-family: 'Courier New', monospace;
+            background-color: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .alert-box {
+            background-color: #fffbeb;
+            border-left: 4px solid #f59e0b;
+            border-radius: 8px;
+            padding: 20px 24px;
+            margin: 28px 0;
+        }
+        .alert-title {
+            font-weight: 700;
+            color: #92400e;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 15px;
+        }
+        .alert-box ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+        .alert-box li {
+            color: #78350f;
+            margin: 8px 0;
+            padding-left: 20px;
+            position: relative;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        .alert-box li:before {
+            content: "•";
+            position: absolute;
+            left: 6px;
+            color: #f59e0b;
+            font-weight: bold;
+        }
+        .cta-section {
+            text-align: center;
+            margin: 36px 0;
+        }
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #c8102e 0%, #a00d26 100%);
+            color: white;
+            padding: 14px 36px;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            box-shadow: 0 4px 12px rgba(200, 16, 46, 0.3);
+            transition: all 0.3s ease;
+        }
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(200, 16, 46, 0.4);
+        }
+        .closing-text {
+            font-size: 15px;
+            color: #475569;
+            margin: 24px 0;
+            line-height: 1.7;
+        }
+        .signature {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .signature p {
+            margin: 6px 0;
+            font-size: 15px;
+            color: #475569;
+        }
+        .signature-name {
+            font-weight: 700;
+            color: #1e293b;
+            font-size: 16px;
+        }
+        .signature-org {
+            color: #64748b;
+            font-style: italic;
+            font-size: 14px;
+        }
+        .footer {
+            background-color: #f8fafc;
+            padding: 32px 40px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+        .footer-brand {
+            color: #c8102e;
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+        .footer p {
+            margin: 8px 0;
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+        .footer-contact {
+            margin: 16px 0;
+            padding: 16px 0;
+            border-top: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .footer-copyright {
+            margin-top: 16px;
+            color: #94a3b8;
+            font-size: 12px;
+        }
+        @media only screen and (max-width: 600px) {
+            .content {
+                padding: 24px 20px;
+            }
+            .header {
+                padding: 24px 20px;
+            }
+            .footer {
+                padding: 24px 20px;
+            }
+            .info-row {
+                flex-direction: column;
+                gap: 4px;
+            }
+            .info-label {
+                min-width: auto;
+            }
+            .info-value {
+                text-align: left;
+            }
+            .amount-highlight {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="email-wrapper">
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <span class="logo-icon">🛒</span>
+                <div>
+                    <div class="logo-text">HUSTBuy</div>
+                    <div class="logo-subtitle">
+                        Sàn Thương Mại Điện Tử - Đại học Bách Khoa Hà Nội
+                    </div>
+                </div>
+            </div>
+            <h2 th:text="${subject}">Xác nhận thanh toán thành công</h2>
+        </div>
+
+        <div class="content">
+            <div class="success-box">
+                <div class="success-icon">✅</div>
+                <p class="success-title">Thanh toán thành công!</p>
+                <p class="success-subtitle">
+                    Cảm ơn bạn đã tin tưởng và sử dụng dịch vụ của HUSTBuy
+                </p>
+            </div>
+
+            <p class="greeting">Xin chào,</p>
+
+            <p class="intro-text">
+                Chúng mình xin xác nhận giao dịch thanh toán của bạn đã được xử lý thành công.
+                Đơn hàng của bạn hiện đang được chuẩn bị và sẽ sớm được giao đến tay bạn.
+            </p>
+
+            <div class="amount-highlight" th:text="${amount}">1.000.000 VNĐ</div>
+
+            <div class="transaction-info">
+                <div class="info-row">
+                    <span class="info-label">🏷️ Đơn hàng</span>
+                    <span class="info-value" th:text="${title}">Đơn hàng #123456</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">📝 Mô tả</span>
+                    <span class="info-value" th:text="${description}">Thanh toán đơn hàng</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">🔖 Mã giao dịch</span>
+                    <span class="info-value">
+                <span class="transaction-code" th:text="${transactionId}">TRANS123456</span>
+              </span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">💰 Số tiền</span>
+                    <span class="info-value" th:text="${amount}">1.000.000 VNĐ</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">🕒 Thời gian</span>
+                    <span class="info-value" th:text="${paidAt}">01/01/2025 lúc 10:00</span>
+                </div>
+            </div>
+
+            <div class="alert-box">
+                <div class="alert-title">⚠️ Lưu ý quan trọng</div>
+                <ul>
+                    <li>Vui lòng lưu lại email này để làm bằng chứng thanh toán</li>
+                    <li>Mã giao dịch có thể được sử dụng để tra cứu hoặc khiếu nại</li>
+                    <li>Liên hệ bộ phận hỗ trợ nếu bạn có bất kỳ thắc mắc nào</li>
+                </ul>
+            </div>
+
+            <div class="cta-section">
+                <a href="#" class="cta-button">Xem chi tiết đơn hàng</a>
+            </div>
+
+            <p class="closing-text">
+                Bạn có thể theo dõi trạng thái đơn hàng trong tài khoản của mình hoặc
+                liên hệ với chúng mình nếu cần hỗ trợ thêm.
+            </p>
+
+            <p class="closing-text">
+                Cảm ơn bạn đã mua sắm tại HUSTBuy! Chúng mình hy vọng được phục vụ bạn
+                trong những lần mua sắm tiếp theo. 🎉
+            </p>
+
+            <div class="signature">
+                <p>Trân trọng,</p>
+                <p class="signature-name">Đội ngũ HUSTBuy</p>
+                <p class="signature-org">Đại học Bách Khoa Hà Nội</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p class="footer-brand">HUSTBuy</p>
+            <p>Dự án Thương mại Điện tử - Đại học Bách Khoa Hà Nội</p>
+            <div class="footer-contact">
+                <p>📧 Email: support@hustbuy.edu.vn | 📞 Hotline: 1900-xxxx</p>
+                <p>🏛️ Địa chỉ: Đại học Bách Khoa Hà Nội, Số 1 Đại Cồ Việt, Hai Bà Trưng, Hà Nội</p>
+            </div>
+            <p class="footer-copyright">&copy; 2025 HUSTBuy. Đồ án sinh viên HUST.</p>
+        </div>
+    </div>
+</div>
+</body>
+</html>

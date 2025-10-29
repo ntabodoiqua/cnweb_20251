@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <title th:text="${subject}"></title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f4;
+        margin: 0;
+        padding: 0;
+      }
+      .container {
+        width: 100%;
+        max-width: 600px;
+        margin: 20px auto;
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+      .header {
+        color: #333;
+        text-align: center;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #c8102e;
+      }
+      .logo {
+        font-size: 28px;
+        font-weight: bold;
+        color: #c8102e;
+        margin-bottom: 10px;
+      }
+      .logo-subtitle {
+        font-size: 12px;
+        color: #666;
+        font-weight: normal;
+      }
+      .content {
+        padding: 20px 0;
+        line-height: 1.6;
+        color: #555555;
+      }
+      .failed-box {
+        background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        border: 2px solid #fc8181;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+        text-align: center;
+      }
+      .failed-icon {
+        font-size: 64px;
+        margin-bottom: 10px;
+      }
+      .failed-title {
+        font-size: 24px;
+        font-weight: bold;
+        color: #c53030;
+        margin: 10px 0;
+      }
+      .failed-subtitle {
+        font-size: 14px;
+        color: #742a2a;
+        margin: 5px 0;
+      }
+      .transaction-info {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin: 20px 0;
+      }
+      .info-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px 0;
+        border-bottom: 1px solid #e2e8f0;
+      }
+      .info-row:last-child {
+        border-bottom: none;
+      }
+      .info-label {
+        font-weight: bold;
+        color: #4a5568;
+      }
+      .info-value {
+        color: #2d3748;
+        text-align: right;
+      }
+      .amount-highlight {
+        font-size: 28px;
+        font-weight: bold;
+        color: #c53030;
+        margin: 20px 0;
+        text-align: center;
+      }
+      .reason-box {
+        background-color: #fff5f5;
+        border-left: 4px solid #fc8181;
+        padding: 15px;
+        margin: 20px 0;
+        border-radius: 4px;
+      }
+      .reason-box p {
+        margin: 5px 0;
+        color: #742a2a;
+      }
+      .help-box {
+        background-color: #e6fffa;
+        border: 1px solid #38b2ac;
+        border-radius: 5px;
+        padding: 15px;
+        margin: 20px 0;
+      }
+      .help-box p {
+        margin: 5px 0;
+        color: #234e52;
+      }
+      .cta-button {
+        display: inline-block;
+        background-color: #c8102e;
+        color: white;
+        padding: 12px 30px;
+        text-decoration: none;
+        border-radius: 5px;
+        margin: 20px 0;
+        font-weight: bold;
+      }
+      .footer {
+        text-align: center;
+        font-size: 12px;
+        color: #999999;
+        padding-top: 20px;
+        border-top: 1px solid #eeeeee;
+      }
+      .footer-brand {
+        color: #c8102e;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="logo">
+          🛒 HUSTBuy
+          <div class="logo-subtitle">
+            Sàn Thương Mại Điện Tử - Đại học Bách Khoa Hà Nội
+          </div>
+        </div>
+        <h2 th:text="${subject}">Thanh toán thất bại</h2>
+      </div>
+
+      <div class="content">
+        <div class="failed-box">
+          <div class="failed-icon">❌</div>
+          <p class="failed-title">Thanh toán thất bại</p>
+          <p class="failed-subtitle">Giao dịch của bạn không thể hoàn tất</p>
+        </div>
+
+        <p>Chào bạn,</p>
+
+        <p>
+          Rất tiếc, giao dịch thanh toán của bạn đã không thành công. Vui lòng
+          kiểm tra thông tin chi tiết bên dưới và thử lại.
+        </p>
+
+        <div class="amount-highlight" th:text="${amount}">1.000.000 VNĐ</div>
+
+        <div class="transaction-info">
+          <div class="info-row">
+            <span class="info-label">🏷️ Đơn hàng:</span>
+            <span class="info-value" th:text="${title}">Đơn hàng #123456</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">📝 Mô tả:</span>
+            <span class="info-value" th:text="${description}"
+              >Thanh toán đơn hàng</span
+            >
+          </div>
+          <div class="info-row">
+            <span class="info-label">🔖 Mã giao dịch:</span>
+            <span
+              class="info-value"
+              style="font-family: monospace"
+              th:text="${transactionId}"
+              >TRANS123456</span
+            >
+          </div>
+          <div class="info-row">
+            <span class="info-label">💰 Số tiền:</span>
+            <span class="info-value" th:text="${amount}">1.000.000 VNĐ</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">🕒 Thời gian:</span>
+            <span class="info-value" th:text="${failedAt}"
+              >01/01/2025 lúc 10:00</span
+            >
+          </div>
+        </div>
+
+        <div class="reason-box">
+          <p><strong>❗ Lý do thất bại:</strong></p>
+          <p th:text="${failureReason}">Không đủ số dư trong tài khoản</p>
+        </div>
+
+        <div class="help-box">
+          <p><strong>💡 Các bước tiếp theo:</strong></p>
+          <p>
+            • Kiểm tra số dư tài khoản của bạn<br />
+            • Đảm bảo thông tin thẻ/tài khoản chính xác<br />
+            • Kiểm tra kết nối internet ổn định<br />
+            • Thử lại sau vài phút<br />
+            • Liên hệ hỗ trợ nếu vấn đề vẫn tiếp diễn
+          </p>
+        </div>
+
+        <p style="text-align: center; margin: 30px 0">
+          <a href="#" class="cta-button">Thử thanh toán lại</a>
+        </p>
+
+        <p>
+          Nếu bạn cần hỗ trợ thêm, đừng ngần ngại liên hệ với chúng tôi. Đội ngũ
+          HUSTBuy luôn sẵn sàng giúp đỡ bạn 24/7.
+        </p>
+
+        <p>
+          Trân trọng,<br />
+          <strong>Đội ngũ phát triển HUSTBuy</strong><br />
+          <em>Đại học Bách Khoa Hà Nội</em>
+        </p>
+      </div>
+
+      <div class="footer">
+        <p class="footer-brand">HUSTBuy</p>
+        <p>Dự án Thương mại Điện tử - Đại học Bách Khoa Hà Nội</p>
+        <p>
+          📧 Hỗ trợ: support@hustbuy.edu.vn | 📞 Hotline: 1900-xxxx<br />
+          🏛️ Địa chỉ: Đại học Bách Khoa Hà Nội, Số 1 Đại Cồ Việt, Hai Bà Trưng,
+          Hà Nội
+        </p>
+        <p>&copy; 2025 HUSTBuy. Đồ án sinh viên HUST.</p>
+      </div>
+    </div>
+  </body>
+</html>
