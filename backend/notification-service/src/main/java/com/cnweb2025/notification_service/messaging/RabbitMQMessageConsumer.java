@@ -98,6 +98,15 @@ public class RabbitMQMessageConsumer {
     }
 
     /**
+     * Listener cho payment failed
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).PAYMENT_FAILED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handlePaymentFailed(PaymentFailedEvent event) {
+        handleMessage(MessageType.PAYMENT_FAILED, event);
+    }
+
+    /**
      * Phương thức chung để xử lý message
      * @param messageType Loại message
      * @param payload Dữ liệu message
