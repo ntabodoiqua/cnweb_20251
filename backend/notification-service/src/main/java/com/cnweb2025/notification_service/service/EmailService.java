@@ -154,4 +154,27 @@ public class EmailService {
         sendEmail(to, subject, htmlContent);
         log.info("User disable email sent to {}", to);
     }
+
+    public void sendPaymentSuccessEmail(String to, String title, String description, 
+                                       String transactionId, Long amount, LocalDateTime paidAt) {
+        final String subject = "Thanh toán thành công - HUSTBuy";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'lúc' HH:mm");
+        String formattedPaidAt = paidAt != null ? paidAt.format(formatter) : "N/A";
+        
+        // Format amount to Vietnamese currency (VND)
+        String formattedAmount = String.format("%,d VNĐ", amount);
+        
+        Context context = new Context();
+        context.setVariable("subject", subject);
+        context.setVariable("title", title);
+        context.setVariable("description", description);
+        context.setVariable("transactionId", transactionId);
+        context.setVariable("amount", formattedAmount);
+        context.setVariable("paidAt", formattedPaidAt);
+        
+        String htmlContent = templateEngine.process("payment-success-email", context);
+        
+        sendEmail(to, subject, htmlContent);
+        log.info("Payment success email sent to {} for transaction: {}", to, transactionId);
+    }
 }
