@@ -40,6 +40,8 @@ services:
     networks:
       - microservices-network
     environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Ho_Chi_Minh 
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
     depends_on:
       discovery-service:
@@ -72,6 +74,8 @@ services:
     networks:
       - microservices-network
     environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Ho_Chi_Minh
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25060/user_service?sslmode=require
       - SPRING_DATASOURCE_USERNAME=doadmin
       - SPRING_DATASOURCE_PASSWORD=AVNS_yX_L2SKXt73ktjTiGbU
@@ -119,6 +123,8 @@ services:
     networks:
       - microservices-network
     environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Ho_Chi_Minh
       - SPRING_RABBITMQ_ADDRESSES=amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
       - SPRING_RABBITMQ_USERNAME=xqjmojji
       - SPRING_RABBITMQ_PASSWORD=hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH
@@ -156,6 +162,8 @@ services:
     networks:
       - microservices-network
     environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Ho_Chi_Minh
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db-postgresql-sgp1-93557-do-user-27848320-0.d.db.ondigitalocean.com:25060/file_service?sslmode=require
       - SPRING_DATASOURCE_USERNAME=doadmin
       - SPRING_DATASOURCE_PASSWORD=AVNS_GP853Gug731-gzXfmnT
@@ -202,6 +210,8 @@ services:
     networks:
       - microservices-network
     environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Ho_Chi_Minh
       - SPRING_DATASOURCE_URL=jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25060/payment_service?sslmode=require
       - SPRING_DATASOURCE_USERNAME=doadmin
       - SPRING_DATASOURCE_PASSWORD=AVNS_yX_L2SKXt73ktjTiGbU
