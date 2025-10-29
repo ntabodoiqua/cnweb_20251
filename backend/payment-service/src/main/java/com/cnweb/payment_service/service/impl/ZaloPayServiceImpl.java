@@ -3,11 +3,14 @@ package com.cnweb.payment_service.service.impl;
 import com.cnweb.payment_service.config.ZaloPayConfig;
 import com.cnweb.payment_service.dto.zalopay.*;
 import com.cnweb.payment_service.entity.ZaloPayTransaction;
+import com.cnweb.payment_service.messaging.RabbitMQMessagePublisher;
 import com.cnweb.payment_service.repository.ZaloPayTransactionRepository;
 import com.cnweb.payment_service.service.ZaloPayService;
 import com.cnweb.payment_service.util.ZaloPayHMACUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vdt2025.common_dto.dto.MessageType;
+import com.vdt2025.common_dto.dto.PaymentSuccessEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -36,6 +39,7 @@ public class ZaloPayServiceImpl implements ZaloPayService {
     private final ObjectMapper objectMapper;
     private final ZaloPayTransactionRepository transactionRepository;
     private final RestTemplate restTemplate = new RestTemplate();
+    private final RabbitMQMessagePublisher rabbitMQMessagePublisher;
     
     private static final String DATE_FORMAT = "yyMMdd";
     
@@ -372,6 +376,8 @@ public class ZaloPayServiceImpl implements ZaloPayService {
                                      : ZaloPayTransaction.TransactionStatus.FAILED)
                     .returnCode(zaloPayResponse != null ? zaloPayResponse.getReturnCode() : null)
                     .returnMessage(zaloPayResponse != null ? zaloPayResponse.getReturnMessage() : null)
+                    .email(request.getEmail())  // Lưu email từ request
+                    .title(request.getTitle())  // Lưu title từ request
                     .build();
             
             transactionRepository.save(transaction);
@@ -409,11 +415,84 @@ public class ZaloPayServiceImpl implements ZaloPayService {
             }
             
             transactionRepository.save(transaction);
+            
+            // Gửi thông báo thanh toán thành công qua RabbitMQ
+            sendPaymentSuccessNotification(transaction);
+            
             log.info("Updated transaction on callback: {}", callbackData.getAppTransId());
             
         } catch (Exception e) {
             log.error("Error updating transaction on callback: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to update transaction", e);
+        }
+    }
+    
+    /**
+     * Gửi thông báo thanh toán thành công qua RabbitMQ
+     */
+    private void sendPaymentSuccessNotification(ZaloPayTransaction transaction) {
+        try {
+            // Lấy email từ transaction (đã lưu từ CreateOrderRequest)
+            String email = transaction.getEmail();
+            
+            // Fallback: nếu không có email trong transaction, thử lấy từ embed_data
+            if (email == null || email.isEmpty()) {
+                email = extractEmailFromEmbedData(transaction.getEmbedData());
+            }
+            
+            if (email == null || email.isEmpty()) {
+                log.warn("No email found in transaction: {}. Skip sending notification.", 
+                        transaction.getAppTransId());
+                return;
+            }
+            
+            // Lấy title từ transaction hoặc dùng mặc định
+            String title = transaction.getTitle();
+            if (title == null || title.isEmpty()) {
+                title = "Đơn hàng #" + transaction.getAppTransId();
+            }
+            
+            // Tạo event
+            PaymentSuccessEvent event = PaymentSuccessEvent.builder()
+                    .email(email)
+                    .appUser(transaction.getAppUser())
+                    .title(title)
+                    .description(transaction.getDescription())
+                    .appTransId(transaction.getAppTransId())
+                    .amount(transaction.getAmount())
+                    .paidAt(transaction.getPaidAt())
+                    .build();
+            
+            // Gửi message qua RabbitMQ
+            rabbitMQMessagePublisher.publish(MessageType.PAYMENT_SUCCESS, event);
+            
+            log.info("Payment success notification sent to RabbitMQ for transaction: {} to email: {}", 
+                    transaction.getAppTransId(), email);
+            
+        } catch (Exception e) {
+            log.error("Failed to send payment success notification for transaction: {}. Error: {}", 
+                    transaction.getAppTransId(), e.getMessage(), e);
+            // Không throw exception để không block flow chính
+        }
+    }
+    
+    /**
+     * Trích xuất email từ embed_data JSON
+     */
+    private String extractEmailFromEmbedData(String embedDataJson) {
+        try {
+            if (embedDataJson == null || embedDataJson.isEmpty()) {
+                return null;
+            }
+            
+            // Parse JSON và lấy email
+            @SuppressWarnings("unchecked")
+            Map<String, Object> embedData = objectMapper.readValue(embedDataJson, Map.class);
+            return (String) embedData.get("email");
+            
+        } catch (Exception e) {
+            log.error("Failed to extract email from embed_data: {}", e.getMessage());
+            return null;
         }
     }
     
@@ -515,21 +594,13 @@ public class ZaloPayServiceImpl implements ZaloPayService {
         }
         
         // Map return_code sang status
-        String status;
-        switch (zaloPayResponse.getReturnCode()) {
-            case 1:
-                status = "SUCCESS";
-                break;
-            case 2:
-                status = "FAILED";
-                break;
-            case 3:
-                status = "PENDING";
-                break;
-            default:
-                status = "UNKNOWN";
-        }
-        
+        String status = switch (zaloPayResponse.getReturnCode()) {
+            case 1 -> "SUCCESS";
+            case 2 -> "FAILED";
+            case 3 -> "PENDING";
+            default -> "UNKNOWN";
+        };
+
         return QueryOrderResponse.builder()
                 .appTransId(appTransId)
                 .zpTransId(zaloPayResponse.getZpTransId())
@@ -566,8 +637,12 @@ public class ZaloPayServiceImpl implements ZaloPayService {
                 transaction.setStatus(ZaloPayTransaction.TransactionStatus.SUCCESS);
                 transaction.setDiscountAmount(queryResponse.getDiscountAmount());
                 transaction.setPaidAt(LocalDateTime.now());
-                
+
                 transactionRepository.save(transaction);
+                
+                // Tạo và gửi sự kiện thanh toán thành công qua RabbitMQ
+                sendPaymentSuccessNotification(transaction);
+                
                 log.info("Updated transaction from query: {}", appTransId);
             }
             
