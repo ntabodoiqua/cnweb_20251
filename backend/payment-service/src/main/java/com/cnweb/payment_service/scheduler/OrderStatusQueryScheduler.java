@@ -81,6 +81,10 @@ public class OrderStatusQueryScheduler {
         if ("PENDING".equals(response.getStatus()) && isExpired(transaction)) {
             updateTransactionToExpired(transaction);
         }
+        // cập nhật trạng thái đơn hàng thất bại
+        if ("FAILED".equals(response.getStatus())) {
+            updateTransactionToFailed(transaction);
+        }
     }
     
     /**
@@ -102,6 +106,18 @@ public class OrderStatusQueryScheduler {
             log.info("Updated transaction {} to EXPIRED", transaction.getAppTransId());
         } catch (Exception e) {
             log.error("Error updating transaction to expired: {}", e.getMessage(), e);
+        }
+    }
+    /*
+     * Update transaction sang trạng thái FAILED
+     */
+    private void updateTransactionToFailed(ZaloPayTransaction transaction) {
+        try {
+            transaction.setStatus(ZaloPayTransaction.TransactionStatus.FAILED);
+            transactionRepository.save(transaction);
+            log.info("Updated transaction {} to FAILED", transaction.getAppTransId());
+        } catch (Exception e) {
+            log.error("Error updating transaction to FAILED: {}", e.getMessage(), e);
         }
     }
 }

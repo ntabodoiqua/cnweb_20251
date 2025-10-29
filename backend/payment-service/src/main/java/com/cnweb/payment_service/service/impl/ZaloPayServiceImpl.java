@@ -611,7 +611,7 @@ public class ZaloPayServiceImpl implements ZaloPayService {
             return response;
             
         } catch (Exception e) {
-            log.error("❌ Error getting bank list: {}", e.getMessage(), e);
+            log.error("Error getting bank list: {}", e.getMessage(), e);
             return GetBankListResponse.builder()
                     .returnCode(0)
                     .returnMessage("Lỗi lấy danh sách ngân hàng: " + e.getMessage())
