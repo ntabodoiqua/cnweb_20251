@@ -32,3 +32,6 @@ build/
 ### VS Code ###
 .vscode/
 md file/
+zalopay_integration
+zpgateway-html
+*.log
