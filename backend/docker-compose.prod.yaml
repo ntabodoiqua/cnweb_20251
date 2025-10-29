@@ -156,9 +156,9 @@ services:
     networks:
       - microservices-network
     environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25060/file_service?sslmode=require
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-postgresql-sgp1-93557-do-user-27848320-0.d.db.ondigitalocean.com:25060/file_service?sslmode=require
       - SPRING_DATASOURCE_USERNAME=doadmin
-      - SPRING_DATASOURCE_PASSWORD=AVNS_yX_L2SKXt73ktjTiGbU
+      - SPRING_DATASOURCE_PASSWORD=ANVS_GP853Gug731-gzXfmnT
       - SPRING_DATA_REDIS_HOST=db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
       - SPRING_DATA_REDIS_PORT=25061
       - SPRING_DATA_REDIS_USERNAME=default
