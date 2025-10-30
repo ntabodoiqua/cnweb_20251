@@ -1,0 +1,107 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: inventory-service
+  datasource:
+    url: jdbc:postgresql://db-postgresql-sgp1-93557-do-user-27848320-0.d.db.ondigitalocean.com:25060/inventory_service?sslmode=require
+    username: doadmin
+    password: AVNS_GP853Gug731-gzXfmnT
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+        use_sql_comments: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  cache:
+    type: redis
+  data:
+    redis:
+      host: db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
+      port: 25061
+      username: default
+      password: AVNS_N-gwsyNb6xBC3fXPdQp
+      ssl:
+        enabled: true
+      timeout: 60000
+  rabbitmq:
+    addresses: amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
+    username: xqjmojji
+    password: hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH
+    virtual-host: xqjmojji
+    ssl:
+      enabled: true
+    listener:
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 3000
+          max-attempts: 3
+          multiplier: 2
+
+# Eureka Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://discovery-service:8761/eureka/}
+    registry-fetch-interval-seconds: 30
+    instance-info-replication-interval-seconds: 30
+  instance:
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+    instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+
+# JWT Configuration
+jwt:
+  signerKey: cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2
+  valid-duration: 3600
+  refreshable-duration: 86400
+
+# File Configuration
+file:
+  directory: ./uploads/
+  max-size: 10MB
+
+# Application Configuration
+app:
+  default-admin-id: d50f8589-da20-49e8-a3f3-6a115d1f68d7
+  inventory:
+    default-min-stock-level: 10
+    reservation-expiry-minutes: 30
+
+# Logging Configuration
+logging:
+  level:
+    com.cnweb.inventory_service: INFO
+    org.springframework.web: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+# Management & Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
