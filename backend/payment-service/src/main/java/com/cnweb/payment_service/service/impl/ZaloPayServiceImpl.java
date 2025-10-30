@@ -3,6 +3,7 @@ package com.cnweb.payment_service.service.impl;
 import com.cnweb.payment_service.config.ZaloPayConfig;
 import com.cnweb.payment_service.dto.zalopay.*;
 import com.cnweb.payment_service.entity.ZaloPayTransaction;
+import com.cnweb.payment_service.enums.ZaloPaySubReturnCode;
 import com.cnweb.payment_service.messaging.RabbitMQMessagePublisher;
 import com.cnweb.payment_service.repository.ZaloPayTransactionRepository;
 import com.cnweb.payment_service.service.ZaloPayService;
@@ -664,16 +665,61 @@ public class ZaloPayServiceImpl implements ZaloPayService {
                     .appTransId(appTransId)
                     .status("ERROR")
                     .message("Không nhận được response từ ZaloPay")
+                    .errorCategory("SYSTEM")
+                    .canRetry(true)
                     .build();
         }
         
         // Map return_code sang status
-        String status = switch (zaloPayResponse.getReturnCode()) {
-            case 1 -> "SUCCESS";
-            case 2 -> "FAILED";
-            case 3 -> "PENDING";
-            default -> "UNKNOWN";
-        };
+        String status;
+        String errorCategory = null;
+        Boolean canRetry = null;
+        String errorMessage = null;
+        String errorNote = null;
+        
+        switch (zaloPayResponse.getReturnCode()) {
+            case 1 -> status = "SUCCESS";
+            case 2 -> {
+                status = "FAILED";
+                // Xử lý sub_return_code để cung cấp thông tin chi tiết về lỗi
+                if (zaloPayResponse.getSubReturnCode() != null) {
+                    ZaloPaySubReturnCode subCode = ZaloPaySubReturnCode.fromCode(
+                            zaloPayResponse.getSubReturnCode()
+                    );
+                    
+                    errorMessage = subCode.getDescription();
+                    errorNote = subCode.getNote();
+                    canRetry = subCode.shouldRetry();
+                    
+                    // Xác định error category
+                    if (subCode.isUserActionable()) {
+                        errorCategory = "USER";
+                    } else if (subCode.isMerchantError()) {
+                        errorCategory = "MERCHANT";
+                    } else if (subCode.isSystemError()) {
+                        errorCategory = "SYSTEM";
+                    } else {
+                        errorCategory = "UNKNOWN";
+                    }
+                    
+                    log.warn("Payment query failed - AppTransId: {}, SubCode: {}, Category: {}, Description: {}", 
+                            appTransId, zaloPayResponse.getSubReturnCode(), errorCategory, errorMessage);
+                }
+            }
+            case 3 -> {
+                status = "PENDING";
+                // Kiểm tra is_processing để xác định chính xác trạng thái
+                if (Boolean.TRUE.equals(zaloPayResponse.getIsProcessing())) {
+                    status = "PROCESSING";
+                }
+            }
+            default -> {
+                status = "UNKNOWN";
+                errorCategory = "SYSTEM";
+                log.error("Unknown return_code from ZaloPay: {} for AppTransId: {}", 
+                        zaloPayResponse.getReturnCode(), appTransId);
+            }
+        }
 
         return QueryOrderResponse.builder()
                 .appTransId(appTransId)
@@ -684,6 +730,10 @@ public class ZaloPayServiceImpl implements ZaloPayService {
                 .discountAmount(zaloPayResponse.getDiscountAmount())
                 .isProcessing(zaloPayResponse.getIsProcessing())
                 .errorCode(zaloPayResponse.getSubReturnCode())
+                .errorMessage(errorMessage != null ? errorMessage : zaloPayResponse.getSubReturnMessage())
+                .errorNote(errorNote)
+                .canRetry(canRetry)
+                .errorCategory(errorCategory)
                 .build();
     }
     
@@ -729,14 +779,42 @@ public class ZaloPayServiceImpl implements ZaloPayService {
                     break;
                     
                 case 2: // Thanh toán thất bại
+                    // Xử lý chi tiết lỗi từ sub_return_code
+                    String failureReason = queryResponse.getReturnMessage();
+                    
+                    if (queryResponse.getSubReturnCode() != null) {
+                        ZaloPaySubReturnCode subCode = ZaloPaySubReturnCode.fromCode(
+                                queryResponse.getSubReturnCode()
+                        );
+                        
+                        // Tạo thông báo lỗi chi tiết
+                        failureReason = String.format("%s - %s", 
+                                subCode.getDescription(), 
+                                subCode.getNote());
+                        
+                        log.warn("Payment failed with detailed error - AppTransId: {}, SubCode: {} ({}), Category: {}, Retry: {}", 
+                                appTransId, 
+                                queryResponse.getSubReturnCode(),
+                                subCode.name(),
+                                subCode.isMerchantError() ? "MERCHANT" : 
+                                    (subCode.isUserActionable() ? "USER" : 
+                                        (subCode.isSystemError() ? "SYSTEM" : "UNKNOWN")),
+                                subCode.shouldRetry());
+                    }
+                    
                     // Gửi thông báo TRƯỚC KHI update status
-                    String failureReason = queryResponse.getReturnMessage() != null ? 
-                            queryResponse.getReturnMessage() : "Giao dịch bị từ chối";
                     sendPaymentFailedNotification(transaction, failureReason);
                     
                     transaction.setStatus(ZaloPayTransaction.TransactionStatus.FAILED);
                     transaction.setReturnCode(queryResponse.getReturnCode());
-                    transaction.setReturnMessage(queryResponse.getReturnMessage());
+                    transaction.setReturnMessage(failureReason);
+                    
+                    // Lưu thêm thông tin về sub_return_code để trace
+                    if (queryResponse.getSubReturnCode() != null) {
+                        transaction.setSubReturnCode(queryResponse.getSubReturnCode());
+                        transaction.setSubReturnMessage(queryResponse.getSubReturnMessage());
+                    }
+                    
                     transactionRepository.save(transaction);
                     
                     log.info("Updated transaction from query to FAILED: {}", appTransId);
