@@ -69,6 +69,29 @@ public enum ZaloPaySubReturnCode {
     EXCEED_MAX_FUND_OUT_PER_MONTH_1343(-1343, "Đơn hàng thất bại do tài khoản người dùng vượt quá hạn mức giao dịch trong một tháng", 
             "Người dùng có thể thanh toán vào các tháng kế tiếp"),
     
+    // ========== Refund Error Codes ==========
+    
+    REFUND_PENDING(-1, "Hoàn tiền chờ phê duyệt", 
+            "Yêu cầu hoàn tiền đang chờ phê duyệt. Merchant liên hệ Zalopay để biết thêm chi tiết"),
+    
+    REFUND_TYPE_INVALID(-2, "Đơn hàng không được phép hoàn tiền", 
+            "Hoàn tiền không thành công. Merchant liên hệ Zalopay để biết thêm chi tiết"),
+    
+    REFUND_EXPIRED(-13, "Vượt quá thời hạn cho phép của việc khởi tạo yêu cầu hoàn tiền", 
+            "Merchant kiểm tra và khởi tạo lại yêu cầu hoàn tiền với giá trị tham số timestamp hợp lệ (không quá 15 phút với thời điểm khởi tạo yêu cầu)"),
+    
+    REFUND_AMOUNT_INVALID(-14, "Số tiền yêu cầu hoàn không hợp lệ", 
+            "Hoàn tiền không thành công. Merchant cần kiểm tra và khởi tạo lại yêu cầu hoàn tiền với số tiền hợp lệ"),
+    
+    INSERT_REFUND_LOG_AR_FAIL(-16, "Hoàn tiền đang được xử lý", 
+            "Hoàn tiền đang xử lý. Merchant liên hệ Zalopay để biết thêm chi tiết"),
+    
+    NOT_SUPPORT_PARTIAL_REFUND(-32, "Giao dịch không hỗ trợ hoàn tiền một phần", 
+            "Hoàn tiền từng phần cho thanh toán qua ví điện tử (trừ ZaloPay)"),
+    
+    M_REFUND_ID_NOT_FOUND(-101, "Giá trị m_refund_id không tồn tại", 
+            "Merchant kiểm tra và thử lại yêu cầu truy vấn hoàn tiền với giá trị m_refund_id khác"),
+    
     UNKNOWN(0, "Mã lỗi không xác định", "Vui lòng liên hệ hỗ trợ");
     
     private final int code;

@@ -2,6 +2,7 @@ package com.cnweb.payment_service.service;
 
 import com.cnweb.payment_service.dto.zalopay.*;
 import com.cnweb.payment_service.entity.ZaloPayTransaction;
+import com.cnweb.payment_service.entity.ZaloPayRefundTransaction;
 
 /**
  * Service xử lý tích hợp ZaloPay
@@ -40,6 +41,22 @@ public interface ZaloPayService {
     GetBankListResponse getBankList();
     
     /**
+     * Thực hiện hoàn tiền giao dịch
+     * 
+     * @param request Request chứa thông tin hoàn tiền
+     * @return Response chứa kết quả hoàn tiền
+     */
+    RefundResponse refundOrder(RefundRequest request);
+    
+    /**
+     * Truy vấn trạng thái hoàn tiền
+     * 
+     * @param request Request chứa m_refund_id
+     * @return Response chứa trạng thái hoàn tiền
+     */
+    QueryRefundResponse queryRefundStatus(QueryRefundRequest request);
+    
+    /**
      * Gửi thông báo thanh toán thành công
      * 
      * @param transaction Transaction đã thanh toán thành công
@@ -53,4 +70,24 @@ public interface ZaloPayService {
      * @param failureReason Lý do thất bại
      */
     void sendPaymentFailedNotification(ZaloPayTransaction transaction, String failureReason);
+    
+    /**
+     * Gửi thông báo hoàn tiền thành công
+     * 
+     * @param refundTransaction Refund transaction đã thành công
+     * @param originalTransaction Transaction gốc
+     */
+    void sendRefundSuccessNotification(ZaloPayRefundTransaction refundTransaction, 
+                                       ZaloPayTransaction originalTransaction);
+    
+    /**
+     * Gửi thông báo hoàn tiền thất bại
+     * 
+     * @param refundTransaction Refund transaction thất bại
+     * @param originalTransaction Transaction gốc
+     * @param failureReason Lý do thất bại
+     */
+    void sendRefundFailedNotification(ZaloPayRefundTransaction refundTransaction,
+                                      ZaloPayTransaction originalTransaction,
+                                      String failureReason);
 }

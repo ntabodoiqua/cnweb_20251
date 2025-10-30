@@ -107,6 +107,24 @@ public class RabbitMQMessageConsumer {
     }
 
     /**
+     * Listener cho refund success
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).REFUND_SUCCESS).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleRefundSuccess(RefundSuccessEvent event) {
+        handleMessage(MessageType.REFUND_SUCCESS, event);
+    }
+
+    /**
+     * Listener cho refund failed
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).REFUND_FAILED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleRefundFailed(RefundFailedEvent event) {
+        handleMessage(MessageType.REFUND_FAILED, event);
+    }
+
+    /**
      * Phương thức chung để xử lý message
      * @param messageType Loại message
      * @param payload Dữ liệu message
