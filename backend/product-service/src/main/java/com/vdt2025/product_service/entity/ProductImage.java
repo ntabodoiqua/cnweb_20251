@@ -22,7 +22,7 @@ public class ProductImage {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @NotBlank(message = "Image name is required")
+    @NotBlank(message = "PRODUCT_IMAGE_NAME_REQUIRED")
     @Column(name = "image_name", nullable = false)
     String imageName;
 

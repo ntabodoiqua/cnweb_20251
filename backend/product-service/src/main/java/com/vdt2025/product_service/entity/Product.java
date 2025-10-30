@@ -24,11 +24,11 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @NotBlank(message = "Product name is required")
+    @NotBlank(message = "PRODUCT_NAME_REQUIRED")
     @Column(nullable = false)
     String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT", name = "description")
     String description;
 
     @Column(name = "short_description", length = 500)

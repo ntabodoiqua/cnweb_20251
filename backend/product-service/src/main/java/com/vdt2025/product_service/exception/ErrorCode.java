@@ -38,6 +38,8 @@ public enum ErrorCode {
     // Lỗi sản phẩm (16xx)
     PRODUCT_NOT_FOUND(1601, "error.1601", HttpStatus.NOT_FOUND),
     PRODUCT_EXISTED(1602, "error.1602", HttpStatus.CONFLICT),
+    PRODUCT_NAME_REQUIRED(1603, "error.1603", HttpStatus.BAD_REQUEST),
+    PRODUCT_IMAGE_NAME_REQUIRED(1604, "error.1604", HttpStatus.BAD_REQUEST),
     // Lỗi store (17xx)
     STORE_NOT_FOUND(1701, "error.1701", HttpStatus.NOT_FOUND),
     STORE_ALREADY_EXISTS(1702, "error.1702", HttpStatus.CONFLICT),
