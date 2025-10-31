@@ -14,8 +14,7 @@ const createUserApi = (username, password, firstName, lastName, dob, email, phon
 
     return axios.post(URL_API, data, {
         headers: {
-            'Accept-Language': 'vi',
-            'Content-Type': 'application/json'
+            'Accept-Language': 'vi'
         }
     })
 }
