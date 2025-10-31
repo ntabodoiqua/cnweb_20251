@@ -286,18 +286,8 @@
   }
 }
 
-/* Animation */
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.header-dropdown-menu {
-  animation: slideDown 0.3s ease;
-}
+/* Animation - Removed to prevent conflict with Ant Design's built-in animations */
+/* Custom animations were causing double-render effect (jerking twice) 
+   because they conflicted with Ant Design's default transition animations.
+   Ant Design components (Dropdown, Notification) have their own optimized animations,
+   so we let them handle it naturally for smoother transitions. */
