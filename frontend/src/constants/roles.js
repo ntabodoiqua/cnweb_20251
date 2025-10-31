@@ -4,6 +4,7 @@
 export const ROLES = {
   USER: "ROLE_USER",
   ADMIN: "ROLE_ADMIN",
+  SELLER: "ROLE_SELLER",
   MODERATOR: "ROLE_MODERATOR",
   // Thêm các role khác nếu cần
 };
@@ -15,6 +16,7 @@ export const ROLE_NAMES = {
   [ROLES.USER]: "Người dùng",
   [ROLES.ADMIN]: "Quản trị viên",
   [ROLES.MODERATOR]: "Điều hành viên",
+  [ROLES.SELLER]: "Người bán",
 };
 
 /**

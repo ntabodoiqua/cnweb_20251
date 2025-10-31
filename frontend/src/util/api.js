@@ -92,4 +92,58 @@ const resendOtpApi = (username) => {
   );
 };
 
-export { createUserApi, loginApi, getUserApi, verifyEmailApi, resendOtpApi };
+const forgotPasswordApi = (username) => {
+  const URL_API = "/api/user/users/forgot-password";
+  return axios.post(
+    URL_API,
+    {
+      username,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      // Không gửi Authorization header cho API quên mật khẩu
+      transformRequest: [
+        (data, headers) => {
+          delete headers.Authorization;
+          return JSON.stringify(data);
+        },
+      ],
+    }
+  );
+};
+
+const resetPasswordApi = (username, otpCode, newPassword) => {
+  const URL_API = "/api/user/users/reset-password";
+  return axios.post(
+    URL_API,
+    {
+      username,
+      otpCode,
+      newPassword,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      // Không gửi Authorization header cho API đặt lại mật khẩu
+      transformRequest: [
+        (data, headers) => {
+          delete headers.Authorization;
+          return JSON.stringify(data);
+        },
+      ],
+    }
+  );
+};
+
+export {
+  createUserApi,
+  loginApi,
+  getUserApi,
+  verifyEmailApi,
+  resendOtpApi,
+  forgotPasswordApi,
+  resetPasswordApi,
+};

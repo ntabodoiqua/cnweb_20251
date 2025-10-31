@@ -10,6 +10,8 @@ import ProfilePage from "./pages/profile.jsx";
 import HomePage from "./pages/home.jsx";
 import LoginPage from "./pages/login.jsx";
 import VerifyEmailPage from "./pages/verify-email.jsx";
+import ForgotPasswordPage from "./pages/forgot-password.jsx";
+import ResetPasswordPage from "./pages/reset-password.jsx";
 import { AuthWrapper } from "./components/context/auth.context.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
@@ -60,6 +62,14 @@ const router = createBrowserRouter([
   {
     path: "login",
     element: <LoginPage />,
+  },
+  {
+    path: "forgot-password",
+    element: <ForgotPasswordPage />,
+  },
+  {
+    path: "reset-password",
+    element: <ResetPasswordPage />,
   },
 ]);
 
