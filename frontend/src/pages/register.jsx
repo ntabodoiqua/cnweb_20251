@@ -8,6 +8,7 @@ import {
   MailOutlined,
   PhoneOutlined,
   CalendarOutlined,
+  GoogleOutlined,
 } from "@ant-design/icons";
 import "./register.css";
 import logo from "../assets/logo.png";
@@ -87,12 +88,12 @@ const RegisterPage = () => {
       if (res && res.code === 1000) {
         notification.success({
           message: "Đăng ký thành công!",
-          description:
-            "Tài khoản của bạn đã được tạo. Vui lòng đăng nhập để tiếp tục.",
+          description: "Vui lòng kiểm tra email để nhận mã xác minh OTP.",
           placement: "topRight",
           duration: 3,
         });
-        navigate("/login");
+        // Chuyển hướng đến trang xác minh email và truyền username
+        navigate("/verify-email", { state: { username } });
       } else {
         notification.error({
           message: "Đăng ký thất bại",
@@ -178,6 +179,17 @@ const RegisterPage = () => {
     }
 
     return Promise.resolve();
+  };
+
+  const handleGoogleRegister = () => {
+    // TODO: Implement Google OAuth registration
+    notification.info({
+      message: "Tính năng đang phát triển",
+      description:
+        "Đăng ký bằng Google sẽ được triển khai trong phiên bản tiếp theo.",
+      placement: "topRight",
+      duration: 3,
+    });
   };
 
   return (
@@ -427,6 +439,20 @@ const RegisterPage = () => {
               </Button>
             </Form.Item>
           </Form>
+
+          <div className="register-divider">
+            <span>hoặc</span>
+          </div>
+
+          <Button
+            size="large"
+            block
+            icon={<GoogleOutlined />}
+            onClick={handleGoogleRegister}
+            className="google-register-button"
+          >
+            Đăng ký với Google
+          </Button>
 
           <div className="register-footer">
             <span>Đã có tài khoản? </span>

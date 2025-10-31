@@ -1,17 +1,15 @@
-import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.jsx'
-import './styles/global.css';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.jsx";
+import "./styles/global.css";
 
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
-import RegisterPage from './pages/register.jsx';
-import UserPage from './pages/user.jsx';
-import HomePage from './pages/home.jsx';
-import LoginPage from './pages/login.jsx';
-import { AuthWrapper } from './components/context/auth.context.jsx';
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import RegisterPage from "./pages/register.jsx";
+import UserPage from "./pages/user.jsx";
+import HomePage from "./pages/home.jsx";
+import LoginPage from "./pages/login.jsx";
+import VerifyEmailPage from "./pages/verify-email.jsx";
+import { AuthWrapper } from "./components/context/auth.context.jsx";
 
 const router = createBrowserRouter([
   {
@@ -20,29 +18,32 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <HomePage />
+        element: <HomePage />,
       },
       {
         path: "user",
-        element: <UserPage />
+        element: <UserPage />,
       },
-    ]
+    ],
   },
   {
     path: "register",
-    element: <RegisterPage />
+    element: <RegisterPage />,
+  },
+  {
+    path: "verify-email",
+    element: <VerifyEmailPage />,
   },
   {
     path: "login",
-    element: <LoginPage />
+    element: <LoginPage />,
   },
 ]);
 
-
-ReactDOM.createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <AuthWrapper>
       <RouterProvider router={router} />
     </AuthWrapper>
-  </React.StrictMode>,
-)
+  </React.StrictMode>
+);

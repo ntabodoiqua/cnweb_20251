@@ -1,11 +1,11 @@
-.register-container {
+.verify-email-container {
   display: flex;
   min-height: 100vh;
   width: 100%;
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
 }
 
-.register-left {
+.verify-email-left {
   flex: 1;
   display: flex;
   align-items: center;
@@ -16,7 +16,7 @@
   overflow: hidden;
 }
 
-.register-left::before {
+.verify-email-left::before {
   content: "";
   position: absolute;
   width: 400px;
@@ -27,7 +27,7 @@
   left: -100px;
 }
 
-.register-left::after {
+.verify-email-left::after {
   content: "";
   position: absolute;
   width: 300px;
@@ -38,23 +38,22 @@
   right: -50px;
 }
 
-.register-left-content {
+.verify-email-left-content {
   max-width: 500px;
   color: white;
   z-index: 1;
   text-align: center;
 }
 
-.register-logo {
+.verify-email-logo {
   width: 180px;
   height: auto;
   margin-bottom: 30px;
   animation: fadeInDown 0.8s ease;
-  /* Có thể thêm drop-shadow để logo nổi bật hơn trên nền màu */
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
 }
 
-.register-welcome {
+.verify-email-welcome {
   font-size: 42px;
   font-weight: 800;
   margin-bottom: 20px;
@@ -63,7 +62,7 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.register-description {
+.verify-email-description {
   font-size: 18px;
   line-height: 1.6;
   opacity: 0.95;
@@ -72,14 +71,14 @@
   animation: fadeInDown 0.8s ease 0.4s both;
 }
 
-.register-features {
+.verify-email-features {
   display: flex;
   flex-direction: column;
   gap: 20px;
   animation: fadeInUp 0.8s ease 0.6s both;
 }
 
-.feature-item {
+.verify-email-features .feature-item {
   display: flex;
   align-items: center;
   gap: 15px;
@@ -90,12 +89,12 @@
   transition: all 0.3s ease;
 }
 
-.feature-item:hover {
+.verify-email-features .feature-item:hover {
   background: rgba(255, 255, 255, 0.25);
   transform: translateX(10px);
 }
 
-.feature-icon {
+.verify-email-features .feature-icon {
   width: 30px;
   height: 30px;
   background: white;
@@ -105,15 +104,16 @@
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: 18px;
+  font-size: 16px;
 }
 
-.feature-text {
+.verify-email-features .feature-text {
   font-size: 16px;
   font-weight: 500;
+  text-align: left;
 }
 
-.register-right {
+.verify-email-right {
   flex: 1;
   display: flex;
   align-items: center;
@@ -122,96 +122,101 @@
   background: white;
 }
 
-.register-form-container {
+.verify-email-form-container {
   width: 100%;
   max-width: 480px;
   animation: fadeInUp 0.6s ease;
+  text-align: center;
 }
 
-.register-title {
+.verify-email-icon-wrapper {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 24px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.verify-email-icon {
+  font-size: 40px;
+  color: white;
+}
+
+.verify-email-title {
   font-size: 32px;
   font-weight: 800;
   color: #222;
   margin-bottom: 8px;
-  text-align: center;
 }
 
-.register-subtitle {
+.verify-email-subtitle {
   font-size: 16px;
   color: #666;
-  margin-bottom: 32px;
-  text-align: center;
+  margin-bottom: 24px;
 }
 
-.register-form {
+.verify-email-username {
+  background: #f8f9fa;
+  padding: 12px 20px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  font-size: 15px;
+  color: #666;
+}
+
+.verify-email-username strong {
+  color: #ee4d2d;
+  font-weight: 600;
+}
+
+.verify-email-form {
   margin-top: 24px;
+  text-align: left;
 }
 
-.register-form .ant-form-item-label > label {
+.verify-email-form .ant-form-item-label > label {
   font-weight: 600;
   color: #333;
   font-size: 14px;
 }
 
-.register-form .ant-input,
-.register-form .ant-input-password,
-.register-form .ant-picker {
+.verify-email-form .ant-input,
+.verify-email-form .ant-input-affix-wrapper {
   border-radius: 8px;
   border: 2px solid #e8e8e8;
   transition: all 0.3s ease;
 }
 
-.register-form .ant-input:hover,
-.register-form .ant-input-password:hover .ant-input,
-.register-form .ant-picker:hover {
+.verify-email-form .ant-input:hover,
+.verify-email-form .ant-input-affix-wrapper:hover {
   border-color: #ff8c5a;
 }
 
-.register-form .ant-input:focus,
-.register-form .ant-input-password:focus .ant-input,
-.register-form .ant-input-focused,
-.register-form .ant-picker-focused {
+.verify-email-form .ant-input:focus,
+.verify-email-form .ant-input-affix-wrapper-focused {
   border-color: #ee4d2d;
   box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
 }
 
-.register-form .ant-input-affix-wrapper {
-  border-radius: 8px;
-  border: 2px solid #e8e8e8;
-  padding: 8px 11px;
+.otp-input input {
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: 8px;
+  text-align: center;
+  padding-left: 40px !important;
 }
 
-.register-form .ant-input-affix-wrapper:hover {
-  border-color: #ff8c5a;
-}
-
-.register-form .ant-input-affix-wrapper-focused {
-  border-color: #ee4d2d;
-  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
-}
-
-.register-form .ant-input-prefix {
+.verify-email-form .ant-input-prefix {
   color: #999;
-  font-size: 16px;
-  margin-right: 8px;
+  font-size: 18px;
+  margin-right: 12px;
 }
 
-.register-form .ant-form-item-explain-error {
-  font-size: 13px;
-  margin-top: 4px;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.form-item-half {
-  margin-bottom: 24px;
-}
-
-.register-button {
+.verify-email-button {
   height: 48px;
   font-size: 16px;
   font-weight: 600;
@@ -223,149 +228,76 @@
   transition: all 0.3s ease;
 }
 
-.register-button:hover {
+.verify-email-button:hover {
   background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%) !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(238, 77, 45, 0.4) !important;
 }
 
-.register-button:active {
+.verify-email-button:active {
   transform: translateY(0);
 }
 
-.register-divider {
-  display: flex;
-  align-items: center;
-  margin: 24px 0 20px;
-  color: #999;
-  font-size: 14px;
-}
-
-.register-divider::before,
-.register-divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: #e8e8e8;
-}
-
-.register-divider span {
-  padding: 0 16px;
-  font-weight: 500;
-}
-
-.google-register-button {
-  height: 48px;
-  font-size: 16px;
-  font-weight: 600;
-  border-radius: 8px;
-  border: 2px solid #e8e8e8;
-  background: white;
-  color: #333;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-  margin-bottom: 24px;
-}
-
-.google-register-button .anticon {
-  font-size: 20px;
-  color: #4285f4;
-  margin-right: 8px;
-}
-
-.google-register-button:hover {
-  border-color: #4285f4 !important;
-  color: #4285f4 !important;
-  background: #f8f9ff !important;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.2);
-}
-
-.google-register-button:active {
-  transform: translateY(0);
-}
-
-.register-footer {
-  text-align: center;
+.verify-email-footer {
   margin-top: 24px;
+  text-align: center;
+}
+
+.resend-otp-section {
   font-size: 15px;
   color: #666;
 }
 
-.login-link {
+.resend-link {
   color: #ee4d2d;
   font-weight: 600;
-  text-decoration: none;
-  transition: all 0.3s ease;
+  padding: 0 4px;
+  height: auto;
 }
 
-.login-link:hover {
+.resend-link:hover:not(:disabled) {
   color: #ff6b35;
-  text-decoration: underline;
 }
 
-.register-home-link {
-  text-align: center;
+.resend-link:disabled {
+  color: #999;
+  cursor: not-allowed;
+}
+
+.verify-email-note {
+  background: #fff7e6;
+  border: 1px solid #ffd666;
+  border-radius: 8px;
+  padding: 16px;
   margin-top: 16px;
 }
 
-.register-home-link a {
-  color: #999;
-  text-decoration: none;
-  font-size: 14px;
-  transition: all 0.3s ease;
-}
-
-.register-home-link a:hover {
-  color: #ee4d2d;
-}
-
-/* Password Strength Indicator */
-.password-strength-container {
-  margin-top: -16px;
-  margin-bottom: 24px;
-}
-
-.password-strength-bar {
-  width: 100%;
-  height: 6px;
-  background-color: #f0f0f0;
-  border-radius: 3px;
-  overflow: hidden;
-  margin-bottom: 8px;
-}
-
-.password-strength-fill {
-  height: 100%;
-  transition: all 0.3s ease;
-  border-radius: 3px;
-}
-
-.password-strength-text {
+.verify-email-note p {
+  margin: 0;
   font-size: 13px;
-  margin-bottom: 8px;
-  color: #666;
+  color: #ad6800;
+  line-height: 1.6;
+  text-align: left;
 }
 
-.password-requirements {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 6px;
-  margin-top: 8px;
+.verify-email-note strong {
+  font-weight: 600;
 }
 
-.requirement-item {
-  font-size: 12px;
+.verify-email-back-link {
+  text-align: center;
+  margin-top: 24px;
+}
+
+.back-link {
   color: #999;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  font-size: 14px;
+  padding: 0;
+  height: auto;
 }
 
-.requirement-item::before {
-  content: attr(data-check);
+.back-link:hover {
+  color: #ee4d2d;
 }
 
 /* Animations */
@@ -391,13 +323,25 @@
   }
 }
 
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(238, 77, 45, 0.4);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(238, 77, 45, 0);
+  }
+}
+
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .register-left {
+  .verify-email-left {
     display: none;
   }
 
-  .register-right {
+  .verify-email-right {
     flex: 1;
     background: linear-gradient(
       135deg,
@@ -406,7 +350,7 @@
     );
   }
 
-  .register-form-container {
+  .verify-email-form-container {
     max-width: 500px;
     background: white;
     padding: 40px 30px;
@@ -416,44 +360,49 @@
 }
 
 @media (max-width: 768px) {
-  .register-right {
+  .verify-email-right {
     padding: 20px 16px;
   }
 
-  .register-form-container {
+  .verify-email-form-container {
     padding: 32px 24px;
   }
 
-  .register-title {
+  .verify-email-title {
     font-size: 28px;
   }
 
-  .register-subtitle {
+  .verify-email-subtitle {
     font-size: 14px;
   }
 
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 0;
+  .verify-email-icon-wrapper {
+    width: 70px;
+    height: 70px;
   }
 
-  .form-item-half {
-    margin-bottom: 24px;
+  .verify-email-icon {
+    font-size: 36px;
   }
 }
 
 @media (max-width: 480px) {
-  .register-form-container {
+  .verify-email-form-container {
     padding: 24px 20px;
   }
 
-  .register-title {
+  .verify-email-title {
     font-size: 24px;
   }
 
-  .register-button {
+  .verify-email-button {
     height: 44px;
     font-size: 15px;
+  }
+
+  .otp-input input {
+    font-size: 18px;
+    letter-spacing: 6px;
   }
 }
 

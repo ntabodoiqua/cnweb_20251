@@ -17,14 +17,28 @@ const createUserApi = (userData) => {
   });
 };
 
-const loginApi = (email, password) => {
-  const URL_API = "/v1/api/login";
-  const data = {
-    email,
-    password,
-  };
-
-  return axios.post(URL_API, data);
+const loginApi = (username, password) => {
+  const URL_API = "/api/user/auth/token";
+  return axios.post(
+    URL_API,
+    {
+      username,
+      password,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "Accept-Language": "vi",
+      },
+      // Không gửi Authorization header cho API đăng nhập
+      transformRequest: [
+        (data, headers) => {
+          delete headers.Authorization;
+          return JSON.stringify(data);
+        },
+      ],
+    }
+  );
 };
 
 const getUserApi = () => {
@@ -32,4 +46,50 @@ const getUserApi = () => {
   return axios.get(URL_API);
 };
 
-export { createUserApi, loginApi, getUserApi };
+const verifyEmailApi = (username, otpCode) => {
+  const URL_API = "/api/user/users/verify-email";
+  return axios.post(
+    URL_API,
+    {
+      username,
+      otpCode,
+    },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+      // Không gửi Authorization header cho API xác minh email
+      transformRequest: [
+        (data, headers) => {
+          delete headers.Authorization;
+          return JSON.stringify(data);
+        },
+      ],
+    }
+  );
+};
+
+const resendOtpApi = (username) => {
+  const URL_API = "/api/user/users/resend-otp";
+  return axios.post(
+    URL_API,
+    {
+      username,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      // Không gửi Authorization header cho API gửi lại OTP
+      transformRequest: [
+        (data, headers) => {
+          delete headers.Authorization;
+          return JSON.stringify(data);
+        },
+      ],
+    }
+  );
+};
+
+export { createUserApi, loginApi, getUserApi, verifyEmailApi, resendOtpApi };
