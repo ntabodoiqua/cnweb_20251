@@ -12,11 +12,7 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build argument for API URL
-ARG VITE_API_URL
-ENV VITE_API_URL=${VITE_API_URL}
-
-# Build the application
+# Build the application (uses .env.production by default)
 RUN npm run build
 
 # Stage 2: Serve the application with Nginx

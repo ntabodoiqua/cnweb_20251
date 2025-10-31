@@ -63,8 +63,6 @@ jobs:
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
           cache-from: type=gha,scope=frontend
           cache-to: type=gha,mode=max,scope=frontend
-          build-args: |
-            VITE_API_URL=${{ secrets.VITE_API_URL }}
 
   deploy:
     needs: [prepare, build-and-push]
