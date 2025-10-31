@@ -80,7 +80,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             # Navigate to deployment directory
-            cd /opt/cnweb2025_1 || exit 1
+            cd /opt/cnweb2025_1_fe || exit 1
 
             # Pull latest changes
             git pull origin anhnt/fe-test-deploy
