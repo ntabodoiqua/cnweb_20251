@@ -67,10 +67,13 @@ zalopay:
   # Endpoint truy vấn trạng thái hoàn tiền (Sandbox)
   query-refund-url: https://sb-openapi.zalopay.vn/v2/query_refund
   # Callback URL (ZaloPay sẽ gọi endpoint này khi thanh toán hoàn tất)
-  # IMPORTANT: Trong production, nên dùng URL qua API Gateway
-  # Development: http://localhost:8086/api/v1/payments/zalopay/callback (direct)
-  # Production: https://your-domain.com/api/payment/v1/payments/zalopay/callback (via gateway)
-  callback-url: ${ZALOPAY_CALLBACK_URL:http://localhost:8086/api/v1/payments/zalopay/callback}
+  # IMPORTANT: PHẢI dùng URL qua API Gateway để CORS hoạt động đúng
+  # Gateway routing: /api/payment/** -> payment-service (StripPrefix=2 bỏ /api/payment)
+  # Controller endpoint: /v1/payments/zalopay/callback
+  # Full Gateway URL: /api/payment/v1/payments/zalopay/callback
+  # Development: http://localhost:8080/api/payment/v1/payments/zalopay/callback
+  # Production: http://146.190.101.2:8080/api/payment/v1/payments/zalopay/callback
+  callback-url: ${ZALOPAY_CALLBACK_URL:http://localhost:8080/api/payment/v1/payments/zalopay/callback}
   # Redirect URL sau khi thanh toán
   redirect-url: ${ZALOPAY_REDIRECT_URL:http://localhost:3000/payment/result}
   # Thời gian hết hạn đơn hàng (giây) - 15 phút

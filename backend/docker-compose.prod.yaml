@@ -41,7 +41,7 @@ services:
       - microservices-network
     environment:
       - TZ=Asia/Ho_Chi_Minh
-      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Ho_Chi_Minh 
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Ho_Chi_Minh
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
     depends_on:
       discovery-service:
@@ -232,7 +232,7 @@ services:
       - ZALOPAY_CREATE_ORDER_URL=${ZALOPAY_CREATE_ORDER_URL:-https://sb-openapi.zalopay.vn/v2/create}
       - ZALOPAY_QUERY_ORDER_URL=${ZALOPAY_QUERY_ORDER_URL:-https://sb-openapi.zalopay.vn/v2/query}
       - ZALOPAY_GET_BANK_LIST_URL=${ZALOPAY_GET_BANK_LIST_URL:-https://sbgateway.zalopay.vn/api/getlistmerchantbanks}
-      - ZALOPAY_CALLBACK_URL=${ZALOPAY_CALLBACK_URL:-http://146.190.101.2:8086/api/v1/payments/zalopay/callback}
+      - ZALOPAY_CALLBACK_URL=${ZALOPAY_CALLBACK_URL:-http://146.190.101.2:8080/api/payment/v1/payments/zalopay/callback}
       - ZALOPAY_REDIRECT_URL=${ZALOPAY_REDIRECT_URL:-http://localhost:3000/payment/result}
     depends_on:
       discovery-service:

@@ -28,10 +28,14 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * Controller xử lý các API liên quan đến ZaloPay
+ * 
+ * IMPORTANT: Base path không có /api vì Gateway sẽ StripPrefix=2 (bỏ /api/payment)
+ * Gateway URL: /api/payment/v1/payments/zalopay/* 
+ * → Forward to: /v1/payments/zalopay/*
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/v1/payments/zalopay")
+@RequestMapping("/v1/payments/zalopay")
 @RequiredArgsConstructor
 @Tag(name = "ZaloPay Payment", description = "APIs tích hợp cổng thanh toán ZaloPay")
 public class ZaloPayController {
