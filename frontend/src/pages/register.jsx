@@ -1,106 +1,447 @@
-import React from 'react';
-import { Button, Col, Divider, Form, Input, notification, Row } from 'antd';
-import { createUserApi } from '../util/api';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import React, { useState } from "react";
+import { Button, Form, Input, notification, DatePicker } from "antd";
+import { createUserApi } from "../util/api";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  UserOutlined,
+  LockOutlined,
+  MailOutlined,
+  PhoneOutlined,
+  CalendarOutlined,
+} from "@ant-design/icons";
+import "./register.css";
+import logo from "../assets/logo.png";
 
 const RegisterPage = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+  const [form] = Form.useForm();
+  const [loading, setLoading] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState({
+    strength: "",
+    score: 0,
+    color: "",
+  });
 
-    const onFinish = async (values) => {
-        const { name, email, password } = values;
+  // Hàm tính độ mạnh mật khẩu
+  const calculatePasswordStrength = (password) => {
+    if (!password) {
+      return { strength: "", score: 0, color: "" };
+    }
 
-        const res = await createUserApi(name, email, password);
-
-        if (res) {
-            notification.success({
-                message: "CREATE USER",
-                description: "Success"
-            });
-            navigate("/login");
-
-        } else {
-            notification.error({
-                message: "CREATE USER",
-                description: "error"
-            })
-        }
-
+    let score = 0;
+    const checks = {
+      length: password.length >= 8,
+      lowercase: /[a-z]/.test(password),
+      uppercase: /[A-Z]/.test(password),
+      number: /\d/.test(password),
+      special: /[@$!%*?&#]/.test(password),
     };
 
-    return (
-        <Row justify={"center"} style={{ marginTop: "30px" }}>
-            <Col xs={24} md={16} lg={8}>
-                <fieldset style={{
-                    padding: "15px",
-                    margin: "5px",
-                    border: "1px solid #ccc",
-                    borderRadius: "5px"
-                }}>
-                    <legend>Đăng Ký Tài Khoản</legend>
-                    <Form
-                        name="basic"
-                        onFinish={onFinish}
-                        autoComplete="off"
-                        layout='vertical'
-                    >
-                        <Form.Item
-                            label="Email"
-                            name="email"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input your email!',
-                                },
-                            ]}
-                        >
-                            <Input />
-                        </Form.Item>
+    // Tính điểm
+    if (checks.length) score += 20;
+    if (password.length >= 12) score += 10;
+    if (checks.lowercase) score += 20;
+    if (checks.uppercase) score += 20;
+    if (checks.number) score += 15;
+    if (checks.special) score += 15;
 
-                        <Form.Item
-                            label="Password"
-                            name="password"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input your password!',
-                                },
-                            ]}
-                        >
-                            <Input.Password />
-                        </Form.Item>
+    // Xác định độ mạnh
+    let strength = "";
+    let color = "";
 
-                        <Form.Item
-                            label="Name"
-                            name="name"
-                            rules={[
-                                {
-                                    required: true,
-                                    message: 'Please input your name!',
-                                },
-                            ]}
-                        >
-                            <Input />
-                        </Form.Item>
+    if (score < 40) {
+      strength = "Yếu";
+      color = "#ff4d4f";
+    } else if (score < 60) {
+      strength = "Trung bình";
+      color = "#faad14";
+    } else if (score < 80) {
+      strength = "Khá mạnh";
+      color = "#52c41a";
+    } else {
+      strength = "Rất mạnh";
+      color = "#389e0d";
+    }
 
-                        <Form.Item
-                        >
-                            <Button type="primary" htmlType="submit">
-                                Submit
-                            </Button>
-                        </Form.Item>
-                    </Form>
-                    <Link to={"/"}><ArrowLeftOutlined /> Quay lại trang chủ</Link>
-                    <Divider />
-                    <div style={{ textAlign: "center" }}>
-                        Đã có tài khoản? <Link to={"/login"}>Đăng nhập</Link>
-                    </div>
+    return { strength, score, color };
+  };
 
-                </fieldset>
-            </Col>
-        </Row>
+  const onFinish = async (values) => {
+    setLoading(true);
+    try {
+      const { username, password, firstName, lastName, dob, email, phone } =
+        values;
 
-    )
-}
+      const userData = {
+        username,
+        password,
+        firstName,
+        lastName,
+        dob: dob.format("YYYY-MM-DD"),
+        email,
+        phone,
+      };
+
+      const res = await createUserApi(userData);
+
+      if (res && res.code === 1000) {
+        notification.success({
+          message: "Đăng ký thành công!",
+          description:
+            "Tài khoản của bạn đã được tạo. Vui lòng đăng nhập để tiếp tục.",
+          placement: "topRight",
+          duration: 3,
+        });
+        navigate("/login");
+      } else {
+        notification.error({
+          message: "Đăng ký thất bại",
+          description: res.message || "Đã có lỗi xảy ra, vui lòng thử lại.",
+          placement: "topRight",
+          duration: 3,
+        });
+      }
+    } catch (error) {
+      notification.error({
+        message: "Đăng ký thất bại",
+        description: error?.message || "Đã có lỗi xảy ra, vui lòng thử lại.",
+        placement: "topRight",
+        duration: 3,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const validatePassword = (_, value) => {
+    if (!value) {
+      return Promise.reject(new Error("Vui lòng nhập mật khẩu!"));
+    }
+    if (value.length < 8) {
+      return Promise.reject(new Error("Mật khẩu phải có ít nhất 8 ký tự!"));
+    }
+    if (!/(?=.*[a-z])/.test(value)) {
+      return Promise.reject(
+        new Error("Mật khẩu phải chứa ít nhất 1 chữ thường!")
+      );
+    }
+    if (!/(?=.*[A-Z])/.test(value)) {
+      return Promise.reject(new Error("Mật khẩu phải chứa ít nhất 1 chữ hoa!"));
+    }
+    if (!/(?=.*\d)/.test(value)) {
+      return Promise.reject(new Error("Mật khẩu phải chứa ít nhất 1 số!"));
+    }
+    if (!/(?=.*[@$!%*?&#])/.test(value)) {
+      return Promise.reject(
+        new Error("Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt (@$!%*?&#)!")
+      );
+    }
+    return Promise.resolve();
+  };
+
+  const validatePhone = (_, value) => {
+    if (!value) {
+      return Promise.reject(new Error("Vui lòng nhập số điện thoại!"));
+    }
+    if (!/^[0-9]{10}$/.test(value)) {
+      return Promise.reject(new Error("Số điện thoại phải có 10 chữ số!"));
+    }
+    return Promise.resolve();
+  };
+
+  const validateDateOfBirth = (_, value) => {
+    if (!value) {
+      return Promise.reject(new Error("Vui lòng chọn ngày sinh!"));
+    }
+
+    const today = new Date();
+    const birthDate = value.toDate();
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    // Điều chỉnh tuổi nếu chưa đến sinh nhật trong năm nay
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    if (age < 16) {
+      return Promise.reject(
+        new Error("Bạn phải từ 16 tuổi trở lên để đăng ký!")
+      );
+    }
+
+    if (age > 120) {
+      return Promise.reject(new Error("Ngày sinh không hợp lệ!"));
+    }
+
+    return Promise.resolve();
+  };
+
+  return (
+    <div className="register-container">
+      <div className="register-left">
+        <div className="register-left-content">
+          <img src={logo} alt="Logo" className="register-logo" />
+          <h1 className="register-welcome">Chào mừng đến với HUSTBuy</h1>
+          <p className="register-description">
+            Đăng ký ngay để trải nghiệm mua sắm trực tuyến tuyệt vời với hàng
+            triệu sản phẩm chất lượng, giá tốt nhất thị trường.
+          </p>
+          <div className="register-features">
+            <div className="feature-item">
+              <div className="feature-icon">✓</div>
+              <div className="feature-text">Miễn phí vận chuyển</div>
+            </div>
+            <div className="feature-item">
+              <div className="feature-icon">✓</div>
+              <div className="feature-text">Thanh toán an toàn</div>
+            </div>
+            <div className="feature-item">
+              <div className="feature-icon">✓</div>
+              <div className="feature-text">Hoàn tiền 100%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="register-right">
+        <div className="register-form-container">
+          <h2 className="register-title">Đăng ký tài khoản</h2>
+          <p className="register-subtitle">
+            Tạo tài khoản mới để bắt đầu mua sắm
+          </p>
+
+          <Form
+            form={form}
+            name="register"
+            onFinish={onFinish}
+            autoComplete="off"
+            layout="vertical"
+            className="register-form"
+            requiredMark={false}
+          >
+            <Form.Item
+              label="Tên đăng nhập"
+              name="username"
+              rules={[
+                { required: true, message: "Vui lòng nhập tên đăng nhập!" },
+                { min: 3, message: "Tên đăng nhập phải có ít nhất 3 ký tự!" },
+                {
+                  pattern: /^[a-zA-Z0-9_]+$/,
+                  message: "Tên đăng nhập chỉ chứa chữ, số và dấu gạch dưới!",
+                },
+              ]}
+              validateTrigger={["onChange", "onBlur"]}
+            >
+              <Input
+                prefix={<UserOutlined />}
+                placeholder="Nhập tên đăng nhập"
+                size="large"
+              />
+            </Form.Item>
+
+            <div className="form-row">
+              <Form.Item
+                label="Họ và tên đệm"
+                name="firstName"
+                rules={[
+                  { required: true, message: "Vui lòng nhập họ và tên đệm!" },
+                ]}
+                validateTrigger={["onChange", "onBlur"]}
+                className="form-item-half"
+              >
+                <Input placeholder="Nhập họ và tên đệm" size="large" />
+              </Form.Item>
+
+              <Form.Item
+                label="Tên"
+                name="lastName"
+                rules={[{ required: true, message: "Vui lòng nhập tên!" }]}
+                validateTrigger={["onChange", "onBlur"]}
+                className="form-item-half"
+              >
+                <Input placeholder="Nhập tên" size="large" />
+              </Form.Item>
+            </div>
+
+            <Form.Item
+              label="Email"
+              name="email"
+              rules={[
+                { required: true, message: "Vui lòng nhập email!" },
+                { type: "email", message: "Email không hợp lệ!" },
+              ]}
+              validateTrigger={["onChange", "onBlur"]}
+            >
+              <Input
+                prefix={<MailOutlined />}
+                placeholder="Nhập email"
+                size="large"
+              />
+            </Form.Item>
+
+            <div className="form-row">
+              <Form.Item
+                label="Số điện thoại"
+                name="phone"
+                rules={[{ validator: validatePhone }]}
+                validateTrigger={["onChange", "onBlur"]}
+                className="form-item-half"
+              >
+                <Input
+                  prefix={<PhoneOutlined />}
+                  placeholder="Nhập số điện thoại"
+                  size="large"
+                />
+              </Form.Item>
+
+              <Form.Item
+                label="Ngày sinh"
+                name="dob"
+                rules={[{ validator: validateDateOfBirth }]}
+                validateTrigger={["onChange", "onBlur"]}
+                className="form-item-half"
+              >
+                <DatePicker
+                  placeholder="Chọn ngày sinh"
+                  size="large"
+                  format="DD/MM/YYYY"
+                  style={{ width: "100%" }}
+                  suffixIcon={<CalendarOutlined />}
+                  disabledDate={(current) => {
+                    // Không cho chọn ngày trong tương lai
+                    return current && current > new Date();
+                  }}
+                />
+              </Form.Item>
+            </div>
+
+            <Form.Item
+              label="Mật khẩu"
+              name="password"
+              rules={[{ validator: validatePassword }]}
+              validateTrigger={["onChange", "onBlur"]}
+            >
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder="Nhập mật khẩu"
+                size="large"
+                onChange={(e) => {
+                  const strength = calculatePasswordStrength(e.target.value);
+                  setPasswordStrength(strength);
+                }}
+              />
+            </Form.Item>
+
+            {passwordStrength.strength && (
+              <div className="password-strength-container">
+                <div className="password-strength-bar">
+                  <div
+                    className="password-strength-fill"
+                    style={{
+                      width: `${passwordStrength.score}%`,
+                      backgroundColor: passwordStrength.color,
+                    }}
+                  ></div>
+                </div>
+                <div className="password-strength-text">
+                  <span>Độ mạnh mật khẩu: </span>
+                  <span
+                    style={{ color: passwordStrength.color, fontWeight: 600 }}
+                  >
+                    {passwordStrength.strength}
+                  </span>
+                </div>
+                <div className="password-requirements">
+                  <div className="requirement-item">
+                    {form.getFieldValue("password")?.length >= 8 ? "✓" : "○"}{" "}
+                    Tối thiểu 8 ký tự
+                  </div>
+                  <div className="requirement-item">
+                    {/[a-z]/.test(form.getFieldValue("password") || "")
+                      ? "✓"
+                      : "○"}{" "}
+                    Chữ thường
+                  </div>
+                  <div className="requirement-item">
+                    {/[A-Z]/.test(form.getFieldValue("password") || "")
+                      ? "✓"
+                      : "○"}{" "}
+                    Chữ hoa
+                  </div>
+                  <div className="requirement-item">
+                    {/\d/.test(form.getFieldValue("password") || "")
+                      ? "✓"
+                      : "○"}{" "}
+                    Số
+                  </div>
+                  <div className="requirement-item">
+                    {/[@$!%*?&#]/.test(form.getFieldValue("password") || "")
+                      ? "✓"
+                      : "○"}{" "}
+                    Ký tự đặc biệt
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <Form.Item
+              label="Xác nhận mật khẩu"
+              name="confirmPassword"
+              dependencies={["password"]}
+              rules={[
+                { required: true, message: "Vui lòng xác nhận mật khẩu!" },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("password") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(
+                      new Error("Mật khẩu xác nhận không khớp!")
+                    );
+                  },
+                }),
+              ]}
+              validateTrigger={["onChange", "onBlur"]}
+            >
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder="Nhập lại mật khẩu"
+                size="large"
+              />
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                size="large"
+                block
+                loading={loading}
+                className="register-button"
+              >
+                Đăng ký
+              </Button>
+            </Form.Item>
+          </Form>
+
+          <div className="register-footer">
+            <span>Đã có tài khoản? </span>
+            <Link to="/login" className="login-link">
+              Đăng nhập ngay
+            </Link>
+          </div>
+
+          <div className="register-home-link">
+            <Link to="/">← Quay về trang chủ</Link>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default RegisterPage;
