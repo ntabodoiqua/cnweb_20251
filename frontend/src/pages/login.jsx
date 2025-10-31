@@ -4,6 +4,7 @@ import { loginApi, resendOtpApi } from "../util/api";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/context/auth.context";
 import { UserOutlined, LockOutlined, GoogleOutlined } from "@ant-design/icons";
+import { getTokenInfo } from "../util/jwt";
 import "./login.css";
 import logo from "../assets/logo.png";
 
@@ -28,18 +29,24 @@ const LoginPage = () => {
           // Lưu token vào localStorage
           localStorage.setItem("access_token", token);
 
+          // Decode token để lấy thông tin user
+          const tokenInfo = getTokenInfo(token);
+
           notification.success({
             message: "Đăng nhập thành công!",
-            description: "Chào mừng bạn quay trở lại.",
+            description: `Chào mừng ${
+              tokenInfo?.username || username
+            } quay trở lại.`,
             placement: "topRight",
             duration: 3,
           });
 
-          // Cập nhật auth context
+          // Cập nhật auth context với đầy đủ thông tin
           setAuth({
             isAuthenticated: true,
             user: {
-              username: username,
+              username: tokenInfo?.username || username,
+              role: tokenInfo?.role || "",
             },
           });
 
