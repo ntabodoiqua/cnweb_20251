@@ -1,12 +1,23 @@
 import axios from './axios.customize';
 
-const createUserApi = (name, email, password) => {
-    const URL_API = "/v1/api/register";
+const createUserApi = (username, password, firstName, lastName, dob, email, phone) => {
+    const URL_API = "/api/user/users";
     const data = {
-        name, email, password
+        username,
+        password,
+        firstName,
+        lastName,
+        dob,
+        email,
+        phone
     }
 
-    return axios.post(URL_API, data)
+    return axios.post(URL_API, data, {
+        headers: {
+            'Accept-Language': 'vi',
+            'Content-Type': 'application/json'
+        }
+    })
 }
 
 const loginApi = (email, password) => {
