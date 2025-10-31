@@ -83,7 +83,7 @@ jobs:
             cd /opt/cnweb2025_1 || exit 1
 
             # Pull latest changes
-            git pull origin fe/dev
+            git pull origin anhnt/fe-test-deploy
 
             # Login to GitHub Container Registry
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
