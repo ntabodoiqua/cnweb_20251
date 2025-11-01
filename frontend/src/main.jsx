@@ -15,6 +15,7 @@ import ResetPasswordPage from "./pages/reset-password.jsx";
 import NotFoundPage from "./pages/not-found.jsx";
 import { AuthWrapper } from "./components/context/auth.context.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import PublicRoute from "./components/PublicRoute.jsx";
 
 const router = createBrowserRouter([
   {
@@ -58,30 +59,48 @@ const router = createBrowserRouter([
   },
   {
     path: "register",
-    element: <RegisterPage />,
+    element: (
+      <PublicRoute>
+        <RegisterPage />
+      </PublicRoute>
+    ),
   },
   {
     path: "verify-email",
-    element: <VerifyEmailPage />,
+    element: (
+      <PublicRoute>
+        <VerifyEmailPage />
+      </PublicRoute>
+    ),
   },
   {
     path: "login",
-    element: <LoginPage />,
+    element: (
+      <PublicRoute>
+        <LoginPage />
+      </PublicRoute>
+    ),
   },
   {
     path: "forgot-password",
-    element: <ForgotPasswordPage />,
+    element: (
+      <PublicRoute>
+        <ForgotPasswordPage />
+      </PublicRoute>
+    ),
   },
   {
     path: "reset-password",
-    element: <ResetPasswordPage />,
+    element: (
+      <PublicRoute>
+        <ResetPasswordPage />
+      </PublicRoute>
+    ),
   },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <AuthWrapper>
-      <RouterProvider router={router} />
-    </AuthWrapper>
-  </React.StrictMode>
+  <AuthWrapper>
+    <RouterProvider router={router} />
+  </AuthWrapper>
 );

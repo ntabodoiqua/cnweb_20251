@@ -16,6 +16,13 @@ const VerifyEmailPage = () => {
   const [username, setUsername] = useState("");
 
   useEffect(() => {
+    // Kiểm tra xem user đã đăng nhập chưa (đã có token)
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      // Nếu đã đăng nhập, không cần hiển thị notification, PublicRoute sẽ tự redirect
+      return;
+    }
+
     // Lấy username từ state của navigation
     const usernameFromState = location.state?.username;
     if (!usernameFromState) {
