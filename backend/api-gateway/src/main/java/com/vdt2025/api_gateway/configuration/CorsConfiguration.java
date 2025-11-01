@@ -17,7 +17,10 @@ public class CorsConfiguration {
         // Cho phép frontend từ localhost:5173 (Vite React)
         corsConfig.setAllowedOrigins(Arrays.asList(
             "http://localhost:5173",
-            "http://localhost:3000"  // Backup cho React dev server thông thường
+            "http://localhost:3000",
+                "https://nguyentheanh-nta.id.vn",
+                "https://www.nguyentheanh-nta.id.vn",
+                "http://nguyentheanh-nta.id.vn"
         ));
         
         // Cho phép các HTTP methods
