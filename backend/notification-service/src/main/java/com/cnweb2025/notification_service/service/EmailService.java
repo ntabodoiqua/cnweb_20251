@@ -144,4 +144,115 @@ public class EmailService {
         sendEmail(to, subject, htmlContent);
         log.info("Store created email sent to {}", to);
     }
+
+    public void sendUserDisableEmail(String to, String username) {
+        final String subject = "Tài khoản của bạn đã bị vô hiệu hóa - HUSTBuy";
+        Context context = new Context();
+        context.setVariable("username", username);
+        context.setVariable("subject", subject);
+        String htmlContent = templateEngine.process("user-disable-email", context);
+        sendEmail(to, subject, htmlContent);
+        log.info("User disable email sent to {}", to);
+    }
+
+    public void sendPaymentSuccessEmail(String to, String title, String description, 
+                                       String transactionId, Long amount, LocalDateTime paidAt) {
+        final String subject = "Thanh toán thành công - HUSTBuy";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'lúc' HH:mm");
+        String formattedPaidAt = paidAt != null ? paidAt.format(formatter) : "N/A";
+        
+        // Format amount to Vietnamese currency (VND)
+        String formattedAmount = String.format("%,d VNĐ", amount);
+        
+        Context context = new Context();
+        context.setVariable("subject", subject);
+        context.setVariable("title", title);
+        context.setVariable("description", description);
+        context.setVariable("transactionId", transactionId);
+        context.setVariable("amount", formattedAmount);
+        context.setVariable("paidAt", formattedPaidAt);
+        
+        String htmlContent = templateEngine.process("payment-success-email", context);
+        
+        sendEmail(to, subject, htmlContent);
+        log.info("Payment success email sent to {} for transaction: {}", to, transactionId);
+    }
+
+    public void sendPaymentFailedEmail(String to, String title, String description,
+                                      String transactionId, Long amount, String failureReason,
+                                      LocalDateTime failedAt) {
+        final String subject = "Thanh toán thất bại - HUSTBuy";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'lúc' HH:mm");
+        String formattedFailedAt = failedAt != null ? failedAt.format(formatter) : "N/A";
+        
+        // Format amount to Vietnamese currency (VND)
+        String formattedAmount = String.format("%,d VNĐ", amount);
+        
+        Context context = new Context();
+        context.setVariable("subject", subject);
+        context.setVariable("title", title);
+        context.setVariable("description", description);
+        context.setVariable("transactionId", transactionId);
+        context.setVariable("amount", formattedAmount);
+        context.setVariable("failureReason", failureReason);
+        context.setVariable("failedAt", formattedFailedAt);
+        
+        String htmlContent = templateEngine.process("payment-failed-email", context);
+        
+        sendEmail(to, subject, htmlContent);
+        log.info("Payment failed email sent to {} for transaction: {}", to, transactionId);
+    }
+
+    public void sendRefundSuccessEmail(String to, String title, String refundId, String transactionId, 
+                                      Long amount, Long refundFee, String refundReason, 
+                                      LocalDateTime refundedAt) {
+        final String subject = "Hoàn tiền thành công - HUSTBuy";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'lúc' HH:mm");
+        String formattedRefundedAt = refundedAt != null ? refundedAt.format(formatter) : "N/A";
+        
+        // Format amount to Vietnamese currency (VND)
+        String formattedAmount = String.format("%,d VNĐ", amount);
+        String formattedRefundFee = refundFee != null ? String.format("%,d VNĐ", refundFee) : null;
+        
+        Context context = new Context();
+        context.setVariable("subject", subject);
+        context.setVariable("title", title);
+        context.setVariable("refundId", refundId);
+        context.setVariable("transactionId", transactionId);
+        context.setVariable("amount", formattedAmount);
+        context.setVariable("refundFee", formattedRefundFee);
+        context.setVariable("refundReason", refundReason);
+        context.setVariable("refundedAt", formattedRefundedAt);
+        
+        String htmlContent = templateEngine.process("refund-success-email", context);
+        
+        sendEmail(to, subject, htmlContent);
+        log.info("Refund success email sent to {} for refund: {}", to, refundId);
+    }
+
+    public void sendRefundFailedEmail(String to, String title, String refundId, String transactionId,
+                                     Long amount, String refundReason, String failureReason,
+                                     LocalDateTime failedAt) {
+        final String subject = "Hoàn tiền thất bại - HUSTBuy";
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'lúc' HH:mm");
+        String formattedFailedAt = failedAt != null ? failedAt.format(formatter) : "N/A";
+        
+        // Format amount to Vietnamese currency (VND)
+        String formattedAmount = String.format("%,d VNĐ", amount);
+        
+        Context context = new Context();
+        context.setVariable("subject", subject);
+        context.setVariable("title", title);
+        context.setVariable("refundId", refundId);
+        context.setVariable("transactionId", transactionId);
+        context.setVariable("amount", formattedAmount);
+        context.setVariable("refundReason", refundReason);
+        context.setVariable("failureReason", failureReason);
+        context.setVariable("failedAt", formattedFailedAt);
+        
+        String htmlContent = templateEngine.process("refund-failed-email", context);
+        
+        sendEmail(to, subject, htmlContent);
+        log.info("Refund failed email sent to {} for refund: {}", to, refundId);
+    }
 }

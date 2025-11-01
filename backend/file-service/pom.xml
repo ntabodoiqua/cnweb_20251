@@ -94,24 +94,29 @@
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
 
-		<!-- Apache POI	-->
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi</artifactId>
-			<version>5.2.3</version>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-ooxml</artifactId>
-			<version>5.2.3</version>
-		</dependency>
+	<!-- Apache POI	-->
+	<dependency>
+		<groupId>org.apache.poi</groupId>
+		<artifactId>poi</artifactId>
+		<version>5.2.3</version>
+	</dependency>
+	<dependency>
+		<groupId>org.apache.poi</groupId>
+		<artifactId>poi-ooxml</artifactId>
+		<version>5.2.3</version>
+	</dependency>
+
+	<!-- AWS SDK for S3 (DigitalOcean Spaces) -->
+	<dependency>
+		<groupId>com.amazonaws</groupId>
+		<artifactId>aws-java-sdk-s3</artifactId>
+		<version>1.12.529</version>
+	</dependency>
 
 	<dependency>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-actuator</artifactId>
-	</dependency>
-
-	<!-- Lombok -->
+	</dependency>	<!-- Lombok -->
 	<dependency>
 		<groupId>org.projectlombok</groupId>
 		<artifactId>lombok</artifactId>

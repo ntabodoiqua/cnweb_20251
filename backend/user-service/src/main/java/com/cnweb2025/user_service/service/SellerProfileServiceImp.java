@@ -16,6 +16,8 @@ import com.cnweb2025.user_service.repository.*;
 import com.vdt2025.common_dto.dto.MessageType;
 import com.vdt2025.common_dto.dto.SellerProfileApprovedEvent;
 import com.vdt2025.common_dto.dto.SellerProfileRejectedEvent;
+import com.vdt2025.common_dto.dto.response.FileInfoResponse;
+import com.vdt2025.common_dto.service.FileServiceClient;
 import com.vdt2025.common_dto.service.ProductServiceClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
 import java.util.Locale;
@@ -45,6 +48,7 @@ public class SellerProfileServiceImp implements SellerProfileService{
     MessageSource messageSource;
     RabbitMQMessagePublisher rabbitMQMessagePublisher;
     RoleRepository roleRepository;
+    FileServiceClient fileServiceClient;
     ProductServiceClient productServiceClient;
 
 
@@ -232,6 +236,55 @@ public class SellerProfileServiceImp implements SellerProfileService{
         return messageSource.getMessage("success.sellerProfile.rejected", null, locale);
     }
 
+    // Upload tài liệu cho seller profile
+    @Override
+    @Transactional
+    public FileInfoResponse uploadSellerDocument(String sellerProfileId, MultipartFile file, Locale locale) {
+        var sellerProfile = sellerProfileRepository.findById(sellerProfileId)
+                .orElseThrow(() -> {
+                    log.error("Seller profile not found with ID: {}", sellerProfileId);
+                    return new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+                });
+        // Kiểm tra trạng thái hiện tại
+        if (sellerProfile.getVerificationStatus() != VerificationStatus.CREATED) {
+            log.error("Seller profile with ID: {} is not in PENDING status", sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_NOT_EDITABLE);
+        }
+        if (sellerProfile.getDocumentName() != null) {
+            log.error("Seller profile with ID: {} already has a document uploaded", sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_ALREADY_HAS_DOCUMENT);
+        }
+
+        // validate file type and size
+        if (file.isEmpty() || file.getSize() == 0) {
+            log.error("Uploaded file is empty for seller profile ID: {}", sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_UPLOAD_DOCUMENT_EMPTY);
+        }
+        String contentType = file.getContentType();
+        try {
+            if (!contentType.equals("application/pdf")) {
+                log.error("Invalid file type: {} for seller profile ID: {}", contentType, sellerProfileId);
+                throw new AppException(ErrorCode.SELLER_PROFILE_UPLOAD_DOCUMENT_INVALID_TYPE);
+            }
+        } catch (Exception e) {
+            log.error("Error validating file type for seller profile ID: {}: {}", sellerProfileId, e.getMessage());
+            throw new AppException(ErrorCode.SELLER_PROFILE_UPLOAD_DOCUMENT_INVALID_TYPE);
+        }
+        // gọi đến dịch vụ upload file private
+        try {
+            var response = fileServiceClient.uploadPrivateFile(file);
+            FileInfoResponse result = response.getResult();
+            // Lưu tên file vào seller profile
+            sellerProfile.setDocumentName(result.getFileName());
+            sellerProfile.setDocumentUploadedAt(LocalDateTime.now());
+            sellerProfileRepository.save(sellerProfile);
+            return result;
+        } catch (Exception e) {
+            log.error("Error uploading document for seller profile ID: {}: {}", sellerProfileId, e.getMessage());
+            throw new AppException(ErrorCode.SELLER_PROFILE_UPLOAD_DOCUMENT_FAILED);
+        }
+    }
+
     @Override
     @Transactional
     public SellerProfileResponse editSellerProfile(String sellerProfileId, SellerProfileUpdateRequest request) {
@@ -305,20 +358,48 @@ public class SellerProfileServiceImp implements SellerProfileService{
             log.error("Seller profile with ID: {} is already deactivated", sellerProfileId);
             throw new AppException(ErrorCode.SELLER_PROFILE_NOT_EDITABLE);
         }
-        
+
         try {
             // Gọi đến product-service để hủy kích hoạt store tương ứng với seller profile này
             productServiceClient.deactivateStore(sellerProfileId);
             log.info("Successfully deactivated store in product-service for seller profile ID: {}", sellerProfileId);
         } catch (Exception e) {
-            log.error("Failed to deactivate store in product-service for seller profile ID: {}: {}", 
+            log.error("Failed to deactivate store in product-service for seller profile ID: {}: {}",
                     sellerProfileId, e.getMessage());
             throw new AppException(ErrorCode.STORE_DEACTIVATION_FAILED);
         }
-        
+
         sellerProfile.setActive(false);
         sellerProfileRepository.save(sellerProfile);
         log.info("Seller profile with ID: {} deactivated by user: {}", sellerProfileId, username);
         return messageSource.getMessage("success.sellerProfile.deactivated", null, locale);
+    }
+
+    @Override
+    @Transactional
+    public String deleteSellerProfileDocument(String sellerProfileId, Locale locale) {
+        var sellerProfile = sellerProfileRepository.findById(sellerProfileId)
+                .orElseThrow(() -> {
+                    log.error("Seller profile not found with ID: {}", sellerProfileId);
+                    return new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+                });
+        // Kiểm tra quyền: Chỉ chủ sở hữu hồ sơ mới được phép xóa tài liệu
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        if (!sellerProfile.getUser().getUsername().equals(username)) {
+            log.error("User: {} is not the owner of seller profile ID: {}", username, sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+        }
+
+        // Chỉ cho phép xóa tài liệu nếu trạng thái là CREATED
+        if (sellerProfile.getVerificationStatus() != VerificationStatus.CREATED) {
+            log.error("Seller profile with ID: {} is not in CREATED status", sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_NOT_EDITABLE);
+        }
+        sellerProfile.setDocumentName(null);
+        sellerProfile.setDocumentUploadedAt(null);
+        sellerProfileRepository.save(sellerProfile);
+        log.info("Document deleted for seller profile ID: {} by user: {}", sellerProfileId, username);
+        return messageSource.getMessage("success.sellerProfile.document.deleted", null, locale);
     }
 }

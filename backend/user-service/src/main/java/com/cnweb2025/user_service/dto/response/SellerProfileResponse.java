@@ -20,7 +20,9 @@ public class SellerProfileResponse {
     String storeName;
     String storeDescription;
     String logoName;
+    String logoUrl;
     String bannerName;
+    String bannerUrl;
     String contactEmail;
     String contactPhone;
     String shopAddress;
@@ -32,4 +34,6 @@ public class SellerProfileResponse {
     WardResponse ward;
     LocalDateTime rejectedAt;
     String rejectionReason;
+    String documentName;
+    LocalDateTime documentUploadedAt;
 }

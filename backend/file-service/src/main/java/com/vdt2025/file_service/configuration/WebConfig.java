@@ -1,6 +1,5 @@
 package com.vdt2025.file_service.configuration;
 
-import com.vdt2025.file_service.interceptor.UserStatusInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.*;
@@ -9,7 +8,7 @@ import org.springframework.web.util.UrlPathHelper;
 @Configuration
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
-    private final UserStatusInterceptor userStatusInterceptor;
+    // UserStatusInterceptor đã bị loại bỏ - logic kiểm tra user được chuyển vào Service layer
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -28,35 +27,38 @@ public class WebConfig implements WebMvcConfigurer {
         configurer.setUrlPathHelper(urlPathHelper);
     }
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173/") // Địa chỉ frontend
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(3600);
-    }
+    // CORS được cấu hình tập trung tại API Gateway
+    // Không cần cấu hình CORS ở đây nữa
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**")
+//                .allowedOrigins("http://localhost:5173") // Địa chỉ frontend
+//                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+//                .allowedHeaders("*")
+//                .allowCredentials(true)
+//                .maxAge(3600);
+//    }
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(userStatusInterceptor)
-                .addPathPatterns("/**")
-                .excludePathPatterns(
-                        "/auth/token",
-                        "/auth/introspect",
-                        "/auth/logout",
-                        "/auth/refresh",
-                        "/users",
-                        "/category/get-categories",
-                        "/category",
-                        "/uploads/**",
-                        "/files/download/**",
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**",
-                        "/swagger-ui.html"
-                );
-    }
+    // Không cần interceptor nữa vì logic đã được chuyển vào Service layer
+//    @Override
+//    public void addInterceptors(InterceptorRegistry registry) {
+//        registry.addInterceptor(userStatusInterceptor)
+//                .addPathPatterns("/**")
+//                .excludePathPatterns(
+//                        "/auth/token",
+//                        "/auth/introspect",
+//                        "/auth/logout",
+//                        "/auth/refresh",
+//                        "/users",
+//                        "/category/get-categories",
+//                        "/category",
+//                        "/uploads/**",
+//                        "/files/download/**",
+//                        "/swagger-ui/**",
+//                        "/v3/api-docs/**",
+//                        "/swagger-ui.html"
+//                );
+//    }
 
 
 }

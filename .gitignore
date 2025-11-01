@@ -35,3 +35,8 @@ md file/
 zalopay_integration
 zpgateway-html
 *.log
+
+# logs
+logs
+
+# another folder

@@ -5,12 +5,15 @@ import com.cnweb2025.user_service.service.MessageService;
 import jakarta.validation.ConstraintViolation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+
 import java.util.Map;
 import java.util.Objects;
 
@@ -20,6 +23,7 @@ import java.util.Objects;
 public class GlobalExceptionHandler {
     private static final String MIN_ATTRIBUTE = "min";
     private final MessageService messageService;
+    private final MessageSource messageSource;
 
     @ExceptionHandler(value = RuntimeException.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
@@ -89,6 +93,17 @@ public class GlobalExceptionHandler {
         }
         
         apiResponse.setMessage(localizedMessage);
+
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ResponseEntity<com.vdt2025.common_dto.dto.response.ApiResponse> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException exception) {
+        log.error("File upload quá kích thước cho phép: ", exception);
+
+        com.vdt2025.common_dto.dto.response.ApiResponse apiResponse = new com.vdt2025.common_dto.dto.response.ApiResponse();
+        apiResponse.setCode(ErrorCode.FILE_SIZE_EXCEEDED.getCode());
+        apiResponse.setMessage(messageService.getMessage(ErrorCode.FILE_SIZE_EXCEEDED.getMessageKey()));
 
         return ResponseEntity.badRequest().body(apiResponse);
     }

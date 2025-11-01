@@ -53,6 +53,15 @@ public class RabbitMQMessageConsumer {
     }
 
     /**
+     * Listener cho user disabled
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).USER_DISABLED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleUserDisabled(UserDisabledEvent event) {
+        handleMessage(MessageType.USER_DISABLED, event);
+    }
+
+    /**
      * Listener cho user deleted
      */
     @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).USER_DELETED).name}")
@@ -77,6 +86,42 @@ public class RabbitMQMessageConsumer {
     @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
     public void handleSellerProfileRejected(SellerProfileRejectedEvent event) {
         handleMessage(MessageType.SELLER_PROFILE_REJECTED, event);
+    }
+
+    /**
+     * Listener cho payment success
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).PAYMENT_SUCCESS).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handlePaymentSuccess(PaymentSuccessEvent event) {
+        handleMessage(MessageType.PAYMENT_SUCCESS, event);
+    }
+
+    /**
+     * Listener cho payment failed
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).PAYMENT_FAILED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handlePaymentFailed(PaymentFailedEvent event) {
+        handleMessage(MessageType.PAYMENT_FAILED, event);
+    }
+
+    /**
+     * Listener cho refund success
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).REFUND_SUCCESS).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleRefundSuccess(RefundSuccessEvent event) {
+        handleMessage(MessageType.REFUND_SUCCESS, event);
+    }
+
+    /**
+     * Listener cho refund failed
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).REFUND_FAILED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleRefundFailed(RefundFailedEvent event) {
+        handleMessage(MessageType.REFUND_FAILED, event);
     }
 
     /**

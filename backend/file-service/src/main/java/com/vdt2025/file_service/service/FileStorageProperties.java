@@ -13,5 +13,16 @@ import org.springframework.stereotype.Component;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class FileStorageProperties {
-    String directory;
+    S3Properties s3;
+    
+    @Getter
+    @Setter
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class S3Properties {
+        String endpoint;
+        String region;
+        String bucketName;
+        String accessKey;
+        String secretKey;
+    }
 }

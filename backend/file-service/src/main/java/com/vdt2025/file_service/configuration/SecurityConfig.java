@@ -37,6 +37,11 @@ public class SecurityConfig {
             "/users"
     };
 
+    private static final String[] PUBLIC_ACTUATOR_ENDPOINTS = {
+            "/actuator/health",
+            "/actuator/info"
+    };
+
     CustomJwtDecoder customJwtDecoder;
 
 
@@ -52,6 +57,8 @@ public class SecurityConfig {
                                 .requestMatchers(AUTH_ENDPOINTS).permitAll()
                                 // Allow POST to create users
                                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                                // Allow actuator endpoints
+                                .requestMatchers(PUBLIC_ACTUATOR_ENDPOINTS).permitAll()
                                 // All other requests need authentication
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 ->

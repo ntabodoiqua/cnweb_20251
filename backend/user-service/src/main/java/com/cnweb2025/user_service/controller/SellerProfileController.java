@@ -3,8 +3,10 @@ package com.cnweb2025.user_service.controller;
 import com.cnweb2025.user_service.dto.ApiResponse;
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileCreationRequest;
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileRejectionRequest;
+import com.cnweb2025.user_service.dto.request.seller.SellerProfileUpdateRequest;
 import com.cnweb2025.user_service.dto.response.SellerProfileResponse;
 import com.cnweb2025.user_service.service.SellerProfileService;
+import com.vdt2025.common_dto.dto.response.FileInfoResponse;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Locale;
 
@@ -52,8 +55,30 @@ public class SellerProfileController {
                 .build();
     }
 
+    @PatchMapping("/{sellerProfileId}/uploadDocument")
+    public ApiResponse<FileInfoResponse> uploadSellerDocument(@PathVariable String sellerProfileId, MultipartFile file, Locale locale) {
+        var result = sellerProfileService.uploadSellerDocument(sellerProfileId, file, locale);
+        return ApiResponse.<FileInfoResponse>builder()
+                .result(result)
+                .message(messageSource.getMessage("success.sellerProfile.document.uploaded", null, locale))
+                .build();
+    }
+
+    @GetMapping("/{sellerProfileId}/document")
+    public ApiResponse<FileInfoResponse> getSellerDocument(@PathVariable String sellerProfileId, Locale locale) {
+        var sellerProfileResponse = sellerProfileService.getSellerProfileOfCurrentUser();
+        var result = FileInfoResponse.builder()
+                .fileName(sellerProfileResponse.getDocumentName())
+                .uploadedAt(sellerProfileResponse.getDocumentUploadedAt())
+                .build();
+        return ApiResponse.<FileInfoResponse>builder()
+                .result(result)
+                .message(messageSource.getMessage("success.sellerProfile.document.retrieved", null, locale))
+                .build();
+    }
+
     @PatchMapping("/{sellerProfileId}/sendToReview")
-    public ApiResponse<String> sendToReviewSellerProfile(@PathVariable String sellerProfileId,Locale locale) {
+    public ApiResponse<String> sendToReviewSellerProfile(@PathVariable String sellerProfileId, Locale locale) {
         var result = sellerProfileService.sendToReview(sellerProfileId, locale);
         return ApiResponse.<String>builder()
                 .result(result)
@@ -87,6 +112,26 @@ public class SellerProfileController {
         return ApiResponse.<String>builder()
                 .result(result)
                 .message(messageSource.getMessage("success.sellerProfile.deactivated", null, locale))
+                .build();
+    }
+
+    @DeleteMapping("/{sellerProfileId}/document")
+    public ApiResponse<String> deleteSellerProfileDocument(@PathVariable String sellerProfileId, Locale locale) {
+        var result = sellerProfileService.deleteSellerProfileDocument(sellerProfileId, locale);
+        return ApiResponse.<String>builder()
+                .result(result)
+                .message(messageSource.getMessage("success.sellerProfile.document.deleted", null, locale))
+                .build();
+    }
+
+    @PutMapping("/{sellerProfileId}")
+    public ApiResponse<SellerProfileResponse> editSellerProfile(@PathVariable String sellerProfileId,
+                                                                @Valid @RequestBody SellerProfileUpdateRequest request,
+                                                                Locale locale) {
+        var result = sellerProfileService.editSellerProfile(sellerProfileId, request);
+        return ApiResponse.<SellerProfileResponse>builder()
+                .result(result)
+                .message(messageSource.getMessage("success.sellerProfile.updated", null, locale))
                 .build();
     }
 
