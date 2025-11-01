@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# SSL Certificates and Let's Encrypt
+certbot/
+nginx-certonly.conf
+
