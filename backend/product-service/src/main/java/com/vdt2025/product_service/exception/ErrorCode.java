@@ -32,9 +32,16 @@ public enum ErrorCode {
     ROLE_NOT_FOUND(1401, "error.1401", HttpStatus.NOT_FOUND),
     ROLE_EXISTED(1402, "error.1402", HttpStatus.CONFLICT),
     ROLE_IN_USE(1403, "error.1403", HttpStatus.CONFLICT),
-    // Lỗi danh mục (15xx)
+
+    // Lỗi danh mục (150x)
     CATEGORY_NOT_FOUND(1501, "error.1501", HttpStatus.NOT_FOUND),
     CATEGORY_EXISTED(1502, "error.1502", HttpStatus.CONFLICT),
+
+    // Lỗi brand (151x)
+    BRAND_NAME_REQUIRED(1510, "error.1510", HttpStatus.BAD_REQUEST),
+    BRAND_EXISTED(1511, "error.1511", HttpStatus.CONFLICT),
+    BRAND_NOT_FOUND(1512, "error.1512", HttpStatus.NOT_FOUND),
+
     // Lỗi sản phẩm (16xx)
     PRODUCT_NOT_FOUND(1601, "error.1601", HttpStatus.NOT_FOUND),
     PRODUCT_EXISTED(1602, "error.1602", HttpStatus.CONFLICT),
