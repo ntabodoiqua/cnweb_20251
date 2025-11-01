@@ -1,0 +1,129 @@
+name: CI/CD Pipeline - Frontend Deploy to Production
+
+on:
+  push:
+    tags:
+      - "fe_dev_*" # Trigger on tags like fe_dev_23.10.2025_v1
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository_owner }}/cnweb-frontend
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      tag: ${{ steps.extract_tag.outputs.TAG }}
+    steps:
+      - name: Extract tag name
+        id: extract_tag
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+          else
+            echo "TAG=latest" >> $GITHUB_OUTPUT
+          fi
+
+  build-and-push:
+    needs: prepare
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: frontend/package.json
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.prepare.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+          cache-from: type=gha,scope=frontend
+          cache-to: type=gha,mode=max,scope=frontend
+
+  deploy:
+    needs: [prepare, build-and-push]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Production Server
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            # Navigate to deployment directory
+            cd /opt/cnweb2025_1_fe || exit 1
+
+            # Pull latest changes
+            git pull origin anhnt/fe-test-deploy
+
+            # Login to GitHub Container Registry
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+
+            # Pull latest frontend image
+            export TAG=${{ needs.prepare.outputs.tag }}
+            docker compose -f frontend/docker-compose.prod.yaml pull
+
+            # Stop and remove old container
+            docker compose -f frontend/docker-compose.prod.yaml down
+
+            # Start new container
+            docker compose -f frontend/docker-compose.prod.yaml up -d
+
+            # Clean up old images
+            docker image prune -af
+
+            # Show running containers
+            docker compose -f frontend/docker-compose.prod.yaml ps
+
+      - name: Verify Deployment
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            # Wait for service to be ready
+            sleep 30
+
+            # Check if frontend is accessible
+            echo "Checking Frontend..."
+            curl -f http://localhost:3000 || curl -f http://localhost:80 || exit 1
+
+            echo "Frontend is healthy!"
+
+      - name: Notify deployment status
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Frontend deployment successful for tag ${{ needs.prepare.outputs.tag }}"
+          else
+            echo "❌ Frontend deployment failed for tag ${{ needs.prepare.outputs.tag }}"
+          fi
