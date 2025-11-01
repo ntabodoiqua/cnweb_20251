@@ -3,9 +3,14 @@ import Header from "./components/layout/header";
 import Footer from "./components/layout/footer";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "./components/context/auth.context";
-import { Spin, notification } from "antd";
+import LoadingSpinner from "./components/LoadingSpinner";
 import { getTokenInfo, isTokenExpired } from "./util/jwt";
 
+/**
+ * App Component - Main Layout
+ * - Kiểm tra và khởi tạo authentication state
+ * - Render Header/Footer với Outlet cho nested routes
+ */
 function App() {
   const { setAuth, appLoading, setAppLoading } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -23,12 +28,6 @@ function App() {
           if (isTokenExpired(token)) {
             // Token đã hết hạn
             localStorage.removeItem("access_token");
-            notification.warning({
-              message: "Phiên đăng nhập đã hết hạn",
-              description: "Vui lòng đăng nhập lại để tiếp tục.",
-              placement: "topRight",
-              duration: 3,
-            });
             setAuth({
               isAuthenticated: false,
               user: {
@@ -93,32 +92,27 @@ function App() {
     };
 
     initializeAuth();
-  }, [setAuth, setAppLoading, navigate]);
+  }, [setAuth, setAppLoading]);
 
+  // Loading state - Hiển thị spinner khi đang khởi tạo auth
+  if (appLoading) {
+    return <LoadingSpinner tip="Đang khởi tạo..." />;
+  }
+
+  // Main layout
   return (
     <div
-      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        minHeight: "100vh",
+      }}
     >
-      {appLoading === true ? (
-        <div
-          style={{
-            position: "fixed",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-          }}
-        >
-          <Spin />
-        </div>
-      ) : (
-        <>
-          <Header />
-          <main style={{ flex: 1 }}>
-            <Outlet />
-          </main>
-          <Footer />
-        </>
-      )}
+      <Header />
+      <main style={{ flex: 1 }}>
+        <Outlet />
+      </main>
+      <Footer />
     </div>
   );
 }
