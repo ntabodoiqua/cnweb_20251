@@ -55,6 +55,23 @@ const Header = () => {
         </Link>
       ),
     },
+    // Thêm menu Admin nếu user là ADMIN
+    ...(auth.user.role === ROLES.ADMIN
+      ? [
+          {
+            key: "admin",
+            label: (
+              <Link
+                to="/admin"
+                style={{ display: "flex", alignItems: "center", gap: "12px" }}
+              >
+                <SettingOutlined />
+                <span>Quản trị Admin</span>
+              </Link>
+            ),
+          },
+        ]
+      : []),
     {
       key: "settings",
       label: (

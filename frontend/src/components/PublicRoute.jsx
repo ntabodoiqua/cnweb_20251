@@ -29,7 +29,7 @@ const PublicRoute = ({ children, redirectTo = "/" }) => {
     setIsCheckingAuth(false);
   }, []);
 
-  // Hiển thị trang ngay lập tức, không cần loading
+  // Hiển thị trang ngay lập tức
   if (isCheckingAuth) {
     return <>{children}</>;
   }

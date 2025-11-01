@@ -207,7 +207,6 @@
   font-weight: 600;
   letter-spacing: 8px;
   text-align: center;
-  padding-left: 40px !important;
 }
 
 .verify-email-form .ant-input-prefix {
@@ -236,6 +235,12 @@
 
 .verify-email-button:active {
   transform: translateY(0);
+}
+
+/* Cân đối lại chữ Xác minh */
+.verify-email-button > span {
+  display: inline-block;
+  transform: translateX(10px);
 }
 
 .verify-email-footer {
