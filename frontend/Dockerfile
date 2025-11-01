@@ -18,14 +18,20 @@ RUN npm run build
 # Stage 2: Serve the application with Nginx
 FROM nginx:alpine
 
+# Install wget for healthcheck
+RUN apk add --no-cache wget
+
 # Copy custom nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Copy built files from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# Expose port 80
-EXPOSE 80
+# Create directory for certbot webroot
+RUN mkdir -p /var/www/certbot
+
+# Expose ports
+EXPOSE 80 443
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
