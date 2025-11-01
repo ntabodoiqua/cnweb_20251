@@ -1,5 +1,6 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import Header from "./components/layout/header";
+import Footer from "./components/layout/footer";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "./components/context/auth.context";
 import { Spin, notification } from "antd";
@@ -95,7 +96,9 @@ function App() {
   }, [setAuth, setAppLoading, navigate]);
 
   return (
-    <div>
+    <div
+      style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+    >
       {appLoading === true ? (
         <div
           style={{
@@ -110,7 +113,10 @@ function App() {
       ) : (
         <>
           <Header />
-          <Outlet />
+          <main style={{ flex: 1 }}>
+            <Outlet />
+          </main>
+          <Footer />
         </>
       )}
     </div>

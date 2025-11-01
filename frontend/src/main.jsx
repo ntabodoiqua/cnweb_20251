@@ -12,6 +12,7 @@ import LoginPage from "./pages/login.jsx";
 import VerifyEmailPage from "./pages/verify-email.jsx";
 import ForgotPasswordPage from "./pages/forgot-password.jsx";
 import ResetPasswordPage from "./pages/reset-password.jsx";
+import NotFoundPage from "./pages/not-found.jsx";
 import { AuthWrapper } from "./components/context/auth.context.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
@@ -49,6 +50,10 @@ const router = createBrowserRouter([
       //     </ProtectedRoute>
       //   ),
       // },
+      {
+        path: "*",
+        element: <NotFoundPage />,
+      },
     ],
   },
   {
