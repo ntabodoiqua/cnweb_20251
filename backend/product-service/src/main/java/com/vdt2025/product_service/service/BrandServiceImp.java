@@ -47,31 +47,23 @@ public class BrandServiceImp implements BrandService{
 //    FileStorageService fileStorageService;
 
     @Override
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public BrandResponse createBrand(BrandCreationRequest request) {
         // Kiểm tra xem brand đã tồn tại chưa
         if (brandRepository.existsByName(request.getName())) {
             log.warn("Brand {} already exists", request.getName());
             throw new AppException(ErrorCode.BRAND_EXISTED);
         }
-
-        // Lấy thông tin người dùng hiện tại từ SecurityContext
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserResponse currentUser = userServiceClient.getUserByUsername(username).getResult();
-        log.info("Current user: {}", username);
-
         // Tạo brand mới
         var brand = brandMapper.toBrand(request);
-        brand.setCreatedBy(currentUser.getId());
         brand.setActive(true);
         brand = brandRepository.save(brand);
-        log.info("Brand {} created successfully by user {}", brand.getName(), currentUser.getUsername());
+        log.info("Brand {} created successfully by user {}", brand.getName(), "Admin");
         // Trả về thông tin brand đã tạo
         return brandMapper.toBrandResponse(brand);
     }
 
     @Override
-    @Cacheable(value = "brands", key = "#filter.toString() + #pageable.toString()")
     public Page<BrandResponse> searchBrands(BrandFilterRequest filter, Pageable pageable) {
         Specification<Brand> spec = BrandSpecification.withFilter(filter);
         Page<Brand> resultPage = brandRepository.findAll(spec, pageable);
@@ -89,19 +81,10 @@ public class BrandServiceImp implements BrandService{
 
     @Override
     @CacheEvict(value = "brands", key = "#id")
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    @PreAuthorize("hasRole('ADMIN')")
     public BrandResponse updateBrand(String id, BrandUpdateRequest request) {
         Brand brand = brandRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
-
-        // Lấy thông tin người dùng hiện tại từ SecurityContext
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        // Kiểm tra quyền truy cập
-        if (!checkAccessRights(brand)) {
-            log.warn("User {} does not have access rights to update brand {}", username, brand.getName());
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
 
         // Kiểm tra xem tên brand mới có trùng với tên brand khác không
         if (!brand.getName().equalsIgnoreCase(request.getName())
@@ -173,18 +156,4 @@ public class BrandServiceImp implements BrandService{
 //        log.info("Brand {} has been deleted successfully", brand.getName());
 //    }
 
-    // Hàm chung để kiểm tra quyền truy cập
-    private boolean checkAccessRights(Brand brand) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        UserResponse currentUser = userServiceClient.getUserByUsername(username).getResult();
-
-        boolean isAdmin = currentUser.getRole().getName().equals("ADMIN");
-        boolean isOwner = brand.getCreatedBy().equals(currentUser.getId());
-
-        if (!isAdmin && !isOwner) {
-            log.warn("User {} is not authorized to access category {}", currentUser.getUsername(), brand.getName());
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
-        return true;
-    }
 }

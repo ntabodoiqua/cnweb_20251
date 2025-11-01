@@ -34,11 +34,11 @@ public class Brand {
     @Column(name = "logo_name")
     String logoName;
 
+    @Column(name = "logo_url", columnDefinition = "TEXT")
+    String logoUrl;
+
     @Column(name = "is_active", nullable = false)
     boolean isActive = true;
-
-    @Column(name = "created_by")
-    String createdBy;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

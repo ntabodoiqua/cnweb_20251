@@ -24,7 +24,7 @@ public class BrandController {
     BrandServiceImp brandService;
 
     // Controller để lấy danh sách các brand
-    @GetMapping
+    @GetMapping("/public")
     public ApiResponse<Page<BrandResponse>> getBrands(
             @ModelAttribute BrandFilterRequest filter,
             Pageable pageable
@@ -36,7 +36,7 @@ public class BrandController {
     }
 
     // Lấy brand theo id
-    @GetMapping("/{id}")
+    @GetMapping("/public/{id}")
     public ApiResponse<BrandResponse> getBrandById(@PathVariable String id) {
         BrandResponse brand = brandService.getBrandById(id);
         return ApiResponse.<BrandResponse>builder()

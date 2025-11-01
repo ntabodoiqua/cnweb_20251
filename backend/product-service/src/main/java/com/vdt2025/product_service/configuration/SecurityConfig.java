@@ -37,6 +37,12 @@ public class SecurityConfig {
             "/users"
     };
 
+    private static final String[] PUBLIC_GET_ENDPOINTS = {
+            "/products/public/**",
+            "/categories/public/**",
+            "/brands/public/**"
+    };
+
     CustomJwtDecoder customJwtDecoder;
 
     @Autowired
@@ -55,6 +61,8 @@ public class SecurityConfig {
                                 .requestMatchers(AUTH_ENDPOINTS).permitAll()
                                 // Allow POST to create users
                                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                                // Allow GET requests to public endpoints
+                                .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                                 // All other requests need authentication
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 ->

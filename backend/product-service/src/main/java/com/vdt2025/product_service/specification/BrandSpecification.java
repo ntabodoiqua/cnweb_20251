@@ -21,9 +21,6 @@ public class BrandSpecification {
                     predicates.add(cb.like(cb.lower(root.get("name")),
                             "%" + filter.getName().toLowerCase().trim() + "%"));
                 }
-                if (StringUtils.hasText(filter.getCreatedBy())) {
-                    predicates.add(cb.equal(root.get("createdBy"), filter.getCreatedBy()));
-                }
                 if(filter.getIsActive() != null) {
                     predicates.add(cb.equal(root.get("isActive"), filter.getIsActive()));
                 }

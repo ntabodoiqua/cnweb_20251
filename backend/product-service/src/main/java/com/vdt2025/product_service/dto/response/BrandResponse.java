@@ -15,8 +15,8 @@ public class BrandResponse {
     String name;
     String description;
     String logoName;
-    boolean isActive;
-    String createdBy;
+    String logoUrl;
+    Boolean isActive;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }
