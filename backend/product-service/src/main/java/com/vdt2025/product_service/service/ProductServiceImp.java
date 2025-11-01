@@ -57,7 +57,7 @@ public class ProductServiceImp implements ProductService {
         UserResponse user = userServiceClient.getUserByUsername(username).getResult();
         // Tạo sản phẩm mới
         var product = productMapper.toProduct(request);
-        product.setImage_name(null);
+//        product.setImage_name(null);
         product.setCreatedBy(user.getId());
         product.setActive(true);
         product.setCategory(category);
@@ -156,7 +156,7 @@ public class ProductServiceImp implements ProductService {
         }
         // Lưu tệp và cập nhật tên ảnh
         String fileName = fileServiceClient.uploadFile(file).getResult();
-        product.setImage_name(fileName);
+//        product.setImage_name(fileName);
         productRepository.save(product);
         log.info("Thumbnail for product {} updated successfully", product.getName());
         return fileName;

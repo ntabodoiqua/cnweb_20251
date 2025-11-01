@@ -18,39 +18,27 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "categories")
-public class Category {
+@Table(name = "brands")
+public class Brand {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @NotBlank(message = "Category name is required")
+    @NotBlank(message = "Brand name is required")
     @Column(nullable = false, unique = true)
     String name;
 
     @Column(columnDefinition = "TEXT")
     String description;
 
-    @Column(name = "image_name")
-    String imageName;
+    @Column(name = "logo_name")
+    String logoName;
 
-    @Column(name = "parent_id")
-    String parentId; // Để hỗ trợ danh mục con (ví dụ: Thời trang > Thời trang nam)
-
-    @Column(name = "display_order")
-    Integer displayOrder; // Thứ tự hiển thị
+    @Column(name = "logo_url", columnDefinition = "TEXT")
+    String logoUrl;
 
     @Column(name = "is_active", nullable = false)
-    @Builder.Default
     boolean isActive = true;
-
-    // Relationship với Product
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL)
-    @Builder.Default
-    List<Product> products = new ArrayList<>();
-
-    @Column(name = "created_by")
-    String createdBy;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -59,4 +47,9 @@ public class Category {
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     LocalDateTime updatedAt;
+
+    // Relationship với Product
+    @OneToMany(mappedBy = "brand", cascade = CascadeType.ALL)
+    @Builder.Default
+    List<Product> products = new ArrayList<>();
 }

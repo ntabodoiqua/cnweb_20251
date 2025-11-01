@@ -37,3 +37,5 @@ md file/
 # logs
 logs
 *.log
+
+node_modules

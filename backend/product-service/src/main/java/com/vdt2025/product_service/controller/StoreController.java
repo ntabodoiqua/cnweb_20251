@@ -24,6 +24,7 @@ public class StoreController {
     MessageSource messageSource;
 
 //    Lấy tất cả cửa hàng với phân trang
+    @GetMapping
     public ApiResponse<Page<StoreResponse>> getAllStores(Pageable pageable, Locale locale) {
         var result = storeService.getAllStores(pageable);
         return ApiResponse.<Page<StoreResponse>>builder()
@@ -32,6 +33,7 @@ public class StoreController {
                 .build();
     }
 
+    // Vô hiệu hóa cửa hàng theo sellerProfileId
     @PutMapping("/{sellerProfileId}/deactivate")
     public ApiResponse<Void> deactivateStore(@PathVariable String sellerProfileId, Locale locale) {
         log.info("Request to deactivate store for seller profile ID: {}", sellerProfileId);
@@ -40,5 +42,4 @@ public class StoreController {
                 .message(messageSource.getMessage("success.store.deactivated", null, locale))
                 .build();
     }
-
 }
