@@ -1,5 +1,11 @@
 import React from "react";
-import { Button, Result } from "antd";
+import { Button } from "antd";
+import {
+  HomeOutlined,
+  ReloadOutlined,
+  WarningOutlined,
+} from "@ant-design/icons";
+import "./ErrorBoundary.css";
 
 /**
  * ErrorBoundary - Component bắt lỗi runtime trong React
@@ -46,57 +52,62 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       // Fallback UI khi có lỗi
       return (
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "100vh",
-            padding: "20px",
-          }}
-        >
-          <Result
-            status="error"
-            title="Oops! Đã có lỗi xảy ra"
-            subTitle="Xin lỗi, đã có lỗi không mong muốn xảy ra. Vui lòng thử lại sau."
-            extra={[
-              <Button type="primary" key="home" onClick={this.handleReset}>
-                Về trang chủ
-              </Button>,
-              <Button key="reload" onClick={() => window.location.reload()}>
-                Tải lại trang
-              </Button>,
-            ]}
-          >
-            {process.env.NODE_ENV === "development" && (
-              <div
-                style={{
-                  textAlign: "left",
-                  background: "#f5f5f5",
-                  padding: "16px",
-                  borderRadius: "8px",
-                  marginTop: "16px",
-                }}
+        <div className="error-boundary-container">
+          <div className="error-boundary-card">
+            <div className="error-boundary-icon-wrapper">
+              <WarningOutlined className="error-boundary-icon" />
+            </div>
+
+            <div className="error-boundary-code">500</div>
+
+            <h2 className="error-boundary-title">Oops! Đã có lỗi xảy ra</h2>
+
+            <p className="error-boundary-description">
+              Xin lỗi, đã có lỗi không mong muốn xảy ra. Đừng lo lắng, đây không
+              phải lỗi của bạn. Vui lòng thử tải lại trang hoặc quay về trang
+              chủ.
+            </p>
+
+            <div className="error-boundary-buttons">
+              <Button
+                type="primary"
+                size="large"
+                icon={<HomeOutlined />}
+                onClick={this.handleReset}
+                className="error-boundary-button-primary"
               >
-                <details style={{ whiteSpace: "pre-wrap" }}>
-                  <summary style={{ cursor: "pointer", marginBottom: "8px" }}>
-                    <strong>Chi tiết lỗi (Development)</strong>
+                Về trang chủ
+              </Button>
+
+              <Button
+                size="large"
+                icon={<ReloadOutlined />}
+                onClick={() => window.location.reload()}
+                className="error-boundary-button-secondary"
+              >
+                Tải lại trang
+              </Button>
+            </div>
+
+            {process.env.NODE_ENV === "development" && (
+              <div className="error-boundary-details">
+                <details>
+                  <summary>
+                    <strong>Chi tiết lỗi (Development Mode)</strong>
                   </summary>
-                  <div style={{ fontSize: "12px", color: "#666" }}>
+                  <div className="error-boundary-details-content">
                     <p>
                       <strong>Error:</strong> {this.state.error?.toString()}
                     </p>
                     <p>
-                      <strong>Stack:</strong>
+                      <strong>Stack Trace:</strong>
                     </p>
-                    <pre style={{ fontSize: "11px", overflow: "auto" }}>
-                      {this.state.errorInfo?.componentStack}
-                    </pre>
+                    <pre>{this.state.errorInfo?.componentStack}</pre>
                   </div>
                 </details>
               </div>
             )}
-          </Result>
+          </div>
         </div>
       );
     }

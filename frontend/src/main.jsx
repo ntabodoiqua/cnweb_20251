@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import "./styles/global.css";
+import "./styles/antd-custom.css";
 import { RouterProvider } from "react-router-dom";
 import { AuthWrapper } from "./components/context/auth.context.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";

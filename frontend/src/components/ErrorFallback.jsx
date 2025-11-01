@@ -1,6 +1,12 @@
 import React from "react";
 import { useRouteError, useNavigate } from "react-router-dom";
-import { Button, Result } from "antd";
+import { Button } from "antd";
+import {
+  HomeOutlined,
+  ReloadOutlined,
+  ExclamationCircleOutlined,
+} from "@ant-design/icons";
+import "./ErrorFallback.css";
 
 /**
  * ErrorFallback component cho React Router errorElement
@@ -21,55 +27,49 @@ const ErrorFallback = () => {
   };
 
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        minHeight: "100vh",
-        padding: "20px",
-        background: "#f0f2f5",
-      }}
-    >
-      <Result
-        status="error"
-        title="Oops! Đã có lỗi xảy ra"
-        subTitle={
-          error?.message ||
-          "Xin lỗi, đã có lỗi không mong muốn xảy ra khi tải trang này."
-        }
-        extra={[
-          <Button type="primary" key="home" onClick={handleGoHome}>
-            Về trang chủ
-          </Button>,
-          <Button key="reload" onClick={handleReload}>
-            Tải lại trang
-          </Button>,
-        ]}
-      >
-        {process.env.NODE_ENV === "development" && error && (
-          <div
-            style={{
-              textAlign: "left",
-              background: "#fff",
-              padding: "16px",
-              borderRadius: "8px",
-              marginTop: "16px",
-              border: "1px solid #d9d9d9",
-            }}
+    <div className="error-fallback-container">
+      <div className="error-fallback-card">
+        <div className="error-fallback-icon-wrapper">
+          <ExclamationCircleOutlined className="error-fallback-icon" />
+        </div>
+
+        <div className="error-fallback-code">Lỗi</div>
+
+        <h2 className="error-fallback-title">Oops! Đã có lỗi xảy ra</h2>
+
+        <p className="error-fallback-description">
+          {error?.message ||
+            "Xin lỗi, đã có lỗi không mong muốn xảy ra khi tải trang này. Đừng lo lắng, vui lòng thử tải lại trang hoặc quay về trang chủ."}
+        </p>
+
+        <div className="error-fallback-buttons">
+          <Button
+            type="primary"
+            size="large"
+            icon={<HomeOutlined />}
+            onClick={handleGoHome}
+            className="error-fallback-button-primary"
           >
-            <details style={{ whiteSpace: "pre-wrap" }}>
-              <summary
-                style={{
-                  cursor: "pointer",
-                  marginBottom: "8px",
-                  fontWeight: "bold",
-                  color: "#cf1322",
-                }}
-              >
-                Chi tiết lỗi (Development Mode)
+            Về trang chủ
+          </Button>
+
+          <Button
+            size="large"
+            icon={<ReloadOutlined />}
+            onClick={handleReload}
+            className="error-fallback-button-secondary"
+          >
+            Tải lại trang
+          </Button>
+        </div>
+
+        {process.env.NODE_ENV === "development" && error && (
+          <div className="error-fallback-details">
+            <details>
+              <summary>
+                <strong>Chi tiết lỗi (Development Mode)</strong>
               </summary>
-              <div style={{ fontSize: "12px", color: "#666" }}>
+              <div className="error-fallback-details-content">
                 <p>
                   <strong>Error:</strong> {error.message}
                 </p>
@@ -78,24 +78,14 @@ const ErrorFallback = () => {
                     <p>
                       <strong>Stack Trace:</strong>
                     </p>
-                    <pre
-                      style={{
-                        fontSize: "11px",
-                        overflow: "auto",
-                        background: "#f5f5f5",
-                        padding: "8px",
-                        borderRadius: "4px",
-                      }}
-                    >
-                      {error.stack}
-                    </pre>
+                    <pre>{error.stack}</pre>
                   </>
                 )}
               </div>
             </details>
           </div>
         )}
-      </Result>
+      </div>
     </div>
   );
 };
