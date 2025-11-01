@@ -1,0 +1,73 @@
+server:
+  port: 8086
+spring:
+  application:
+    name: payment-service
+  datasource:
+    url: jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25061/payment_service?sslmode=require
+    username: doadmin
+    password: AVNS_yX_L2SKXt73ktjTiGbU
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+  cache:
+    type: redis
+  rabbitmq:
+    addresses: amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
+    username: xqjmojji
+    password: hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH
+    virtual-host: xqjmojji
+    ssl:
+      enabled: true
+  data:
+    redis:
+      host: db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
+      port: 25061
+      username: default
+      password: AVNS_N-gwsyNb6xBC3fXPdQp
+      ssl:
+        enabled: true
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://discovery-service:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+jwt:
+  signerKey: cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2
+  valid-duration: 3600
+  refreshable-duration: 86400
+
+logging:
+  level:
+    org.springframework.data.redis: DEBUG
+    io.lettuce.core: DEBUG
+
+# ZaloPay Configuration
+zalopay:
+  # App ID được cấp bởi ZaloPay (Sandbox)
+  app-id: 2554
+  # Key1 dùng để tạo MAC
+  key1: sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn
+  # Key2 dùng để verify callback
+  key2: trMrHtvjo6myautxDUiAcYsVtaeQ8nhf
+  # Endpoint tạo đơn hàng (Sandbox)
+  create-order-url: https://sb-openapi.zalopay.vn/v2/create
+  # Endpoint query đơn hàng (Sandbox)
+  query-order-url: https://sb-openapi.zalopay.vn/v2/query
+  # Endpoint lấy danh sách ngân hàng (Sandbox)
+  get-bank-list-url: https://sbgateway.zalopay.vn/api/getlistmerchantbanks
+  # Callback URL (ZaloPay sẽ gọi endpoint này khi thanh toán hoàn tất)
+  # IMPORTANT: Trong production, nên dùng URL qua API Gateway
+  # Development: http://localhost:8086/api/v1/payments/zalopay/callback (direct)
+  # Production: https://your-domain.com/api/payment/v1/payments/zalopay/callback (via gateway)
+  callback-url: ${ZALOPAY_CALLBACK_URL:http://localhost:8086/api/v1/payments/zalopay/callback}
+  # Redirect URL sau khi thanh toán
+  redirect-url: ${ZALOPAY_REDIRECT_URL:http://localhost:3000/payment/result}
+  # Thời gian hết hạn đơn hàng (giây) - 15 phút
+  expire-duration-seconds: 900

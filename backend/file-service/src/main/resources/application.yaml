@@ -4,36 +4,50 @@ spring:
   application:
     name: file-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/file-service
-    username: postgres
-    password: admin
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db-postgresql-sgp1-93557-do-user-27848320-0.d.db.ondigitalocean.com:25060/file_service?sslmode=require}
+    username: ${SPRING_DATASOURCE_USERNAME:doadmin}
+    password: ${SPRING_DATASOURCE_PASSWORD:AVNS_GP853Gug731-gzXfmnT}
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: ${SPRING_JPA_SHOW_SQL:true}
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
   cache:
     type: redis
-  redis:
-    host: localhost
-    port: 6379
+  data:
+    redis:
+      host: db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
+      port: 25061
+      username: default
+      password: AVNS_N-gwsyNb6xBC3fXPdQp
+      ssl:
+        enabled: true
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://discovery-service:8761/eureka/}
   instance:
     prefer-ip-address: true
 jwt:
-  signerKey: cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2
-  valid-duration: 3600
-  refreshable-duration: 86400
+  signerKey: ${JWT_SIGNERKEY:cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2}
+  valid-duration: ${JWT_VALID_DURATION:3600}
+  refreshable-duration: ${JWT_REFRESHABLE_DURATION:86400}
 
 file:
-  directory: ./uploads/
-  max-size: 10MB
+  max-size: 10485760
+  s3:
+    endpoint: ${S3_ENDPOINT:https://sgp1.digitaloceanspaces.com}
+    region: ${S3_REGION:sgp1}
+    bucket-name: ${S3_BUCKET_NAME:hla}
+    access-key: ${S3_ACCESS_KEY:DO007GZR7WN63YHWKLVU}
+    secret-key: ${S3_SECRET_KEY:LPB+xqPNyJ8RTN7Syg3932nDFqZOsGb2X3wa6jWV+yA}
+  cleanup:
+    enabled: ${FILE_CLEANUP_ENABLED:true}
+    cron: ${FILE_CLEANUP_CRON:0 0 2 * * *} # 2:00 AM mỗi ngày
+    batch-size: ${FILE_CLEANUP_BATCH_SIZE:100}
 
 app:
-  default-admin-id: d50f8589-da20-49e8-a3f3-6a115d1f68d7
+  default-admin-id: ${DEFAULT_ADMIN_ID:d50f8589-da20-49e8-a3f3-6a115d1f68d7}

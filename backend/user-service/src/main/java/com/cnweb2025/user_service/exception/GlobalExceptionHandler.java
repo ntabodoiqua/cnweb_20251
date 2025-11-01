@@ -1,29 +1,38 @@
 package com.cnweb2025.user_service.exception;
 
 import com.cnweb2025.user_service.dto.ApiResponse;
+import com.cnweb2025.user_service.service.MessageService;
 import jakarta.validation.ConstraintViolation;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.nio.file.AccessDeniedException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+
 import java.util.Map;
 import java.util.Objects;
 
 @ControllerAdvice
 @Slf4j
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
     private static final String MIN_ATTRIBUTE = "min";
+    private final MessageService messageService;
+    private final MessageSource messageSource;
 
     @ExceptionHandler(value = RuntimeException.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
         log.error("Exception: ", exception);
+        ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
         ApiResponse apiResponse = new ApiResponse();
 
-        apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
-        apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(messageService.getMessage(errorCode.getMessageKey()));
 
         return ResponseEntity.badRequest().body(apiResponse);
     }
@@ -34,7 +43,7 @@ public class GlobalExceptionHandler {
         ApiResponse apiResponse = new ApiResponse();
 
         apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(errorCode.getMessage());
+        apiResponse.setMessage(messageService.getMessage(errorCode.getMessageKey()));
 
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
@@ -46,7 +55,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getStatusCode())
                 .body(ApiResponse.builder()
                         .code(errorCode.getCode())
-                        .message(errorCode.getMessage())
+                        .message(messageService.getMessage(errorCode.getMessageKey()))
                         .build());
     }
 
@@ -73,17 +82,29 @@ public class GlobalExceptionHandler {
         ApiResponse apiResponse = new ApiResponse();
 
         apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(
-                Objects.nonNull(attributes)
-                        ? mapAttribute(errorCode.getMessage(), attributes)
-                        : errorCode.getMessage());
+        
+        // Get localized message with parameters
+        String localizedMessage;
+        if (Objects.nonNull(attributes)) {
+            String minValue = String.valueOf(attributes.get(MIN_ATTRIBUTE));
+            localizedMessage = messageService.getMessage(errorCode.getMessageKey(), new Object[]{minValue});
+        } else {
+            localizedMessage = messageService.getMessage(errorCode.getMessageKey());
+        }
+        
+        apiResponse.setMessage(localizedMessage);
 
         return ResponseEntity.badRequest().body(apiResponse);
     }
 
-    private String mapAttribute(String message, Map<String, Object> attributes) {
-        String minValue = String.valueOf(attributes.get(MIN_ATTRIBUTE));
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    ResponseEntity<com.vdt2025.common_dto.dto.response.ApiResponse> handleMaxUploadSizeExceeded(MaxUploadSizeExceededException exception) {
+        log.error("File upload quá kích thước cho phép: ", exception);
 
-        return message.replace("{" + MIN_ATTRIBUTE + "}", minValue);
+        com.vdt2025.common_dto.dto.response.ApiResponse apiResponse = new com.vdt2025.common_dto.dto.response.ApiResponse();
+        apiResponse.setCode(ErrorCode.FILE_SIZE_EXCEEDED.getCode());
+        apiResponse.setMessage(messageService.getMessage(ErrorCode.FILE_SIZE_EXCEEDED.getMessageKey()));
+
+        return ResponseEntity.badRequest().body(apiResponse);
     }
 }

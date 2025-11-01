@@ -1,6 +1,9 @@
 package com.cnweb2025.user_service.service;
 
+import com.vdt2025.common_dto.dto.MessageType;
 import com.vdt2025.common_dto.dto.UserCreatedEvent;
+import com.vdt2025.common_dto.dto.UserForgotPasswordEvent;
+import com.vdt2025.common_dto.dto.response.FileInfoResponse;
 import com.vdt2025.common_dto.service.FileServiceClient;
 import com.cnweb2025.user_service.constant.PredefinedRole;
 import com.cnweb2025.user_service.dto.request.user.UserCreationRequest;
@@ -8,16 +11,17 @@ import com.cnweb2025.user_service.dto.request.user.UserUpdateRequest;
 import com.cnweb2025.user_service.dto.response.UserResponse;
 import com.cnweb2025.user_service.entity.Role;
 import com.cnweb2025.user_service.entity.User;
+import com.cnweb2025.user_service.enums.OtpType;
 import com.cnweb2025.user_service.exception.AppException;
 import com.cnweb2025.user_service.exception.ErrorCode;
 import com.cnweb2025.user_service.mapper.UserMapper;
 import com.cnweb2025.user_service.repository.RoleRepository;
 import com.cnweb2025.user_service.repository.UserRepository;
+import com.cnweb2025.user_service.messaging.RabbitMQMessagePublisher;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -25,8 +29,11 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import com.cnweb2025.user_service.configuration.RabbitMQConfig;
+
+import java.util.HashSet;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -38,37 +45,41 @@ public class UserServiceImp implements UserService{
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
     FileServiceClient fileServiceClient;
-    RabbitTemplate rabbitTemplate;
+    RabbitMQMessagePublisher messagePublisher;
+    OtpService otpService;
     // FileStorageService fileStorageService;
 
     @Override
     public UserResponse createUser(UserCreationRequest request) {
         User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        // Kiểm tra xem vai trò đã được định nghĩa chưa, nếu chưa thì tạo mới
-        if (roleRepository.findById(PredefinedRole.GUEST_ROLE).isEmpty()) {
-            Role guestRole = new Role();
-            guestRole.setName(PredefinedRole.GUEST_ROLE);
-            guestRole.setDescription("Guest role to be assigned to new users. Can view products and categories.");
-            roleRepository.save(guestRole);
-        }
-        // Gán vai trò cho người dùng
-        user.setRole(roleRepository.findById(PredefinedRole.GUEST_ROLE)
-                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND)));
+        // Gán role mặc định
+        Set<Role> roles = new HashSet<>();
+        roleRepository.findById(PredefinedRole.USER_ROLE)
+                .ifPresent(roles::add);
+        user.setRoles(roles);
         // Gán trạng thái kích hoạt cho người dùng
         user.setEnabled(true);
+        // Đặt trạng thái chưa xác thực email
+        user.setVerified(false);
         // Lưu người dùng vào cơ sở dữ liệu
         try {
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException e) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
+        
+        // Tạo OTP code cho việc xác thực email
+        String otpCode = otpService.createOtpCode(user.getId(), OtpType.EMAIL_VERIFICATION);
+        log.info("OTP code created for user: {}", user.getUsername());
+        
         com.vdt2025.common_dto.dto.UserCreatedEvent event = UserCreatedEvent.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .otpCode(otpCode)
                 .build();
-        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE_NAME, RabbitMQConfig.ROUTING_KEY, event);
+        messagePublisher.publish(MessageType.USER_CREATED, event);
         log.info("User {} created successfully with ID {}", user.getUsername(), user.getId());
         return userMapper.toUserResponse(user);
     }
@@ -99,7 +110,7 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'GUEST', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SELLER')")
     public String changeMyPassword(String oldPassword, String newPassword) {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
@@ -125,28 +136,28 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
-    @PreAuthorize("hasAnyRole('ADMIN', 'GUEST', 'MANAGER')")
+    @Transactional
     public String setMyAvatar(MultipartFile file) {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
-        User user = userRepository.findByUsername(username)
+        User user = userRepository.findByUsernameAndEnabledTrueAndIsVerifiedTrue(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
             throw new AppException(ErrorCode.INVALID_IMAGE_TYPE);
         }
-
-        String fileName = fileServiceClient.uploadFile(file).getResult();
-        user.setAvatarName(fileName);
+        FileInfoResponse response = fileServiceClient.uploadPublicFile(file).getResult();
+        user.setAvatarUrl(response.getFileUrl());
+        user.setAvatarName(response.getFileName());
         userRepository.save(user);
-        return fileName;
+        return response.getFileUrl();
     }
 
 
     @Override
     @CacheEvict(value = "userCache",
             key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()")
-    @PreAuthorize("hasAnyRole('ADMIN', 'GUEST', 'MANAGER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SELLER')")
     public UserResponse updateMyInfo(UserUpdateRequest request) {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
@@ -176,8 +187,125 @@ public class UserServiceImp implements UserService{
         // Đặt trạng thái người dùng là không hoạt động
         user.setEnabled(false);
         userRepository.save(user);
+
+        // Gửi sự kiện USER_DISABLED qua RabbitMQ
+        com.vdt2025.common_dto.dto.UserDisabledEvent event = com.vdt2025.common_dto.dto.UserDisabledEvent.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .build();
+        messagePublisher.publish(MessageType.USER_DISABLED, event);
+
         log.info("User {} disabled their account successfully", username);
         return "Account disabled successfully";
     }
+
+    @Override
+    public String verifyEmail(String username, String otpCode) {
+        log.info("Verifying email for user: {}", username);
+        
+        // Tìm user theo username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        
+        // Kiểm tra xem user đã được xác thực chưa
+        if (user.isVerified()) {
+            log.warn("User {} already verified", username);
+            return "Email already verified";
+        }
+        
+        // Xác thực OTP code
+        otpService.verifyOtpCode(user.getId(), otpCode, OtpType.EMAIL_VERIFICATION);
+        
+        // Cập nhật trạng thái xác thực
+        user.setVerified(true);
+        userRepository.save(user);
+        
+        log.info("User {} verified their email successfully", username);
+        return "Email verified successfully";
+    }
+
+    @Override
+    public String resendOtp(String username) {
+        log.info("Resending OTP for user: {}", username);
+        
+        // Tìm user theo username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        
+        // Kiểm tra xem user đã được xác thực chưa
+        if (user.isVerified()) {
+            log.warn("User {} already verified", username);
+            return "Email already verified";
+        }
+        
+        // Tạo OTP code mới
+        String otpCode = otpService.createOtpCode(user.getId(), OtpType.EMAIL_VERIFICATION);
+        
+        // Gửi OTP qua RabbitMQ
+        UserCreatedEvent event = UserCreatedEvent.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .otpCode(otpCode)
+                .build();
+        messagePublisher.publish(MessageType.EMAIL_VERIFICATION, event);
+        
+        log.info("OTP resent for user: {}", username);
+        return "OTP code has been resent to your email";
+    }
+
+    @Override
+    public String forgotPassword(String username) {
+        log.info("Processing forgot password for user: {}", username);
+
+        // Tìm user theo username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Tạo OTP code cho việc đặt lại mật khẩu
+        String otpCode = otpService.createOtpCode(user.getId(), OtpType.PASSWORD_RESET);
+
+        // Gửi OTP qua RabbitMQ
+        UserForgotPasswordEvent event = UserForgotPasswordEvent.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .otpCode(otpCode)
+                .build();
+        messagePublisher.publish(MessageType.PASSWORD_RESET, event);
+
+        log.info("Forgot password OTP sent for user: {}", username);
+        return "Password reset OTP has been sent to your email";
+    }
+
+    @Override
+    public String resetPassword(String username, String otpCode, String newPassword) {
+        log.info("Resetting password for user: {}", username);
+
+        // Tìm user theo username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Xác thực OTP code
+        otpService.verifyOtpCode(user.getId(), otpCode, OtpType.PASSWORD_RESET);
+
+        // Cập nhật mật khẩu mới
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+
+        log.info("Password reset successfully for user: {}", username);
+        return "Password has been reset successfully";
+    }
+
+    public String getMyAvatarLink() {
+        log.info("Fetching avatar link for current user");
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        User user = userRepository.findByUsernameAndEnabledTrueAndIsVerifiedTrue(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        return user.getAvatarName();
+    }
+
 
 }

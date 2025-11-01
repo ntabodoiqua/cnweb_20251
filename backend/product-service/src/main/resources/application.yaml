@@ -4,9 +4,9 @@ spring:
   application:
     name: product-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/product-service
-    username: postgres
-    password: admin
+    url: jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25061/product_service?sslmode=require
+    username: doadmin
+    password: AVNS_yX_L2SKXt73ktjTiGbU
   jpa:
     hibernate:
       ddl-auto: update
@@ -17,9 +17,21 @@ spring:
       max-request-size: 10MB
   cache:
     type: redis
-  redis:
-    host: localhost
-    port: 6379
+  data:
+    redis:
+      host: db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
+      port: 25061
+      username: default
+      password: AVNS_N-gwsyNb6xBC3fXPdQp
+      ssl:
+        enabled: true
+  rabbitmq:
+    addresses: amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
+    username: xqjmojji
+    password: hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH
+    virtual-host: xqjmojji
+    ssl:
+      enabled: true
   kafka:
     bootstrap-servers: localhost:9092
     consumer:
@@ -29,7 +41,7 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://discovery-service:8761/eureka/}
   instance:
     prefer-ip-address: true
 jwt:

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title th:text="${subject}"></title>
     <style>
         body {
@@ -17,18 +17,62 @@
             background-color: #ffffff;
             padding: 20px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         .header {
             color: #333;
             text-align: center;
             padding-bottom: 20px;
-            border-bottom: 1px solid #eeeeee;
+            border-bottom: 2px solid #c8102e;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #c8102e;
+            margin-bottom: 10px;
+        }
+        .logo-subtitle {
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
         }
         .content {
             padding: 20px 0;
             line-height: 1.6;
             color: #555555;
+        }
+        .otp-box {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+            border: 2px solid #c8102e;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .otp-code {
+            font-size: 32px;
+            font-weight: bold;
+            color: #c8102e;
+            letter-spacing: 5px;
+            font-family: "Courier New", monospace;
+        }
+        .warning {
+            color: #ff6b6b;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #c8102e;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .info-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .info-box li {
+            margin: 5px 0;
         }
         .footer {
             text-align: center;
@@ -37,21 +81,67 @@
             padding-top: 20px;
             border-top: 1px solid #eeeeee;
         }
+        .footer-brand {
+            color: #c8102e;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header">
-        <h1 th:text="${subject}">Chào mừng bạn!</h1>
+        <div class="logo">
+            🛒 HUSTBuy
+            <div class="logo-subtitle">Sàn Thương Mại Điện Tử - Đại học Bách Khoa Hà Nội</div>
+        </div>
+        <h2 th:text="${subject}">Xác thực tài khoản</h2>
     </div>
     <div class="content">
         <p>Xin chào <strong th:text="${username}">Bạn</strong>,</p>
-        <p>Cảm ơn bạn đã đăng ký tài khoản trên NTA VDT_2025. Chúng tôi rất vui mừng chào đón bạn đến với cộng đồng của chúng tôi.</p>
-        <p>Nếu bạn có bất kỳ câu hỏi nào, xin vui lòng liên hệ với chúng tôi qua email này.</p>
-        <p>Trân trọng,<br/>Đội ngũ NTA VDT_2025</p>
+        <p>
+            Cảm ơn bạn đã đăng ký tài khoản trên <strong>HUSTBuy</strong> - nền tảng
+            thương mại điện tử dành riêng cho cộng đồng sinh viên Bách Khoa Hà Nội.
+            Chúng mình rất vui mừng chào đón bạn!
+        </p>
+
+        <p>
+            Để hoàn tất quá trình đăng ký và bắt đầu trải nghiệm mua sắm, vui lòng
+            sử dụng mã OTP dưới đây để xác thực tài khoản:
+        </p>
+
+        <div class="otp-box">
+            <p style="margin: 0; font-size: 18px; color: #333">
+                Mã xác thực của bạn:
+            </p>
+            <p class="otp-code" th:text="${otpCode}">123456</p>
+            <p class="warning">⚠️ Mã này sẽ hết hạn sau 5 phút</p>
+        </div>
+
+        <div class="info-box">
+            <p><strong>📌 Lưu ý quan trọng:</strong></p>
+            <ul>
+                <li>Không chia sẻ mã OTP này với bất kỳ ai, kể cả admin HUSTBuy</li>
+                <li>Mã OTP chỉ có hiệu lực trong vòng 5 phút kể từ khi nhận email</li>
+                <li>Nếu bạn không yêu cầu đăng ký, vui lòng bỏ qua email này hoặc liên hệ với chúng mình ngay</li>
+                <li>Sau khi xác thực thành công, bạn có thể bắt đầu mua sắm trên HUSTBuy</li>
+            </ul>
+        </div>
+
+        <p>
+            Nếu bạn gặp bất kỳ khó khăn nào trong quá trình đăng ký hoặc có câu hỏi về
+            nền tảng, đừng ngần ngại liên hệ với đội ngũ hỗ trợ của chúng mình.
+        </p>
+        <p>Chúc bạn có trải nghiệm mua sắm tuyệt vời! 🎉</p>
+        <p>
+            Trân trọng,<br />
+            <strong>Đội ngũ phát triển HUSTBuy</strong><br />
+            <em>Đại học Bách Khoa Hà Nội</em>
+        </p>
     </div>
     <div class="footer">
-        <p>&copy; 2025 NTA VDT_2025. All rights reserved.</p>
+        <p class="footer-brand">HUSTBuy</p>
+        <p>Dự án Thương mại Điện tử - Đại học Bách Khoa Hà Nội</p>
+        <p>&copy; 2025 HUSTBuy. Đồ án sinh viên HUST.</p>
     </div>
 </div>
 </body>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Thông báo từ chối hồ sơ người bán</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            color: #333;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #dc2626;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #f59e0b;
+            margin-bottom: 10px;
+        }
+        .logo-subtitle {
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
+        }
+        .content {
+            padding: 20px 0;
+            line-height: 1.6;
+            color: #555555;
+        }
+        .status-box {
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border: 2px solid #dc2626;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .status-text {
+            font-size: 20px;
+            font-weight: bold;
+            color: #dc2626;
+            margin: 10px 0;
+        }
+        .rejection-box {
+            background-color: #fef2f2;
+            border-left: 4px solid #dc2626;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 4px;
+        }
+        .rejection-box h3 {
+            margin-top: 0;
+            color: #dc2626;
+            font-size: 16px;
+        }
+        .rejection-reason {
+            background-color: #fff;
+            border: 1px solid #fecaca;
+            border-radius: 4px;
+            padding: 12px;
+            margin: 10px 0;
+            color: #333;
+            line-height: 1.8;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .info-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .info-box li {
+            margin: 5px 0;
+        }
+        .details-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        .details-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .details-table td:first-child {
+            font-weight: bold;
+            color: #666;
+            width: 40%;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #f59e0b;
+            color: #ffffff;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 20px 0;
+            transition: background-color 0.3s;
+        }
+        .cta-button:hover {
+            background-color: #d97706;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #999999;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+        }
+        .footer-brand {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo">
+            🛒 HUSTBuy
+            <div class="logo-subtitle">
+                Sàn Thương Mại Điện Tử - Đại học Bách Khoa Hà Nội
+            </div>
+        </div>
+        <h2>Thông báo về hồ sơ đăng ký người bán</h2>
+    </div>
+    <div class="content">
+        <p>Xin chào,</p>
+        <p>
+            Cảm ơn bạn đã quan tâm và gửi hồ sơ đăng ký trở thành người bán trên
+            <strong>HUSTBuy</strong>.
+        </p>
+
+        <div class="status-box">
+            <div class="status-icon">❌</div>
+            <p class="status-text">Hồ sơ chưa được phê duyệt</p>
+            <p style="margin: 5px 0; color: #666; font-size: 14px">
+                Mã hồ sơ: <strong th:text="${sellerProfileId}">SP123456</strong>
+            </p>
+        </div>
+
+        <p>
+            Rất tiếc, sau khi xem xét kỹ lưỡng, chúng mình chưa thể phê duyệt hồ
+            sơ đăng ký của bạn vào thời điểm này.
+        </p>
+
+        <div class="rejection-box">
+            <h3>📋 Lý do từ chối:</h3>
+            <div class="rejection-reason" th:text="${rejectionReason}">
+                Thông tin giấy tờ không đầy đủ hoặc không rõ ràng. Vui lòng cung
+                cấp ảnh chụp rõ nét của CCCD/CMND và giấy phép kinh doanh (nếu có).
+            </div>
+        </div>
+
+        <table class="details-table">
+            <tr>
+                <td>Tên cửa hàng:</td>
+                <td><strong th:text="${storeName}">Cửa hàng ABC</strong></td>
+            </tr>
+            <tr>
+                <td>Email liên hệ:</td>
+                <td th:text="${contactEmail}">seller@example.com</td>
+            </tr>
+            <tr>
+                <td>Thời gian xét duyệt:</td>
+                <td th:text="${rejectedAt}">2025-01-15 10:30:00</td>
+            </tr>
+        </table>
+
+        <div class="info-box">
+            <p><strong>📌 Bạn có thể làm gì tiếp theo?</strong></p>
+            <ul>
+                <li>
+                    Xem lại lý do từ chối và chuẩn bị đầy đủ các thông tin, giấy tờ
+                    cần thiết
+                </li>
+                <li>
+                    Đảm bảo tất cả thông tin cá nhân và giấy tờ được cung cấp rõ ràng,
+                    chính xác
+                </li>
+                <li>
+                    Gửi lại hồ sơ đăng ký mới với đầy đủ thông tin theo yêu cầu
+                </li>
+                <li>
+                    Liên hệ với đội ngũ hỗ trợ nếu bạn cần thêm hướng dẫn chi tiết
+                </li>
+            </ul>
+        </div>
+
+        <div style="text-align: center">
+            <a href="#" class="cta-button">Gửi lại hồ sơ đăng ký</a>
+        </div>
+
+        <p>
+            Chúng mình hiểu rằng điều này có thể gây thất vọng, nhưng quy trình
+            xét duyệt này giúp đảm bảo chất lượng và độ tin cậy cho tất cả người
+            dùng trên nền tảng HUSTBuy.
+        </p>
+
+        <p>
+            Nếu bạn có bất kỳ thắc mắc nào hoặc cần hỗ trợ, đừng ngần ngại liên hệ
+            với chúng mình.
+        </p>
+
+        <p>
+            Trân trọng,<br />
+            <strong>Đội ngũ phát triển HUSTBuy</strong><br />
+            <em>Đại học Bách Khoa Hà Nội</em>
+        </p>
+    </div>
+    <div class="footer">
+        <p class="footer-brand">HUSTBuy</p>
+        <p>Dự án Thương mại Điện tử - Đại học Bách Khoa Hà Nội</p>
+        <p>&copy; 2025 HUSTBuy. Đồ án sinh viên HUST.</p>
+    </div>
+</div>
+</body>
+</html>

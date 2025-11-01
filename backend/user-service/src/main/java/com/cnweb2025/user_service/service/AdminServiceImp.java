@@ -20,6 +20,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -70,24 +71,11 @@ public class AdminServiceImp implements AdminService{
 
         // Cập nhật thông tin người dùng
         userMapper.updateUser(user, request);
+        // Cập nhật vai trò người dùng
+        var roles = roleRepository.findAllById(request.getRoles());
+        user.setRoles(new HashSet<>(roles));
 
         // Lưu người dùng đã cập nhật
-        userRepository.save(user);
-
-        return userMapper.toUserResponse(user);
-    }
-
-    // Cập nhật role cho người dùng
-    @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public UserResponse updateUserRole(String id, String roleName) {
-        log.info("Updating role for user with ID: {} to role: {}", id, roleName);
-        var user = userRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        // Kiểm tra xem role có tồn tại không với roleName là đối tượng Role
-        Role role = roleRepository.findById(roleName)
-                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
-        user.setRole(role);
         userRepository.save(user);
 
         return userMapper.toUserResponse(user);

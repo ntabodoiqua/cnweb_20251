@@ -1,6 +1,5 @@
 package com.vdt2025.file_service.configuration;
 
-import com.vdt2025.file_service.interceptor.UserStatusInterceptor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.*;
@@ -9,7 +8,7 @@ import org.springframework.web.util.UrlPathHelper;
 @Configuration
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
-    private final UserStatusInterceptor userStatusInterceptor;
+    // UserStatusInterceptor đã bị loại bỏ - logic kiểm tra user được chuyển vào Service layer
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
@@ -38,25 +37,26 @@ public class WebConfig implements WebMvcConfigurer {
                 .maxAge(3600);
     }
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(userStatusInterceptor)
-                .addPathPatterns("/**")
-                .excludePathPatterns(
-                        "/auth/token",
-                        "/auth/introspect",
-                        "/auth/logout",
-                        "/auth/refresh",
-                        "/users",
-                        "/category/get-categories",
-                        "/category",
-                        "/uploads/**",
-                        "/files/download/**",
-                        "/swagger-ui/**",
-                        "/v3/api-docs/**",
-                        "/swagger-ui.html"
-                );
-    }
+    // Không cần interceptor nữa vì logic đã được chuyển vào Service layer
+//    @Override
+//    public void addInterceptors(InterceptorRegistry registry) {
+//        registry.addInterceptor(userStatusInterceptor)
+//                .addPathPatterns("/**")
+//                .excludePathPatterns(
+//                        "/auth/token",
+//                        "/auth/introspect",
+//                        "/auth/logout",
+//                        "/auth/refresh",
+//                        "/users",
+//                        "/category/get-categories",
+//                        "/category",
+//                        "/uploads/**",
+//                        "/files/download/**",
+//                        "/swagger-ui/**",
+//                        "/v3/api-docs/**",
+//                        "/swagger-ui.html"
+//                );
+//    }
 
 
 }
