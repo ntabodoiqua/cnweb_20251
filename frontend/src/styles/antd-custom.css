@@ -304,6 +304,8 @@
   border-radius: 12px !important;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
   padding: 16px 24px !important;
+  overflow: hidden;
+  position: relative;
 }
 
 .ant-notification-notice-message {
@@ -311,20 +313,76 @@
   color: #333 !important;
 }
 
+/* Progress bar container */
+.ant-notification-notice::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.ant-notification-notice::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  width: 0;
+  animation: notificationProgress 3.5s linear forwards;
+  border-radius: 0 2px 2px 0;
+}
+
+/* Success notification icon and progress */
 .ant-notification-notice-success .ant-notification-notice-icon {
   color: #52c41a !important;
 }
 
+.ant-notification-notice-success::after {
+  background: linear-gradient(90deg, #52c41a 0%, #73d13d 100%);
+  box-shadow: 0 0 8px rgba(82, 196, 26, 0.6);
+}
+
+/* Error notification icon and progress */
 .ant-notification-notice-error .ant-notification-notice-icon {
   color: #ff4d4f !important;
 }
 
+.ant-notification-notice-error::after {
+  background: linear-gradient(90deg, #ff4d4f 0%, #ff7875 100%);
+  box-shadow: 0 0 8px rgba(255, 77, 79, 0.6);
+}
+
+/* Warning notification icon and progress */
 .ant-notification-notice-warning .ant-notification-notice-icon {
   color: #faad14 !important;
 }
 
+.ant-notification-notice-warning::after {
+  background: linear-gradient(90deg, #faad14 0%, #ffc53d 100%);
+  box-shadow: 0 0 8px rgba(250, 173, 20, 0.6);
+}
+
+/* Info notification icon and progress */
 .ant-notification-notice-info .ant-notification-notice-icon {
   color: #ee4d2d !important;
+}
+
+.ant-notification-notice-info::after {
+  background: linear-gradient(90deg, #ee4d2d 0%, #ff6b35 100%);
+  box-shadow: 0 0 8px rgba(238, 77, 45, 0.6);
+}
+
+/* Progress animation */
+@keyframes notificationProgress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
 }
 
 /* ==================== Popover ==================== */
