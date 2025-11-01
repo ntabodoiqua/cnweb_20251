@@ -28,6 +28,9 @@ const ResetPasswordPage = lazy(() => import("../pages/reset-password"));
 const UserPage = lazy(() => import("../pages/user"));
 const ProfilePage = lazy(() => import("../pages/profile"));
 
+// Admin Pages
+const AdminDashboardPage = lazy(() => import("../pages/admin-dashboard"));
+
 // Error Pages
 const NotFoundPage = lazy(() => import("../pages/not-found"));
 
@@ -148,17 +151,16 @@ const router = createBrowserRouter([
       },
 
       // ==================== ADMIN ONLY ROUTES ====================
-      // Uncomment khi có AdminPage
-      // {
-      //   path: PROTECTED_ROUTES.ADMIN_DASHBOARD,
-      //   element: (
-      //     <SuspenseWrapper>
-      //       <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-      //         <AdminDashboardPage />
-      //       </ProtectedRoute>
-      //     </SuspenseWrapper>
-      //   ),
-      // },
+      {
+        path: PROTECTED_ROUTES.ADMIN_DASHBOARD,
+        element: (
+          <SuspenseWrapper>
+            <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
+              <AdminDashboardPage />
+            </ProtectedRoute>
+          </SuspenseWrapper>
+        ),
+      },
 
       // ==================== ERROR ROUTES ====================
       {
