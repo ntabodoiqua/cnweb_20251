@@ -11,6 +11,7 @@ export const PUBLIC_ROUTES = {
   VERIFY_EMAIL: "/verify-email",
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
+  ABOUT_US: "/about-us",
 };
 
 // Protected routes - yêu cầu đăng nhập
@@ -49,6 +50,7 @@ export const ROUTE_TITLES = {
   [PUBLIC_ROUTES.VERIFY_EMAIL]: "Xác thực email",
   [PUBLIC_ROUTES.FORGOT_PASSWORD]: "Quên mật khẩu",
   [PUBLIC_ROUTES.RESET_PASSWORD]: "Đặt lại mật khẩu",
+  [PUBLIC_ROUTES.ABOUT_US]: "Về chúng tôi",
 
   [PROTECTED_ROUTES.PROFILE]: "Trang cá nhân",
   [PROTECTED_ROUTES.USER]: "Quản lý người dùng",
