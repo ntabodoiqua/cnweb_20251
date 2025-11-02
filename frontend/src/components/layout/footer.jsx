@@ -104,7 +104,7 @@ const Footer = () => {
             <h4 className="footer-title">Về chúng tôi</h4>
             <ul className="footer-links">
               <li>
-                <Link to="/about">Giới thiệu HUSTBuy</Link>
+                <Link to="/about-us">Giới thiệu HUSTBuy</Link>
               </li>
               <li>
                 <Link to="/careers">Tuyển dụng</Link>

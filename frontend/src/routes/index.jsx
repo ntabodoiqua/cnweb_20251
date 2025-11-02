@@ -23,6 +23,7 @@ const RegisterPage = lazy(() => import("../pages/register"));
 const VerifyEmailPage = lazy(() => import("../pages/verify-email"));
 const ForgotPasswordPage = lazy(() => import("../pages/forgot-password"));
 const ResetPasswordPage = lazy(() => import("../pages/reset-password"));
+const AboutUsPage = lazy(() => import("../pages/about-us"));
 
 // Protected Pages
 const UserPage = lazy(() => import("../pages/user"));
@@ -124,6 +125,14 @@ const router = createBrowserRouter([
             <PublicRoute>
               <ResetPasswordPage />
             </PublicRoute>
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.ABOUT_US,
+        element: (
+          <SuspenseWrapper>
+            <AboutUsPage />
           </SuspenseWrapper>
         ),
       },
