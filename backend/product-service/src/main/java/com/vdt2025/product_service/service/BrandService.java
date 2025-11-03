@@ -18,7 +18,7 @@ public interface BrandService {
 
 //    void deleteBrand(String id);
 
-//    String setBrandThumbnail(String id, MultipartFile file);
+    String setBrandThumbnail(String id, MultipartFile file);
 
     Page<BrandResponse> searchBrands(BrandFilterRequest filter, Pageable pageable);
 }

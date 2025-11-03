@@ -1,5 +1,6 @@
 package com.vdt2025.product_service.service;
 
+import com.vdt2025.common_dto.dto.response.FileInfoResponse;
 import com.vdt2025.common_dto.dto.response.UserResponse;
 import com.vdt2025.common_dto.service.FileServiceClient;
 import com.vdt2025.common_dto.service.UserServiceClient;
@@ -48,6 +49,7 @@ public class BrandServiceImp implements BrandService{
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public BrandResponse createBrand(BrandCreationRequest request) {
         // Kiểm tra xem brand đã tồn tại chưa
         if (brandRepository.existsByName(request.getName())) {
@@ -82,6 +84,7 @@ public class BrandServiceImp implements BrandService{
     @Override
     @CacheEvict(value = "brands", key = "#id")
     @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
     public BrandResponse updateBrand(String id, BrandUpdateRequest request) {
         Brand brand = brandRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
@@ -100,31 +103,26 @@ public class BrandServiceImp implements BrandService{
         return brandMapper.toBrandResponse(brand);
     }
 
-    // Cập nhật thumbnail của brand
-//    @Override
-//    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-//    public String setBrandThumbnail(String id, MultipartFile file) {
-//        Brand brand = brandRepository.findById(id)
-//                .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
-//
-//        // Kiểm tra quyền truy cập
-//        if (!checkAccessRights(brand)) {
-//            log.warn("User does not have access rights to update thumbnail for brand {}", brand.getName());
-//            throw new AppException(ErrorCode.UNAUTHORIZED);
-//        }
-//
-//        // Cập nhật thumbnail
-//        String contentType = file.getContentType();
-//        if (contentType == null || !contentType.startsWith("image/")) {
-//            log.warn("Invalid file type for thumbnail: {}", contentType);
-//            throw new AppException(ErrorCode.INVALID_IMAGE_TYPE);
-//        }
-//        String fileName = fileServiceClient.uploadFile(file).getResult();
-//        brand.setLogoName(fileName);
-//        brandRepository.save(brand);
-//        log.info("Thumbnail for brand {} updated successfully", brand.getName());
-//        return fileName;
-//    }
+//  Cập nhật ảnh của brand
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public String setBrandThumbnail(String id, MultipartFile file) {
+        Brand brand = brandRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
+        // Cập nhật thumbnail
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            log.warn("Invalid file type for thumbnail: {}", contentType);
+            throw new AppException(ErrorCode.INVALID_IMAGE_TYPE);
+        }
+        com.vdt2025.common_dto.dto.response.FileInfoResponse response = fileServiceClient.uploadPublicFile(file).getResult();
+        brand.setLogoName(response.getFileName());
+        brand.setLogoUrl(response.getFileUrl());
+        brandRepository.save(brand);
+        log.info("Thumbnail for brand {} updated successfully", brand.getName());
+        return response.getFileUrl();
+    }
 
 //    @Override
 //    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")

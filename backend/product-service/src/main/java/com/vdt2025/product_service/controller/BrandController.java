@@ -54,15 +54,15 @@ public class BrandController {
     }
 
     // Cập nhật ảnh đại diện cho brand
-//    @PostMapping("/{id}/thumbnail")
-//    public ApiResponse<String> setBrandThumbnail(
-//            @PathVariable String id,
-//            @RequestParam("file") MultipartFile file) {
-//        String thumbnailUrl = brandService.setBrandThumbnail(id, file);
-//        return ApiResponse.<String>builder()
-//                .result(thumbnailUrl)
-//                .build();
-//    }
+    @PostMapping("/{id}/thumbnail")
+    public ApiResponse<String> setBrandThumbnail(
+            @PathVariable String id,
+            @RequestParam("file") MultipartFile file) {
+        String thumbnailUrl = brandService.setBrandThumbnail(id, file);
+        return ApiResponse.<String>builder()
+                .result(thumbnailUrl)
+                .build();
+    }
 
     // Cập nhật brand
     @PutMapping("/{id}")
