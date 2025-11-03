@@ -1,248 +1,384 @@
-import React, { useContext } from "react";
-import { Card, Descriptions, Tag, Space, Alert, Button, Row, Col } from "antd";
-import { AuthContext } from "../components/context/auth.context";
-import { getTokenInfo } from "../util/jwt";
-import { getRoleName, ROLES } from "../constants/roles";
+// javascript
+import React, { useContext, useState } from "react";
 import {
-  UserOutlined,
-  SafetyOutlined,
-  ClockCircleOutlined,
-  CheckCircleOutlined,
-} from "@ant-design/icons";
+    Card,
+    Form,
+    Input,
+    Button,
+    Row,
+    Col,
+    Avatar,
+    Radio,
+    Select,
+    Space,
+    Typography,
+    Upload,
+    Descriptions,
+    Tag,
+} from "antd";
+import { UserOutlined, DeleteOutlined } from "@ant-design/icons";
+import { AuthContext } from "../components/context/auth.context";
+import { getRoleName, ROLES } from "../constants/roles";
+import logo from "../assets/logo.png";
+
+const { Text } = Typography;
+const { Option } = Select;
+
+const maskEmail = (email) => {
+    if (!email) return "N/A";
+    const [local, domain] = email.split("@");
+    const maskedLocal = local.length <= 2 ? local : local[0] + "*******" + local.slice(-1);
+    return `${maskedLocal}@${domain}`;
+};
+const maskPhone = (phone) => {
+    if (!phone) return "N/A";
+    const s = phone.replace(/\D/g, "");
+    if (s.length <= 4) return "****";
+    return "*".repeat(Math.max(0, s.length - 2)) + s.slice(-2);
+};
+
+const beforeUploadValidate = (file) => {
+    const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
+    if (!isJpgOrPng) {
+        return Upload.LIST_IGNORE;
+    }
+    const isLt1M = file.size / 1024 / 1024 < 1;
+    if (!isLt1M) {
+        return Upload.LIST_IGNORE;
+    }
+    return false; // valid file -> prevent auto upload, we'll preview manually
+};
+
+const formatDob = (user) => {
+    if (!user?.dob) return "N/A";
+    const d = new Date(user.dob);
+    if (Number.isNaN(d.getTime())) return user.dob;
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yy = d.getFullYear();
+    return `${dd}/${mm}/${yy}`;
+};
+
+const formatCreated = (ts) => {
+    if (!ts) return "N/A";
+    const d = new Date(ts);
+    if (Number.isNaN(d.getTime())) return ts;
+    return d.toLocaleString();
+};
 
 const ProfilePage = () => {
-  const { auth } = useContext(AuthContext);
-  const token = localStorage.getItem("access_token");
-  const tokenInfo = token ? getTokenInfo(token) : null;
+    const { auth } = useContext(AuthContext);
+    const user = auth?.user ?? {};
+    const [form] = Form.useForm();
+    const [avatarPreview, setAvatarPreview] = useState(user.avatar_url || null);
+    const [uploadKey, setUploadKey] = useState(Date.now()); // to reset Upload input
+    const [editAll, setEditAll] = useState(false);
 
-  // Format timestamp thành ngày giờ
-  const formatTimestamp = (timestamp) => {
-    if (!timestamp) return "N/A";
-    const date = new Date(timestamp * 1000);
-    return date.toLocaleString("vi-VN");
-  };
+    const onSave = (values) => {
+        // TODO: call API to update profile
+        console.log("Save profile values:", values);
+        setEditAll(false);
+    };
 
-  // Tính thời gian còn lại của token
-  const getTimeRemaining = () => {
-    if (!tokenInfo || !tokenInfo.expiresAt) return "N/A";
-    const now = Math.floor(Date.now() / 1000);
-    const remaining = tokenInfo.expiresAt - now;
+    const handleUploadChange = (info) => {
+        const file = info?.file?.originFileObj || info?.file;
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => setAvatarPreview(e.target.result);
+        reader.readAsDataURL(file);
+    };
 
-    if (remaining < 0) return "Đã hết hạn";
+    const handleRemoveAvatar = () => {
+        setAvatarPreview(null);
+        setUploadKey(Date.now());
+    };
 
-    const hours = Math.floor(remaining / 3600);
-    const minutes = Math.floor((remaining % 3600) / 60);
-    const seconds = remaining % 60;
+    const dob = user.dob ? new Date(user.dob) : null;
+    const initialDob = {
+        day: dob ? dob.getDate() : undefined,
+        month: dob ? dob.getMonth() + 1 : undefined,
+        year: dob ? dob.getFullYear() : undefined,
+    };
 
-    return `${hours}h ${minutes}m ${seconds}s`;
-  };
+    // initialize form values when component mounts / user changes
+    React.useEffect(() => {
+        form.setFieldsValue({
+            username: user.username,
+            name: user.first_name || user.name || "",
+            email: user.email,
+            phone: user.phone,
+            gender: user.gender || user.sex || "",
+            ...initialDob,
+        });
+    }, [user]);
 
-  return (
-    <div style={{ padding: "24px", maxWidth: "1400px", margin: "0 auto" }}>
-      <Space direction="vertical" size="large" style={{ width: "100%" }}>
-        {/* Header */}
-        <Card>
-          <Row align="middle" gutter={16}>
-            <Col>
-              <UserOutlined style={{ fontSize: "48px", color: "#1890ff" }} />
-            </Col>
-            <Col flex="auto">
-              <h1 style={{ margin: 0, fontSize: "28px" }}>Hồ sơ của tôi</h1>
-              <p style={{ margin: 0, color: "#666", fontSize: "16px" }}>
-                Quản lý thông tin hồ sơ để bảo mật tài khoản
-              </p>
-            </Col>
-          </Row>
-        </Card>
+    return (
+        <div
+            style={{
+                padding: 32,
+                maxWidth: 1100,
+                margin: "0 auto",
+                background:
+                    "linear-gradient(180deg, rgba(250,250,252,1) 0%, rgba(245,247,250,1) 100%)",
+                minHeight: "100vh",
+            }}
+        >
+            <Row align="middle" gutter={16} style={{ marginBottom: 18 }}>
+                <Col>
+                    <img src={logo} alt="logo" style={{ height: 48, width: 48, objectFit: "contain" }} />
+                </Col>
+                <Col flex="auto">
+                    <h2 style={{ margin: 0 }}>Hồ Sơ Của Tôi</h2>
+                    <div style={{ color: "#666" }}>Quản lý thông tin hồ sơ để bảo mật tài khoản</div>
+                </Col>
+            </Row>
 
-        <Row gutter={[24, 24]}>
-          <Col xs={24} lg={12}>
-            {/* Auth Status */}
-            <Card
-              title={
-                <>
-                  <SafetyOutlined /> Trạng thái xác thực
-                </>
-              }
-              style={{ height: "100%" }}
-            >
-              <Alert
-                message={
-                  auth.isAuthenticated ? "Đã đăng nhập" : "Chưa đăng nhập"
-                }
-                description={
-                  auth.isAuthenticated
-                    ? "Bạn đã đăng nhập thành công và có quyền truy cập hệ thống."
-                    : "Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục."
-                }
-                type={auth.isAuthenticated ? "success" : "warning"}
-                showIcon
-                icon={
-                  auth.isAuthenticated ? <CheckCircleOutlined /> : undefined
-                }
-              />
-            </Card>
-          </Col>
-
-          <Col xs={24} lg={12}>
-            {/* Role Info */}
-            {auth.isAuthenticated && (
-              <Card title="Phân quyền" style={{ height: "100%" }}>
-                <Space
-                  direction="vertical"
-                  size="middle"
-                  style={{ width: "100%" }}
-                >
-                  <div>
-                    <div style={{ marginBottom: 8, color: "#666" }}>
-                      Vai trò hiện tại:
-                    </div>
-                    <Tag
-                      color={
-                        auth.user?.role === ROLES.ADMIN
-                          ? "red"
-                          : auth.user?.role === ROLES.USER
-                          ? "blue"
-                          : "default"
-                      }
-                      style={{ fontSize: "16px", padding: "8px 16px" }}
+            <Row gutter={24}>
+                <Col xs={24} lg={16}>
+                    <Card
+                        style={{
+                            borderRadius: 12,
+                            boxShadow: "0 6px 18px rgba(15, 23, 42, 0.06)",
+                            border: "none",
+                        }}
+                        bodyStyle={{ padding: 24 }}
                     >
-                      {getRoleName(auth.user?.role)}
-                    </Tag>
-                  </div>
+                        <Row justify="space-between" align="middle" style={{ marginBottom: 16 }}>
+                            <Col>
+                                <h3 style={{ margin: 0 }}>Thông tin cá nhân</h3>
+                            </Col>
+                            <Col>
+                                {editAll ? (
+                                    <Space>
+                                        <Button onClick={() => { form.resetFields(); setEditAll(false); }}>Hủy</Button>
+                                        <Button type="primary" onClick={() => form.submit()} style={{ background: "#ff6b3c", borderColor: "#ff6b3c" }}>
+                                            Lưu
+                                        </Button>
+                                    </Space>
+                                ) : (
+                                    <Button type="primary" onClick={() => setEditAll(true)} style={{ background: "#1890ff", borderColor: "#1890ff" }}>
+                                        Chỉnh sửa
+                                    </Button>
+                                )}
+                            </Col>
+                        </Row>
 
-                  {auth.user?.role === ROLES.ADMIN && (
-                    <Alert
-                      message="Bạn có quyền quản trị viên"
-                      type="info"
-                      showIcon
-                    />
-                  )}
-                </Space>
-              </Card>
-            )}
-          </Col>
-        </Row>
+                        <Form
+                            form={form}
+                            layout="vertical"
+                            initialValues={{
+                                username: user.username,
+                                name: user.first_name || user.name || "",
+                                email: user.email,
+                                phone: user.phone,
+                                gender: user.gender || user.sex || "",
+                                ...initialDob,
+                            }}
+                            onFinish={onSave}
+                        >
+                            <Descriptions bordered column={1} size="middle">
+                                <Descriptions.Item label="Tên đăng nhập">
+                                    {!editAll ? (
+                                        <Text>{user.username || "—"}</Text>
+                                    ) : (
+                                        <Form.Item name="username" noStyle>
+                                            <Input />
+                                        </Form.Item>
+                                    )}
+                                </Descriptions.Item>
 
-        {/* User Info */}
-        {auth.isAuthenticated && (
-          <Card title="Thông tin tài khoản">
-            <Descriptions bordered column={{ xs: 1, sm: 1, md: 2 }}>
-              <Descriptions.Item label="Tên đăng nhập" span={2}>
-                <strong style={{ fontSize: "16px" }}>
-                  {auth.user?.username || "N/A"}
-                </strong>
-              </Descriptions.Item>
-              <Descriptions.Item label="Vai trò">
-                <Tag
-                  color={
-                    auth.user?.role === ROLES.ADMIN
-                      ? "red"
-                      : auth.user?.role === ROLES.USER
-                      ? "blue"
-                      : "default"
-                  }
-                >
-                  {getRoleName(auth.user?.role)}
-                </Tag>
-              </Descriptions.Item>
-              <Descriptions.Item label="Mã role">
-                <code>{auth.user?.role}</code>
-              </Descriptions.Item>
-            </Descriptions>
-          </Card>
-        )}
+                                <Descriptions.Item label="Họ và tên">
+                                    {!editAll ? (
+                                        <Text>{user.first_name || user.name || "—"}</Text>
+                                    ) : (
+                                        <Form.Item name="name" noStyle>
+                                            <Input />
+                                        </Form.Item>
+                                    )}
+                                </Descriptions.Item>
 
-        {/* Token Info */}
-        {tokenInfo && (
-          <Card
-            title={
-              <>
-                <ClockCircleOutlined /> Thông tin phiên đăng nhập
-              </>
-            }
-          >
-            <Descriptions bordered column={{ xs: 1, sm: 1, md: 2 }}>
-              <Descriptions.Item label="Phát hành bởi" span={2}>
-                {tokenInfo.issuer}
-              </Descriptions.Item>
-              <Descriptions.Item label="Username">
-                {tokenInfo.username}
-              </Descriptions.Item>
-              <Descriptions.Item label="Token ID">
-                <code style={{ fontSize: "11px", wordBreak: "break-all" }}>
-                  {tokenInfo.tokenId}
-                </code>
-              </Descriptions.Item>
-              <Descriptions.Item label="Thời gian tạo">
-                {formatTimestamp(tokenInfo.issuedAt)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Thời gian hết hạn">
-                {formatTimestamp(tokenInfo.expiresAt)}
-              </Descriptions.Item>
-              <Descriptions.Item label="Còn lại">
-                <Tag color={tokenInfo.isExpired ? "red" : "green"}>
-                  {getTimeRemaining()}
-                </Tag>
-              </Descriptions.Item>
-              <Descriptions.Item label="Trạng thái">
-                <Tag color={tokenInfo.isExpired ? "red" : "success"}>
-                  {tokenInfo.isExpired ? "Đã hết hạn" : "Còn hiệu lực"}
-                </Tag>
-              </Descriptions.Item>
-            </Descriptions>
-          </Card>
-        )}
+                                <Descriptions.Item label="Email">
+                                    {!editAll ? (
+                                        <Text>{maskEmail(user.email)}</Text>
+                                    ) : (
+                                        <Form.Item name="email" noStyle rules={[{ type: "email", message: "Email không hợp lệ" }]}>
+                                            <Input />
+                                        </Form.Item>
+                                    )}
+                                </Descriptions.Item>
 
-        {/* Role-based Content */}
-        <Card title="Quyền truy cập">
-          <Space direction="vertical" style={{ width: "100%" }} size="middle">
-            {auth.user?.role === ROLES.ADMIN && (
-              <Alert
-                message="🔐 Admin Panel"
-                description="Bạn là quản trị viên và có toàn quyền truy cập. Bạn có thể quản lý người dùng, cấu hình hệ thống và xem tất cả các báo cáo."
-                type="info"
-                showIcon
-                action={
-                  <Button size="small" type="primary">
-                    Đi đến Admin Panel
-                  </Button>
-                }
-              />
-            )}
+                                <Descriptions.Item label="Số điện thoại">
+                                    {!editAll ? (
+                                        <Text>{maskPhone(user.phone)}</Text>
+                                    ) : (
+                                        <Form.Item
+                                            name="phone"
+                                            noStyle
+                                            rules={[{ pattern: /^\+?\d{6,}$/, message: "Số điện thoại không hợp lệ" }]}
+                                        >
+                                            <Input />
+                                        </Form.Item>
+                                    )}
+                                </Descriptions.Item>
 
-            {auth.user?.role === ROLES.USER && (
-              <Alert
-                message="👤 User Panel"
-                description="Bạn là người dùng thông thường. Bạn có thể xem và chỉnh sửa thông tin cá nhân, quản lý đơn hàng của mình."
-                type="success"
-                showIcon
-              />
-            )}
+                                <Descriptions.Item label="Giới tính">
+                                    {!editAll ? (
+                                        <Text>{(user.gender || user.sex) ? (String(user.gender || user.sex).toUpperCase()) : "—"}</Text>
+                                    ) : (
+                                        <Form.Item name="gender" noStyle>
+                                            <Radio.Group>
+                                                <Radio value="male">Nam</Radio>
+                                                <Radio value="female">Nữ</Radio>
+                                                <Radio value="other">Khác</Radio>
+                                            </Radio.Group>
+                                        </Form.Item>
+                                    )}
+                                </Descriptions.Item>
 
-            <Alert
-              message="Quyền truy cập"
-              description={
-                <ul style={{ paddingLeft: 20, marginBottom: 0 }}>
-                  <li>✓ Xem thông tin cá nhân</li>
-                  <li>✓ Chỉnh sửa hồ sơ</li>
-                  <li>✓ Quản lý đơn hàng</li>
-                  {auth.user?.role === ROLES.ADMIN && (
-                    <>
-                      <li>✓ Quản lý người dùng (Admin)</li>
-                      <li>✓ Cấu hình hệ thống (Admin)</li>
-                      <li>✓ Xem báo cáo (Admin)</li>
-                    </>
-                  )}
-                </ul>
-              }
-              type="info"
-            />
-          </Space>
-        </Card>
-      </Space>
-    </div>
-  );
+                                <Descriptions.Item label="Ngày sinh">
+                                    {!editAll ? (
+                                        <Text>{formatDob(user)}</Text>
+                                    ) : (
+                                        <Space>
+                                            <Form.Item name="day" noStyle>
+                                                <Select placeholder="Day" style={{ width: 100 }}>
+                                                    {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                                                        <Option key={d} value={d}>
+                                                            {d}
+                                                        </Option>
+                                                    ))}
+                                                </Select>
+                                            </Form.Item>
+                                            <Form.Item name="month" noStyle>
+                                                <Select placeholder="Month" style={{ width: 120 }}>
+                                                    {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                                                        <Option key={m} value={m}>
+                                                            {m}
+                                                        </Option>
+                                                    ))}
+                                                </Select>
+                                            </Form.Item>
+                                            <Form.Item name="year" noStyle>
+                                                <Select placeholder="Year" style={{ width: 120 }}>
+                                                    {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - i).map((y) => (
+                                                        <Option key={y} value={y}>
+                                                            {y}
+                                                        </Option>
+                                                    ))}
+                                                </Select>
+                                            </Form.Item>
+                                        </Space>
+                                    )}
+                                </Descriptions.Item>
+
+                                <Descriptions.Item label="Tiểu sử">
+                                    {!editAll ? (
+                                        <Text>{user.bio || user.description || "—"}</Text>
+                                    ) : (
+                                        <Form.Item name="bio" noStyle>
+                                            <Input.TextArea rows={3} />
+                                        </Form.Item>
+                                    )}
+                                </Descriptions.Item>
+
+                                <Descriptions.Item label="Ngày tạo tài khoản">
+                                    <Text>{formatCreated(user.created_at || user.createdAt || user.date_joined)}</Text>
+                                </Descriptions.Item>
+
+                                <Descriptions.Item label="Trạng thái">
+                                    {user.is_active ? <Tag color="success">Đang hoạt động</Tag> : <Tag>Không hoạt động</Tag>}
+                                </Descriptions.Item>
+                            </Descriptions>
+                        </Form>
+                    </Card>
+                </Col>
+
+                <Col xs={24} lg={8}>
+                    <Card
+                        style={{
+                            borderRadius: 12,
+                            boxShadow: "0 6px 18px rgba(15, 23, 42, 0.06)",
+                            border: "none",
+                            textAlign: "center",
+                            position: "relative",
+                            overflow: "hidden",
+                        }}
+                        bodyStyle={{ padding: 24 }}
+                    >
+                        {/* subtle logo watermark */}
+                        <img
+                            src={logo}
+                            alt=""
+                            style={{
+                                position: "absolute",
+                                right: -20,
+                                top: -20,
+                                width: 120,
+                                height: 120,
+                                opacity: 0.06,
+                                transform: "rotate(-15deg)",
+                                pointerEvents: "none",
+                            }}
+                        />
+
+                        <div style={{ marginBottom: 12 }}>
+                            <Avatar
+                                size={112}
+                                src={avatarPreview}
+                                icon={!avatarPreview && <UserOutlined />}
+                                style={{
+                                    border: "4px solid rgba(255,107,60,0.12)",
+                                    boxShadow: "0 4px 12px rgba(15,23,42,0.08)",
+                                }}
+                            />
+                        </div>
+
+                        <Space direction="vertical" style={{ width: "100%" }}>
+                            <Upload
+                                key={uploadKey}
+                                beforeUpload={beforeUploadValidate}
+                                showUploadList={false}
+                                customRequest={({ file, onSuccess }) => {
+                                    setTimeout(() => onSuccess && onSuccess("ok"), 0);
+                                }}
+                                onChange={handleUploadChange}
+                                accept=".jpg,.jpeg,.png"
+                            >
+                                <Button type="primary" style={{ background: "#ff6b3c", borderColor: "#ff6b3c" }}>
+                                    Chọn Ảnh
+                                </Button>
+                            </Upload>
+
+                            <Button
+                                danger
+                                icon={<DeleteOutlined />}
+                                onClick={handleRemoveAvatar}
+                                style={{ margin: "0 auto" }}
+                                type="text"
+                            >
+                                Xóa ảnh
+                            </Button>
+
+                            <div style={{ marginTop: 4, color: "#999", fontSize: 13 }}>
+                                Dung lượng tối đa 1 MB • JPEG, PNG
+                            </div>
+
+                            <div style={{ marginTop: 8 }}>
+                                <Text type="secondary">Vai trò: </Text>
+                                <Text>{getRoleName(user.role)} </Text>
+                            </div>
+
+                            <div style={{ marginTop: 12, textAlign: "center" }}>
+                                <Button type="primary" style={{ width: "100%", background: "#1677ff", borderColor: "#1677ff" }}>
+                                    Đổi mật khẩu
+                                </Button>
+                            </div>
+                        </Space>
+                    </Card>
+                </Col>
+            </Row>
+        </div>
+    );
 };
 
 export default ProfilePage;
