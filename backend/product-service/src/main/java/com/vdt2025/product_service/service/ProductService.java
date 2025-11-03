@@ -16,7 +16,7 @@ public interface ProductService {
 
     ProductResponse updateProduct(String id, ProductUpdateRequest request);
 
-    String setProductThumbnail(String id, MultipartFile file);
+//    String setProductThumbnail(String id, MultipartFile file);
 
     Page<ProductResponse> searchProducts(ProductFilterRequest filter, Pageable pageable);
 

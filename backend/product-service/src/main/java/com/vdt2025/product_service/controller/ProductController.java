@@ -33,18 +33,18 @@ public class ProductController {
                 .build();
     }
 
-    // Cập nhật thumbnail sản phẩm
-    @PostMapping("/{productId}/thumbnail")
-    public ApiResponse<String> updateProductThumbnail(
-            @PathVariable String productId,
-            @RequestParam("file") MultipartFile file) {
-        log.info("Updating thumbnail for product ID: {}", productId);
-        String result = productService.setProductThumbnail(productId, file);
-        return ApiResponse.<String>builder()
-                .message("Thumbnail updated successfully")
-                .result(result)
-                .build();
-    }
+//    // Cập nhật thumbnail sản phẩm
+//    @PostMapping("/{productId}/thumbnail")
+//    public ApiResponse<String> updateProductThumbnail(
+//            @PathVariable String productId,
+//            @RequestParam("file") MultipartFile file) {
+//        log.info("Updating thumbnail for product ID: {}", productId);
+//        String result = productService.setProductThumbnail(productId, file);
+//        return ApiResponse.<String>builder()
+//                .message("Thumbnail updated successfully")
+//                .result(result)
+//                .build();
+//    }
 
     // Cập nhật thông tin sản phẩm
     @PutMapping("/{productId}")

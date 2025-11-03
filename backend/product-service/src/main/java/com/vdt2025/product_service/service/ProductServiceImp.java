@@ -137,28 +137,28 @@ public class ProductServiceImp implements ProductService {
                 .map(productMapper::toProductResponse);
     }
 
-    @Override
-    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public String setProductThumbnail(String id, MultipartFile file) {
-
-        var product = productRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-        // Kiểm tra quyền truy cập
-        if (!checkAccessRights(product)) {
-            log.warn("User does not have access rights to update thumbnail for product {}", product.getName());
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
-        // Kiểm tra loại tệp
-        String contentType = file.getContentType();
-        if (contentType == null || !contentType.startsWith("image/")) {
-            log.warn("Invalid file type for thumbnail: {}", contentType);
-            throw new AppException(ErrorCode.INVALID_IMAGE_TYPE);
-        }
-        // Lưu tệp và cập nhật tên ảnh
-        String fileName = fileServiceClient.uploadFile(file).getResult();
-//        product.setImage_name(fileName);
-        productRepository.save(product);
-        log.info("Thumbnail for product {} updated successfully", product.getName());
-        return fileName;
-    }
+//    @Override
+//    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+//    public String setProductThumbnail(String id, MultipartFile file) {
+//
+//        var product = productRepository.findById(id)
+//                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+//        // Kiểm tra quyền truy cập
+//        if (!checkAccessRights(product)) {
+//            log.warn("User does not have access rights to update thumbnail for product {}", product.getName());
+//            throw new AppException(ErrorCode.UNAUTHORIZED);
+//        }
+//        // Kiểm tra loại tệp
+//        String contentType = file.getContentType();
+//        if (contentType == null || !contentType.startsWith("image/")) {
+//            log.warn("Invalid file type for thumbnail: {}", contentType);
+//            throw new AppException(ErrorCode.INVALID_IMAGE_TYPE);
+//        }
+//        // Lưu tệp và cập nhật tên ảnh
+//        String fileName = fileServiceClient.uploadFile(file).getResult();
+////        product.setImage_name(fileName);
+//        productRepository.save(product);
+//        log.info("Thumbnail for product {} updated successfully", product.getName());
+//        return fileName;
+//    }
 }

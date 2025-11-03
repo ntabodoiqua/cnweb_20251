@@ -36,17 +36,26 @@ public enum ErrorCode {
     // Lỗi danh mục (150x)
     CATEGORY_NOT_FOUND(1501, "error.1501", HttpStatus.NOT_FOUND),
     CATEGORY_EXISTED(1502, "error.1502", HttpStatus.CONFLICT),
+    CATEGORY_NAME_NOT_BLANK(1503, "error.1503", HttpStatus.BAD_REQUEST),
+    CATEGORY_ALREADY_EXISTS(1504, "error.1504", HttpStatus.CONFLICT),
+    PARENT_CATEGORY_NOT_FOUND(1505, "error.1505", HttpStatus.NOT_FOUND),
+    INVALID_PARENT_CATEGORY(1506, "error.1506", HttpStatus.BAD_REQUEST),
+    CATEGORY_HAS_PRODUCTS(1507, "error.1507", HttpStatus.CONFLICT),
+    CATEGORY_HAS_SUBCATEGORIES(1508, "error.1508", HttpStatus.CONFLICT),
+    CATEGORY_ALREADY_EXISTS_IN_STORE(1509, "error.1509", HttpStatus.CONFLICT),
+    UNAUTHORIZED_ACCESS(1510, "error.1510", HttpStatus.FORBIDDEN),
 
     // Lỗi brand (151x)
-    BRAND_NAME_REQUIRED(1510, "error.1510", HttpStatus.BAD_REQUEST),
-    BRAND_EXISTED(1511, "error.1511", HttpStatus.CONFLICT),
-    BRAND_NOT_FOUND(1512, "error.1512", HttpStatus.NOT_FOUND),
+    BRAND_NAME_REQUIRED(1520, "error.1520", HttpStatus.BAD_REQUEST),
+    BRAND_EXISTED(1521, "error.1521", HttpStatus.CONFLICT),
+    BRAND_NOT_FOUND(1522, "error.1522", HttpStatus.NOT_FOUND),
 
     // Lỗi sản phẩm (16xx)
     PRODUCT_NOT_FOUND(1601, "error.1601", HttpStatus.NOT_FOUND),
     PRODUCT_EXISTED(1602, "error.1602", HttpStatus.CONFLICT),
     PRODUCT_NAME_REQUIRED(1603, "error.1603", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_NAME_REQUIRED(1604, "error.1604", HttpStatus.BAD_REQUEST),
+
     // Lỗi store (17xx)
     STORE_NOT_FOUND(1701, "error.1701", HttpStatus.NOT_FOUND),
     STORE_ALREADY_EXISTS(1702, "error.1702", HttpStatus.CONFLICT),
