@@ -41,7 +41,4 @@ public class ProductCreationRequest {
     // Danh sách variants (nếu sản phẩm có nhiều biến thể)
     @Valid
     List<VariantCreationRequest> variants;
-
-    // Thuộc tính sản phẩm (specifications)
-    List<ProductAttributeRequest> attributes;
 }

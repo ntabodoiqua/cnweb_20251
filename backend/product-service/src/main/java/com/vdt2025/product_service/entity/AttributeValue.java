@@ -26,9 +26,6 @@ public class AttributeValue {
     @Column(nullable = false)
     String value; // Ví dụ: "Trắng", "Đỏ", "Size L", "128GB"
 
-    @Column(name = "display_order")
-    Integer displayOrder; // Thứ tự hiển thị
-
     @Column(name = "is_active", nullable = false)
     @Builder.Default
     boolean isActive = true;

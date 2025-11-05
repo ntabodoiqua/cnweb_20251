@@ -77,6 +77,10 @@ public class ProductServiceImpl implements ProductService {
         // Validate category exists
         Category category = categoryRepository.findById(request.getCategoryId())
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+        if (category.isPlatformCategory() && category.isRootCategory()) {
+            log.warn("Cannot create product under platform root category: {}", category.getName());
+            throw new AppException(ErrorCode.INVALID_CATEGORY_FOR_PRODUCT);
+        }
         
         // Validate store exists
         Store store = storeRepository.findById(request.getStoreId())
@@ -140,8 +144,6 @@ public class ProductServiceImpl implements ProductService {
             product.setMaxPrice(maxPrice);
             product = productRepository.save(product);
         }
-        // TODO: Handle images and attributes
-        
         log.info("Product {} created successfully with ID: {}", product.getName(), product.getId());
         return mapToProductResponse(product);
     }

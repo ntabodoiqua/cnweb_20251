@@ -1,8 +1,12 @@
-package com.vdt2025.product_service.dto.request.product;
+package com.vdt2025.product_service.dto.request.attribute;
 
+import com.vdt2025.product_service.entity.Category;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 /**
  * Request để tạo thuộc tính sản phẩm (specifications)
@@ -16,8 +20,13 @@ import lombok.experimental.FieldDefaults;
 public class ProductAttributeRequest {
     
     @NotBlank(message = "ATTRIBUTE_NAME_REQUIRED")
-    String attributeName;
-    
-    @NotBlank(message = "ATTRIBUTE_VALUE_REQUIRED")
-    String attributeValue;
+    String name;
+
+    String description;
+
+    @NotNull
+    List<String> categoryIds; // Danh sách ID của các danh mục áp dụng thuộc tính này
+
+    @NotNull
+    List<AttributeValueRequest> values; // Danh sách giá trị thuộc tính
 }
