@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +45,12 @@ public class Product {
 
     @Column(name = "average_rating")
     Double averageRating; // Điểm đánh giá trung bình
+
+    @Column(name = "min_price")
+    BigDecimal minPrice; // Giá thấp nhất trong các variants
+
+    @Column(name = "max_price")
+    BigDecimal maxPrice; // Giá cao nhất trong các variants
 
     @Column(name = "rating_count")
     @Builder.Default
