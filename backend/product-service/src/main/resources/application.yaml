@@ -55,3 +55,6 @@ file:
 
 app:
   default-admin-id: d50f8589-da20-49e8-a3f3-6a115d1f68d7
+
+product-images:
+  max-per-product: 5

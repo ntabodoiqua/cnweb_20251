@@ -22,6 +22,9 @@ public class CategorySpecification {
                 if (StringUtils.hasText(filter.getCreatedBy())) {
                     predicates.add(cb.equal(root.get("createdBy"), filter.getCreatedBy()));
                 }
+                if (filter.getIsActive() != null) {
+                    predicates.add(cb.equal(root.get("isActive"), filter.getIsActive()));
+                }
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

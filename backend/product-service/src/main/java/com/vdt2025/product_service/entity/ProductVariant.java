@@ -38,7 +38,7 @@ public class ProductVariant {
     BigDecimal price;
 
     @Column(name = "original_price", precision = 19, scale = 2)
-    BigDecimal originalPrice; // Giá gốc (trước khi giảm)
+    BigDecimal originalPrice; // Giá gốc
 
     @Min(value = 0, message = "Stock quantity must be at least 0")
     @Column(name = "stock_quantity", nullable = false)
@@ -51,12 +51,12 @@ public class ProductVariant {
     @Column(name = "image_name")
     String imageName; // Ảnh đại diện cho variant này
 
-    @Column(name = "weight")
-    BigDecimal weight; // Cân nặng (gram) - dùng cho tính phí ship
+    @Column(name = "image_url", columnDefinition = "TEXT")
+    String imageUrl; // URL ảnh đại diện
 
     @Column(name = "is_active", nullable = false)
     @Builder.Default
-    boolean isActive = true;
+    boolean isActive = false;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,12 @@ public class Product {
     @Column(name = "average_rating")
     Double averageRating; // Điểm đánh giá trung bình
 
+    @Column(name = "min_price")
+    BigDecimal minPrice; // Giá thấp nhất trong các variants
+
+    @Column(name = "max_price")
+    BigDecimal maxPrice; // Giá cao nhất trong các variants
+
     @Column(name = "rating_count")
     @Builder.Default
     Integer ratingCount = 0; // Số lượng đánh giá
@@ -70,6 +77,16 @@ public class Product {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     Category category;
+
+    // Relationship với store category
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "product_store_categories",
+        joinColumns = @JoinColumn(name = "product_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    @Builder.Default
+    List<Category> storeCategories = new ArrayList<>();
 
     // Relationship với Brand
     @ManyToOne(fetch = FetchType.LAZY)
