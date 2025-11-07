@@ -33,6 +33,13 @@ public class SecurityConfig {
             "/webjars/**"
     };
 
+    private static final String[] HEALTH_ENDPOINTS = {
+        "/actuator/health",
+        "/actuator/health/**",
+        "/actuator/info",
+        "/actuator/info/**"
+}; 
+
     private static final String[] PUBLIC_POST_ENDPOINTS = {
             "/users",
             "/public/**"
@@ -59,6 +66,7 @@ public class SecurityConfig {
                         request
                                 // Allow Swagger endpoints (highest priority)
                                 .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
+                                .requestMatchers(HEALTH_ENDPOINTS).permitAll()
                                 // Allow auth endpoints
                                 .requestMatchers(AUTH_ENDPOINTS).permitAll()
                                 // Allow POST to create users
