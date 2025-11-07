@@ -28,7 +28,7 @@ public class ApplicationInitConfig {
                 Category defaultCategory = Category.builder()
                         .name(defaultCategoryName)
                         .description("Danh mục mặc định cho các sản phẩm chưa được phân loại")
-                        .createdBy(adminId)
+                        .createdBy("admin")
                         .build();
                 categoryRepository.save(defaultCategory);
                 log.info("Default category created successfully.");

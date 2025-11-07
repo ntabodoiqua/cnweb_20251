@@ -26,8 +26,8 @@ public class Store {
     @Column(name = "seller_profile_id", nullable = false, unique = true)
     String sellerProfileId;
 
-    @Column(name = "user_id", nullable = false)
-    String userId;
+    @Column(name = "user_name", nullable = false)
+    String userName;
 
     @Column(name = "store_name", nullable = false)
     String storeName;
@@ -80,6 +80,11 @@ public class Store {
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     @Builder.Default
     List<Product> products = new ArrayList<>();
+
+    // Relationship với Category (Store categories)
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
+    @Builder.Default
+    List<Category> categories = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

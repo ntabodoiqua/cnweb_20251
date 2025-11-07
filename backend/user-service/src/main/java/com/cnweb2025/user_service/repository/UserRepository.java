@@ -32,4 +32,27 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
         nativeQuery = true
     )
     List<String> findAllAvatarNames();
+
+    // Tổng số người dùng đang hoạt động
+    @Query("SELECT COUNT(u) FROM User u WHERE u.enabled = true")
+    long countEnabledUsers();
+
+    // Tổng số người dùng bị vô hiệu hóa
+    @Query("SELECT COUNT(u) FROM User u WHERE u.enabled = false")
+    long countDisabledUsers();
+
+    // Đếm số lượng người dùng theo vai trò
+    @Query("SELECT r.name, COUNT(u) FROM User u JOIN u.roles r GROUP BY r.name")
+    List<Object[]> countUsersByRole();
+
+    // Đếm người dùng theo tháng tạo tài khoản
+    @Query("""
+       SELECT MONTH(u.createdAt) AS month, COUNT(u)
+       FROM User u
+       WHERE YEAR(u.createdAt) = YEAR(CURRENT_DATE)
+       GROUP BY MONTH(u.createdAt)
+       ORDER BY MONTH(u.createdAt)
+       """)
+    List<Object[]> countUsersByCreatedMonth();
+
 }

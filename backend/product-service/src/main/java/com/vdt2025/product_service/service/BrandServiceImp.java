@@ -1,7 +1,5 @@
 package com.vdt2025.product_service.service;
 
-import com.vdt2025.common_dto.dto.response.FileInfoResponse;
-import com.vdt2025.common_dto.dto.response.UserResponse;
 import com.vdt2025.common_dto.service.FileServiceClient;
 import com.vdt2025.common_dto.service.UserServiceClient;
 import com.vdt2025.product_service.dto.request.brand.BrandCreationRequest;
@@ -9,7 +7,6 @@ import com.vdt2025.product_service.dto.request.brand.BrandFilterRequest;
 import com.vdt2025.product_service.dto.request.brand.BrandUpdateRequest;
 import com.vdt2025.product_service.dto.response.BrandResponse;
 import com.vdt2025.product_service.entity.Brand;
-import com.vdt2025.product_service.entity.Product;
 import com.vdt2025.product_service.exception.AppException;
 import com.vdt2025.product_service.exception.ErrorCode;
 import com.vdt2025.product_service.mapper.BrandMapper;
@@ -20,19 +17,16 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -52,7 +46,7 @@ public class BrandServiceImp implements BrandService{
     @Transactional
     public BrandResponse createBrand(BrandCreationRequest request) {
         // Kiểm tra xem brand đã tồn tại chưa
-        if (brandRepository.existsByName(request.getName())) {
+        if (brandRepository.existsByNameIgnoreCase(request.getName())) {
             log.warn("Brand {} already exists", request.getName());
             throw new AppException(ErrorCode.BRAND_EXISTED);
         }
@@ -91,7 +85,7 @@ public class BrandServiceImp implements BrandService{
 
         // Kiểm tra xem tên brand mới có trùng với tên brand khác không
         if (!brand.getName().equalsIgnoreCase(request.getName())
-                && brandRepository.existsByName(request.getName())) {
+                && brandRepository.existsByNameIgnoreCase(request.getName())) {
             log.warn("Brand {} already exists", request.getName());
             throw new AppException(ErrorCode.BRAND_EXISTED);
         }
