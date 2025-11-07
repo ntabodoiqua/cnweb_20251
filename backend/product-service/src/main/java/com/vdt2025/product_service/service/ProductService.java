@@ -2,11 +2,7 @@ package com.vdt2025.product_service.service;
 
 import com.vdt2025.product_service.dto.request.FindVariantRequest;
 import com.vdt2025.product_service.dto.request.product.*;
-import com.vdt2025.product_service.dto.response.ProductImageResponse;
-import com.vdt2025.product_service.dto.response.ProductResponse;
-import com.vdt2025.product_service.dto.response.ProductSummaryResponse;
-import com.vdt2025.product_service.dto.response.ProductVariantSelectionResponse;
-import com.vdt2025.product_service.dto.response.VariantResponse;
+import com.vdt2025.product_service.dto.response.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -71,7 +67,7 @@ public interface ProductService {
      * Tìm kiếm sản phẩm với filter và pagination
      * Trả về ProductSummaryResponse để tối ưu performance
      */
-    Page<ProductSummaryResponse> searchProducts(ProductFilterRequest filter, Pageable pageable);
+    PageCacheDTO<ProductSummaryResponse> searchProductsCacheable(ProductFilterRequest filter, Pageable pageable);
     
     /**
      * Tìm kiếm sản phẩm theo store

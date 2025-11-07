@@ -37,6 +37,10 @@ public class CacheConfiguration {
                 .allowIfSubType("java.util")
                 .allowIfSubType("java.time")
                 .allowIfSubType("com.vdt2025.common_dto")
+                .allowIfSubType("org.springframework.data.domain")
+                .allowIfSubType("org.springframework.data.support")
+                .allowIfSubType("org.springframework.data")
+                .allowIfSubType("java.math")
                 .build();
 
         objectMapper.activateDefaultTyping(

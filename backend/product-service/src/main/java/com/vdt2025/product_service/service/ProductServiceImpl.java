@@ -25,6 +25,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -307,19 +309,30 @@ public class ProductServiceImpl implements ProductService {
 
     // ========== Search & Filter ==========
 
-    @Override
     @Cacheable(value = "product-search", key = "#filter.toString() + '-' + #pageable.toString()")
+    @Override
     @Transactional(readOnly = true)
-    public Page<ProductSummaryResponse> searchProducts(ProductFilterRequest filter, Pageable pageable) {
+    public PageCacheDTO<ProductSummaryResponse> searchProductsCacheable(ProductFilterRequest filter, Pageable pageable) {
         log.info("Searching products with filter: {}", filter);
-        
+
         Page<Product> productPage = productRepository.findAll(
-                ProductSpecification.withFilter(filter), 
+                ProductSpecification.withFilter(filter),
                 pageable
         );
-        
-        return productPage.map(this::mapToProductSummaryResponse);
+
+        List<ProductSummaryResponse> content = productPage
+                .map(this::mapToProductSummaryResponse)
+                .getContent();
+
+        return new PageCacheDTO<>(
+                content,
+                productPage.getNumber(),
+                productPage.getSize(),
+                productPage.getTotalElements()
+        );
     }
+
+
 
     @Override
     @Transactional(readOnly = true)
@@ -852,10 +865,8 @@ public class ProductServiceImpl implements ProductService {
                 .orElse(BigDecimal.ZERO);
         
         // Get first image as thumbnail
-        String thumbnail = variants.stream()
-                .map(ProductVariant::getImageName)
-                .filter(name -> name != null && !name.isEmpty())
-                .findFirst()
+        String thumbnail = productImageRepository.findFirstByProductIdOrderByDisplayOrderAsc(product.getId())
+                .map(ProductImage::getImageUrl)
                 .orElse(null);
         
         return ProductSummaryResponse.builder()
@@ -872,7 +883,12 @@ public class ProductServiceImpl implements ProductService {
                 .storeName(product.getStore().getStoreName())
                 .storeId(product.getStore().getId())
                 .platformCategoryName(product.getCategory().getName())
-                .storeCategoryName(product.getStoreCategories().getFirst().getName())
+                .storeCategoryName(
+                        Optional.ofNullable(product.getStoreCategories())
+                                .filter(list -> !list.isEmpty())
+                                .map(list -> list.getFirst().getName())
+                                .orElse(null)
+                )
                 .brandName(product.getBrand() != null ? product.getBrand().getName() : null)
                 .createdAt(product.getCreatedAt())
                 .build();

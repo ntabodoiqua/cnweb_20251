@@ -2,19 +2,14 @@ package com.vdt2025.product_service.controller;
 
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import com.vdt2025.product_service.dto.request.product.*;
-import com.vdt2025.product_service.dto.response.ProductImageResponse;
-import com.vdt2025.product_service.dto.response.ProductResponse;
-import com.vdt2025.product_service.dto.response.ProductSummaryResponse;
-import com.vdt2025.product_service.dto.response.VariantResponse;
+import com.vdt2025.product_service.dto.response.*;
 import com.vdt2025.product_service.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -181,11 +176,15 @@ public class ProductManagementController {
             @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) 
             Pageable pageable) {
         log.info("Searching products with filter: {}", filter);
-        
-        Page<ProductSummaryResponse> response = productService.searchProducts(filter, pageable);
-        
+
+        PageCacheDTO<ProductSummaryResponse> dto = productService.searchProductsCacheable(filter, pageable);
+
         return ApiResponse.<Page<ProductSummaryResponse>>builder()
-                .result(response)
+                .result(new PageImpl<>(
+                        dto.content(),
+                        PageRequest.of(dto.pageNumber(), dto.pageSize()),
+                        dto.totalElements()
+                ))
                 .build();
     }
 

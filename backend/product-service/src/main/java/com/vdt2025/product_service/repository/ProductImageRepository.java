@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface ProductImageRepository extends JpaRepository<ProductImage, String> {
     // Đếm số lượng ảnh của một sản phẩm
@@ -14,4 +16,6 @@ public interface ProductImageRepository extends JpaRepository<ProductImage, Stri
     Boolean existsByProductIdAndDisplayOrder(String productId, Integer displayOrder);
 
     List<ProductImage> findAllByProductId(String productId);
+
+    Optional<ProductImage> findFirstByProductIdOrderByDisplayOrderAsc(String productId);
 }
