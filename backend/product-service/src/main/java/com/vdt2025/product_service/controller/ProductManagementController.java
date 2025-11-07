@@ -301,6 +301,40 @@ public class ProductManagementController {
                 .build();
     }
 
+    /**
+     * Thêm thuộc tính cho variant
+     * POST /products/{productId}/variants/{variantId}/attributes
+     */
+    @PostMapping("/{productId}/variants/{variantId}/attributes")
+    public ApiResponse<VariantResponse> addVariantAttribute(
+            @PathVariable String productId,
+            @PathVariable String variantId,
+            @Valid @RequestBody VariantAttributeRequest request) {
+        log.info("Adding attribute to variant {} of product {}", variantId, productId);
+        VariantResponse response = productService.addVariantAttribute(productId, variantId, request);
+        return ApiResponse.<VariantResponse>builder()
+                .message("Variant attribute added successfully")
+                .result(response)
+                .build();
+    }
+
+    /**
+     * Xóa thuộc tính của variant
+     * DELETE /products/{productId}/variants/{variantId}/attributes
+     */
+    @DeleteMapping("/{productId}/variants/{variantId}/attributes")
+    public ApiResponse<VariantResponse> removeVariantAttribute(
+            @PathVariable String productId,
+            @PathVariable String variantId,
+            @Valid @RequestBody VariantAttributeRequest request) {
+        log.info("Removing attribute from variant {} of product {}", variantId, productId);
+        VariantResponse response = productService.removeVariantAttribute(productId, variantId, request);
+        return ApiResponse.<VariantResponse>builder()
+                .message("Variant attribute removed successfully")
+                .result(response)
+                .build();
+    }
+
     // ========== Status Management ==========
     
     /**

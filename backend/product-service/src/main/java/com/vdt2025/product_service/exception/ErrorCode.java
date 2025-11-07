@@ -45,6 +45,7 @@ public enum ErrorCode {
     CATEGORY_ALREADY_EXISTS_IN_STORE(1509, "error.1509", HttpStatus.CONFLICT),
     UNAUTHORIZED_ACCESS(1510, "error.1510", HttpStatus.FORBIDDEN),
     INVALID_CATEGORY_FOR_PRODUCT(1511, "error.1511", HttpStatus.BAD_REQUEST),
+    STORE_CATEGORY_NOT_FOUND(1512, "error.1512", HttpStatus.NOT_FOUND),
 
     // Lỗi brand (151x)
     BRAND_NAME_REQUIRED(1520, "error.1520", HttpStatus.BAD_REQUEST),
@@ -90,11 +91,17 @@ public enum ErrorCode {
     ATTRIBUTE_NAME_REQUIRED(1801, "error.1801", HttpStatus.BAD_REQUEST),
     ATTRIBUTE_CATEGORY_REQUIRED(1802, "error.1802", HttpStatus.BAD_REQUEST),
     ATTRIBUTE_EXISTS(1803, "error.1803", HttpStatus.CONFLICT),
+    ATTRIBUTE_NOT_FOUND(1804, "error.1804", HttpStatus.NOT_FOUND),
+    ATTRIBUTE_VALUE_EXISTS(1805, "error.1805", HttpStatus.CONFLICT),
+    ATTRIBUTE_VALUE_NOT_FOUND(1806, "error.1806", HttpStatus.NOT_FOUND),
+    INVALID_CATEGORY_TYPE(1807, "error.1807", HttpStatus.BAD_REQUEST),
+    ATTRIBUTE_NOT_APPLICABLE_TO_PRODUCT_CATEGORY(1808, "error.1808", HttpStatus.BAD_REQUEST),
 
     // Lỗi khác (99xx)
     UNCATEGORIZED_EXCEPTION(9999, "error.9999", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(9998, "error.9998", HttpStatus.BAD_REQUEST),
     DATA_INTEGRITY_VIOLATION(9997, "error.9997", HttpStatus.CONFLICT),
+    INVALID_REQUEST(9996, "error.9996", HttpStatus.BAD_REQUEST)
     ;
     ErrorCode(int code, String messageKey, HttpStatusCode statusCode) {
         this.code = code;

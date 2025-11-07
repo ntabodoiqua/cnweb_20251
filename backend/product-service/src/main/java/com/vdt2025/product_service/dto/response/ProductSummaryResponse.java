@@ -41,7 +41,9 @@ public class ProductSummaryResponse {
     
     String storeId;
     
-    String categoryName;
+    String storeCategoryName;
+
+    String platformCategoryName;
     
     String brandName;
     

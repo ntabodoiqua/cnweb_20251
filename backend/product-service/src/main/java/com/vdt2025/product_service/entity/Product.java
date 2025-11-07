@@ -78,6 +78,16 @@ public class Product {
     @JoinColumn(name = "category_id", nullable = false)
     Category category;
 
+    // Relationship với store category
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "product_store_categories",
+        joinColumns = @JoinColumn(name = "product_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    @Builder.Default
+    List<Category> storeCategories = new ArrayList<>();
+
     // Relationship với Brand
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "brand_id")

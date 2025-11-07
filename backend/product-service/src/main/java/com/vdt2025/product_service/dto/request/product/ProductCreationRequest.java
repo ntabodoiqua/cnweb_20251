@@ -32,6 +32,8 @@ public class ProductCreationRequest {
     
     @NotNull(message = "CATEGORY_ID_REQUIRED")
     String categoryId;
+
+    List<String> storeCategoryIds; // Optional danh mục cửa hàng
     
     @NotNull(message = "STORE_ID_REQUIRED")
     String storeId;

@@ -83,6 +83,9 @@ public class Category {
     @Builder.Default
     List<Product> products = new ArrayList<>();
 
+    @ManyToMany(mappedBy = "storeCategories", fetch = FetchType.LAZY)
+    List<Product> storeProducts = new ArrayList<>();
+
     @Column(name = "created_by", nullable = false, updatable = false)
     String createdBy;
 

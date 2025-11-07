@@ -61,4 +61,47 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     @Modifying
     @Query("UPDATE ProductVariant v SET v.soldQuantity = v.soldQuantity + :quantity WHERE v.id = :variantId")
     int updateSoldQuantity(@Param("variantId") String variantId, @Param("quantity") Integer quantity);
+    
+    /**
+     * Tìm variant dựa trên combination của attribute values
+     * Query này sử dụng HAVING COUNT để đảm bảo variant có ĐÚNG tất cả attribute values được chỉ định
+     * 
+     * Ví dụ: Tìm variant có Màu Đỏ (val-1) và Size M (val-3)
+     * - Variant phải có cả 2 attribute values này
+     * - Variant không được có thêm attribute values khác
+     * 
+     * @param productId ID của product
+     * @param attributeValueIds Danh sách ID của attribute values (Đỏ, Size M, ...)
+     * @param count Số lượng attribute values (dùng để check EXACT match)
+     * @return Optional<ProductVariant>
+     */
+    @Query("""
+        SELECT v FROM ProductVariant v
+        JOIN v.attributeValues av
+        WHERE v.product.id = :productId
+        AND v.isActive = true
+        AND av.id IN :attributeValueIds
+        GROUP BY v.id
+        HAVING COUNT(DISTINCT av.id) = :count
+        AND SIZE(v.attributeValues) = :count
+    """)
+    Optional<ProductVariant> findByProductIdAndAttributeValues(
+        @Param("productId") String productId,
+        @Param("attributeValueIds") List<String> attributeValueIds,
+        @Param("count") Long count
+    );
+    
+    /**
+     * Lấy tất cả variants active của product kèm theo attribute values (eager fetch)
+     * Dùng LEFT JOIN FETCH để tránh N+1 query problem
+     */
+    @Query("""
+        SELECT DISTINCT v FROM ProductVariant v
+        LEFT JOIN FETCH v.attributeValues av
+        LEFT JOIN FETCH av.attribute
+        WHERE v.product.id = :productId
+        AND v.isActive = true
+        ORDER BY v.createdAt DESC
+    """)
+    List<ProductVariant> findByProductIdWithAttributeValues(@Param("productId") String productId);
 }

@@ -56,7 +56,7 @@ public class ProductVariant {
 
     @Column(name = "is_active", nullable = false)
     @Builder.Default
-    boolean isActive = true;
+    boolean isActive = false;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

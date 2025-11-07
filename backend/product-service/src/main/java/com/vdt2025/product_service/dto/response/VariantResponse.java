@@ -32,6 +32,8 @@ public class VariantResponse {
     Integer soldQuantity;
     
     String imageName;
+
+    String imageUrl;
     
     BigDecimal weight;
     

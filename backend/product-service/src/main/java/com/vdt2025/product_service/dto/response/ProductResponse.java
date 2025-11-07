@@ -39,6 +39,8 @@ public class ProductResponse {
     
     // Relationship responses
     CategoryResponse category;
+
+    List<CategoryResponse> storeCategories;
     
     StoreResponse store;
     

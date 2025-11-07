@@ -1,11 +1,14 @@
 package com.vdt2025.product_service.controller;
 
 import com.vdt2025.common_dto.dto.response.ApiResponse;
+import com.vdt2025.product_service.dto.request.FindVariantRequest;
 import com.vdt2025.product_service.dto.request.product.ProductFilterRequest;
 import com.vdt2025.product_service.dto.response.ProductResponse;
 import com.vdt2025.product_service.dto.response.ProductSummaryResponse;
+import com.vdt2025.product_service.dto.response.ProductVariantSelectionResponse;
 import com.vdt2025.product_service.dto.response.VariantResponse;
 import com.vdt2025.product_service.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -197,6 +200,102 @@ public class PublicProductController {
         Page<ProductSummaryResponse> response = productService.searchProducts(filter, pageable);
         
         return ApiResponse.<Page<ProductSummaryResponse>>builder()
+                .result(response)
+                .build();
+    }
+    
+    /**
+     * Lấy thông tin để chọn variant (Màu sắc, Size, ...)
+     * GET /public/products/{productId}/variant-options
+     * 
+     * Use case:
+     * - User vào trang chi tiết sản phẩm
+     * - Frontend call API này để lấy danh sách thuộc tính có thể chọn
+     * - Render UI với dropdown/buttons cho từng thuộc tính
+     * 
+     * Response structure:
+     * {
+     *   "productId": "prod-123",
+     *   "productName": "Áo Sơ Mi Nam",
+     *   "attributeGroups": [
+     *     {
+     *       "attributeId": "attr-1",
+     *       "attributeName": "Màu sắc",
+     *       "options": [
+     *         {"valueId": "val-1", "value": "Đỏ", "available": true},
+     *         {"valueId": "val-2", "value": "Xanh", "available": true}
+     *       ]
+     *     },
+     *     {
+     *       "attributeId": "attr-2",
+     *       "attributeName": "Size",
+     *       "options": [
+     *         {"valueId": "val-3", "value": "M", "available": true},
+     *         {"valueId": "val-4", "value": "L", "available": true},
+     *         {"valueId": "val-5", "value": "XL", "available": true}
+     *       ]
+     *     }
+     *   ],
+     *   "variantMatrix": {
+     *     "val-1,val-3": "variant-1",  // Đỏ + M -> variant-1
+     *     "val-1,val-4": "variant-2",  // Đỏ + L -> variant-2
+     *     ...
+     *   },
+     *   "totalVariants": 6
+     * }
+     */
+    @GetMapping("/{productId}/variant-options")
+    public ApiResponse<ProductVariantSelectionResponse> getVariantSelectionOptions(
+            @PathVariable String productId) {
+        log.info("Public: Fetching variant selection options for product: {}", productId);
+        
+        ProductVariantSelectionResponse response = productService.getProductVariantSelectionOptions(productId);
+        
+        return ApiResponse.<ProductVariantSelectionResponse>builder()
+                .message("Fetch variant selection options successfully")
+                .result(response)
+                .build();
+    }
+    
+    /**
+     * Tìm variant dựa trên combination của attributes đã chọn
+     * POST /public/products/{productId}/find-variant
+     * 
+     * Use case:
+     * - User đã chọn xong tất cả thuộc tính (Màu: Đỏ, Size: XL)
+     * - Frontend call API này để lấy thông tin variant tương ứng
+     * - Hiển thị giá, số lượng tồn, ảnh của variant đó
+     * 
+     * Request body:
+     * {
+     *   "attributeValueIds": ["val-1", "val-5"]  // Đỏ + XL
+     * }
+     * 
+     * Response:
+     * {
+     *   "id": "variant-2",
+     *   "sku": "ASM-DO-XL",
+     *   "variantName": "Áo Sơ Mi - Đỏ - XL",
+     *   "price": 299000,
+     *   "stockQuantity": 50,
+     *   "attributeValues": [
+     *     {"id": "val-1", "value": "Đỏ", "attributeName": "Màu sắc"},
+     *     {"id": "val-5", "value": "XL", "attributeName": "Size"}
+     *   ],
+     *   ...
+     * }
+     */
+    @PostMapping("/{productId}/find-variant")
+    public ApiResponse<VariantResponse> findVariantByAttributes(
+            @PathVariable String productId,
+            @Valid @RequestBody FindVariantRequest request) {
+        log.info("Public: Finding variant for product {} with attributes: {}", 
+                productId, request.getAttributeValueIds());
+        
+        VariantResponse response = productService.findVariantByAttributes(productId, request);
+        
+        return ApiResponse.<VariantResponse>builder()
+                .message("Found variant successfully")
                 .result(response)
                 .build();
     }

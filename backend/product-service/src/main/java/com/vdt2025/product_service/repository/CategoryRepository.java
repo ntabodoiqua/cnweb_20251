@@ -61,5 +61,9 @@ public interface CategoryRepository extends JpaRepository<Category, String>, Jpa
 
     @Query("SELECT c.id FROM Category c WHERE c.id IN :ids")
     List<String> findExistingIds(@Param("ids") List<String> ids);
+
+    boolean existsByIdAndStoreId(String id, String storeId);
+
+    List<Category> findByStoreId(String storeId);
 }
 

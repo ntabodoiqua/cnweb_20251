@@ -1,9 +1,11 @@
 package com.vdt2025.product_service.service;
 
+import com.vdt2025.product_service.dto.request.FindVariantRequest;
 import com.vdt2025.product_service.dto.request.product.*;
 import com.vdt2025.product_service.dto.response.ProductImageResponse;
 import com.vdt2025.product_service.dto.response.ProductResponse;
 import com.vdt2025.product_service.dto.response.ProductSummaryResponse;
+import com.vdt2025.product_service.dto.response.ProductVariantSelectionResponse;
 import com.vdt2025.product_service.dto.response.VariantResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -103,6 +105,17 @@ public interface ProductService {
      */
     List<VariantResponse> getVariantsByProductId(String productId);
 
+
+    /**
+     * Thêm thuộc tính cho variant
+     */
+    VariantResponse addVariantAttribute(String productId, String variantId, VariantAttributeRequest request);
+
+    /**
+     * Xóa thuộc tính của variant
+     */
+    VariantResponse removeVariantAttribute(String productId, String variantId, VariantAttributeRequest request);
+
     // ========== Status Management ==========
     
     /**
@@ -143,5 +156,30 @@ public interface ProductService {
      * Cập nhật sold count khi hoàn thành đơn hàng
      */
     void updateSoldCount(String productId, Integer quantity);
+    
+    // ========== Variant Selection (for E-commerce UI) ==========
+    
+    /**
+     * Lấy danh sách options để chọn variant
+     * Dùng để render UI chọn thuộc tính (Màu sắc, Size, ...)
+     * 
+     * @param productId ID sản phẩm
+     * @return ProductVariantSelectionResponse chứa:
+     *         - Danh sách attribute groups (Màu sắc, Size, ...)
+     *         - Các options có thể chọn cho mỗi group
+     *         - Variant matrix để quick lookup
+     */
+    ProductVariantSelectionResponse getProductVariantSelectionOptions(String productId);
+
+    /**
+     * Tìm variant dựa trên combination của attribute values
+     * Dùng khi user chọn xong tất cả attributes (Đỏ + Size M)
+     * 
+     * @param productId ID sản phẩm
+     * @param request Chứa danh sách attribute value IDs đã chọn
+     * @return VariantResponse của variant matching
+     * @throws com.vdt2025.product_service.exception.AppException nếu không tìm thấy variant
+     */
+    VariantResponse findVariantByAttributes(String productId, FindVariantRequest request);
 }
 

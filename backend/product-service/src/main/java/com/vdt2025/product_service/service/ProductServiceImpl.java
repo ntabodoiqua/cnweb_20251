@@ -4,6 +4,7 @@ import com.vdt2025.common_dto.dto.response.ApiResponse;
 import com.vdt2025.common_dto.dto.response.FileInfoResponse;
 import com.vdt2025.common_dto.service.FileServiceClient;
 import com.vdt2025.common_dto.service.UserServiceClient;
+import com.vdt2025.product_service.dto.request.FindVariantRequest;
 import com.vdt2025.product_service.dto.request.product.*;
 import com.vdt2025.product_service.dto.response.*;
 import com.vdt2025.product_service.entity.*;
@@ -48,7 +49,7 @@ import java.util.stream.Collectors;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
 public class ProductServiceImpl implements ProductService {
-    
+
     ProductRepository productRepository;
     ProductVariantRepository variantRepository;
     CategoryRepository categoryRepository;
@@ -58,6 +59,7 @@ public class ProductServiceImpl implements ProductService {
     UserServiceClient userServiceClient;
     FileServiceClient fileServiceClient;
     ProductImageRepository productImageRepository;
+    AttributeValueRepository attributeValueRepository;
     private final CategoryMapper categoryMapper;
     private final StoreMapper storeMapper;
     private final BrandMapper brandMapper;
@@ -101,6 +103,33 @@ public class ProductServiceImpl implements ProductService {
             log.warn("Product {} already exists in store {}", request.getName(), store.getStoreName());
             throw new AppException(ErrorCode.PRODUCT_EXISTED);
         }
+
+        List<Category> newStoreCategories = new ArrayList<>();
+        // Validate store categories if provided
+        if (request.getStoreCategoryIds() != null && !request.getStoreCategoryIds().isEmpty()) {
+            List<String> requestedIds = request.getStoreCategoryIds();
+            // Load tất cả categories hợp lệ trong 1 query
+            List<Category> validCategories = categoryRepository.findByStoreId(request.getStoreId());
+
+            // Tạo Map tra cứu nhanh: id → category
+            Map<String, Category> categoryMap = validCategories.stream()
+                    .collect(Collectors.toMap(Category::getId, c -> c));
+
+            // Tìm các ID không hợp lệ (không có trong map)
+            List<String> invalidIds = requestedIds.stream()
+                    .filter(categoryId -> !categoryMap.containsKey(categoryId))
+                    .toList();
+
+            if (!invalidIds.isEmpty()) {
+                log.warn("Store {} has no categories with IDs: {}", request.getStoreId(), invalidIds);
+                throw new AppException(ErrorCode.STORE_CATEGORY_NOT_FOUND);
+            }
+
+            // Map sang entity
+            newStoreCategories = requestedIds.stream()
+                    .map(categoryMap::get)
+                    .toList();
+        }
         
         // Validate brand if provided
         Brand brand = null;
@@ -122,6 +151,7 @@ public class ProductServiceImpl implements ProductService {
                 .viewCount(0L)
                 .soldCount(0)
                 .ratingCount(0)
+                .storeCategories(newStoreCategories)
                 .build();
         
         product = productRepository.save(product);
@@ -194,6 +224,36 @@ public class ProductServiceImpl implements ProductService {
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
             product.setCategory(category);
+        }
+
+        if (request.getStoreCategoryIds() != null && !request.getStoreCategoryIds().isEmpty()) {
+            List<String> requestedIds = request.getStoreCategoryIds();
+            String storeId = product.getStore().getId();
+
+            // Load tất cả categories hợp lệ trong 1 query
+            List<Category> validCategories = categoryRepository.findByStoreId(storeId);
+
+            // Tạo Map tra cứu nhanh: id → category
+            Map<String, Category> categoryMap = validCategories.stream()
+                    .collect(Collectors.toMap(Category::getId, c -> c));
+
+            // Tìm các ID không hợp lệ (không có trong map)
+            List<String> invalidIds = requestedIds.stream()
+                    .filter(categoryId -> !categoryMap.containsKey(categoryId))
+                    .toList();
+
+            if (!invalidIds.isEmpty()) {
+                log.warn("Store {} has no categories with IDs: {}", storeId, invalidIds);
+                throw new AppException(ErrorCode.STORE_CATEGORY_NOT_FOUND);
+            }
+
+            // Map sang entity
+            List<Category> newStoreCategories = requestedIds.stream()
+                    .map(categoryMap::get)
+                    .toList();
+
+            // Cập nhật product
+            product.setStoreCategories(newStoreCategories);
         }
         
         if (request.getBrandId() != null) {
@@ -502,6 +562,93 @@ public class ProductServiceImpl implements ProductService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    public VariantResponse addVariantAttribute(String productId, String variantId, VariantAttributeRequest request) {
+        log.info("Adding attribute [{}:{}] to variant {} of product {}",
+                request.getAttributeId(), request.getValue(), variantId, productId);
+
+        // Lấy variant kèm product
+        ProductVariant variant = variantRepository.findByProductIdAndId(productId, variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+
+        // Kiểm tra quyền trên product
+        checkProductAccess(variant.getProduct());
+
+        // Lấy AttributeValue theo attributeId + value
+        AttributeValue attributeValue = attributeValueRepository
+                .findByValueIgnoreCaseAndAttributeId(request.getValue(), request.getAttributeId())
+                .orElseThrow(() -> new AppException(ErrorCode.ATTRIBUTE_VALUE_NOT_FOUND));
+
+        // Kiểm tra attribute này có thuộc về danh mục sản phẩm không
+        Category category = variant.getProduct().getCategory();
+        Category productCategory = (category != null) ? category.getParentCategory() : null;
+
+        if (productCategory == null) {
+            log.warn("Product {} has no valid category or parent category", variant.getProduct().getId());
+            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
+        }
+        if (!attributeValue.getAttribute().getCategories().contains(productCategory)) {
+            log.warn("Attribute value {} does not belong to product category {}",
+                    attributeValue.getValue(), productCategory.getName());
+            throw new AppException(ErrorCode.ATTRIBUTE_NOT_APPLICABLE_TO_PRODUCT_CATEGORY);
+        }
+
+        // Nếu variant đã có attributeValue → bỏ qua
+        if (variant.getAttributeValues().stream()
+                .anyMatch(av -> av.getId().equals(attributeValue.getId()))) {
+            log.warn("Variant {} already contains attribute value {}", variantId, attributeValue.getValue());
+            return mapToVariantResponse(variant);
+        }
+
+        // Thêm và lưu
+        variant.getAttributeValues().add(attributeValue);
+        // Variant đã có attribute, set active nếu trước đó inactive
+        if (!variant.isActive()) {
+            variant.setActive(true);
+            log.info("Variant {} was inactive, setting to active after adding attribute", variantId);
+        }
+        return mapToVariantResponse(variantRepository.save(variant));
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    public VariantResponse removeVariantAttribute(String productId, String variantId, VariantAttributeRequest request) {
+        log.info("Removing attribute [{}:{}] from variant {} of product {}",
+                request.getAttributeId(), request.getValue(), variantId, productId);
+
+        // Lấy variant kèm product
+        ProductVariant variant = variantRepository.findByProductIdAndId(productId, variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+
+        // Kiểm tra quyền trên product
+        checkProductAccess(variant.getProduct());
+
+        // Lấy AttributeValue theo attributeId + value
+        AttributeValue attributeValue = attributeValueRepository
+                .findByValueIgnoreCaseAndAttributeId(request.getValue(), request.getAttributeId())
+                .orElseThrow(() -> new AppException(ErrorCode.ATTRIBUTE_VALUE_NOT_FOUND));
+
+        // Nếu variant không có attributeValue → bỏ qua
+        if (variant.getAttributeValues().stream()
+                .noneMatch(av -> av.getId().equals(attributeValue.getId()))) {
+            log.warn("Variant {} does not contain attribute value {}", variantId, attributeValue.getValue());
+            return mapToVariantResponse(variant);
+        }
+
+        // Xóa và lưu
+        variant.getAttributeValues().removeIf(av -> av.getId().equals(attributeValue.getId()));
+
+        // Nếu không còn attribute nào, disable variant
+        if (variant.getAttributeValues().isEmpty()) {
+            variant.setActive(false);
+            log.info("Variant {} has no attributes left, setting to inactive", variantId);
+        }
+        return mapToVariantResponse(variantRepository.save(variant));
+    }
+
     // ========== Status Management ==========
 
     @Override
@@ -724,7 +871,8 @@ public class ProductServiceImpl implements ProductService {
                 .isActive(product.isActive())
                 .storeName(product.getStore().getStoreName())
                 .storeId(product.getStore().getId())
-                .categoryName(product.getCategory().getName())
+                .platformCategoryName(product.getCategory().getName())
+                .storeCategoryName(product.getStoreCategories().getFirst().getName())
                 .brandName(product.getBrand() != null ? product.getBrand().getName() : null)
                 .createdAt(product.getCreatedAt())
                 .build();
@@ -740,10 +888,168 @@ public class ProductServiceImpl implements ProductService {
                 .stockQuantity(variant.getStockQuantity())
                 .soldQuantity(variant.getSoldQuantity())
                 .imageName(variant.getImageName())
+                .imageUrl(variant.getImageUrl())
                 .isActive(variant.isActive())
                 .createdAt(variant.getCreatedAt())
                 .updatedAt(variant.getUpdatedAt())
-                .attributeValues(new ArrayList<>()) // TODO: implement attribute values mapping
+                .attributeValues(variant.getAttributeValues().stream()
+                        .map(this::mapToAttributeValueResponse)
+                        .collect(Collectors.toList()))
                 .build();
+    }
+    
+    private AttributeValueResponse mapToAttributeValueResponse(AttributeValue value) {
+        return AttributeValueResponse.builder()
+                .id(value.getId())
+                .value(value.getValue())
+                .attributeId(value.getAttribute().getId())
+                .attributeName(value.getAttribute().getName())
+                .build();
+    }
+    
+    // ========== Variant Selection Implementation ==========
+    
+    /**
+     * Lấy danh sách options để chọn variant
+     * Algorithm:
+     * 1. Lấy tất cả variants active của product (eager fetch attribute values)
+     * 2. Collect tất cả unique attributes và values từ các variants
+     * 3. Build variant matrix: key = "val1,val2,val3" (sorted) -> variantId
+     * 4. Mark available options (có ít nhất 1 variant với option đó)
+     */
+    @Override
+    @Cacheable(value = "variantSelectionOptions", key = "#productId")
+    public ProductVariantSelectionResponse getProductVariantSelectionOptions(String productId) {
+        log.info("Fetching variant selection options for product: {}", productId);
+        
+        // Validate product exists
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        
+        // Get all active variants with attribute values (eager fetch to avoid N+1)
+        List<ProductVariant> variants = variantRepository.findByProductIdWithAttributeValues(productId);
+        
+        if (variants.isEmpty()) {
+            log.warn("Product {} has no variants", productId);
+            return ProductVariantSelectionResponse.builder()
+                    .productId(productId)
+                    .productName(product.getName())
+                    .attributeGroups(new ArrayList<>())
+                    .variantMatrix(new HashMap<>())
+                    .totalVariants(0)
+                    .build();
+        }
+        
+        // Step 1: Collect all unique attributes and their values across all variants
+        Map<String, Set<AttributeValue>> attributeValuesMap = new LinkedHashMap<>();
+        
+        for (ProductVariant variant : variants) {
+            for (AttributeValue value : variant.getAttributeValues()) {
+                String attrId = value.getAttribute().getId();
+                attributeValuesMap.putIfAbsent(attrId, new LinkedHashSet<>());
+                attributeValuesMap.get(attrId).add(value);
+            }
+        }
+        
+        // Step 2: Build attribute groups with options
+        List<VariantAttributeGroup> attributeGroups = new ArrayList<>();
+        
+        for (Map.Entry<String, Set<AttributeValue>> entry : attributeValuesMap.entrySet()) {
+            String attributeId = entry.getKey();
+            Set<AttributeValue> values = entry.getValue();
+            
+            if (values.isEmpty()) continue;
+            
+            // Get attribute name from first value
+            String attributeName = values.iterator().next().getAttribute().getName();
+            
+            // Build options for this attribute
+            List<VariantAttributeOption> options = values.stream()
+                    .map(value -> VariantAttributeOption.builder()
+                            .valueId(value.getId())
+                            .value(value.getValue())
+                            .available(true) // All values in map are available (có ít nhất 1 variant)
+                            .build())
+                    .collect(Collectors.toList());
+            
+            attributeGroups.add(VariantAttributeGroup.builder()
+                    .attributeId(attributeId)
+                    .attributeName(attributeName)
+                    .options(options)
+                    .build());
+        }
+        
+        // Step 3: Build variant matrix for quick lookup
+        // Key: "valueId1,valueId2,valueId3" (sorted), Value: variantId
+        Map<String, String> variantMatrix = new HashMap<>();
+        
+        for (ProductVariant variant : variants) {
+            // Sort attribute value IDs to ensure consistent key
+            String matrixKey = variant.getAttributeValues().stream()
+                    .map(AttributeValue::getId)
+                    .sorted()
+                    .collect(Collectors.joining(","));
+            
+            variantMatrix.put(matrixKey, variant.getId());
+        }
+        
+        log.info("Built variant selection with {} attribute groups, {} total variants", 
+                attributeGroups.size(), variants.size());
+        
+        return ProductVariantSelectionResponse.builder()
+                .productId(productId)
+                .productName(product.getName())
+                .attributeGroups(attributeGroups)
+                .variantMatrix(variantMatrix)
+                .totalVariants(variants.size())
+                .build();
+    }
+    
+    /**
+     * Tìm variant dựa trên combination của attribute values
+     * Algorithm:
+     * 1. Validate request (không null, không empty)
+     * 2. Sort attribute value IDs để đảm bảo consistent lookup
+     * 3. Query database với HAVING COUNT để match EXACT combination
+     * 4. Return variant hoặc throw exception nếu không tìm thấy
+     */
+    @Override
+    public VariantResponse findVariantByAttributes(String productId, FindVariantRequest request) {
+        log.info("Finding variant for product {} with attributes: {}", 
+                productId, request.getAttributeValueIds());
+        
+        // Validate product exists
+        if (!productRepository.existsById(productId)) {
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+        
+        // Validate request
+        if (request.getAttributeValueIds() == null || request.getAttributeValueIds().isEmpty()) {
+            throw new AppException(ErrorCode.INVALID_REQUEST);
+        }
+        
+        // Remove duplicates and sort for consistent query
+        List<String> uniqueAttributeValueIds = request.getAttributeValueIds().stream()
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+        
+        // Find variant with exact match of attribute values
+        ProductVariant variant = variantRepository
+                .findByProductIdAndAttributeValues(
+                        productId, 
+                        uniqueAttributeValueIds, 
+                        (long) uniqueAttributeValueIds.size()
+                )
+                .orElseThrow(() -> {
+                    log.warn("No variant found for product {} with attributes {}", 
+                            productId, uniqueAttributeValueIds);
+                    return new AppException(ErrorCode.VARIANT_NOT_FOUND);
+                });
+        
+        log.info("Found variant {} for product {} with attributes {}", 
+                variant.getId(), productId, uniqueAttributeValueIds);
+        
+        return mapToVariantResponse(variant);
     }
 }

@@ -6,6 +6,7 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * Request để cập nhật thông tin sản phẩm
@@ -27,6 +28,8 @@ public class ProductUpdateRequest {
     String shortDescription;
     
     String categoryId;
+
+    List<String> storeCategoryIds;
     
     String brandId;
     
