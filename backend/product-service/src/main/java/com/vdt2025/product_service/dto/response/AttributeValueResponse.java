@@ -15,14 +15,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AttributeValueResponse {
-    
+
     String id;
 
     String value; // Ví dụ: "Trắng", "L"
-    
+
     String attributeId; // ID của ProductAttribute (Màu sắc, Size, ...)
-    
+
     String attributeName; // Tên của attribute (Màu sắc, Size, ...)
+
 
     Boolean isActive;
 

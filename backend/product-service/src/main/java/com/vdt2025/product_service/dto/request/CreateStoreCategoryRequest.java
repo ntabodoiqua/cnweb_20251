@@ -15,12 +15,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CreateStoreCategoryRequest {
-    
+
     @NotBlank(message = "CATEGORY_NAME_NOT_BLANK")
     private String name;
-    
+
     private String description;
-    
+
     @Builder.Default
     private boolean isActive = true;
 }

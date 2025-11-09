@@ -1,5 +1,4 @@
 package com.vdt2025.product_service.dto.response;
-
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -17,55 +16,53 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductResponse {
-    
+
     String id;
-    
+
     String name;
-    
+
     String description;
-    
+
     String shortDescription;
-    
+
     // Thống kê
     Long viewCount;
-    
+
     Integer soldCount;
-    
+
     Double averageRating;
-    
+
     Integer ratingCount;
-    
+
     boolean isActive;
-    
+
     // Relationship responses
     CategoryResponse category;
 
-    List<CategoryResponse> storeCategories;
-    
     StoreResponse store;
-    
+
     BrandResponse brand;
-    
+
     // Danh sách variants
     List<VariantResponse> variants;
-    
+
     // Danh sách ảnh
     List<ProductImageResponse> images;
-    
+
     // Thuộc tính sản phẩm (specifications)
     List<ProductAttributeResponse> attributes;
-    
+
     // Thông tin tạo/cập nhật
     String createdBy;
-    
+
     LocalDateTime createdAt;
-    
+
     LocalDateTime updatedAt;
-    
+
     // Thông tin pricing tổng hợp (từ variants)
     BigDecimal minPrice;
-    
+
     BigDecimal maxPrice;
-    
+
     Integer totalStock;
 }

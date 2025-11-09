@@ -16,33 +16,33 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class VariantResponse {
-    
+
     String id;
-    
+
     String sku;
-    
+
     String variantName;
-    
+
     BigDecimal price;
-    
+
     BigDecimal originalPrice;
-    
+
     Integer stockQuantity;
-    
+
     Integer soldQuantity;
-    
+
     String imageName;
 
     String imageUrl;
-    
+
     BigDecimal weight;
-    
+
     boolean isActive;
-    
+
     LocalDateTime createdAt;
-    
+
     LocalDateTime updatedAt;
-    
+
     // Danh sách thuộc tính của variant (màu sắc, kích thước, etc.)
     List<AttributeValueResponse> attributeValues;
 }

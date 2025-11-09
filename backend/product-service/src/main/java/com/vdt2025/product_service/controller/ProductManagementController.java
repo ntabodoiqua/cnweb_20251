@@ -2,6 +2,10 @@ package com.vdt2025.product_service.controller;
 
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import com.vdt2025.product_service.dto.request.product.*;
+import com.vdt2025.product_service.dto.response.ProductImageResponse;
+import com.vdt2025.product_service.dto.response.ProductResponse;
+import com.vdt2025.product_service.dto.response.ProductSummaryResponse;
+import com.vdt2025.product_service.dto.response.VariantResponse;
 import com.vdt2025.product_service.dto.response.*;
 import com.vdt2025.product_service.service.ProductService;
 import jakarta.validation.Valid;
@@ -9,6 +13,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -33,11 +40,11 @@ import java.util.List;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProductManagementController {
-    
+
     ProductService productService;
 
     // ========== CRUD Operations ==========
-    
+
     /**
      * Tạo sản phẩm mới
      * POST /products
@@ -48,9 +55,9 @@ public class ProductManagementController {
     public ApiResponse<ProductResponse> createProduct(
             @Valid @RequestBody ProductCreationRequest request) {
         log.info("Creating new product: {}", request.getName());
-        
+
         ProductResponse response = productService.createProduct(request);
-        
+
         return ApiResponse.<ProductResponse>builder()
                 .message("Product created successfully")
                 .result(response)
@@ -64,12 +71,12 @@ public class ProductManagementController {
     @GetMapping("/{productId}")
     public ApiResponse<ProductResponse> getProductById(@PathVariable String productId) {
         log.info("Fetching product with ID: {}", productId);
-        
+
         // Increment view count
         productService.incrementViewCount(productId);
-        
+
         ProductResponse response = productService.getProductById(productId);
-        
+
         return ApiResponse.<ProductResponse>builder()
                 .result(response)
                 .build();
@@ -85,9 +92,9 @@ public class ProductManagementController {
             @PathVariable String productId,
             @Valid @RequestBody ProductUpdateRequest request) {
         log.info("Updating product with ID: {}", productId);
-        
+
         ProductResponse response = productService.updateProduct(productId, request);
-        
+
         return ApiResponse.<ProductResponse>builder()
                 .message("Product updated successfully")
                 .result(response)
@@ -136,9 +143,9 @@ public class ProductManagementController {
     @DeleteMapping("/{productId}")
     public ApiResponse<String> deleteProduct(@PathVariable String productId) {
         log.info("Deleting product with ID: {}", productId);
-        
+
         productService.deleteProduct(productId);
-        
+
         return ApiResponse.<String>builder()
                 .message("Product deleted successfully")
                 .result("Product with ID " + productId + " has been deactivated")
@@ -153,9 +160,9 @@ public class ProductManagementController {
     @DeleteMapping("/{productId}/permanent")
     public ApiResponse<String> permanentDeleteProduct(@PathVariable String productId) {
         log.info("Permanently deleting product with ID: {}", productId);
-        
+
         productService.permanentDeleteProduct(productId);
-        
+
         return ApiResponse.<String>builder()
                 .message("Product permanently deleted")
                 .result("Product with ID " + productId + " has been permanently removed")
@@ -163,7 +170,7 @@ public class ProductManagementController {
     }
 
     // ========== Search & Filter ==========
-    
+
     /**
      * Tìm kiếm sản phẩm với filter và pagination
      * GET /products
@@ -173,7 +180,7 @@ public class ProductManagementController {
     @GetMapping
     public ApiResponse<Page<ProductSummaryResponse>> searchProducts(
             @ModelAttribute ProductFilterRequest filter,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) 
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
         log.info("Searching products with filter: {}", filter);
 
@@ -195,12 +202,12 @@ public class ProductManagementController {
     @GetMapping("/by-store/{storeId}")
     public ApiResponse<Page<ProductSummaryResponse>> getProductsByStore(
             @PathVariable String storeId,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) 
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
         log.info("Fetching products for store: {}", storeId);
-        
+
         Page<ProductSummaryResponse> response = productService.getProductsByStoreId(storeId, pageable);
-        
+
         return ApiResponse.<Page<ProductSummaryResponse>>builder()
                 .result(response)
                 .build();
@@ -213,19 +220,19 @@ public class ProductManagementController {
     @GetMapping("/by-category/{categoryId}")
     public ApiResponse<Page<ProductSummaryResponse>> getProductsByCategory(
             @PathVariable String categoryId,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) 
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
         log.info("Fetching products for category: {}", categoryId);
-        
+
         Page<ProductSummaryResponse> response = productService.getProductsByCategoryId(categoryId, pageable);
-        
+
         return ApiResponse.<Page<ProductSummaryResponse>>builder()
                 .result(response)
                 .build();
     }
 
     // ========== Variant Management ==========
-    
+
     /**
      * Thêm variant cho sản phẩm
      * POST /products/{productId}/variants
@@ -237,9 +244,9 @@ public class ProductManagementController {
             @PathVariable String productId,
             @Valid @RequestBody VariantCreationRequest request) {
         log.info("Adding variant to product: {}", productId);
-        
+
         VariantResponse response = productService.addVariant(productId, request);
-        
+
         return ApiResponse.<VariantResponse>builder()
                 .message("Variant added successfully")
                 .result(response)
@@ -257,9 +264,9 @@ public class ProductManagementController {
             @PathVariable String variantId,
             @Valid @RequestBody VariantUpdateRequest request) {
         log.info("Updating variant {} for product {}", variantId, productId);
-        
+
         VariantResponse response = productService.updateVariant(productId, variantId, request);
-        
+
         return ApiResponse.<VariantResponse>builder()
                 .message("Variant updated successfully")
                 .result(response)
@@ -276,9 +283,9 @@ public class ProductManagementController {
             @PathVariable String productId,
             @PathVariable String variantId) {
         log.info("Deleting variant {} from product {}", variantId, productId);
-        
+
         productService.deleteVariant(productId, variantId);
-        
+
         return ApiResponse.<String>builder()
                 .message("Variant deleted successfully")
                 .result("Variant with ID " + variantId + " has been removed")
@@ -292,9 +299,9 @@ public class ProductManagementController {
     @GetMapping("/{productId}/variants")
     public ApiResponse<List<VariantResponse>> getVariants(@PathVariable String productId) {
         log.info("Fetching variants for product: {}", productId);
-        
+
         List<VariantResponse> response = productService.getVariantsByProductId(productId);
-        
+
         return ApiResponse.<List<VariantResponse>>builder()
                 .result(response)
                 .build();
@@ -335,7 +342,7 @@ public class ProductManagementController {
     }
 
     // ========== Status Management ==========
-    
+
     /**
      * Cập nhật trạng thái sản phẩm
      * PATCH /products/{productId}/status
@@ -346,9 +353,9 @@ public class ProductManagementController {
             @PathVariable String productId,
             @RequestParam boolean isActive) {
         log.info("Updating product {} status to {}", productId, isActive);
-        
+
         ProductResponse response = productService.updateProductStatus(productId, isActive);
-        
+
         return ApiResponse.<ProductResponse>builder()
                 .message("Product status updated successfully")
                 .result(response)
@@ -364,9 +371,9 @@ public class ProductManagementController {
     public ApiResponse<List<ProductResponse>> bulkUpdateStatus(
             @Valid @RequestBody BulkStatusUpdateRequest request) {
         log.info("Bulk updating status for {} products", request.getProductIds().size());
-        
+
         List<ProductResponse> response = productService.bulkUpdateStatus(request);
-        
+
         return ApiResponse.<List<ProductResponse>>builder()
                 .message("Bulk status update completed")
                 .result(response)
@@ -374,7 +381,7 @@ public class ProductManagementController {
     }
 
     // ========== Inventory Management ==========
-    
+
     /**
      * Cập nhật số lượng tồn kho
      * PATCH /products/{productId}/variants/{variantId}/stock
@@ -386,9 +393,9 @@ public class ProductManagementController {
             @PathVariable String variantId,
             @RequestParam Integer quantity) {
         log.info("Updating stock for variant {} to {}", variantId, quantity);
-        
+
         VariantResponse response = productService.updateVariantStock(productId, variantId, quantity);
-        
+
         return ApiResponse.<VariantResponse>builder()
                 .message("Stock updated successfully")
                 .result(response)

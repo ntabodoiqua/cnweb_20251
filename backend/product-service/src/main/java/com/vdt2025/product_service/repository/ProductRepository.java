@@ -17,28 +17,28 @@ import java.util.List;
  */
 @Repository
 public interface ProductRepository extends JpaRepository<Product, String>, JpaSpecificationExecutor<Product> {
-    
+
     /**
      * Tìm kiếm các sản phẩm thuộc danh mục
      */
     @Query(value = "SELECT * FROM products WHERE category_id = :categoryId", nativeQuery = true)
     List<Product> findAllByCategoryId(String categoryId);
-    
+
     /**
      * Tìm sản phẩm theo store ID với pagination
      */
     Page<Product> findByStoreId(String storeId, Pageable pageable);
-    
+
     /**
      * Tìm sản phẩm theo category ID với pagination
      */
     Page<Product> findByCategoryId(String categoryId, Pageable pageable);
-    
+
     /**
      * Tìm sản phẩm active theo store
      */
     Page<Product> findByStoreIdAndIsActiveTrue(String storeId, Pageable pageable);
-    
+
     /**
      * Tìm sản phẩm active theo category
      */
@@ -48,26 +48,26 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
      * Kiểm tra sản phẩm tồn tại theo tên
      */
     boolean existsByNameAndStoreId(String name, String storeId);
-    
+
     /**
      * Kiểm tra sản phẩm tồn tại theo tên và store (trừ product hiện tại)
      */
     boolean existsByNameAndStoreIdAndIdNot(String name, String storeId, String productId);
-    
+
     /**
      * Tăng view count
      */
     @Modifying
     @Query("UPDATE Product p SET p.viewCount = p.viewCount + 1 WHERE p.id = :productId")
     int incrementViewCount(@Param("productId") String productId);
-    
+
     /**
      * Cập nhật sold count
      */
     @Modifying
     @Query("UPDATE Product p SET p.soldCount = p.soldCount + :quantity WHERE p.id = :productId")
     int updateSoldCount(@Param("productId") String productId, @Param("quantity") Integer quantity);
-    
+
     /**
      * Cập nhật rating
      */
@@ -75,4 +75,3 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     @Query("UPDATE Product p SET p.averageRating = :averageRating, p.ratingCount = :ratingCount WHERE p.id = :productId")
     int updateRating(@Param("productId") String productId, @Param("averageRating") Double averageRating, @Param("ratingCount") Integer ratingCount);
 }
-

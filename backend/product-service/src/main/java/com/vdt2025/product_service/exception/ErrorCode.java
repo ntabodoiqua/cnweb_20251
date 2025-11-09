@@ -47,7 +47,7 @@ public enum ErrorCode {
     INVALID_CATEGORY_FOR_PRODUCT(1511, "error.1511", HttpStatus.BAD_REQUEST),
     STORE_CATEGORY_NOT_FOUND(1512, "error.1512", HttpStatus.NOT_FOUND),
 
-    // Lỗi brand (151x)
+    // Lỗi brand (152x)
     BRAND_NAME_REQUIRED(1520, "error.1520", HttpStatus.BAD_REQUEST),
     BRAND_EXISTED(1521, "error.1521", HttpStatus.CONFLICT),
     BRAND_NOT_FOUND(1522, "error.1522", HttpStatus.NOT_FOUND),

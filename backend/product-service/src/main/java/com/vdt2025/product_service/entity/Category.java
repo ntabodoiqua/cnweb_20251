@@ -1,16 +1,13 @@
 package com.vdt2025.product_service.entity;
-
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 @Getter
 @Setter
 @Builder
@@ -19,15 +16,15 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(
-    name = "categories",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"name", "category_type", "store_id"})
-    },
-    indexes = {
-        @Index(name = "idx_category_type", columnList = "category_type"),
-        @Index(name = "idx_store_id", columnList = "store_id"),
-        @Index(name = "idx_parent_id", columnList = "parent_id")
-    }
+        name = "categories",
+        uniqueConstraints = {
+                @UniqueConstraint(columnNames = {"name", "category_type", "store_id"})
+        },
+        indexes = {
+                @Index(name = "idx_category_type", columnList = "category_type"),
+                @Index(name = "idx_store_id", columnList = "store_id"),
+                @Index(name = "idx_parent_id", columnList = "parent_id")
+        }
 )
 public class Category {
     @Id
@@ -83,6 +80,7 @@ public class Category {
     @Builder.Default
     List<Product> products = new ArrayList<>();
 
+    @Column(name = "created_by", nullable = false, updatable = false)
     @ManyToMany(mappedBy = "storeCategories", fetch = FetchType.LAZY)
     List<Product> storeProducts = new ArrayList<>();
 
@@ -92,7 +90,6 @@ public class Category {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
-
     @UpdateTimestamp
     @Column(name = "updated_at", nullable = false)
     LocalDateTime updatedAt;

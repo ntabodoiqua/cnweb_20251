@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductAttributeRequest {
-    
+
     @NotBlank(message = "ATTRIBUTE_NAME_REQUIRED")
     String name;
 

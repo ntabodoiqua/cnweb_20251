@@ -17,9 +17,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class PublicCategoryController {
-    
+
     private final CategoryManagementService categoryManagementService;
-    
+
     /**
      * Lấy tất cả platform categories (cấu trúc cây 2 cấp)
      * GET /public/categories/platform
@@ -32,7 +32,7 @@ public class PublicCategoryController {
                 .result(response)
                 .build();
     }
-    
+
     /**
      * Lấy chi tiết một platform category (bao gồm subcategories)
      * GET /public/categories/platform/{categoryId}
@@ -45,7 +45,7 @@ public class PublicCategoryController {
                 .result(response)
                 .build();
     }
-    
+
     /**
      * Lấy tất cả store categories của một store cụ thể
      * GET /public/categories/store/{storeId}
@@ -58,7 +58,7 @@ public class PublicCategoryController {
                 .result(response)
                 .build();
     }
-    
+
     /**
      * Lấy chi tiết một store category
      * GET /public/categories/store/{storeId}/{categoryId}
@@ -67,7 +67,7 @@ public class PublicCategoryController {
     public ApiResponse<CategoryResponse> getStoreCategoryById(
             @PathVariable String storeId,
             @PathVariable String categoryId) {
-        
+
         log.info("Public: Getting store category {} from store {}", categoryId, storeId);
         CategoryResponse response = categoryManagementService.getStoreCategoryById(storeId, categoryId);
         return ApiResponse.<CategoryResponse>builder()

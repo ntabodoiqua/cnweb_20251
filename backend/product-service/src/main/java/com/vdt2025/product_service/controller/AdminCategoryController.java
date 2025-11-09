@@ -23,9 +23,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class AdminCategoryController {
-    
+
     private final CategoryManagementService categoryManagementService;
-    
+
     /**
      * Admin tạo platform category mới
      * POST /admin/categories
@@ -40,7 +40,7 @@ public class AdminCategoryController {
                 .result(response)
                 .build();
     }
-    
+
     /**
      * Admin cập nhật platform category
      * PUT /admin/categories/{categoryId}
@@ -51,17 +51,17 @@ public class AdminCategoryController {
             @PathVariable String categoryId,
             @Valid @RequestBody CreatePlatformCategoryRequest request
     ) {
-        
+
         log.info("Admin is updating platform category: {}", categoryId);
         CategoryResponse response = categoryManagementService.updatePlatformCategory(
-                categoryId, 
+                categoryId,
                 request
         );
         return ApiResponse.<CategoryResponse>builder()
                 .result(response)
                 .build();
     }
-    
+
     /**
      * Admin xóa platform category
      * DELETE /admin/categories/{categoryId}
@@ -71,14 +71,14 @@ public class AdminCategoryController {
     public ApiResponse<Void> deletePlatformCategory(
             @PathVariable String categoryId,
             Authentication authentication) {
-        
+
         log.info("Admin {} deleting platform category: {}", authentication.getName(), categoryId);
         categoryManagementService.deletePlatformCategory(categoryId);
         return ApiResponse.<Void>builder()
                 .message("Platform category deleted successfully")
                 .build();
     }
-    
+
     /**
      * Lấy tất cả platform categories (cấu trúc cây 2 cấp)
      * GET /admin/categories
@@ -91,7 +91,7 @@ public class AdminCategoryController {
                 .result(response)
                 .build();
     }
-    
+
     /**
      * Lấy chi tiết một platform category (bao gồm subcategories)
      * GET /admin/categories/{categoryId}
