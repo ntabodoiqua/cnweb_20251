@@ -1,0 +1,534 @@
+/* ========================================
+   Custom Ant Design Components Theme
+   Đồng bộ với màu sắc và thiết kế tổng thể
+   ======================================== */
+
+/* ==================== Dropdown Menu ==================== */
+
+/* Dropdown overlay container */
+.ant-dropdown {
+  z-index: 1050;
+}
+
+/* Dropdown menu wrapper */
+.ant-dropdown-menu {
+  background: white;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  padding: 8px !important;
+  min-width: 200px;
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  animation: dropdownFadeIn 0.3s ease;
+}
+
+/* Dropdown menu items */
+.ant-dropdown-menu-item {
+  border-radius: 8px !important;
+  padding: 10px 16px !important;
+  margin: 4px 0 !important;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  color: #333 !important;
+  transition: all 0.3s ease !important;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ant-dropdown-menu-item:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.08) 0%,
+    rgba(255, 107, 53, 0.08) 100%
+  ) !important;
+  color: #ee4d2d !important;
+  transform: translateX(4px);
+}
+
+.ant-dropdown-menu-item-active {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.08) 0%,
+    rgba(255, 107, 53, 0.08) 100%
+  ) !important;
+  color: #ee4d2d !important;
+}
+
+/* Dropdown menu item icon */
+.ant-dropdown-menu-item .anticon {
+  font-size: 16px !important;
+  color: inherit;
+}
+
+/* Dropdown divider */
+.ant-dropdown-menu-item-divider {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(238, 77, 45, 0.2) 50%,
+    transparent 100%
+  ) !important;
+  margin: 8px 0 !important;
+  height: 1px;
+}
+
+/* Header dropdown menu custom class */
+.header-dropdown-menu .ant-dropdown-menu {
+  box-shadow: 0 8px 32px rgba(238, 77, 45, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  border: 1px solid rgba(238, 77, 45, 0.15);
+}
+
+.header-dropdown-menu .ant-dropdown-menu-item {
+  font-weight: 600 !important;
+}
+
+/* Logout item special styling */
+.ant-dropdown-menu-item[style*="color: rgb(255, 77, 79)"],
+.ant-dropdown-menu-item[style*="color:#ff4d4f"] {
+  color: #ff4d4f !important;
+}
+
+.ant-dropdown-menu-item[style*="color: rgb(255, 77, 79)"]:hover,
+.ant-dropdown-menu-item[style*="color:#ff4d4f"]:hover {
+  background: rgba(255, 77, 79, 0.08) !important;
+  color: #ff4d4f !important;
+}
+
+/* ==================== Menu (Mobile Drawer) ==================== */
+
+/* Menu container */
+.ant-menu {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Menu item */
+.ant-menu-item {
+  border-radius: 8px !important;
+  margin: 4px 0 !important;
+  padding: 12px 16px !important;
+  height: auto !important;
+  line-height: 1.5 !important;
+  font-weight: 500 !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-menu-item:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.1) 0%,
+    rgba(255, 107, 53, 0.1) 100%
+  ) !important;
+  color: #ee4d2d !important;
+}
+
+.ant-menu-item-selected {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.15) 0%,
+    rgba(255, 107, 53, 0.15) 100%
+  ) !important;
+  color: #ee4d2d !important;
+  font-weight: 600 !important;
+}
+
+.ant-menu-item-selected::after {
+  border-right: 3px solid #ee4d2d !important;
+}
+
+/* Menu item icon */
+.ant-menu-item .anticon {
+  font-size: 18px !important;
+  margin-right: 12px !important;
+}
+
+/* Menu divider */
+.ant-menu-item-divider {
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(238, 77, 45, 0.2) 50%,
+    transparent 100%
+  ) !important;
+  margin: 12px 0 !important;
+}
+
+/* Menu danger item (logout) */
+.ant-menu-item-danger {
+  color: #ff4d4f !important;
+}
+
+.ant-menu-item-danger:hover {
+  background: rgba(255, 77, 79, 0.1) !important;
+  color: #ff4d4f !important;
+}
+
+/* ==================== Drawer ==================== */
+
+/* Drawer mask (overlay) */
+.ant-drawer-mask {
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(4px);
+}
+
+/* Drawer panel */
+.ant-drawer-content-wrapper {
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Drawer content */
+.ant-drawer-content {
+  background: #fff !important;
+}
+
+/* Drawer header */
+.ant-drawer-header {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%) !important;
+  border-bottom: none !important;
+  padding: 20px 24px !important;
+  border-radius: 0 !important;
+}
+
+.ant-drawer-title {
+  color: white !important;
+  font-weight: 700 !important;
+  font-size: 18px !important;
+}
+
+/* Drawer close button */
+.ant-drawer-close {
+  color: white !important;
+  width: 40px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-drawer-close:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.ant-drawer-close .anticon {
+  font-size: 20px !important;
+}
+
+/* Drawer body */
+.ant-drawer-body {
+  padding: 16px !important;
+}
+
+/* ==================== Button (Optional override) ==================== */
+
+/* Primary button */
+.ant-btn-primary {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3) !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-btn-primary:hover {
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(238, 77, 45, 0.4) !important;
+}
+
+.ant-btn-primary:active {
+  transform: translateY(0) !important;
+}
+
+/* Default button */
+.ant-btn-default {
+  border: 2px solid #e8e8e8 !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-btn-default:hover {
+  border-color: #ee4d2d !important;
+  color: #ee4d2d !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.2) !important;
+}
+
+/* ==================== Modal ==================== */
+
+.ant-modal-content {
+  border-radius: 16px !important;
+  overflow: hidden;
+}
+
+.ant-modal-header {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%) !important;
+  border-bottom: none !important;
+  padding: 20px 24px !important;
+}
+
+.ant-modal-title {
+  color: white !important;
+  font-weight: 700 !important;
+  font-size: 18px !important;
+}
+
+.ant-modal-close {
+  color: white !important;
+  width: 40px !important;
+  height: 40px !important;
+  line-height: 40px !important;
+  border-radius: 8px !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-modal-close:hover {
+  background: rgba(255, 255, 255, 0.2) !important;
+  color: white !important;
+}
+
+.ant-modal-body {
+  padding: 24px !important;
+}
+
+.ant-modal-footer {
+  border-top: 1px solid rgba(238, 77, 45, 0.1) !important;
+  padding: 16px 24px !important;
+}
+
+/* ==================== Notification ==================== */
+
+.ant-notification-notice {
+  border-radius: 12px !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+  padding: 16px 24px !important;
+  overflow: hidden;
+  position: relative;
+}
+
+.ant-notification-notice-message {
+  font-weight: 600 !important;
+  color: #333 !important;
+}
+
+/* Progress bar container */
+.ant-notification-notice::before {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.ant-notification-notice::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 4px;
+  width: 0;
+  animation: notificationProgress 3.5s linear forwards;
+  border-radius: 0 2px 2px 0;
+}
+
+/* Success notification icon and progress */
+.ant-notification-notice-success .ant-notification-notice-icon {
+  color: #52c41a !important;
+}
+
+.ant-notification-notice-success::after {
+  background: linear-gradient(90deg, #52c41a 0%, #73d13d 100%);
+  box-shadow: 0 0 8px rgba(82, 196, 26, 0.6);
+}
+
+/* Error notification icon and progress */
+.ant-notification-notice-error .ant-notification-notice-icon {
+  color: #ff4d4f !important;
+}
+
+.ant-notification-notice-error::after {
+  background: linear-gradient(90deg, #ff4d4f 0%, #ff7875 100%);
+  box-shadow: 0 0 8px rgba(255, 77, 79, 0.6);
+}
+
+/* Warning notification icon and progress */
+.ant-notification-notice-warning .ant-notification-notice-icon {
+  color: #faad14 !important;
+}
+
+.ant-notification-notice-warning::after {
+  background: linear-gradient(90deg, #faad14 0%, #ffc53d 100%);
+  box-shadow: 0 0 8px rgba(250, 173, 20, 0.6);
+}
+
+/* Info notification icon and progress */
+.ant-notification-notice-info .ant-notification-notice-icon {
+  color: #ee4d2d !important;
+}
+
+.ant-notification-notice-info::after {
+  background: linear-gradient(90deg, #ee4d2d 0%, #ff6b35 100%);
+  box-shadow: 0 0 8px rgba(238, 77, 45, 0.6);
+}
+
+/* Progress animation */
+@keyframes notificationProgress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* ==================== Popover ==================== */
+
+.ant-popover {
+  z-index: 1050;
+}
+
+.ant-popover-inner {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15) !important;
+}
+
+.ant-popover-title {
+  border-bottom: 1px solid rgba(238, 77, 45, 0.1) !important;
+  font-weight: 600 !important;
+  color: #ee4d2d !important;
+}
+
+/* ==================== Tooltip ==================== */
+
+.ant-tooltip-inner {
+  background: rgba(0, 0, 0, 0.85) !important;
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  font-size: 13px !important;
+}
+
+.ant-tooltip-arrow-content {
+  background: rgba(0, 0, 0, 0.85) !important;
+}
+
+/* ==================== Select ==================== */
+
+.ant-select-dropdown {
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15) !important;
+  padding: 8px !important;
+}
+
+.ant-select-item {
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  transition: all 0.3s ease !important;
+}
+
+.ant-select-item-option-selected {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.1) 0%,
+    rgba(255, 107, 53, 0.1) 100%
+  ) !important;
+  color: #ee4d2d !important;
+  font-weight: 600 !important;
+}
+
+.ant-select-item-option-active {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.08) 0%,
+    rgba(255, 107, 53, 0.08) 100%
+  ) !important;
+}
+
+/* ==================== Input Focus ==================== */
+
+.ant-input:focus,
+.ant-input-focused,
+.ant-input-affix-wrapper:focus,
+.ant-input-affix-wrapper-focused {
+  border-color: #ee4d2d !important;
+  box-shadow: 0 0 0 2px rgba(238, 77, 45, 0.1) !important;
+}
+
+.ant-input:hover,
+.ant-input-affix-wrapper:hover {
+  border-color: #ff8c5a !important;
+}
+
+/* ==================== Animations ==================== */
+
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ==================== Scrollbar ==================== */
+
+/* Custom scrollbar for dropdown and drawer */
+.ant-dropdown-menu::-webkit-scrollbar,
+.ant-drawer-body::-webkit-scrollbar,
+.ant-select-dropdown::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.ant-dropdown-menu::-webkit-scrollbar-track,
+.ant-drawer-body::-webkit-scrollbar-track,
+.ant-select-dropdown::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.ant-dropdown-menu::-webkit-scrollbar-thumb,
+.ant-drawer-body::-webkit-scrollbar-thumb,
+.ant-select-dropdown::-webkit-scrollbar-thumb {
+  background: #ee4d2d;
+  border-radius: 3px;
+}
+
+.ant-dropdown-menu::-webkit-scrollbar-thumb:hover,
+.ant-drawer-body::-webkit-scrollbar-thumb:hover,
+.ant-select-dropdown::-webkit-scrollbar-thumb:hover {
+  background: #d73211;
+}
+
+/* ==================== Responsive Adjustments ==================== */
+
+@media (max-width: 768px) {
+  .ant-dropdown-menu {
+    min-width: 180px;
+  }
+
+  .ant-dropdown-menu-item {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+
+  .ant-drawer-content-wrapper {
+    width: 280px !important;
+  }
+}

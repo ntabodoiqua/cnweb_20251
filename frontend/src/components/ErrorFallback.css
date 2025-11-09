@@ -1,0 +1,307 @@
+.error-fallback-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff7337 50%, #ff9a56 100%);
+  position: relative;
+  overflow: hidden;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    sans-serif;
+}
+
+.error-fallback-container::before {
+  content: "";
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  top: -150px;
+  right: -150px;
+  animation: float 6s ease-in-out infinite;
+}
+
+.error-fallback-container::after {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  bottom: -100px;
+  left: -100px;
+  animation: float 8s ease-in-out infinite reverse;
+}
+
+.error-fallback-card {
+  background: white;
+  border-radius: 20px;
+  padding: 60px 40px;
+  max-width: 600px;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+  text-align: center;
+  z-index: 1;
+  animation: fadeInUp 0.8s ease;
+}
+
+.error-fallback-icon-wrapper {
+  margin-bottom: 24px;
+  animation: shake 2s ease-in-out infinite;
+}
+
+.error-fallback-icon {
+  font-size: 80px;
+  color: rgba(238, 77, 45, 0.15);
+}
+
+.error-fallback-code {
+  font-size: 80px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  line-height: 1;
+  margin-bottom: 20px;
+  text-shadow: 0 4px 20px rgba(238, 77, 45, 0.2);
+  animation: scaleIn 0.6s ease;
+}
+
+.error-fallback-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: #222;
+  margin-bottom: 16px;
+  animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+.error-fallback-description {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 40px;
+  line-height: 1.6;
+  max-width: 480px;
+  margin-left: auto;
+  margin-right: auto;
+  animation: fadeInUp 0.8s ease 0.4s both;
+}
+
+.error-fallback-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: fadeInUp 0.8s ease 0.6s both;
+}
+
+.error-fallback-button-primary {
+  height: 48px !important;
+  padding: 0 32px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.error-fallback-button-primary:hover {
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%) !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 16px rgba(238, 77, 45, 0.4) !important;
+}
+
+.error-fallback-button-primary:active {
+  transform: translateY(0) !important;
+}
+
+.error-fallback-button-secondary {
+  height: 48px !important;
+  padding: 0 32px !important;
+  font-size: 16px !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  border: 2px solid #e8e8e8 !important;
+  color: #666 !important;
+  background: white !important;
+  transition: all 0.3s ease !important;
+}
+
+.error-fallback-button-secondary:hover {
+  border-color: #ee4d2d !important;
+  color: #ee4d2d !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.2) !important;
+}
+
+.error-fallback-button-secondary:active {
+  transform: translateY(0) !important;
+}
+
+.error-fallback-details {
+  margin-top: 32px;
+  text-align: left;
+  background: #f5f5f5;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e8e8e8;
+  animation: fadeInUp 0.8s ease 0.8s both;
+}
+
+.error-fallback-details summary {
+  cursor: pointer;
+  margin-bottom: 12px;
+  color: #cf1322;
+  font-weight: 600;
+  font-size: 14px;
+  user-select: none;
+}
+
+.error-fallback-details summary:hover {
+  color: #ee4d2d;
+}
+
+.error-fallback-details-content {
+  font-size: 12px;
+  color: #666;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.error-fallback-details-content p {
+  margin-bottom: 12px;
+}
+
+.error-fallback-details-content strong {
+  color: #333;
+  font-weight: 600;
+}
+
+.error-fallback-details-content pre {
+  font-size: 11px;
+  overflow: auto;
+  background: white;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  font-family: "Courier New", monospace;
+  max-height: 300px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-20px) rotate(5deg);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-5px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .error-fallback-container {
+    padding: 20px 16px;
+  }
+
+  .error-fallback-card {
+    padding: 40px 24px;
+  }
+
+  .error-fallback-code {
+    font-size: 60px;
+  }
+
+  .error-fallback-title {
+    font-size: 26px;
+  }
+
+  .error-fallback-description {
+    font-size: 15px;
+  }
+
+  .error-fallback-buttons {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .error-fallback-button-primary,
+  .error-fallback-button-secondary {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .error-fallback-card {
+    padding: 32px 20px;
+  }
+
+  .error-fallback-code {
+    font-size: 50px;
+  }
+
+  .error-fallback-title {
+    font-size: 22px;
+  }
+
+  .error-fallback-description {
+    font-size: 14px;
+  }
+
+  .error-fallback-button-primary,
+  .error-fallback-button-secondary {
+    height: 44px !important;
+    font-size: 15px !important;
+  }
+
+  .error-fallback-details {
+    padding: 16px;
+  }
+}
