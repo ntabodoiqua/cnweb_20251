@@ -14,15 +14,15 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductImageResponse {
-    
+
     String id;
-    
+
     String imageName;
-    
+
     String imageUrl;
-    
+
     Boolean isPrimary; // Ảnh chính
-    
+
     Integer displayOrder; // Thứ tự hiển thị
 
     LocalDateTime createdAt;

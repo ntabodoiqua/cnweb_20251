@@ -30,9 +30,9 @@ public class ProductAttribute {
 
     @ManyToMany
     @JoinTable(
-        name = "attribute_categories",
-        joinColumns = @JoinColumn(name = "attribute_id"),
-        inverseJoinColumns = @JoinColumn(name = "category_id")
+            name = "attribute_categories",
+            joinColumns = @JoinColumn(name = "attribute_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     @Builder.Default
     List<Category> categories = new ArrayList<>(); // Các danh mục áp dụng thuộc tính này

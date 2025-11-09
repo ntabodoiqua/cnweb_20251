@@ -16,10 +16,10 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class BulkStatusUpdateRequest {
-    
+
     @NotEmpty(message = "PRODUCT_IDS_REQUIRED")
     List<String> productIds;
-    
+
     @NotNull(message = "STATUS_REQUIRED")
     Boolean isActive;
 }

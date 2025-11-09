@@ -3,6 +3,9 @@ package com.vdt2025.product_service.controller;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import com.vdt2025.product_service.dto.request.FindVariantRequest;
 import com.vdt2025.product_service.dto.request.product.ProductFilterRequest;
+import com.vdt2025.product_service.dto.response.ProductResponse;
+import com.vdt2025.product_service.dto.response.ProductSummaryResponse;
+import com.vdt2025.product_service.dto.response.VariantResponse;
 import com.vdt2025.product_service.dto.response.*;
 import com.vdt2025.product_service.service.ProductService;
 import jakarta.validation.Valid;
@@ -10,6 +13,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.*;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
@@ -31,13 +37,13 @@ import java.util.List;
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PublicProductController {
-    
+
     ProductService productService;
 
     /**
      * Tìm kiếm/xem danh sách sản phẩm (chỉ hiển thị sản phẩm active)
      * GET /public/products
-     * 
+     *
      * Query params:
      * - keyword: tìm kiếm theo tên hoặc mô tả
      * - categoryId: filter theo danh mục
@@ -51,10 +57,10 @@ public class PublicProductController {
     @GetMapping
     public ApiResponse<Page<ProductSummaryResponse>> getProducts(
             @ModelAttribute ProductFilterRequest filter,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) 
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
         log.info("Public: Searching products with filter: {}", filter);
-        
+
         // Force filter to only show active products
         filter.setIsActive(true);
 
@@ -76,12 +82,12 @@ public class PublicProductController {
     @GetMapping("/{productId}")
     public ApiResponse<ProductResponse> getProductDetail(@PathVariable String productId) {
         log.info("Public: Fetching product detail: {}", productId);
-        
+
         // Increment view count
         productService.incrementViewCount(productId);
-        
+
         ProductResponse response = productService.getProductById(productId);
-        
+
         return ApiResponse.<ProductResponse>builder()
                 .result(response)
                 .build();
@@ -94,9 +100,9 @@ public class PublicProductController {
     @GetMapping("/{productId}/variants")
     public ApiResponse<List<VariantResponse>> getProductVariants(@PathVariable String productId) {
         log.info("Public: Fetching variants for product: {}", productId);
-        
+
         List<VariantResponse> response = productService.getVariantsByProductId(productId);
-        
+
         return ApiResponse.<List<VariantResponse>>builder()
                 .result(response)
                 .build();
@@ -109,12 +115,12 @@ public class PublicProductController {
     @GetMapping("/store/{storeId}")
     public ApiResponse<Page<ProductSummaryResponse>> getProductsByStore(
             @PathVariable String storeId,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) 
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
         log.info("Public: Fetching products for store: {}", storeId);
-        
+
         Page<ProductSummaryResponse> response = productService.getProductsByStoreId(storeId, pageable);
-        
+
         return ApiResponse.<Page<ProductSummaryResponse>>builder()
                 .result(response)
                 .build();
@@ -127,12 +133,12 @@ public class PublicProductController {
     @GetMapping("/category/{categoryId}")
     public ApiResponse<Page<ProductSummaryResponse>> getProductsByCategory(
             @PathVariable String categoryId,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) 
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
         log.info("Public: Fetching products for category: {}", categoryId);
-        
+
         Page<ProductSummaryResponse> response = productService.getProductsByCategoryId(categoryId, pageable);
-        
+
         return ApiResponse.<Page<ProductSummaryResponse>>builder()
                 .result(response)
                 .build();
@@ -144,13 +150,14 @@ public class PublicProductController {
      */
     @GetMapping("/best-sellers")
     public ApiResponse<Page<ProductSummaryResponse>> getBestSellers(
-            @PageableDefault(size = 20, sort = "soldCount", direction = Sort.Direction.DESC) 
+            @PageableDefault(size = 20, sort = "soldCount", direction = Sort.Direction.DESC)
             Pageable pageable) {
         log.info("Public: Fetching best-selling products");
-        
+
         ProductFilterRequest filter = ProductFilterRequest.builder()
                 .isActive(true)
                 .build();
+
 
         PageCacheDTO<ProductSummaryResponse> dto = productService.searchProductsCacheable(filter, pageable);
 
@@ -170,10 +177,10 @@ public class PublicProductController {
     @GetMapping("/top-rated")
     public ApiResponse<Page<ProductSummaryResponse>> getTopRated(
             @RequestParam(defaultValue = "4.0") Double minRating,
-            @PageableDefault(size = 20, sort = "averageRating", direction = Sort.Direction.DESC) 
+            @PageableDefault(size = 20, sort = "averageRating", direction = Sort.Direction.DESC)
             Pageable pageable) {
         log.info("Public: Fetching top-rated products (min rating: {})", minRating);
-        
+
         ProductFilterRequest filter = ProductFilterRequest.builder()
                 .isActive(true)
                 .ratingFrom(minRating)
@@ -196,10 +203,10 @@ public class PublicProductController {
      */
     @GetMapping("/new-arrivals")
     public ApiResponse<Page<ProductSummaryResponse>> getNewArrivals(
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC) 
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
             Pageable pageable) {
         log.info("Public: Fetching new arrivals");
-        
+
         ProductFilterRequest filter = ProductFilterRequest.builder()
                 .isActive(true)
                 .build();
@@ -214,16 +221,16 @@ public class PublicProductController {
                 ))
                 .build();
     }
-    
+
     /**
      * Lấy thông tin để chọn variant (Màu sắc, Size, ...)
      * GET /public/products/{productId}/variant-options
-     * 
+     *
      * Use case:
      * - User vào trang chi tiết sản phẩm
      * - Frontend call API này để lấy danh sách thuộc tính có thể chọn
      * - Render UI với dropdown/buttons cho từng thuộc tính
-     * 
+     *
      * Response structure:
      * {
      *   "productId": "prod-123",
@@ -259,29 +266,29 @@ public class PublicProductController {
     public ApiResponse<ProductVariantSelectionResponse> getVariantSelectionOptions(
             @PathVariable String productId) {
         log.info("Public: Fetching variant selection options for product: {}", productId);
-        
+
         ProductVariantSelectionResponse response = productService.getProductVariantSelectionOptions(productId);
-        
+
         return ApiResponse.<ProductVariantSelectionResponse>builder()
                 .message("Fetch variant selection options successfully")
                 .result(response)
                 .build();
     }
-    
+
     /**
      * Tìm variant dựa trên combination của attributes đã chọn
      * POST /public/products/{productId}/find-variant
-     * 
+     *
      * Use case:
      * - User đã chọn xong tất cả thuộc tính (Màu: Đỏ, Size: XL)
      * - Frontend call API này để lấy thông tin variant tương ứng
      * - Hiển thị giá, số lượng tồn, ảnh của variant đó
-     * 
+     *
      * Request body:
      * {
      *   "attributeValueIds": ["val-1", "val-5"]  // Đỏ + XL
      * }
-     * 
+     *
      * Response:
      * {
      *   "id": "variant-2",
@@ -300,11 +307,11 @@ public class PublicProductController {
     public ApiResponse<VariantResponse> findVariantByAttributes(
             @PathVariable String productId,
             @Valid @RequestBody FindVariantRequest request) {
-        log.info("Public: Finding variant for product {} with attributes: {}", 
+        log.info("Public: Finding variant for product {} with attributes: {}",
                 productId, request.getAttributeValueIds());
-        
+
         VariantResponse response = productService.findVariantByAttributes(productId, request);
-        
+
         return ApiResponse.<VariantResponse>builder()
                 .message("Found variant successfully")
                 .result(response)

@@ -1,5 +1,4 @@
 package com.vdt2025.product_service.repository;
-
 import com.vdt2025.product_service.entity.Category;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -15,44 +14,44 @@ public interface CategoryRepository extends JpaRepository<Category, String>, Jpa
     boolean existsByName(String name);
 
     Optional<Category> findByName(String name);
-    
+
     /**
      * Kiểm tra tên category có tồn tại trong platform categories
      */
     boolean existsByNameAndCategoryType(String name, Category.CategoryType categoryType);
-    
+
     /**
      * Kiểm tra tên category có tồn tại trong store categories của một store cụ thể
      */
     boolean existsByNameAndCategoryTypeAndStoreId(String name, Category.CategoryType categoryType, String storeId);
-    
+
     /**
      * Lấy tất cả platform categories (root level - không có parent)
      */
     @Query("SELECT c FROM Category c WHERE c.categoryType = 'PLATFORM' AND c.parentCategory IS NULL")
     List<Category> findAllPlatformRootCategories();
-    
+
     /**
      * Lấy tất cả platform categories (bao gồm cả sub-categories)
      */
     List<Category> findAllByCategoryType(Category.CategoryType categoryType);
-    
+
     /**
      * Lấy tất cả store categories của một store cụ thể
      */
     @Query("SELECT c FROM Category c WHERE c.categoryType = 'STORE' AND c.store.id = :storeId")
     List<Category> findAllByStoreId(@Param("storeId") String storeId);
-    
+
     /**
      * Lấy sub-categories của một parent category
      */
     List<Category> findAllByParentCategoryId(String parentId);
-    
+
     /**
      * Tìm category theo ID và loại
      */
     Optional<Category> findByIdAndCategoryType(String id, Category.CategoryType categoryType);
-    
+
     /**
      * Tìm category theo ID và store ID (cho store categories)
      */
@@ -66,4 +65,3 @@ public interface CategoryRepository extends JpaRepository<Category, String>, Jpa
 
     List<Category> findByStoreId(String storeId);
 }
-

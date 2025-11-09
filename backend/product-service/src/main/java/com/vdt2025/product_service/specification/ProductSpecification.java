@@ -15,7 +15,7 @@ import java.util.List;
  * Best practice cho e-commerce: support keyword search, price range, rating, etc.
  */
 public class ProductSpecification {
-    
+
     public static Specification<Product> withFilter(ProductFilterRequest filter) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -27,45 +27,45 @@ public class ProductSpecification {
                 Predicate descPredicate = cb.like(cb.lower(root.get("description")), keyword);
                 predicates.add(cb.or(namePredicate, descPredicate));
             }
-            
+
             // Name exact/partial match
             if (filter.getName() != null && !filter.getName().isBlank()) {
                 predicates.add(cb.like(cb.lower(root.get("name")), "%" + filter.getName().toLowerCase() + "%"));
             }
-            
+
             // Category filter
             if (filter.getCategoryId() != null && !filter.getCategoryId().isBlank()) {
                 Join<Product, Category> categoryJoin = root.join("category");
                 predicates.add(cb.equal(categoryJoin.get("id"), filter.getCategoryId()));
             }
-            
+
             // Store filter
             if (filter.getStoreId() != null && !filter.getStoreId().isBlank()) {
                 Join<Product, Store> storeJoin = root.join("store");
                 predicates.add(cb.equal(storeJoin.get("id"), filter.getStoreId()));
             }
-            
+
             // Brand filter
             if (filter.getBrandId() != null && !filter.getBrandId().isBlank()) {
                 Join<Product, Brand> brandJoin = root.join("brand");
                 predicates.add(cb.equal(brandJoin.get("id"), filter.getBrandId()));
             }
-            
+
             // Created by filter
             if (filter.getCreatedBy() != null && !filter.getCreatedBy().isBlank()) {
                 predicates.add(cb.equal(root.get("createdBy"), filter.getCreatedBy()));
             }
-            
+
             // Active status filter
             if (filter.getIsActive() != null) {
                 predicates.add(cb.equal(root.get("isActive"), filter.getIsActive()));
             }
-            
+
             // Price range filter (sẽ cần join với variants để lấy min price)
             // Để đơn giản, tạm thời filter based on variants
             if (filter.getPriceFrom() != null || filter.getPriceTo() != null) {
                 Join<Product, ProductVariant> variantJoin = root.join("variants");
-                
+
                 if (filter.getPriceFrom() != null) {
                     predicates.add(cb.greaterThanOrEqualTo(variantJoin.get("price"), filter.getPriceFrom()));
                 }
@@ -73,11 +73,11 @@ public class ProductSpecification {
                     predicates.add(cb.lessThanOrEqualTo(variantJoin.get("price"), filter.getPriceTo()));
                 }
             }
-            
+
             // Stock range filter
             if (filter.getStockFrom() != null || filter.getStockTo() != null) {
                 Join<Product, ProductVariant> variantJoin = root.join("variants");
-                
+
                 if (filter.getStockFrom() != null) {
                     predicates.add(cb.greaterThanOrEqualTo(variantJoin.get("stockQuantity"), filter.getStockFrom()));
                 }
@@ -85,7 +85,7 @@ public class ProductSpecification {
                     predicates.add(cb.lessThanOrEqualTo(variantJoin.get("stockQuantity"), filter.getStockTo()));
                 }
             }
-            
+
             // Rating filter
             if (filter.getRatingFrom() != null) {
                 predicates.add(cb.greaterThanOrEqualTo(root.get("averageRating"), filter.getRatingFrom()));
@@ -93,7 +93,7 @@ public class ProductSpecification {
             if (filter.getRatingTo() != null) {
                 predicates.add(cb.lessThanOrEqualTo(root.get("averageRating"), filter.getRatingTo()));
             }
-            
+
             // Date range filter
             if (filter.getCreatedFrom() != null) {
                 LocalDateTime fromDate = LocalDateTime.parse(filter.getCreatedFrom());

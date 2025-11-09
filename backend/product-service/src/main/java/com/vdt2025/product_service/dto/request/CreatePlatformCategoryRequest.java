@@ -19,10 +19,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE)
 public class CreatePlatformCategoryRequest {
-    
+
     @NotBlank(message = "CATEGORY_NAME_NOT_BLANK")
     String name;
-    
+
     String description;
 
     /**
@@ -30,7 +30,7 @@ public class CreatePlatformCategoryRequest {
      * Null nếu tạo danh mục cấp 1 (root)
      */
     String parentId;
-    
+
     @Builder.Default
     boolean isActive = true;
 }

@@ -18,22 +18,22 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class VariantCreationRequest {
-    
+
     @NotBlank(message = "SKU_REQUIRED")
     String sku;
-    
+
     String variantName; // Ví dụ: "Trắng - Size L"
-    
+
     @NotNull(message = "PRICE_REQUIRED")
     @Min(value = 0, message = "PRICE_MUST_BE_POSITIVE")
     BigDecimal price;
-    
+
     BigDecimal originalPrice;
-    
+
     @NotNull(message = "STOCK_QUANTITY_REQUIRED")
     @Min(value = 0, message = "STOCK_QUANTITY_MUST_BE_POSITIVE")
     Integer stockQuantity;
-    
+
     String imageName;
 
     // Danh sách ID của attribute values

@@ -31,7 +31,7 @@ public class CategoryResponse {
     String createdBy;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
-    
+
     /**
      * Convert từ Entity sang Response DTO
      */
@@ -55,7 +55,7 @@ public class CategoryResponse {
                 .updatedAt(category.getUpdatedAt())
                 .build();
     }
-    
+
     /**
      * Convert từ Entity sang Response DTO (bao gồm subcategories)
      */
@@ -63,9 +63,9 @@ public class CategoryResponse {
         CategoryResponse response = fromEntity(category);
         if (category.getSubCategories() != null && !category.getSubCategories().isEmpty()) {
             response.setSubCategories(
-                category.getSubCategories().stream()
-                    .map(CategoryResponse::fromEntity)
-                    .collect(Collectors.toList())
+                    category.getSubCategories().stream()
+                            .map(CategoryResponse::fromEntity)
+                            .collect(Collectors.toList())
             );
         }
         return response;

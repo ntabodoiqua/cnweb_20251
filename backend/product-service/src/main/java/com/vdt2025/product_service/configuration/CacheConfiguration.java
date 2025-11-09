@@ -29,7 +29,7 @@ public class CacheConfiguration {
         ObjectMapper objectMapper = new ObjectMapper()
                 // 2. Đăng ký module để xử lý LocalDateTime, ZonedDateTime, v.v.
                 .registerModule(new JavaTimeModule());
-        
+
         // 3. Enable Default Typing để lưu thông tin kiểu dữ liệu (cần thiết cho cache)
         // BasicPolymorphicTypeValidator giới hạn các class được phép để tăng bảo mật
         BasicPolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
@@ -47,9 +47,9 @@ public class CacheConfiguration {
                 ptv,
                 ObjectMapper.DefaultTyping.EVERYTHING
         );
-        
+
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-        
+
         // 4. Tạo serializer với ObjectMapper đã được cấu hình
         GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
 

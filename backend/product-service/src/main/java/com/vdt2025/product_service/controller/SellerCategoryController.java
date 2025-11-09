@@ -19,9 +19,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 public class SellerCategoryController {
-    
+
     private final CategoryManagementService categoryManagementService;
-    
+
     /**
      * Seller tạo store category mới
      * POST /seller/stores/{storeId}/categories
@@ -32,20 +32,20 @@ public class SellerCategoryController {
             @PathVariable String storeId,
             @Valid @RequestBody CreateStoreCategoryRequest request,
             Authentication authentication) {
-        
-        log.info("Seller {} creating store category for store {}: {}", 
+
+        log.info("Seller {} creating store category for store {}: {}",
                 authentication.getName(), storeId, request.getName());
-        
+
         CategoryResponse response = categoryManagementService.createStoreCategory(
-                storeId, 
-                request, 
+                storeId,
+                request,
                 authentication.getName()
         );
         return ApiResponse.<CategoryResponse>builder()
                 .result(response)
                 .build();
     }
-    
+
     /**
      * Seller cập nhật store category của mình
      * PUT /seller/stores/{storeId}/categories/{categoryId}
@@ -57,21 +57,21 @@ public class SellerCategoryController {
             @PathVariable String categoryId,
             @Valid @RequestBody CreateStoreCategoryRequest request,
             Authentication authentication) {
-        
-        log.info("Seller {} updating store category {} for store {}", 
+
+        log.info("Seller {} updating store category {} for store {}",
                 authentication.getName(), categoryId, storeId);
-        
+
         CategoryResponse response = categoryManagementService.updateStoreCategory(
-                storeId, 
-                categoryId, 
-                request, 
+                storeId,
+                categoryId,
+                request,
                 authentication.getName()
         );
         return ApiResponse.<CategoryResponse>builder()
                 .result(response)
                 .build();
     }
-    
+
     /**
      * Seller xóa store category của mình
      * DELETE /seller/stores/{storeId}/categories/{categoryId}
@@ -82,16 +82,16 @@ public class SellerCategoryController {
             @PathVariable String storeId,
             @PathVariable String categoryId,
             Authentication authentication) {
-        
-        log.info("Seller {} deleting store category {} from store {}", 
+
+        log.info("Seller {} deleting store category {} from store {}",
                 authentication.getName(), categoryId, storeId);
-        
+
         categoryManagementService.deleteStoreCategory(storeId, categoryId, authentication.getName());
         return ApiResponse.<Void>builder()
                 .message("Store category deleted successfully")
                 .build();
     }
-    
+
     /**
      * Lấy tất cả store categories của một store
      * GET /seller/stores/{storeId}/categories
@@ -99,14 +99,14 @@ public class SellerCategoryController {
     @GetMapping
     public ApiResponse<List<CategoryResponse>> getAllStoreCategoriesByStoreId(
             @PathVariable String storeId) {
-        
+
         log.info("Getting all store categories for store: {}", storeId);
         List<CategoryResponse> response = categoryManagementService.getAllStoreCategoriesByStoreId(storeId);
         return ApiResponse.<List<CategoryResponse>>builder()
                 .result(response)
                 .build();
     }
-    
+
     /**
      * Lấy chi tiết một store category
      * GET /seller/stores/{storeId}/categories/{categoryId}
@@ -115,7 +115,7 @@ public class SellerCategoryController {
     public ApiResponse<CategoryResponse> getStoreCategoryById(
             @PathVariable String storeId,
             @PathVariable String categoryId) {
-        
+
         log.info("Getting store category {} from store {}", categoryId, storeId);
         CategoryResponse response = categoryManagementService.getStoreCategoryById(storeId, categoryId);
         return ApiResponse.<CategoryResponse>builder()

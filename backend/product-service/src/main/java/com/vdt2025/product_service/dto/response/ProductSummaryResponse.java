@@ -16,36 +16,36 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProductSummaryResponse {
-    
+
     String id;
-    
+
     String name;
-    
+
     String shortDescription;
-    
+
     String thumbnailImage;
-    
+
     BigDecimal minPrice;
-    
+
     BigDecimal maxPrice;
-    
+
     Integer soldCount;
-    
+
     Double averageRating;
-    
+
     Integer ratingCount;
-    
+
     boolean isActive;
-    
+
     String storeName;
-    
+
     String storeId;
-    
+
     String storeCategoryName;
 
     String platformCategoryName;
-    
+
     String brandName;
-    
+
     LocalDateTime createdAt;
 }
