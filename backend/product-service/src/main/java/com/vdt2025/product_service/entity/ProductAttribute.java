@@ -24,14 +24,24 @@ public class ProductAttribute {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @NotBlank(message = "Attribute name is required")
+    @NotBlank(message = "ATTRIBUTE_NAME_REQUIRED")
     @Column(nullable = false, unique = true)
     String name; // Ví dụ: "Màu sắc", "Kích cỡ", "Dung lượng"
+
+    @ManyToMany
+    @JoinTable(
+            name = "attribute_categories",
+            joinColumns = @JoinColumn(name = "attribute_id"),
+            inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    @Builder.Default
+    List<Category> categories = new ArrayList<>(); // Các danh mục áp dụng thuộc tính này
 
     @Column(columnDefinition = "TEXT")
     String description;
 
     @Column(name = "is_active", nullable = false)
+    @Builder.Default
     boolean isActive = true;
 
     @CreationTimestamp

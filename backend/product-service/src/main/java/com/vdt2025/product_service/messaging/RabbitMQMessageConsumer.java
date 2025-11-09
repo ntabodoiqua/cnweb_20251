@@ -44,7 +44,7 @@ public class RabbitMQMessageConsumer {
             // Tạo event để gửi sang notification service
             StoreCreatedEvent storeCreatedEvent = StoreCreatedEvent.builder()
                     .storeId(store.getId())
-                    .userId(store.getUserId())
+                    .userId(store.getUserName())
                     .storeName(store.getStoreName())
                     .contactEmail(store.getContactEmail())
                     .createdAt(store.getCreatedAt())

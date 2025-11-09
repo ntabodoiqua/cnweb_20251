@@ -1,13 +1,7 @@
 package com.vdt2025.product_service.dto.response;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -19,7 +13,7 @@ import java.time.LocalDateTime;
 public class StoreResponse {
     String id;
     String sellerProfileId;
-    String userId;
+    String userName;
     String storeName;
     String storeDescription;
     String logoName;
