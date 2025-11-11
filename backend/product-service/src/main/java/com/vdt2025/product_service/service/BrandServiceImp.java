@@ -118,34 +118,17 @@ public class BrandServiceImp implements BrandService{
         return response.getFileUrl();
     }
 
-//    @Override
-//    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-//    @Transactional
-//    @CacheEvict(value = "brands", key = "#id")
-//    public void deleteBrand(String id) {
-//        Brand brand = brandRepository.findById(id)
-//                .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
-//
-//        // Kiểm tra quyền truy cập
-//        if (!checkAccessRights(brand)) {
-//            log.warn("User does not have access rights to delete brand {}", brand.getName());
-//            throw new AppException(ErrorCode.UNAUTHORIZED);
-//        }
-//        // Xóa brand và set Các sản phầm thuộc brand này sẽ được chuyển sang chưa phân loại
-//        // Tìm các sản phẩm thuộc brand này
-//        List<Product> products = productRepository.findAllByBrandId(id);
-//        if (!products.isEmpty()) {
-//            // Chuyển các sản phẩm sang brand "Chưa phân loại"
-//            Brand uncategorizedBrand = brandRepository.findByName("Chưa phân loại")
-//                    .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
-//
-//            products.forEach(product -> product.setBrand(uncategorizedBrand));
-//            productRepository.saveAll(products);
-//            log.info("Products in brand {} have been moved to 'Chưa phân loại'", brand.getName());
-//        }
-//        // Xóa danh mục
-//        brandRepository.delete(brand);
-//        log.info("Brand {} has been deleted successfully", brand.getName());
-//    }
+    @Override
+    @Transactional
+    public void deleteBrand(String brandId) {
+        Brand brand = brandRepository.findById(brandId)
+                .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
+
+        productRepository.deactivateProductsByBrandId(brandId);
+        brand.setActive(false);
+        brandRepository.save(brand);
+
+        log.info("Soft deleted brand {} and its products", brandId);
+    }
 
 }

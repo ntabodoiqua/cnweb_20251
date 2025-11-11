@@ -16,7 +16,7 @@ public interface BrandService {
 
     BrandResponse getBrandById(String id);
 
-//    void deleteBrand(String id);
+    void deleteBrand(String id);
 
     String setBrandThumbnail(String id, MultipartFile file);
 

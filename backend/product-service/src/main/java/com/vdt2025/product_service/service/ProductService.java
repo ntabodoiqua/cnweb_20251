@@ -79,6 +79,10 @@ public interface ProductService {
      */
     Page<ProductSummaryResponse> getProductsByCategoryId(String categoryId, Pageable pageable);
 
+    /**
+     * Tìm kiếm sản phẩm theo brand
+     */
+    Page<ProductSummaryResponse> getProductsByBrandId(String brandId, Pageable pageable);
     // ========== Variant Management ==========
 
     /**
