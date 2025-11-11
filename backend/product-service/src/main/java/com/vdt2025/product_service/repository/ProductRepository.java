@@ -49,6 +49,12 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
      */
     Page<Product> findByBrandIdAndIsActiveTrue(String categoryId, Pageable pageable);
 
+    // Tìm sản phẩm thuộc brand và set active = false
+    @Modifying
+    @Query("UPDATE Product p SET p.isActive = false WHERE p.brand.id = :brandId")
+    void deactivateProductsByBrandId(@Param("brandId") String brandId);
+
+
     /**
      * Kiểm tra sản phẩm tồn tại theo tên
      */
