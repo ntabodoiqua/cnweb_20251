@@ -24,6 +24,9 @@ const VerifyEmailPage = lazy(() => import("../pages/verify-email"));
 const ForgotPasswordPage = lazy(() => import("../pages/forgot-password"));
 const ResetPasswordPage = lazy(() => import("../pages/reset-password"));
 const AboutUsPage = lazy(() => import("../pages/about-us"));
+const CareersPage = lazy(() => import("../pages/careers"));
+const TermsPage = lazy(() => import("../pages/terms"));
+const PrivacyPage = lazy(() => import("../pages/privacy"));
 
 // Protected Pages
 const UserPage = lazy(() => import("../pages/user"));
@@ -133,6 +136,30 @@ const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <AboutUsPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.CAREERS,
+        element: (
+          <SuspenseWrapper>
+            <CareersPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.TERMS,
+        element: (
+          <SuspenseWrapper>
+            <TermsPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.PRIVACY,
+        element: (
+          <SuspenseWrapper>
+            <PrivacyPage />
           </SuspenseWrapper>
         ),
       },
