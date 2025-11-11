@@ -12,6 +12,12 @@ export const PUBLIC_ROUTES = {
   FORGOT_PASSWORD: "/forgot-password",
   RESET_PASSWORD: "/reset-password",
   ABOUT_US: "/about-us",
+    HELP: "/help",
+    ORDERS: "/orders",
+    PAYMENT: "/payment",
+    RETURNS: "/returns",
+    SHIPPING: "/shipping",
+    WARRANTY: "/warranty",
 };
 
 // Protected routes - yêu cầu đăng nhập

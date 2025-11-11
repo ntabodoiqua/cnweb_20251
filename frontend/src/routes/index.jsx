@@ -24,7 +24,12 @@ const VerifyEmailPage = lazy(() => import("../pages/verify-email"));
 const ForgotPasswordPage = lazy(() => import("../pages/forgot-password"));
 const ResetPasswordPage = lazy(() => import("../pages/reset-password"));
 const AboutUsPage = lazy(() => import("../pages/about-us"));
-
+const HelpPage = lazy(() => import("../pages/HelpPage"));
+const OrdersPage = lazy(() => import("../pages/OrdersPage"));
+const PaymentPage = lazy(() => import("../pages/PaymentPage"));
+const ReturnsPage = lazy(() => import("../pages/ReturnsPage"));
+const ShippingPage = lazy(() => import("../pages/ShippingPage"));
+const WarrantyPage = lazy(() => import("../pages/WarrantyPage"));
 // Protected Pages
 const UserPage = lazy(() => import("../pages/user"));
 const ProfilePage = lazy(() => import("../pages/profile"));
@@ -136,7 +141,54 @@ const router = createBrowserRouter([
           </SuspenseWrapper>
         ),
       },
-
+        {
+            path: PUBLIC_ROUTES.HELP,
+            element: (
+                <SuspenseWrapper>
+                    <HelpPage />
+                </SuspenseWrapper>
+            ),
+        },
+        {
+            path: PUBLIC_ROUTES.ORDERS,
+            element: (
+                <SuspenseWrapper>
+                    <OrdersPage />
+                </SuspenseWrapper>
+            ),
+        },
+        {
+            path: PUBLIC_ROUTES.PAYMENT,
+            element: (
+                <SuspenseWrapper>
+                    <PaymentPage />
+                </SuspenseWrapper>
+            ),
+        },
+        {
+            path: PUBLIC_ROUTES.RETURNS,
+            element: (
+                <SuspenseWrapper>
+                    <ReturnsPage />
+                </SuspenseWrapper>
+            ),
+        },
+        {
+            path: PUBLIC_ROUTES.SHIPPING,
+            element: (
+                <SuspenseWrapper>
+                    <ShippingPage />
+                </SuspenseWrapper>
+            ),
+        },
+        {
+            path: PUBLIC_ROUTES.WARRANTY,
+            element: (
+                <SuspenseWrapper>
+                    <WarrantyPage />
+                </SuspenseWrapper>
+            ),
+        },
       // ==================== PROTECTED ROUTES (USER + ADMIN) ====================
       {
         path: PROTECTED_ROUTES.USER,
