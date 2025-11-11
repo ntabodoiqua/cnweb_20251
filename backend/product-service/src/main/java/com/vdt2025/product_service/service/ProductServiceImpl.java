@@ -372,6 +372,10 @@ public class ProductServiceImpl implements ProductService {
             throw new AppException(ErrorCode.BRAND_NOT_FOUND);
         }
 
+        brandRepository.findByIdAndIsActiveTrue(brandId)
+                .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
+
+
         // Lấy danh sách product thuộc brand, chỉ lấy sản phẩm đang active
         Page<Product> productPage = productRepository.findByBrandIdAndIsActiveTrue(brandId, pageable);
 
