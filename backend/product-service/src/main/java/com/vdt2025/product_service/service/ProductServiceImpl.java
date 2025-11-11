@@ -362,6 +362,29 @@ public class ProductServiceImpl implements ProductService {
         return productPage.map(this::mapToProductSummaryResponse);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProductSummaryResponse> getProductsByBrandId(String brandId, Pageable pageable) {
+        log.info("Fetching products for brand: {}", brandId);
+
+        // Verify brand exists
+        if (!brandRepository.existsById(brandId)) {
+            throw new AppException(ErrorCode.BRAND_NOT_FOUND);
+        }
+
+        brandRepository.findByIdAndIsActiveTrue(brandId)
+                .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
+
+
+        // Lấy danh sách product thuộc brand, chỉ lấy sản phẩm đang active
+        Page<Product> productPage = productRepository.findByBrandIdAndIsActiveTrue(brandId, pageable);
+
+        // Map sang DTO summary
+        return productPage.map(this::mapToProductSummaryResponse);
+    }
+
+
+
     // ========== Variant Management ==========
 
     @Override
