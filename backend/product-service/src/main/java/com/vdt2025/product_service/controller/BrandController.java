@@ -76,12 +76,12 @@ public class BrandController {
                 .build();
     }
 
-    // Xóa brand
-//    @DeleteMapping("/{id}")
-//    public ApiResponse<String> deleteBrand(@PathVariable String id) {
-//        brandService.deleteBrand(id);
-//        return ApiResponse.<String>builder()
-//                .result("Brand has been deleted")
-//                .build();
-//    }
+    //Xóa brand
+    @DeleteMapping("/{id}")
+    public ApiResponse<String> deleteBrand(@PathVariable String id) {
+        brandService.deleteBrand(id);
+        return ApiResponse.<String>builder()
+                .result("Brand has been deleted")
+                .build();
+    }
 }
