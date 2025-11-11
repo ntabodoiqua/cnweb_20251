@@ -6,6 +6,7 @@ import com.vdt2025.product_service.dto.request.brand.BrandFilterRequest;
 import com.vdt2025.product_service.dto.request.brand.BrandUpdateRequest;
 import com.vdt2025.product_service.dto.response.BrandResponse;
 import com.vdt2025.product_service.service.BrandServiceImp;
+import com.vdt2025.product_service.service.ProductService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

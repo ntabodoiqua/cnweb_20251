@@ -145,6 +145,24 @@ public class PublicProductController {
     }
 
     /**
+     * Xem sản phẩm theo brand
+     * GET /public/products/brand/{brandId}
+     */
+    @GetMapping("/brand/{brandId}")
+    public ApiResponse<Page<ProductSummaryResponse>> getProductsByBrand(
+            @PathVariable String brandId,
+            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable) {
+        log.info("Public: Fetching products for brand: {}", brandId);
+
+        Page<ProductSummaryResponse> response = productService.getProductsByBrandId(brandId, pageable);
+
+        return ApiResponse.<Page<ProductSummaryResponse>>builder()
+                .result(response)
+                .build();
+    }
+
+    /**
      * Xem sản phẩm bán chạy (best sellers)
      * GET /public/products/best-sellers
      */

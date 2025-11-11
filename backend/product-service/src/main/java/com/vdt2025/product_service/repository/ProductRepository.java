@@ -45,6 +45,11 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     Page<Product> findByCategoryIdAndIsActiveTrue(String categoryId, Pageable pageable);
 
     /**
+     * Tìm sản phẩm active theo brand
+     */
+    Page<Product> findByBrandIdAndIsActiveTrue(String categoryId, Pageable pageable);
+
+    /**
      * Kiểm tra sản phẩm tồn tại theo tên
      */
     boolean existsByNameAndStoreId(String name, String storeId);
