@@ -474,3 +474,35 @@
 ::-webkit-scrollbar-thumb:hover {
   background: #d73211;
 }
+
+/* Terms Checkbox */
+.terms-checkbox {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+.terms-checkbox .ant-checkbox {
+  top: 0.2em;
+}
+
+.terms-checkbox .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #ee4d2d;
+  border-color: #ee4d2d;
+}
+
+.terms-checkbox .ant-checkbox:hover .ant-checkbox-inner {
+  border-color: #ee4d2d;
+}
+
+.terms-link {
+  color: #ee4d2d;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.terms-link:hover {
+  color: #ff6b35;
+  text-decoration: underline;
+}

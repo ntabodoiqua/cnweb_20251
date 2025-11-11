@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Form, Input, notification, DatePicker } from "antd";
+import { Button, Form, Input, notification, DatePicker, Checkbox } from "antd";
 import { createUserApi } from "../util/api";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -424,6 +424,34 @@ const RegisterPage = () => {
                 placeholder="Nhập lại mật khẩu"
                 size="large"
               />
+            </Form.Item>
+
+            <Form.Item
+              name="agreeTerms"
+              valuePropName="checked"
+              rules={[
+                {
+                  validator: (_, value) =>
+                    value
+                      ? Promise.resolve()
+                      : Promise.reject(
+                          new Error(
+                            "Bạn phải đồng ý với điều khoản sử dụng và chính sách bảo mật!"
+                          )
+                        ),
+                },
+              ]}
+            >
+              <Checkbox className="terms-checkbox">
+                Tôi đồng ý với{" "}
+                <Link to="/terms" target="_blank" className="terms-link">
+                  Điều khoản sử dụng
+                </Link>{" "}
+                và{" "}
+                <Link to="/privacy" target="_blank" className="terms-link">
+                  Chính sách bảo mật
+                </Link>
+              </Checkbox>
             </Form.Item>
 
             <Form.Item>

@@ -15,6 +15,12 @@ export const PUBLIC_ROUTES = {
   CAREERS: "/careers",
   TERMS: "/terms",
   PRIVACY: "/privacy",
+    HELP: "/help",
+    ORDERS: "/orders",
+    PAYMENT: "/payment",
+    RETURNS: "/returns",
+    SHIPPING: "/shipping",
+    WARRANTY: "/warranty",
 };
 
 // Protected routes - yêu cầu đăng nhập
