@@ -38,7 +38,24 @@ const ShippingPage = lazy(() => import("../pages/ShippingPage"));
 const WarrantyPage = lazy(() => import("../pages/WarrantyPage"));
 // Protected Pages
 const UserPage = lazy(() => import("../pages/user"));
-const ProfilePage = lazy(() => import("../pages/profile"));
+const ProfileLayout = lazy(() => import("../pages/ProfileLayout"));
+
+// Profile sub-pages
+const ProfileGeneralPage = lazy(() =>
+  import("../pages/profile/ProfileGeneralPage")
+);
+const ProfileSellerPage = lazy(() =>
+  import("../pages/profile/ProfileSellerPage")
+);
+const ProfileOrdersPage = lazy(() =>
+  import("../pages/profile/ProfileOrdersPage")
+);
+const ProfileAddressesPage = lazy(() =>
+  import("../pages/profile/ProfileAddressesPage")
+);
+const ProfileHistoryPage = lazy(() =>
+  import("../pages/profile/ProfileHistoryPage")
+);
 
 // Admin Pages
 const AdminDashboardPage = lazy(() => import("../pages/admin-dashboard"));
@@ -147,54 +164,54 @@ const router = createBrowserRouter([
           </SuspenseWrapper>
         ),
       },
-        {
-            path: PUBLIC_ROUTES.HELP,
-            element: (
-                <SuspenseWrapper>
-                    <HelpPage />
-                </SuspenseWrapper>
-            ),
-        },
-        {
-            path: PUBLIC_ROUTES.ORDERS,
-            element: (
-                <SuspenseWrapper>
-                    <OrdersPage />
-                </SuspenseWrapper>
-            ),
-        },
-        {
-            path: PUBLIC_ROUTES.PAYMENT,
-            element: (
-                <SuspenseWrapper>
-                    <PaymentPage />
-                </SuspenseWrapper>
-            ),
-        },
-        {
-            path: PUBLIC_ROUTES.RETURNS,
-            element: (
-                <SuspenseWrapper>
-                    <ReturnsPage />
-                </SuspenseWrapper>
-            ),
-        },
-        {
-            path: PUBLIC_ROUTES.SHIPPING,
-            element: (
-                <SuspenseWrapper>
-                    <ShippingPage />
-                </SuspenseWrapper>
-            ),
-        },
-        {
-            path: PUBLIC_ROUTES.WARRANTY,
-            element: (
-                <SuspenseWrapper>
-                    <WarrantyPage />
-                </SuspenseWrapper>
-            ),
-        },
+      {
+        path: PUBLIC_ROUTES.HELP,
+        element: (
+          <SuspenseWrapper>
+            <HelpPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.ORDERS,
+        element: (
+          <SuspenseWrapper>
+            <OrdersPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.PAYMENT,
+        element: (
+          <SuspenseWrapper>
+            <PaymentPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.RETURNS,
+        element: (
+          <SuspenseWrapper>
+            <ReturnsPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.SHIPPING,
+        element: (
+          <SuspenseWrapper>
+            <ShippingPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.WARRANTY,
+        element: (
+          <SuspenseWrapper>
+            <WarrantyPage />
+          </SuspenseWrapper>
+        ),
+      },
       {
         path: PUBLIC_ROUTES.CAREERS,
         element: (
@@ -247,15 +264,59 @@ const router = createBrowserRouter([
           </SuspenseWrapper>
         ),
       },
+
+      // Profile routes with nested pages
       {
         path: PROTECTED_ROUTES.PROFILE,
         element: (
           <SuspenseWrapper>
             <ProtectedRoute allowedRoles={[ROLES.USER, ROLES.ADMIN]}>
-              <ProfilePage />
+              <ProfileLayout />
             </ProtectedRoute>
           </SuspenseWrapper>
         ),
+        children: [
+          {
+            index: true,
+            element: (
+              <SuspenseWrapper>
+                <ProfileGeneralPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.PROFILE_SELLER,
+            element: (
+              <SuspenseWrapper>
+                <ProfileSellerPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.PROFILE_ORDERS,
+            element: (
+              <SuspenseWrapper>
+                <ProfileOrdersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.PROFILE_ADDRESSES,
+            element: (
+              <SuspenseWrapper>
+                <ProfileAddressesPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.PROFILE_HISTORY,
+            element: (
+              <SuspenseWrapper>
+                <ProfileHistoryPage />
+              </SuspenseWrapper>
+            ),
+          },
+        ],
       },
 
       // ==================== ADMIN ONLY ROUTES ====================

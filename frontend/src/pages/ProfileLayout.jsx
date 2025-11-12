@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Link, Outlet, useLocation } from "react-router-dom";
 import {
   UserOutlined,
   ShopOutlined,
@@ -6,24 +6,15 @@ import {
   HomeOutlined,
   HistoryOutlined,
 } from "@ant-design/icons";
-import useScrollToTop from "../hooks/useScrollToTop";
-import {
-  ProfileGeneralInfo,
-  ProfileSellerInfo,
-  ProfileOrders,
-  ProfileAddresses,
-  ProfileHistory,
-  mockUserData,
-  mockSellerData,
-  mockOrders,
-  mockAddresses,
-  mockTransactions,
-} from "../components/profile";
+import { PROTECTED_ROUTES } from "../constants/routes";
 import "./profile.css";
 
-const ProfilePage = () => {
-  useScrollToTop();
-  const [activeTab, setActiveTab] = useState("general");
+/**
+ * ProfileLayout - Layout component for profile pages with sidebar navigation
+ * Uses <Outlet> for nested routes
+ */
+const ProfileLayout = () => {
+  const location = useLocation();
 
   // Menu items configuration
   const menuItems = [
@@ -31,47 +22,37 @@ const ProfilePage = () => {
       key: "general",
       icon: <UserOutlined />,
       label: "Thông tin chung",
+      path: PROTECTED_ROUTES.PROFILE,
     },
     {
       key: "seller",
       icon: <ShopOutlined />,
       label: "Hồ sơ người bán",
+      path: PROTECTED_ROUTES.PROFILE_SELLER,
     },
     {
       key: "orders",
       icon: <ShoppingOutlined />,
       label: "Đơn hàng",
+      path: PROTECTED_ROUTES.PROFILE_ORDERS,
     },
     {
       key: "addresses",
       icon: <HomeOutlined />,
       label: "Sổ địa chỉ",
+      path: PROTECTED_ROUTES.PROFILE_ADDRESSES,
     },
     {
       key: "history",
       icon: <HistoryOutlined />,
       label: "Lịch sử giao dịch",
+      path: PROTECTED_ROUTES.PROFILE_HISTORY,
     },
   ];
 
-  // Render different content based on active tab
-  const renderContent = () => {
-    switch (activeTab) {
-      case "general":
-        return <ProfileGeneralInfo userData={mockUserData} />;
-      case "seller":
-        // Pass null to show registration form, or mockSellerData to show seller profile
-        return <ProfileSellerInfo sellerData={null} />;
-      case "orders":
-        return <ProfileOrders orders={mockOrders} />;
-      case "addresses":
-        return <ProfileAddresses addresses={mockAddresses} />;
-      case "history":
-        return <ProfileHistory transactions={mockTransactions} />;
-      default:
-        return <ProfileGeneralInfo userData={mockUserData} />;
-    }
-  };
+  // Get active menu item based on current path
+  const activeItem =
+    menuItems.find((item) => item.path === location.pathname) || menuItems[0];
 
   return (
     <div className="profile-page">
@@ -90,15 +71,15 @@ const ProfilePage = () => {
               <ul className="profile-menu">
                 {menuItems.map((item) => (
                   <li key={item.key} className="profile-menu-item">
-                    <button
-                      onClick={() => setActiveTab(item.key)}
+                    <Link
+                      to={item.path}
                       className={`profile-menu-link ${
-                        activeTab === item.key ? "active" : ""
+                        location.pathname === item.path ? "active" : ""
                       }`}
                     >
                       {item.icon}
                       <span>{item.label}</span>
-                    </button>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -109,15 +90,16 @@ const ProfilePage = () => {
           <main className="profile-main">
             <div className="profile-main-header">
               <h1 className="profile-main-title">
-                {menuItems.find((item) => item.key === activeTab)?.icon}
-                {menuItems.find((item) => item.key === activeTab)?.label}
+                {activeItem.icon}
+                {activeItem.label}
               </h1>
               <p className="profile-main-subtitle">
                 Quản lý thông tin cá nhân của bạn
               </p>
             </div>
 
-            {renderContent()}
+            {/* Nested routes will render here */}
+            <Outlet />
           </main>
         </div>
       </div>
@@ -125,4 +107,4 @@ const ProfilePage = () => {
   );
 };
 
-export default ProfilePage;
+export default ProfileLayout;

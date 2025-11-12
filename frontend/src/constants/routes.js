@@ -17,17 +17,22 @@ export const PUBLIC_ROUTES = {
   PRIVACY: "/privacy",
   SELLERS: "/sellers",
   CONTACT: "/contact",
-    HELP: "/help",
-    ORDERS: "/orders",
-    PAYMENT: "/payment",
-    RETURNS: "/returns",
-    SHIPPING: "/shipping",
-    WARRANTY: "/warranty",
+  HELP: "/help",
+  ORDERS: "/orders",
+  PAYMENT: "/payment",
+  RETURNS: "/returns",
+  SHIPPING: "/shipping",
+  WARRANTY: "/warranty",
 };
 
 // Protected routes - yêu cầu đăng nhập
 export const PROTECTED_ROUTES = {
   PROFILE: "/profile",
+  PROFILE_GENERAL: "/profile/general",
+  PROFILE_SELLER: "/profile/seller",
+  PROFILE_ORDERS: "/profile/orders",
+  PROFILE_ADDRESSES: "/profile/addresses",
+  PROFILE_HISTORY: "/profile/history",
   USER: "/user",
 
   // Admin routes
@@ -69,6 +74,11 @@ export const ROUTE_TITLES = {
   [PUBLIC_ROUTES.CONTACT]: "Liên hệ",
 
   [PROTECTED_ROUTES.PROFILE]: "Trang cá nhân",
+  [PROTECTED_ROUTES.PROFILE_GENERAL]: "Thông tin chung",
+  [PROTECTED_ROUTES.PROFILE_SELLER]: "Hồ sơ người bán",
+  [PROTECTED_ROUTES.PROFILE_ORDERS]: "Đơn hàng của tôi",
+  [PROTECTED_ROUTES.PROFILE_ADDRESSES]: "Sổ địa chỉ",
+  [PROTECTED_ROUTES.PROFILE_HISTORY]: "Lịch sử giao dịch",
   [PROTECTED_ROUTES.USER]: "Quản lý người dùng",
   [PROTECTED_ROUTES.ADMIN_DASHBOARD]: "Bảng điều khiển Admin",
   [PROTECTED_ROUTES.USER_ORDERS]: "Đơn hàng của tôi",
