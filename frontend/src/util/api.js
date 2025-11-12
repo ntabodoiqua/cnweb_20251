@@ -138,6 +138,29 @@ const resetPasswordApi = (username, otpCode, newPassword) => {
   );
 };
 
+const loginWithGoogleApi = (googleToken) => {
+  const URL_API = "/api/user/auth/google";
+  return axios.post(
+    URL_API,
+    {
+      token: googleToken,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "Accept-Language": "vi",
+      },
+      // Không gửi Authorization header cho API đăng nhập Google
+      transformRequest: [
+        (data, headers) => {
+          delete headers.Authorization;
+          return JSON.stringify(data);
+        },
+      ],
+    }
+  );
+};
+
 export {
   createUserApi,
   loginApi,
@@ -146,4 +169,5 @@ export {
   resendOtpApi,
   forgotPasswordApi,
   resetPasswordApi,
+  loginWithGoogleApi,
 };

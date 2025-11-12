@@ -1,10 +1,12 @@
 import React, { useState, useContext } from "react";
 import { Button, Form, Input, notification } from "antd";
-import { loginApi, resendOtpApi } from "../util/api";
+import { loginApi, resendOtpApi, loginWithGoogleApi } from "../util/api";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/context/auth.context";
 import { UserOutlined, LockOutlined, GoogleOutlined } from "@ant-design/icons";
 import { getTokenInfo } from "../util/jwt";
+import { GoogleLogin } from "@react-oauth/google";
+import useScrollToTop from "../hooks/useScrollToTop";
 import "./login.css";
 import logo from "../assets/logo.png";
 
@@ -13,6 +15,9 @@ const LoginPage = () => {
   const { setAuth } = useContext(AuthContext);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+
+  // Sử dụng hook để tự động scroll lên đầu trang
+  useScrollToTop();
 
   const onFinish = async (values) => {
     setLoading(true);
@@ -133,6 +138,80 @@ const LoginPage = () => {
     });
   };
 
+  const handleGoogleLoginSuccess = async (credentialResponse) => {
+    try {
+      setLoading(true);
+      const { credential } = credentialResponse;
+
+      // Gửi token lên backend để xác thực
+      const res = await loginWithGoogleApi(credential);
+
+      if (res && res.code === 1000) {
+        const { token, authenticated } = res.result;
+
+        if (authenticated && token) {
+          // Lưu token vào localStorage
+          localStorage.setItem("access_token", token);
+
+          // Decode token để lấy thông tin user
+          const tokenInfo = getTokenInfo(token);
+
+          notification.success({
+            message: "Đăng nhập thành công!",
+            description: `Chào mừng ${
+              tokenInfo?.username || "bạn"
+            } quay trở lại.`,
+            placement: "topRight",
+            duration: 3,
+          });
+
+          // Cập nhật auth context
+          setAuth({
+            isAuthenticated: true,
+            user: {
+              username: tokenInfo?.username || "",
+              role: tokenInfo?.role || "",
+            },
+          });
+
+          // Chuyển hướng về trang chủ
+          navigate("/");
+        }
+      } else {
+        notification.error({
+          message: "Đăng nhập thất bại",
+          description:
+            res?.message ||
+            "Không thể đăng nhập bằng Google, vui lòng thử lại.",
+          placement: "topRight",
+          duration: 3,
+        });
+      }
+    } catch (error) {
+      console.error("Google login error:", error);
+      notification.error({
+        message: "Đăng nhập thất bại",
+        description:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Không thể đăng nhập bằng Google, vui lòng thử lại.",
+        placement: "topRight",
+        duration: 3,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLoginError = () => {
+    notification.error({
+      message: "Đăng nhập thất bại",
+      description: "Đăng nhập bằng Google thất bại, vui lòng thử lại.",
+      placement: "topRight",
+      duration: 3,
+    });
+  };
+
   return (
     <div className="login-container">
       <div className="login-left">
@@ -235,15 +314,19 @@ const LoginPage = () => {
             <span>hoặc</span>
           </div>
 
-          <Button
-            size="large"
-            block
-            icon={<GoogleOutlined />}
-            onClick={handleGoogleLogin}
-            className="google-login-button"
-          >
-            Đăng nhập với Google
-          </Button>
+          <div className="google-login-wrapper">
+            <GoogleLogin
+              onSuccess={handleGoogleLoginSuccess}
+              onError={handleGoogleLoginError}
+              useOneTap={false}
+              theme="outline"
+              size="large"
+              text="continue_with"
+              shape="rectangular"
+              logo_alignment="left"
+              width="100%"
+            />
+          </div>
 
           <div className="login-footer">
             <span>Chưa có tài khoản? </span>

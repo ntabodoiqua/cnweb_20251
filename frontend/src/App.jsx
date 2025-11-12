@@ -5,6 +5,7 @@ import { useContext, useEffect } from "react";
 import { AuthContext } from "./components/context/auth.context";
 import LoadingSpinner from "./components/LoadingSpinner";
 import { getTokenInfo, isTokenExpired } from "./util/jwt";
+import useScrollToTop from "./hooks/useScrollToTop";
 
 /**
  * App Component - Main Layout
@@ -14,6 +15,9 @@ import { getTokenInfo, isTokenExpired } from "./util/jwt";
 function App() {
   const { setAuth, appLoading, setAppLoading } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // Tự động scroll lên đầu trang mỗi khi chuyển route
+  useScrollToTop();
 
   useEffect(() => {
     const initializeAuth = async () => {

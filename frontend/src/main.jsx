@@ -6,6 +6,7 @@ import { RouterProvider } from "react-router-dom";
 import { AuthWrapper } from "./components/context/auth.context.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import router from "./routes/index.jsx";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 /**
  * Main entry point của ứng dụng
@@ -16,10 +17,12 @@ import router from "./routes/index.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <ErrorBoundary>
-      <AuthWrapper>
-        <RouterProvider router={router} />
-      </AuthWrapper>
-    </ErrorBoundary>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <ErrorBoundary>
+        <AuthWrapper>
+          <RouterProvider router={router} />
+        </AuthWrapper>
+      </ErrorBoundary>
+    </GoogleOAuthProvider>
   </React.StrictMode>
 );
