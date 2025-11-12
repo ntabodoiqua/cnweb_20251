@@ -9,8 +9,17 @@ import {
   MenuOutlined,
   SettingOutlined,
   ProfileOutlined,
+  SearchOutlined,
+  LaptopOutlined,
+  MobileOutlined,
+  SkinOutlined,
+  HomeOutlined as HomeIconOutlined,
+  BookOutlined,
+  ShoppingCartOutlined,
+  DownOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Space, Drawer, Menu } from "antd";
+import { Dropdown, Space, Drawer, Menu, Input } from "antd";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
 import { getRoleName, ROLES } from "../../constants/roles";
@@ -22,6 +31,7 @@ const Header = () => {
   const location = useLocation();
   const { auth, setAuth } = useContext(AuthContext);
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
 
   const handleLogout = () => {
     localStorage.removeItem("access_token");
@@ -40,6 +50,73 @@ const Header = () => {
   const isActive = (path) => {
     return location.pathname === path;
   };
+
+  const handleSearch = (value) => {
+    if (value.trim()) {
+      navigate(`/search?q=${encodeURIComponent(value.trim())}`);
+    }
+  };
+
+  // Categories dropdown menu
+  const categoryMenuItems = [
+    {
+      key: "electronics",
+      label: (
+        <Link to="/category/electronics" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <LaptopOutlined />
+          <span>Điện tử</span>
+        </Link>
+      ),
+    },
+    {
+      key: "mobile",
+      label: (
+        <Link to="/category/mobile" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <MobileOutlined />
+          <span>Điện thoại & Phụ kiện</span>
+        </Link>
+      ),
+    },
+    {
+      key: "fashion",
+      label: (
+        <Link to="/category/fashion" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <SkinOutlined />
+          <span>Thời trang</span>
+        </Link>
+      ),
+    },
+    {
+      key: "home",
+      label: (
+        <Link to="/category/home" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <HomeIconOutlined />
+          <span>Nhà cửa & Đời sống</span>
+        </Link>
+      ),
+    },
+    {
+      key: "books",
+      label: (
+        <Link to="/category/books" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+          <BookOutlined />
+          <span>Sách & Văn phòng phẩm</span>
+        </Link>
+      ),
+    },
+    {
+      type: "divider",
+    },
+    {
+      key: "all",
+      label: (
+        <Link to="/category/all" style={{ display: "flex", alignItems: "center", gap: "12px", fontWeight: 600 }}>
+          <ShoppingCartOutlined />
+          <span>Xem tất cả danh mục</span>
+        </Link>
+      ),
+    },
+  ];
 
   // Dropdown menu cho user đã đăng nhập
   const userMenuItems = [
@@ -105,11 +182,6 @@ const Header = () => {
 
   // Mobile menu items
   const mobileMenuItems = [
-    {
-      key: "home",
-      icon: <HomeOutlined />,
-      label: <Link to="/">Trang chủ</Link>,
-    },
     ...(auth.isAuthenticated
       ? [
           {
@@ -148,48 +220,35 @@ const Header = () => {
 
   return (
     <header className="custom-header">
-      <div className="header-container">
-        {/* Logo */}
-        <div className="header-logo" onClick={() => navigate("/")}>
-          <img src={logo} alt="Logo" className="header-logo-image" />
-          <h1 className="header-logo-text">HUSTBuy</h1>
-        </div>
+      {/* Top Header - Logo, Search, Actions */}
+      <div className="header-top">
+        <div className="header-container">
+          {/* Logo */}
+          <div className="header-logo" onClick={() => navigate("/")}>
+            <img src={logo} alt="Logo" className="header-logo-image" />
+            <h1 className="header-logo-text">HUSTBuy</h1>
+          </div>
 
-        {/* Desktop Navigation */}
-        <nav className="header-nav">
-          <Link
-            to="/"
-            className={`header-nav-item ${isActive("/") ? "active" : ""}`}
-          >
-            <HomeOutlined />
-            Trang chủ
-          </Link>
-          {auth.isAuthenticated && (
-            <>
-              <Link
-                to="/user"
-                className={`header-nav-item ${
-                  isActive("/user") ? "active" : ""
-                }`}
-              >
-                <UserOutlined />
-                Người dùng
-              </Link>
-              <Link
-                to="/profile"
-                className={`header-nav-item ${
-                  isActive("/profile") ? "active" : ""
-                }`}
-              >
-                <ProfileOutlined />
-                Hồ sơ
-              </Link>
-            </>
-          )}
-        </nav>
+          {/* Search Bar */}
+          <div className="header-search">
+            <Input.Search
+              placeholder="Tìm kiếm sản phẩm, danh mục..."
+              size="large"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              onSearch={handleSearch}
+              enterButton={
+                <button className="search-button">
+                  <SearchOutlined />
+                  Tìm kiếm
+                </button>
+              }
+              className="search-input"
+            />
+          </div>
 
-        {/* Actions */}
-        <div className="header-actions">
+          {/* Actions */}
+          <div className="header-actions">
           {/* Mobile Menu Trigger */}
           <MenuOutlined
             className="header-mobile-trigger"
@@ -240,6 +299,45 @@ const Header = () => {
               </button>
             </Space>
           )}
+        </div>
+      </div>
+      </div>
+
+      {/* Navigation Bar */}
+      <div className="header-bottom">
+        <div className="header-container">
+          <nav className="header-nav">
+            <Link to="/" className={`nav-link ${isActive("/") ? "active" : ""}`}>
+              <HomeOutlined />
+              <span>Trang chủ</span>
+            </Link>
+            
+            <Dropdown
+              menu={{ items: categoryMenuItems }}
+              trigger={["hover"]}
+              placement="bottomLeft"
+              overlayClassName="category-dropdown-menu"
+            >
+              <div className={`nav-link ${location.pathname.startsWith("/category") ? "active" : ""}`}>
+                <AppstoreOutlined />
+                <span>Danh mục sản phẩm</span>
+                <DownOutlined style={{ fontSize: "10px", marginLeft: "4px" }} />
+              </div>
+            </Dropdown>
+
+            {auth.isAuthenticated && (
+              <>
+                <Link to="/user" className={`nav-link ${isActive("/user") ? "active" : ""}`}>
+                  <UserOutlined />
+                  <span>Người dùng</span>
+                </Link>
+                <Link to="/profile" className={`nav-link ${isActive("/profile") ? "active" : ""}`}>
+                  <ProfileOutlined />
+                  <span>Hồ sơ</span>
+                </Link>
+              </>
+            )}
+          </nav>
         </div>
       </div>
 

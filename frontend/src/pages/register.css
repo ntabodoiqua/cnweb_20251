@@ -480,10 +480,12 @@
   font-size: 14px;
   color: #666;
   line-height: 1.6;
+  display: flex;
+  align-items: flex-start;
 }
 
 .terms-checkbox .ant-checkbox {
-  top: 0.2em;
+  margin-top: 0.2em;
 }
 
 .terms-checkbox .ant-checkbox-checked .ant-checkbox-inner {
