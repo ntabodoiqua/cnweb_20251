@@ -292,6 +292,50 @@ const sendSellerProfileToReviewApi = (profileId) => {
   });
 };
 
+// Address APIs
+const getAddressesApi = (page = 0, size = 20) => {
+  const URL_API = "/api/user/address";
+  return axios.get(URL_API, {
+    params: {
+      page,
+      size,
+      sort: "isDefault,desc", // Sắp xếp địa chỉ mặc định lên đầu
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const createAddressApi = (addressData) => {
+  const URL_API = "/api/user/address";
+  return axios.post(URL_API, addressData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const updateAddressApi = (addressId, addressData) => {
+  const URL_API = `/api/user/address/${addressId}`;
+  return axios.put(URL_API, addressData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const deleteAddressApi = (addressId) => {
+  const URL_API = `/api/user/address/${addressId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -312,4 +356,8 @@ export {
   getProvincesApi,
   getWardsByProvinceApi,
   sendSellerProfileToReviewApi,
+  getAddressesApi,
+  createAddressApi,
+  updateAddressApi,
+  deleteAddressApi,
 };

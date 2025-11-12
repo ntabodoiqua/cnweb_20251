@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   HomeOutlined,
   PlusOutlined,
@@ -8,91 +8,478 @@ import {
   EnvironmentOutlined,
   UserOutlined,
   PhoneOutlined,
+  GlobalOutlined,
+  LoadingOutlined,
+  SaveOutlined,
+  CloseOutlined,
+  FileTextOutlined,
 } from "@ant-design/icons";
-import PropTypes from "prop-types";
+import { notification, Modal, Select } from "antd";
+import {
+  getAddressesApi,
+  createAddressApi,
+  updateAddressApi,
+  deleteAddressApi,
+  getProvincesApi,
+  getWardsByProvinceApi,
+} from "../../util/api";
+import "./ProfileSellerInfo.css";
 
-const ProfileAddresses = ({ addresses }) => {
+const { Option } = Select;
+
+const ProfileAddresses = () => {
+  const [addresses, setAddresses] = useState([]);
+  const [provinces, setProvinces] = useState([]);
+  const [wards, setWards] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 20,
+    total: 0,
+  });
+
   const [isAdding, setIsAdding] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState({
+    receiverPhone: "",
+  });
   const [formData, setFormData] = useState({
-    recipientName: "",
-    phone: "",
-    province: "",
-    district: "",
-    ward: "",
-    detailAddress: "",
+    receiverName: "",
+    receiverPhone: "",
+    provinceId: null,
+    wardId: null,
+    street: "",
     isDefault: false,
   });
 
+  // Fetch addresses khi component mount
+  useEffect(() => {
+    fetchAddresses();
+    fetchProvinces();
+  }, []);
+
+  const fetchAddresses = async (page = 0) => {
+    try {
+      setLoading(true);
+      const res = await getAddressesApi(page, pagination.pageSize);
+
+      if (res && res.code === 1000) {
+        setAddresses(res.result.content);
+        setPagination({
+          ...pagination,
+          current: page + 1,
+          total: res.result.totalElements,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching addresses:", error);
+      notification.error({
+        message: "Lỗi tải dữ liệu",
+        description: "Không thể tải danh sách địa chỉ. Vui lòng thử lại sau.",
+        placement: "topRight",
+        duration: 3,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchProvinces = async () => {
+    try {
+      const res = await getProvincesApi();
+
+      if (res && res.code === 1000) {
+        setProvinces(res.result);
+      }
+    } catch (error) {
+      console.error("Error fetching provinces:", error);
+      notification.error({
+        message: "Lỗi tải dữ liệu",
+        description:
+          "Không thể tải danh sách tỉnh/thành phố. Vui lòng thử lại sau.",
+        placement: "topRight",
+        duration: 3,
+      });
+    }
+  };
+
+  const fetchWards = async (provinceId) => {
+    try {
+      const res = await getWardsByProvinceApi(provinceId);
+
+      if (res && res.code === 1000) {
+        setWards(res.result);
+      }
+    } catch (error) {
+      console.error("Error fetching wards:", error);
+      notification.error({
+        message: "Lỗi tải dữ liệu",
+        description: "Không thể tải danh sách phường/xã. Vui lòng thử lại sau.",
+        placement: "topRight",
+        duration: 3,
+      });
+    }
+  };
+
+  const validatePhone = (phone) => {
+    const phoneRegex = /^0[0-9]{9}$/;
+    return phoneRegex.test(phone);
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
+    }));
+
+    // Real-time validation for phone
+    if (name === "receiverPhone") {
+      const numericValue = value.replace(/[^0-9]/g, "");
+
+      setFormData((prev) => ({
+        ...prev,
+        receiverPhone: numericValue,
+      }));
+
+      if (numericValue && !validatePhone(numericValue)) {
+        if (numericValue.length < 10) {
+          setErrors((prev) => ({
+            ...prev,
+            receiverPhone: "Số điện thoại phải có 10 chữ số",
+          }));
+        } else if (!numericValue.startsWith("0")) {
+          setErrors((prev) => ({
+            ...prev,
+            receiverPhone: "Số điện thoại phải bắt đầu bằng số 0",
+          }));
+        } else {
+          setErrors((prev) => ({
+            ...prev,
+            receiverPhone: "Số điện thoại không hợp lệ",
+          }));
+        }
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          receiverPhone: "",
+        }));
+      }
+    }
+  };
+
+  const handleProvinceChange = (provinceId) => {
+    setFormData((prev) => ({
+      ...prev,
+      provinceId,
+      wardId: null,
+    }));
+    setWards([]);
+    if (provinceId) {
+      fetchWards(provinceId);
+    }
+  };
+
+  const handleWardChange = (wardId) => {
+    setFormData((prev) => ({
+      ...prev,
+      wardId,
     }));
   };
 
   const handleAdd = () => {
     setIsAdding(true);
     setFormData({
-      recipientName: "",
-      phone: "",
-      province: "",
-      district: "",
-      ward: "",
-      detailAddress: "",
+      receiverName: "",
+      receiverPhone: "",
+      provinceId: null,
+      wardId: null,
+      street: "",
       isDefault: false,
+    });
+    setWards([]);
+    setErrors({
+      receiverPhone: "",
     });
   };
 
   const handleEdit = (address) => {
     setEditingId(address.id);
     setFormData({
-      recipientName: address.recipientName,
-      phone: address.phone,
-      province: address.province,
-      district: address.district,
-      ward: address.ward,
-      detailAddress: address.detailAddress,
+      receiverName: address.receiverName,
+      receiverPhone: address.receiverPhone,
+      provinceId: address.ward?.province?.id || null,
+      wardId: address.ward?.id || null,
+      street: address.street,
       isDefault: address.isDefault,
     });
+
+    // Load wards nếu có provinceId
+    if (address.ward?.province?.id) {
+      fetchWards(address.ward.province.id);
+    }
   };
 
-  const handleSave = () => {
-    // TODO: Call API to save address
-    console.log("Saving address:", formData);
-    setIsAdding(false);
-    setEditingId(null);
+  const validateForm = () => {
+    if (!formData.receiverName.trim()) {
+      notification.error({
+        message: "Lỗi",
+        description: "Vui lòng nhập tên người nhận",
+        placement: "topRight",
+        duration: 3,
+      });
+      return false;
+    }
+
+    // Validate phone Vietnamese format
+    const phoneRegex = /^0[0-9]{9}$/;
+    if (!phoneRegex.test(formData.receiverPhone)) {
+      notification.error({
+        message: "Lỗi",
+        description:
+          "Số điện thoại không hợp lệ. Vui lòng nhập 10 số bắt đầu bằng 0",
+        placement: "topRight",
+        duration: 3,
+      });
+      return false;
+    }
+
+    if (!formData.provinceId) {
+      notification.error({
+        message: "Thiếu thông tin",
+        description: "Vui lòng chọn tỉnh/thành phố",
+        placement: "topRight",
+        duration: 3,
+      });
+      return false;
+    }
+
+    if (!formData.wardId) {
+      notification.error({
+        message: "Thiếu thông tin",
+        description: "Vui lòng chọn phường/xã",
+        placement: "topRight",
+        duration: 3,
+      });
+      return false;
+    }
+
+    if (!formData.street.trim()) {
+      notification.error({
+        message: "Thiếu thông tin",
+        description: "Vui lòng nhập địa chỉ cụ thể",
+        placement: "topRight",
+        duration: 3,
+      });
+      return false;
+    }
+
+    if (formData.street.trim().length < 5) {
+      notification.error({
+        message: "Địa chỉ không hợp lệ",
+        description: "Địa chỉ cụ thể phải có ít nhất 5 ký tự",
+        placement: "topRight",
+        duration: 3,
+      });
+      return false;
+    }
+
+    return true;
   };
 
+  const handleSave = async () => {
+    if (!validateForm()) {
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const requestData = {
+        receiverName: formData.receiverName,
+        receiverPhone: formData.receiverPhone,
+        street: formData.street,
+        wardId: formData.wardId,
+        provinceId: formData.provinceId,
+        isDefault: formData.isDefault,
+      };
+
+      let res;
+      if (editingId) {
+        // Update existing address
+        res = await updateAddressApi(editingId, requestData);
+      } else {
+        // Create new address
+        res = await createAddressApi(requestData);
+      }
+
+      if (res && res.code === 1000) {
+        notification.success({
+          message: "Thành công",
+          description: editingId
+            ? "Cập nhật địa chỉ thành công"
+            : "Thêm địa chỉ mới thành công",
+          placement: "topRight",
+          duration: 3,
+        });
+
+        // Refresh addresses list
+        await fetchAddresses(pagination.current - 1);
+
+        setIsAdding(false);
+        setEditingId(null);
+        setWards([]);
+        setErrors({
+          receiverPhone: "",
+        });
+      } else {
+        notification.error({
+          message: editingId ? "Cập nhật thất bại" : "Thêm địa chỉ thất bại",
+          description: res.message || "Có lỗi xảy ra, vui lòng thử lại sau.",
+          placement: "topRight",
+          duration: 3,
+        });
+      }
+    } catch (error) {
+      console.error("Error saving address:", error);
+      notification.error({
+        message: editingId ? "Cập nhật thất bại" : "Thêm địa chỉ thất bại",
+        description:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Không thể lưu địa chỉ. Vui lòng thử lại sau.",
+        placement: "topRight",
+        duration: 3,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
   const handleCancel = () => {
     setIsAdding(false);
     setEditingId(null);
+    setWards([]);
+    setFormData({
+      receiverName: "",
+      receiverPhone: "",
+      provinceId: null,
+      wardId: null,
+      street: "",
+      isDefault: false,
+    });
+    setErrors({
+      receiverPhone: "",
+    });
   };
 
   const handleDelete = (id) => {
-    // TODO: Call API to delete address
-    console.log("Deleting address:", id);
+    Modal.confirm({
+      title: "Xác nhận xóa",
+      content: "Bạn có chắc chắn muốn xóa địa chỉ này?",
+      okText: "Xóa",
+      cancelText: "Hủy",
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          setLoading(true);
+          const res = await deleteAddressApi(id);
+
+          if (res && res.code === 1000) {
+            notification.success({
+              message: "Thành công",
+              description: "Xóa địa chỉ thành công",
+              placement: "topRight",
+              duration: 3,
+            });
+
+            // Refresh addresses list
+            await fetchAddresses(pagination.current - 1);
+          }
+        } catch (error) {
+          console.error("Error deleting address:", error);
+          notification.error({
+            message: "Lỗi",
+            description:
+              error?.response?.data?.message ||
+              "Không thể xóa địa chỉ. Vui lòng thử lại sau.",
+            placement: "topRight",
+            duration: 3,
+          });
+        } finally {
+          setLoading(false);
+        }
+      },
+    });
   };
 
-  const handleSetDefault = (id) => {
-    // TODO: Call API to set default address
-    console.log("Setting default address:", id);
+  const handleSetDefault = async (id) => {
+    try {
+      setLoading(true);
+
+      // Tìm address cần set default
+      const address = addresses.find((addr) => addr.id === id);
+      if (!address) return;
+
+      // Update với isDefault = true
+      const requestData = {
+        receiverName: address.receiverName,
+        receiverPhone: address.receiverPhone,
+        street: address.street,
+        wardId: address.ward?.id,
+        provinceId: address.ward?.province?.id,
+        isDefault: true,
+      };
+
+      const res = await updateAddressApi(id, requestData);
+
+      if (res && res.code === 1000) {
+        notification.success({
+          message: "Thành công",
+          description: "Đã đặt làm địa chỉ mặc định",
+          placement: "topRight",
+          duration: 3,
+        });
+
+        // Refresh addresses list
+        await fetchAddresses(pagination.current - 1);
+      }
+    } catch (error) {
+      console.error("Error setting default address:", error);
+      notification.error({
+        message: "Lỗi",
+        description:
+          error?.response?.data?.message ||
+          "Không thể đặt địa chỉ mặc định. Vui lòng thử lại sau.",
+        placement: "topRight",
+        duration: 3,
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  if (addresses.length === 0 && !isAdding) {
+  // Loading state
+  if (loading && addresses.length === 0 && !isAdding && !editingId) {
     return (
-      <div className="profile-empty-state">
+      <div className="seller-loading">
+        <LoadingOutlined />
+        <p>Đang tải danh sách địa chỉ...</p>
+      </div>
+    );
+  }
+
+  // Empty state
+  if (addresses.length === 0 && !isAdding && !editingId) {
+    return (
+      <div className="seller-empty-state">
         <HomeOutlined />
         <h3>Sổ địa chỉ trống</h3>
         <p>
           Bạn chưa có địa chỉ nào. Thêm địa chỉ để việc mua hàng dễ dàng hơn.
         </p>
-        <button
-          className="profile-btn profile-btn-primary"
-          style={{ marginTop: "20px" }}
-          onClick={handleAdd}
-        >
+        <button className="profile-btn profile-btn-primary" onClick={handleAdd}>
           <PlusOutlined />
           Thêm địa chỉ mới
         </button>
@@ -100,188 +487,191 @@ const ProfileAddresses = ({ addresses }) => {
     );
   }
 
+  // If adding or editing
+  if (isAdding || editingId) {
+    return (
+      <div className="seller-registration-form">
+        <div className="form-section-title">
+          <FileTextOutlined />
+          {isAdding ? "Thêm địa chỉ mới" : "Chỉnh sửa địa chỉ"}
+        </div>
+
+        <div className="profile-form-row">
+          <div className="profile-form-group">
+            <label className="profile-form-label">
+              <UserOutlined />
+              Họ tên người nhận <span className="required">*</span>
+            </label>
+            <input
+              type="text"
+              name="receiverName"
+              value={formData.receiverName}
+              onChange={handleInputChange}
+              className="profile-form-input"
+              placeholder="Nhập họ tên người nhận"
+            />
+          </div>
+
+          <div className="profile-form-group">
+            <label className="profile-form-label">
+              <PhoneOutlined />
+              Số điện thoại <span className="required">*</span>
+            </label>
+            <input
+              type="tel"
+              name="receiverPhone"
+              value={formData.receiverPhone}
+              onChange={handleInputChange}
+              className={`profile-form-input ${
+                errors.receiverPhone ? "input-error" : ""
+              }`}
+              placeholder="0123456789"
+              maxLength={10}
+            />
+            {errors.receiverPhone && (
+              <span className="error-message">{errors.receiverPhone}</span>
+            )}
+          </div>
+        </div>
+
+        <div className="form-section-title">
+          <EnvironmentOutlined />
+          Địa chỉ giao hàng
+        </div>
+
+        <div className="location-selects">
+          <div className="location-select-group">
+            <label className="location-select-label">
+              <GlobalOutlined />
+              Tỉnh/Thành phố <span className="required">*</span>
+            </label>
+            <Select
+              showSearch
+              placeholder="Chọn tỉnh/thành phố"
+              optionFilterProp="children"
+              value={formData.provinceId}
+              onChange={handleProvinceChange}
+              style={{ width: "100%" }}
+              size="large"
+            >
+              {provinces.map((province) => (
+                <Option key={province.id} value={province.id}>
+                  {province.fullName}
+                </Option>
+              ))}
+            </Select>
+          </div>
+
+          <div className="location-select-group">
+            <label className="location-select-label">
+              <HomeOutlined />
+              Phường/Xã <span className="required">*</span>
+            </label>
+            <Select
+              showSearch
+              placeholder="Chọn phường/xã"
+              optionFilterProp="children"
+              value={formData.wardId}
+              onChange={handleWardChange}
+              style={{ width: "100%" }}
+              size="large"
+              disabled={!formData.provinceId}
+            >
+              {wards.map((ward) => (
+                <Option key={ward.id} value={ward.id}>
+                  {ward.nameWithType}
+                </Option>
+              ))}
+            </Select>
+          </div>
+        </div>
+
+        <div className="profile-form-group full-width">
+          <label className="profile-form-label">
+            <EnvironmentOutlined />
+            Địa chỉ cụ thể <span className="required">*</span>
+          </label>
+          <input
+            type="text"
+            name="street"
+            value={formData.street}
+            onChange={handleInputChange}
+            className="profile-form-input"
+            placeholder="Số nhà, tên đường..."
+          />
+        </div>
+
+        <div style={{ marginTop: "16px" }}>
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              cursor: "pointer",
+            }}
+          >
+            <input
+              type="checkbox"
+              name="isDefault"
+              checked={formData.isDefault}
+              onChange={handleInputChange}
+              style={{ width: "18px", height: "18px", cursor: "pointer" }}
+            />
+            <span style={{ fontSize: "14px", fontWeight: 500 }}>
+              Đặt làm địa chỉ mặc định
+            </span>
+          </label>
+        </div>
+
+        <div className="profile-form-actions">
+          <button
+            className="profile-btn profile-btn-secondary"
+            onClick={handleCancel}
+            disabled={submitting}
+          >
+            <CloseOutlined />
+            Hủy
+          </button>
+          <button
+            className="profile-btn profile-btn-primary"
+            onClick={handleSave}
+            disabled={submitting}
+          >
+            {submitting ? (
+              <>
+                <LoadingOutlined />
+                Đang xử lý...
+              </>
+            ) : (
+              <>
+                <SaveOutlined />
+                {isAdding ? "Thêm địa chỉ" : "Cập nhật"}
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // List addresses view
   return (
     <div>
       {/* Add Address Button */}
-      {!isAdding && !editingId && (
-        <div style={{ marginBottom: "24px" }}>
-          <button
-            className="profile-btn profile-btn-primary"
-            onClick={handleAdd}
-          >
-            <PlusOutlined />
-            Thêm địa chỉ mới
-          </button>
-        </div>
-      )}
-
-      {/* Add/Edit Address Form */}
-      {(isAdding || editingId) && (
-        <div
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(238, 77, 45, 0.03) 0%, rgba(255, 107, 53, 0.03) 100%)",
-            border: "2px solid rgba(238, 77, 45, 0.2)",
-            borderRadius: "12px",
-            padding: "24px",
-            marginBottom: "24px",
-          }}
-        >
-          <h3
-            style={{ marginBottom: "20px", fontSize: "18px", fontWeight: 600 }}
-          >
-            {isAdding ? "Thêm địa chỉ mới" : "Chỉnh sửa địa chỉ"}
-          </h3>
-
-          <div className="profile-info-form">
-            <div className="profile-form-row">
-              <div className="profile-form-group">
-                <label className="profile-form-label">
-                  <UserOutlined />
-                  Họ tên người nhận <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="recipientName"
-                  value={formData.recipientName}
-                  onChange={handleInputChange}
-                  className="profile-form-input"
-                  placeholder="Nhập họ tên"
-                />
-              </div>
-
-              <div className="profile-form-group">
-                <label className="profile-form-label">
-                  <PhoneOutlined />
-                  Số điện thoại <span className="required">*</span>
-                </label>
-                <input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className="profile-form-input"
-                  placeholder="0123456789"
-                />
-              </div>
-            </div>
-
-            <div className="profile-form-row">
-              <div className="profile-form-group">
-                <label className="profile-form-label">
-                  <EnvironmentOutlined />
-                  Tỉnh/Thành phố <span className="required">*</span>
-                </label>
-                <select
-                  name="province"
-                  value={formData.province}
-                  onChange={handleInputChange}
-                  className="profile-form-select"
-                >
-                  <option value="">Chọn Tỉnh/Thành phố</option>
-                  <option value="Hà Nội">Hà Nội</option>
-                  <option value="Hồ Chí Minh">Hồ Chí Minh</option>
-                  <option value="Đà Nẵng">Đà Nẵng</option>
-                  <option value="Hải Phòng">Hải Phòng</option>
-                  <option value="Cần Thơ">Cần Thơ</option>
-                </select>
-              </div>
-
-              <div className="profile-form-group">
-                <label className="profile-form-label">
-                  <EnvironmentOutlined />
-                  Quận/Huyện <span className="required">*</span>
-                </label>
-                <select
-                  name="district"
-                  value={formData.district}
-                  onChange={handleInputChange}
-                  className="profile-form-select"
-                >
-                  <option value="">Chọn Quận/Huyện</option>
-                  <option value="Quận 1">Quận 1</option>
-                  <option value="Quận 2">Quận 2</option>
-                  <option value="Quận 3">Quận 3</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="profile-form-row">
-              <div className="profile-form-group">
-                <label className="profile-form-label">
-                  <EnvironmentOutlined />
-                  Phường/Xã <span className="required">*</span>
-                </label>
-                <select
-                  name="ward"
-                  value={formData.ward}
-                  onChange={handleInputChange}
-                  className="profile-form-select"
-                >
-                  <option value="">Chọn Phường/Xã</option>
-                  <option value="Phường 1">Phường 1</option>
-                  <option value="Phường 2">Phường 2</option>
-                </select>
-              </div>
-
-              <div className="profile-form-group">
-                <label className="profile-form-label">
-                  <HomeOutlined />
-                  Địa chỉ cụ thể <span className="required">*</span>
-                </label>
-                <input
-                  type="text"
-                  name="detailAddress"
-                  value={formData.detailAddress}
-                  onChange={handleInputChange}
-                  className="profile-form-input"
-                  placeholder="Số nhà, tên đường..."
-                />
-              </div>
-            </div>
-
-            <div style={{ marginTop: "16px" }}>
-              <label
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "8px",
-                  cursor: "pointer",
-                }}
-              >
-                <input
-                  type="checkbox"
-                  name="isDefault"
-                  checked={formData.isDefault}
-                  onChange={handleInputChange}
-                  style={{ width: "18px", height: "18px", cursor: "pointer" }}
-                />
-                <span style={{ fontSize: "14px", fontWeight: 500 }}>
-                  Đặt làm địa chỉ mặc định
-                </span>
-              </label>
-            </div>
-
-            <div className="profile-form-actions">
-              <button
-                className="profile-btn profile-btn-secondary"
-                onClick={handleCancel}
-              >
-                Hủy
-              </button>
-              <button
-                className="profile-btn profile-btn-primary"
-                onClick={handleSave}
-              >
-                Lưu địa chỉ
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <div style={{ marginBottom: "24px" }}>
+        <button className="profile-btn profile-btn-primary" onClick={handleAdd}>
+          <PlusOutlined />
+          Thêm địa chỉ mới
+        </button>
+      </div>
 
       {/* Addresses List */}
-      {addresses.length > 0 && (
+      {loading ? (
+        <div className="seller-loading">
+          <LoadingOutlined />
+          <p>Đang tải...</p>
+        </div>
+      ) : addresses.length > 0 ? (
         <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           {addresses.map((address) => (
             <div
@@ -339,20 +729,22 @@ const ProfileAddresses = ({ addresses }) => {
                       margin: 0,
                     }}
                   >
-                    {address.recipientName}
+                    {address.receiverName}
                   </h4>
                   <span style={{ color: "#888", fontSize: "14px" }}>|</span>
                   <span style={{ color: "#666", fontSize: "14px" }}>
-                    {address.phone}
+                    {address.receiverPhone}
                   </span>
                 </div>
 
                 <div
                   style={{ fontSize: "14px", color: "#666", lineHeight: "1.6" }}
                 >
-                  <div>{address.detailAddress}</div>
+                  <div>{address.street}</div>
                   <div>
-                    {address.ward}, {address.district}, {address.province}
+                    {address.ward?.nameWithType}
+                    {address.ward?.province?.fullName &&
+                      `, ${address.ward.province.fullName}`}
                   </div>
                 </div>
               </div>
@@ -363,6 +755,7 @@ const ProfileAddresses = ({ addresses }) => {
                   className="profile-btn profile-btn-secondary"
                   style={{ minWidth: "auto", padding: "8px 16px" }}
                   onClick={() => handleEdit(address)}
+                  disabled={loading}
                 >
                   <EditOutlined />
                   Chỉnh sửa
@@ -374,6 +767,7 @@ const ProfileAddresses = ({ addresses }) => {
                       className="profile-btn profile-btn-secondary"
                       style={{ minWidth: "auto", padding: "8px 16px" }}
                       onClick={() => handleSetDefault(address.id)}
+                      disabled={loading}
                     >
                       <CheckCircleOutlined />
                       Đặt làm mặc định
@@ -387,6 +781,7 @@ const ProfileAddresses = ({ addresses }) => {
                         borderColor: "#ff4d4f",
                       }}
                       onClick={() => handleDelete(address.id)}
+                      disabled={loading}
                     >
                       <DeleteOutlined />
                       Xóa
@@ -397,24 +792,37 @@ const ProfileAddresses = ({ addresses }) => {
             </div>
           ))}
         </div>
+      ) : null}
+
+      {/* Pagination */}
+      {!loading && pagination.total > pagination.pageSize && (
+        <div style={{ textAlign: "center", marginTop: "24px" }}>
+          <button
+            className="profile-btn profile-btn-secondary"
+            disabled={pagination.current === 1 || loading}
+            onClick={() => fetchAddresses(pagination.current - 2)}
+            style={{ marginRight: "10px" }}
+          >
+            Trang trước
+          </button>
+          <span style={{ margin: "0 15px", fontSize: "14px", color: "#666" }}>
+            Trang {pagination.current} /{" "}
+            {Math.ceil(pagination.total / pagination.pageSize)}
+          </span>
+          <button
+            className="profile-btn profile-btn-secondary"
+            disabled={
+              pagination.current >=
+                Math.ceil(pagination.total / pagination.pageSize) || loading
+            }
+            onClick={() => fetchAddresses(pagination.current)}
+          >
+            Trang sau
+          </button>
+        </div>
       )}
     </div>
   );
-};
-
-ProfileAddresses.propTypes = {
-  addresses: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      recipientName: PropTypes.string.isRequired,
-      phone: PropTypes.string.isRequired,
-      province: PropTypes.string.isRequired,
-      district: PropTypes.string.isRequired,
-      ward: PropTypes.string.isRequired,
-      detailAddress: PropTypes.string.isRequired,
-      isDefault: PropTypes.bool,
-    })
-  ).isRequired,
 };
 
 export default ProfileAddresses;
