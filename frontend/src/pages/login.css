@@ -281,28 +281,63 @@
   min-height: 48px;
 }
 
+/* Custom Google Button Style */
 .google-login-wrapper > div {
+  width: 100% !important;
+  display: flex;
+  justify-content: center;
+}
+
+.google-login-wrapper > div > div {
   width: 100% !important;
 }
 
+/* Override Google's default styles */
 .google-login-wrapper iframe {
   width: 100% !important;
   min-height: 48px !important;
 }
 
-/* Style cho Google button */
-.google-login-wrapper button {
+/* Style for the actual Google button */
+.google-login-wrapper button,
+.google-login-wrapper div[role="button"] {
   width: 100% !important;
-  border-radius: 8px !important;
+  min-width: 100% !important;
+  max-width: 100% !important;
   height: 48px !important;
+  border-radius: 8px !important;
   border: 2px solid #e8e8e8 !important;
   transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 16px !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  font-family: inherit !important;
 }
 
-.google-login-wrapper button:hover {
+.google-login-wrapper button:hover,
+.google-login-wrapper div[role="button"]:hover {
   border-color: #4285f4 !important;
   box-shadow: 0 4px 12px rgba(66, 133, 244, 0.2) !important;
   transform: translateY(-2px);
+}
+
+/* Fix for Google's One Tap shrinking issue */
+.google-login-wrapper > div[style*="width"] {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Ensure logo and text are properly aligned */
+.google-login-wrapper img {
+  margin-right: 12px !important;
+}
+
+.google-login-wrapper span {
+  flex: 1 !important;
+  text-align: center !important;
 }
 
 .login-footer {

@@ -319,12 +319,14 @@ const LoginPage = () => {
               onSuccess={handleGoogleLoginSuccess}
               onError={handleGoogleLoginError}
               useOneTap={false}
+              auto_select={false}
               theme="outline"
               size="large"
               text="continue_with"
               shape="rectangular"
               logo_alignment="left"
-              width="100%"
+              width="400"
+              locale="vi"
             />
           </div>
 

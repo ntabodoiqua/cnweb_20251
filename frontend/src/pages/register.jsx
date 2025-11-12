@@ -558,12 +558,14 @@ const RegisterPage = () => {
               onSuccess={handleGoogleSuccess}
               onError={handleGoogleError}
               useOneTap={false}
+              auto_select={false}
               theme="outline"
               size="large"
               text="signup_with"
               shape="rectangular"
               logo_alignment="left"
-              width="100%"
+              width="400"
+              locale="vi"
             />
           </div>
 
