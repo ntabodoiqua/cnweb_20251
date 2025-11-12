@@ -14,7 +14,9 @@ public interface SellerProfileService {
 
     SellerProfileResponse createSellerProfile(SellerProfileCreationRequest request);
 
-    SellerProfileResponse getSellerProfileOfCurrentUser();
+    Page<SellerProfileResponse> getSellerProfileOfCurrentUser(Pageable pageable);
+
+    SellerProfileResponse getSpecificSellerProfileOfCurrentUser(String sellerProfileId);
 
     Page<SellerProfileResponse> getAllSellerProfiles(Pageable pageable);
 

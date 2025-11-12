@@ -3,10 +3,7 @@ package com.cnweb2025.user_service.service;
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileCreationRequest;
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileUpdateRequest;
 import com.cnweb2025.user_service.dto.response.SellerProfileResponse;
-import com.cnweb2025.user_service.entity.Province;
-import com.cnweb2025.user_service.entity.Role;
-import com.cnweb2025.user_service.entity.User;
-import com.cnweb2025.user_service.entity.Ward;
+import com.cnweb2025.user_service.entity.*;
 import com.cnweb2025.user_service.enums.VerificationStatus;
 import com.cnweb2025.user_service.exception.AppException;
 import com.cnweb2025.user_service.exception.ErrorCode;
@@ -92,17 +89,34 @@ public class SellerProfileServiceImp implements SellerProfileService{
     }
 
     @Override
-    public SellerProfileResponse getSellerProfileOfCurrentUser() {
+    public Page<SellerProfileResponse> getSellerProfileOfCurrentUser(Pageable pageable) {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
         User user = userRepository.findByUsernameAndEnabledTrueAndIsVerifiedTrue(username)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
-        var sellerProfile = sellerProfileRepository.findByUserId(user.getId())
+        Page<SellerProfile> sellerProfiles = sellerProfileRepository.findAllByUserId(user.getId(), pageable);
+        if (sellerProfiles.isEmpty()) {
+            log.error("No seller profiles found for user: {}", username);
+            throw new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+        }
+
+        log.info("Retrieved {} seller profiles for user: {}", sellerProfiles.getTotalElements(), username);
+
+        return sellerProfiles.map(sellerProfileMapper::toSellerResponse);
+    }
+
+    @Override
+    public SellerProfileResponse getSpecificSellerProfileOfCurrentUser(String sellerProfileId) {
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        User user = userRepository.findByUsernameAndEnabledTrueAndIsVerifiedTrue(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+        var sellerProfile = sellerProfileRepository.findByIdAndUserId(sellerProfileId, user.getId())
                 .orElseThrow(() -> {
-                    log.error("Seller profile not found for user: {}", username);
+                    log.error("Seller profile not found with ID: {} for user: {}", sellerProfileId, username);
                     return new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
                 });
-        log.info("Retrieved seller profile for user: {}", username);
+        log.info("Retrieved seller profile with ID: {} for user: {}", sellerProfileId, username);
         return sellerProfileMapper.toSellerResponse(sellerProfile);
     }
 
