@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import "./contact.css";
-import useScrollToTop from "../hooks/useScrollToTop";
+import "../../../styles/contact.css";
+import useScrollToTop from "../../../hooks/useScrollToTop";
 import {
   MailOutlined,
   PhoneOutlined,
@@ -15,7 +15,7 @@ import {
   CustomerServiceOutlined,
 } from "@ant-design/icons";
 import { Button, Form, Input, notification, Select } from "antd";
-import logo from "../assets/logo.png";
+import logo from "../../../assets/logo.png";
 
 const { Option } = Select;
 

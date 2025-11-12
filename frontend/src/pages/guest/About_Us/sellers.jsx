@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import "./sellers.css";
-import useScrollToTop from "../hooks/useScrollToTop";
+import "../../../styles/sellers.css";
+import useScrollToTop from "../../../hooks/useScrollToTop";
 import {
   ShopOutlined,
   RocketOutlined,
@@ -16,7 +16,7 @@ import {
   ThunderboltOutlined,
 } from "@ant-design/icons";
 import { Button, Form, Input, notification } from "antd";
-import logo from "../assets/logo.png";
+import logo from "../../../assets/logo.png";
 
 const Sellers = () => {
   useScrollToTop();

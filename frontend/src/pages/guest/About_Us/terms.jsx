@@ -1,6 +1,6 @@
 import React from "react";
-import "./terms.css";
-import useScrollToTop from "../hooks/useScrollToTop";
+import "../../../styles/terms.css";
+import useScrollToTop from "../../../hooks/useScrollToTop";
 import {
   SafetyOutlined,
   FileTextOutlined,
@@ -10,7 +10,7 @@ import {
   WarningOutlined,
   CheckCircleOutlined,
 } from "@ant-design/icons";
-import logo from "../assets/logo.png";
+import logo from "../../../assets/logo.png";
 
 const Terms = () => {
   useScrollToTop();

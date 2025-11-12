@@ -1,6 +1,6 @@
 import React from "react";
-import "./privacy.css";
-import useScrollToTop from "../hooks/useScrollToTop";
+import "../../../styles/privacy.css";
+import useScrollToTop from "../../../hooks/useScrollToTop";
 import {
   LockOutlined,
   SafetyOutlined,
@@ -10,7 +10,7 @@ import {
   GlobalOutlined,
   WarningOutlined,
 } from "@ant-design/icons";
-import logo from "../assets/logo.png";
+import logo from "../../../assets/logo.png";
 
 const Privacy = () => {
   useScrollToTop();
