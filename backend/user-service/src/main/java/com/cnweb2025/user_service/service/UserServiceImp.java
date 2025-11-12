@@ -361,6 +361,14 @@ public class UserServiceImp implements UserService{
 
         try {
             User savedUser = userRepository.save(newUser);
+            // gửi email chào mừng
+            com.vdt2025.common_dto.dto.UserCreatedEvent event = UserCreatedEvent.builder()
+                    .id(savedUser.getId())
+                    .username(savedUser.getUsername())
+                    .email(savedUser.getEmail())
+                    .otpCode(null)
+                    .build();
+            messagePublisher.publish(MessageType.USER_CREATED, event);
             log.info("Created new user {} from Google login", email);
             return savedUser;
         } catch (DataIntegrityViolationException e) {
