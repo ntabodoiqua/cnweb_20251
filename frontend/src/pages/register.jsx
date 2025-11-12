@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Button, Form, Input, notification, DatePicker, Checkbox } from "antd";
-import { createUserApi } from "../util/api";
+import { createUserApi, loginWithGoogleApi } from "../util/api";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../components/context/auth.context";
 import {
   UserOutlined,
   LockOutlined,
@@ -10,11 +11,15 @@ import {
   CalendarOutlined,
   GoogleOutlined,
 } from "@ant-design/icons";
+import { getTokenInfo } from "../util/jwt";
+import { GoogleLogin } from "@react-oauth/google";
+import useScrollToTop from "../hooks/useScrollToTop";
 import "./register.css";
 import logo from "../assets/logo.png";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const { setAuth } = useContext(AuthContext);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState({
@@ -22,6 +27,9 @@ const RegisterPage = () => {
     score: 0,
     color: "",
   });
+
+  // Sử dụng hook để tự động scroll lên đầu trang
+  useScrollToTop();
 
   // Hàm tính độ mạnh mật khẩu
   const calculatePasswordStrength = (password) => {
@@ -187,6 +195,79 @@ const RegisterPage = () => {
       message: "Tính năng đang phát triển",
       description:
         "Đăng ký bằng Google sẽ được triển khai trong phiên bản tiếp theo.",
+      placement: "topRight",
+      duration: 3,
+    });
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setLoading(true);
+      const { credential } = credentialResponse;
+
+      // Gửi token lên backend để xác thực (sử dụng cùng API với login)
+      const res = await loginWithGoogleApi(credential);
+
+      if (res && res.code === 1000) {
+        const { token, authenticated } = res.result;
+
+        if (authenticated && token) {
+          // Lưu token vào localStorage
+          localStorage.setItem("access_token", token);
+
+          // Decode token để lấy thông tin user
+          const tokenInfo = getTokenInfo(token);
+
+          notification.success({
+            message: "Đăng ký thành công!",
+            description: `Chào mừng ${
+              tokenInfo?.username || "bạn"
+            } đã tham gia HUSTBuy!`,
+            placement: "topRight",
+            duration: 3,
+          });
+
+          // Cập nhật auth context
+          setAuth({
+            isAuthenticated: true,
+            user: {
+              username: tokenInfo?.username || "",
+              role: tokenInfo?.role || "",
+            },
+          });
+
+          // Chuyển hướng về trang chủ
+          navigate("/");
+        }
+      } else {
+        notification.error({
+          message: "Đăng ký thất bại",
+          description:
+            res?.message || "Không thể đăng ký bằng Google, vui lòng thử lại.",
+          placement: "topRight",
+          duration: 3,
+        });
+      }
+    } catch (error) {
+      console.error("Google register error:", error);
+      notification.error({
+        message: "Đăng ký thất bại",
+        description:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Không thể đăng ký bằng Google, vui lòng thử lại.",
+        placement: "topRight",
+        duration: 3,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    notification.error({
+      message: "Đăng ký thất bại",
+      description: "Đăng ký bằng Google thất bại, vui lòng thử lại.",
       placement: "topRight",
       duration: 3,
     });
@@ -472,15 +553,19 @@ const RegisterPage = () => {
             <span>hoặc</span>
           </div>
 
-          <Button
-            size="large"
-            block
-            icon={<GoogleOutlined />}
-            onClick={handleGoogleRegister}
-            className="google-register-button"
-          >
-            Đăng ký với Google
-          </Button>
+          <div className="google-register-wrapper">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap={false}
+              theme="outline"
+              size="large"
+              text="signup_with"
+              shape="rectangular"
+              logo_alignment="left"
+              width="100%"
+            />
+          </div>
 
           <div className="register-footer">
             <span>Đã có tài khoản? </span>
