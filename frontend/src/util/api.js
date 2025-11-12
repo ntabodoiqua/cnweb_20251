@@ -161,6 +161,15 @@ const loginWithGoogleApi = (googleToken) => {
   );
 };
 
+const getMyInfoApi = () => {
+  const URL_API = "/api/user/users/myInfo";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -170,4 +179,5 @@ export {
   forgotPasswordApi,
   resetPasswordApi,
   loginWithGoogleApi,
+  getMyInfoApi,
 };

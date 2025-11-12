@@ -32,6 +32,7 @@
   position: sticky;
   top: 130px;
   transition: all 0.3s ease;
+  animation: slideInFromLeft 0.5s ease-out;
 }
 
 .profile-sidebar-header {
@@ -75,30 +76,43 @@
   text-decoration: none;
   font-size: 15px;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   border-left: 3px solid transparent;
 }
 
-.profile-menu-link:hover {
-  background: linear-gradient(
-    90deg,
-    rgba(238, 77, 45, 0.08) 0%,
-    transparent 100%
-  );
-  color: #ee4d2d;
-  border-left-color: #ee4d2d;
-}
-
-.profile-menu-link.active {
+.profile-menu-link::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
   background: linear-gradient(
     90deg,
     rgba(238, 77, 45, 0.12) 0%,
     rgba(255, 107, 53, 0.08) 100%
   );
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: -1;
+}
+
+.profile-menu-link:hover::before,
+.profile-menu-link.active::before {
+  width: 100%;
+}
+
+.profile-menu-link:hover {
+  color: #ee4d2d;
+  border-left-color: #ee4d2d;
+  padding-left: 28px;
+}
+
+.profile-menu-link.active {
   color: #ee4d2d;
   font-weight: 600;
   border-left-color: #ee4d2d;
+  padding-left: 28px;
 }
 
 .profile-menu-link .anticon {
@@ -119,13 +133,18 @@
   box-shadow: 0 4px 20px rgba(238, 77, 45, 0.08);
   padding: 32px;
   min-height: 600px;
-  animation: fadeInUp 0.5s ease;
+}
+
+/* Animation for content transitions */
+.profile-main > * {
+  animation: fadeInUp 0.4s ease-out;
 }
 
 .profile-main-header {
   margin-bottom: 32px;
   padding-bottom: 20px;
   border-bottom: 2px solid rgba(238, 77, 45, 0.1);
+  animation: slideInFromTop 0.5s ease-out;
 }
 
 .profile-main-title {
@@ -152,6 +171,7 @@
 
 .profile-general-info {
   max-width: 900px;
+  animation: fadeIn 0.6s ease-out;
 }
 
 .profile-avatar-section {
@@ -167,11 +187,13 @@
   border-radius: 12px;
   margin-bottom: 32px;
   border: 1px solid rgba(238, 77, 45, 0.1);
+  animation: scaleIn 0.5s ease-out;
 }
 
 .profile-avatar-wrapper {
   position: relative;
   flex-shrink: 0;
+  animation: scaleIn 0.6s ease-out;
 }
 
 .profile-avatar {
@@ -181,6 +203,12 @@
   object-fit: cover;
   border: 4px solid white;
   box-shadow: 0 4px 16px rgba(238, 77, 45, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-avatar:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
 }
 
 .profile-avatar-placeholder {
@@ -196,6 +224,12 @@
   font-weight: 700;
   border: 4px solid white;
   box-shadow: 0 4px 16px rgba(238, 77, 45, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.profile-avatar-placeholder:hover {
+  transform: scale(1.05) rotate(5deg);
+  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
 }
 
 .profile-avatar-upload {
@@ -212,13 +246,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
 }
 
 .profile-avatar-upload:hover {
   background: #d73211;
-  transform: scale(1.1);
+  transform: scale(1.15) rotate(15deg);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.4);
+}
+
+.profile-avatar-upload:active {
+  transform: scale(1.05) rotate(10deg);
 }
 
 .profile-avatar-upload .anticon {
@@ -290,6 +329,7 @@
 
 .profile-info-form {
   margin-top: 24px;
+  animation: fadeInUp 0.6s ease-out 0.2s both;
 }
 
 .profile-form-row {
@@ -297,6 +337,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 24px;
   margin-bottom: 24px;
+  animation: slideInFromRight 0.5s ease-out;
 }
 
 .profile-form-group {
@@ -334,13 +375,14 @@
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
 }
 
 .profile-form-input:focus {
   border-color: #ee4d2d;
   box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+  transform: translateY(-1px);
 }
 
 .profile-form-input:disabled {
@@ -355,7 +397,7 @@
   border-radius: 8px;
   font-size: 14px;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   outline: none;
   background: white;
   cursor: pointer;
@@ -364,6 +406,7 @@
 .profile-form-select:focus {
   border-color: #ee4d2d;
   box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+  transform: translateY(-1px);
 }
 
 .profile-form-textarea {
@@ -399,13 +442,33 @@
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: none;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   min-width: 120px;
   justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.profile-btn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.profile-btn:hover::before {
+  width: 300px;
+  height: 300px;
 }
 
 .profile-btn-primary {
@@ -422,6 +485,7 @@
 
 .profile-btn-primary:active {
   transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
 }
 
 .profile-btn-secondary {
@@ -435,6 +499,11 @@
   color: #ee4d2d;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(238, 77, 45, 0.15);
+}
+
+.profile-btn-secondary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(238, 77, 45, 0.1);
 }
 
 /* ==================== Status Cards (for other sections) ==================== */
@@ -455,12 +524,27 @@
   border: 1px solid rgba(238, 77, 45, 0.1);
   border-radius: 12px;
   padding: 20px;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInUp 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+.profile-stat-card:nth-child(1) {
+  animation-delay: 0.1s;
+}
+.profile-stat-card:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.profile-stat-card:nth-child(3) {
+  animation-delay: 0.3s;
+}
+.profile-stat-card:nth-child(4) {
+  animation-delay: 0.4s;
 }
 
 .profile-stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15);
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 12px 28px rgba(238, 77, 45, 0.2);
   border-color: rgba(238, 77, 45, 0.3);
 }
 
@@ -525,6 +609,30 @@
 .profile-empty-state p {
   font-size: 14px;
   color: #999;
+}
+
+/* ==================== Error State ==================== */
+
+.profile-error {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(238, 77, 45, 0.08);
+  margin: 40px auto;
+  max-width: 600px;
+}
+
+.profile-error h2 {
+  font-size: 24px;
+  color: #ff4d4f;
+  margin-bottom: 16px;
+}
+
+.profile-error p {
+  font-size: 16px;
+  color: #666;
+  margin: 0;
 }
 
 /* ==================== Mobile Responsive ==================== */
@@ -651,6 +759,97 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromTop {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Smooth transition for menu items */
+.profile-menu-item {
+  animation: fadeInUp 0.3s ease-out;
+  animation-fill-mode: both;
+}
+
+.profile-menu-item:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.profile-menu-item:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.profile-menu-item:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.profile-menu-item:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.profile-menu-item:nth-child(5) {
+  animation-delay: 0.25s;
+}
+
+/* Smooth transition for form groups */
+.profile-form-group {
+  animation: fadeInUp 0.4s ease-out;
+  animation-fill-mode: both;
+}
+
+.profile-form-row:nth-child(1) .profile-form-group {
+  animation-delay: 0.1s;
+}
+.profile-form-row:nth-child(2) .profile-form-group {
+  animation-delay: 0.2s;
+}
+.profile-form-row:nth-child(3) .profile-form-group {
+  animation-delay: 0.3s;
 }
 
 /* ==================== Print Styles ==================== */

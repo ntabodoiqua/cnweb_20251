@@ -36,7 +36,6 @@ const ProfileGeneralInfo = ({ userData }) => {
 
   const handleSave = () => {
     // TODO: Call API to save profile
-    console.log("Saving profile data:", formData);
     setIsEditing(false);
     // Show success notification
   };
@@ -61,17 +60,26 @@ const ProfileGeneralInfo = ({ userData }) => {
     return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
   };
 
+  // Get avatar URL with priority: avatarUrl > avatarName > placeholder
+  const getAvatarUrl = () => {
+    if (userData.avatarUrl) {
+      return userData.avatarUrl;
+    }
+    if (userData.avatarName) {
+      return userData.avatarName;
+    }
+    return null;
+  };
+
+  const avatarUrl = getAvatarUrl();
+
   return (
     <div className="profile-general-info">
       {/* Avatar and Basic Info */}
       <div className="profile-avatar-section">
         <div className="profile-avatar-wrapper">
-          {userData.avatarUrl ? (
-            <img
-              src={userData.avatarUrl}
-              alt="Avatar"
-              className="profile-avatar"
-            />
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Avatar" className="profile-avatar" />
           ) : (
             <div className="profile-avatar-placeholder">{getInitials()}</div>
           )}
