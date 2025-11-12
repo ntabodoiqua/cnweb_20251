@@ -26,12 +26,13 @@ public class UserCreatedMessageHandler implements MessageHandler<UserCreatedEven
         try {
             if (payload.getOtpCode() == null || payload.getOtpCode().isEmpty()) {
                 emailService.sendWelcomeEmailWithoutOtp(payload.getEmail());
+            } else {
+                emailService.sendWelcomeEmail(
+                        payload.getEmail(),
+                        payload.getUsername(),
+                        payload.getOtpCode()
+                );
             }
-            emailService.sendWelcomeEmail(
-                payload.getEmail(),
-                payload.getUsername(),
-                payload.getOtpCode()
-            );
             log.info("Successfully sent welcome email to: {}", payload.getEmail());
         } catch (Exception e) {
             log.error("Failed to send welcome email to: {}", payload.getEmail(), e);
