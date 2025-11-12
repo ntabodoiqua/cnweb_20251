@@ -161,6 +161,181 @@ const loginWithGoogleApi = (googleToken) => {
   );
 };
 
+const getMyInfoApi = () => {
+  const URL_API = "/api/user/users/myInfo";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const updateMyInfoApi = (userData) => {
+  const URL_API = "/api/user/users/myInfo";
+  return axios.put(URL_API, userData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const updateAvatarApi = (file) => {
+  const URL_API = "/api/user/users/avatar";
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+const changePasswordApi = (oldPassword, newPassword) => {
+  const URL_API = "/api/user/users/changePassword";
+  return axios.put(
+    URL_API,
+    {
+      oldPassword,
+      newPassword,
+    },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const getLoginHistoryApi = () => {
+  const URL_API = "/api/user/login-history/my";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const createSellerProfileApi = (profileData) => {
+  const URL_API = "/api/user/seller-profiles";
+  return axios.post(URL_API, profileData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const getMySellerProfileApi = (page = 0, size = 20) => {
+  const URL_API = "/api/user/seller-profiles/me";
+  return axios.get(URL_API, {
+    params: {
+      page,
+      size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const updateSellerProfileApi = (profileId, profileData) => {
+  const URL_API = `/api/user/seller-profiles/${profileId}`;
+  return axios.put(URL_API, profileData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const getProvincesApi = () => {
+  const URL_API = "/api/user/provinces";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+    // Không gửi Authorization header
+    transformRequest: [
+      (data, headers) => {
+        delete headers.Authorization;
+        return data;
+      },
+    ],
+  });
+};
+
+const getWardsByProvinceApi = (provinceId) => {
+  const URL_API = `/api/user/wards/province/${provinceId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+    // Không gửi Authorization header
+    transformRequest: [
+      (data, headers) => {
+        delete headers.Authorization;
+        return data;
+      },
+    ],
+  });
+};
+
+const sendSellerProfileToReviewApi = (profileId) => {
+  const URL_API = `/api/user/seller-profiles/${profileId}/sendToReview`;
+  return axios.patch(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Address APIs
+const getAddressesApi = (page = 0, size = 20) => {
+  const URL_API = "/api/user/address";
+  return axios.get(URL_API, {
+    params: {
+      page,
+      size,
+      sort: "isDefault,desc", // Sắp xếp địa chỉ mặc định lên đầu
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const createAddressApi = (addressData) => {
+  const URL_API = "/api/user/address";
+  return axios.post(URL_API, addressData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const updateAddressApi = (addressId, addressData) => {
+  const URL_API = `/api/user/address/${addressId}`;
+  return axios.put(URL_API, addressData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const deleteAddressApi = (addressId) => {
+  const URL_API = `/api/user/address/${addressId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -170,4 +345,19 @@ export {
   forgotPasswordApi,
   resetPasswordApi,
   loginWithGoogleApi,
+  getMyInfoApi,
+  updateMyInfoApi,
+  updateAvatarApi,
+  changePasswordApi,
+  getLoginHistoryApi,
+  createSellerProfileApi,
+  getMySellerProfileApi,
+  updateSellerProfileApi,
+  getProvincesApi,
+  getWardsByProvinceApi,
+  sendSellerProfileToReviewApi,
+  getAddressesApi,
+  createAddressApi,
+  updateAddressApi,
+  deleteAddressApi,
 };

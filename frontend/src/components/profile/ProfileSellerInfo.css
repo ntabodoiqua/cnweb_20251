@@ -1,0 +1,784 @@
+/* ========================================
+   Profile Seller Info Component Styles
+   Giao diện trang hồ sơ người bán
+   ======================================== */
+
+.seller-profile-container {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* ==================== Compact View ==================== */
+
+.seller-profile-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: white;
+  border: 2px solid rgba(238, 77, 45, 0.15);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.seller-profile-compact:hover {
+  border-color: #ee4d2d;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.15);
+  transform: translateY(-2px);
+}
+
+.compact-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.compact-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 28px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+  overflow: hidden;
+}
+
+.compact-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.compact-info {
+  flex: 1;
+}
+
+.compact-store-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px;
+}
+
+.seller-status-badge.compact {
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.compact-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.compact-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.compact-date {
+  font-size: 13px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.compact-date .anticon {
+  color: #ee4d2d;
+}
+
+.expand-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+}
+
+.expand-button:hover {
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.4);
+}
+
+.expand-button:active {
+  transform: translateY(0);
+}
+
+/* ==================== Expanded View ==================== */
+
+.seller-profile-expanded {
+  margin-top: 16px;
+  padding: 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.02) 0%,
+    rgba(255, 107, 53, 0.02) 100%
+  );
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  border-radius: 12px;
+  animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== Status Badge ==================== */
+
+.seller-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: scaleIn 0.4s ease-out;
+}
+
+.seller-status-badge.created {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  color: white;
+}
+
+.seller-status-badge.pending {
+  background: linear-gradient(135deg, #faad14 0%, #ffc53d 100%);
+  color: white;
+}
+
+.seller-status-badge.verified {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+}
+
+.seller-status-badge.rejected {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  color: white;
+}
+
+.seller-status-badge .anticon {
+  font-size: 16px;
+}
+
+/* ==================== Shop Info Section ==================== */
+
+.shop-info-section {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.03) 0%,
+    rgba(255, 107, 53, 0.03) 100%
+  );
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
+  animation: slideInFromLeft 0.5s ease-out;
+}
+
+.shop-info-section:hover {
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.12);
+  border-color: rgba(238, 77, 45, 0.2);
+  transform: translateY(-2px);
+}
+
+.shop-info-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.1);
+}
+
+.shop-logo-wrapper {
+  position: relative;
+  flex-shrink: 0;
+  animation: scaleIn 0.6s ease-out;
+}
+
+.shop-logo {
+  width: 100px;
+  height: 100px;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 3px solid white;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shop-logo:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
+}
+
+.shop-logo-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 40px;
+  border: 3px solid white;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shop-logo-placeholder:hover {
+  transform: scale(1.05) rotate(5deg);
+  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
+}
+
+.shop-basic-info {
+  flex: 1;
+}
+
+.shop-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 12px;
+}
+
+.shop-description {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  margin: 12px 0;
+  padding: 12px;
+  background: rgba(238, 77, 45, 0.05);
+  border-radius: 8px;
+  border-left: 3px solid #ee4d2d;
+}
+
+.shop-contact-info {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.shop-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+  padding: 6px 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid rgba(238, 77, 45, 0.15);
+  transition: all 0.3s ease;
+}
+
+.shop-contact-item:hover {
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.15);
+}
+
+.shop-contact-item .anticon {
+  color: #ee4d2d;
+  font-size: 16px;
+}
+
+/* ==================== Address Info ==================== */
+
+.shop-address-section {
+  margin-top: 16px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid rgba(238, 77, 45, 0.1);
+}
+
+.shop-address-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shop-address-title .anticon {
+  color: #ee4d2d;
+}
+
+.shop-address-text {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* ==================== Registration Form ==================== */
+
+.seller-registration-form {
+  max-width: 900px;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.form-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 32px 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-section-title:first-child {
+  margin-top: 0;
+}
+
+.form-section-title .anticon {
+  color: #ee4d2d;
+  font-size: 20px;
+}
+
+.location-selects {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.location-select-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.location-select-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.location-select-label .anticon {
+  color: #ee4d2d;
+  font-size: 16px;
+}
+
+.location-select-label .required {
+  color: #ff4d4f;
+  margin-left: 2px;
+}
+
+/* ==================== Empty State ==================== */
+
+.seller-empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.seller-empty-state .anticon {
+  font-size: 100px;
+  color: #ee4d2d;
+  margin-bottom: 24px;
+  opacity: 0.8;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.seller-empty-state h3 {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.seller-empty-state p {
+  font-size: 16px;
+  color: #666;
+  line-height: 1.6;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.seller-empty-state .profile-btn {
+  margin-top: 24px;
+  min-width: 200px;
+  height: 48px;
+  font-size: 16px;
+}
+
+/* ==================== Loading State ==================== */
+
+.seller-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  gap: 20px;
+}
+
+.seller-loading .anticon {
+  font-size: 48px;
+  color: #ee4d2d;
+  animation: spin 1s linear infinite;
+}
+
+.seller-loading p {
+  font-size: 16px;
+  color: #666;
+}
+
+/* ==================== Rejection Reason ==================== */
+
+.rejection-reason-section {
+  margin-top: 24px;
+  padding: 16px;
+  background: rgba(255, 77, 79, 0.05);
+  border: 1px solid rgba(255, 77, 79, 0.2);
+  border-radius: 12px;
+  animation: shake 0.5s ease-out;
+}
+
+.rejection-reason-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ff4d4f;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rejection-reason-text {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+}
+
+/* ==================== Timestamps ==================== */
+
+.timestamps-section {
+  margin-top: 24px;
+  padding: 16px;
+  background: rgba(238, 77, 45, 0.03);
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.timestamp-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timestamp-label {
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.timestamp-value {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timestamp-value .anticon {
+  color: #ee4d2d;
+  font-size: 14px;
+}
+
+/* ==================== Action Buttons ==================== */
+
+.seller-profile-container .profile-form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 2px solid rgba(238, 77, 45, 0.1);
+}
+
+.seller-profile-container .profile-btn {
+  min-width: 180px;
+}
+
+/* ==================== Animations ==================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* ==================== Responsive Design ==================== */
+
+@media (max-width: 768px) {
+  .seller-profile-compact {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .compact-left {
+    width: 100%;
+  }
+
+  .compact-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .compact-meta {
+    align-items: flex-start;
+  }
+
+  .expand-button {
+    width: auto;
+  }
+
+  .shop-info-header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .shop-logo,
+  .shop-logo-placeholder {
+    width: 80px;
+    height: 80px;
+  }
+
+  .shop-contact-info {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .shop-contact-item {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .location-selects {
+    grid-template-columns: 1fr;
+  }
+
+  .timestamps-section {
+    grid-template-columns: 1fr;
+  }
+
+  .form-section-title {
+    font-size: 16px;
+  }
+
+  .shop-name {
+    font-size: 18px;
+  }
+}
+
+/* ==================== Form Validation Styles ==================== */
+
+.input-error {
+  border-color: #ff4d4f !important;
+  background-color: #fff2f0 !important;
+}
+
+.input-error:focus {
+  border-color: #ff4d4f !important;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1) !important;
+}
+
+.error-message {
+  display: block;
+  color: #ff4d4f;
+  font-size: 13px;
+  margin-top: 6px;
+  font-weight: 400;
+  line-height: 1.4;
+  animation: fadeInDown 0.3s ease-out;
+}
+
+.error-message::before {
+  content: "⚠ ";
+  margin-right: 4px;
+}
+
+.profile-form-group {
+  position: relative;
+}
+
+.profile-form-input.input-error,
+.profile-form-textarea.input-error {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@media (max-width: 480px) {
+  .shop-info-section {
+    padding: 20px 16px;
+  }
+
+  .seller-empty-state {
+    padding: 60px 16px;
+  }
+
+  .seller-empty-state .anticon {
+    font-size: 80px;
+  }
+
+  .seller-empty-state h3 {
+    font-size: 20px;
+  }
+
+  .seller-empty-state p {
+    font-size: 14px;
+  }
+
+  .shop-logo,
+  .shop-logo-placeholder {
+    width: 70px;
+    height: 70px;
+    font-size: 32px;
+  }
+
+  .shop-name {
+    font-size: 18px;
+  }
+
+  .seller-status-badge {
+    font-size: 13px;
+    padding: 6px 12px;
+  }
+}
