@@ -685,7 +685,63 @@
   }
 
   .shop-name {
-    font-size: 20px;
+    font-size: 18px;
+  }
+}
+
+/* ==================== Form Validation Styles ==================== */
+
+.input-error {
+  border-color: #ff4d4f !important;
+  background-color: #fff2f0 !important;
+}
+
+.input-error:focus {
+  border-color: #ff4d4f !important;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1) !important;
+}
+
+.error-message {
+  display: block;
+  color: #ff4d4f;
+  font-size: 13px;
+  margin-top: 6px;
+  font-weight: 400;
+  line-height: 1.4;
+  animation: fadeInDown 0.3s ease-out;
+}
+
+.error-message::before {
+  content: "⚠ ";
+  margin-right: 4px;
+}
+
+.profile-form-group {
+  position: relative;
+}
+
+.profile-form-input.input-error,
+.profile-form-textarea.input-error {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
   }
 }
 

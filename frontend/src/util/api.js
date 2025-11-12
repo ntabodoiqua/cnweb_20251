@@ -228,9 +228,13 @@ const createSellerProfileApi = (profileData) => {
   });
 };
 
-const getMySellerProfileApi = () => {
+const getMySellerProfileApi = (page = 0, size = 20) => {
   const URL_API = "/api/user/seller-profiles/me";
   return axios.get(URL_API, {
+    params: {
+      page,
+      size,
+    },
     headers: {
       "Accept-Language": "vi",
     },
@@ -243,6 +247,47 @@ const updateSellerProfileApi = (profileId, profileData) => {
     headers: {
       "Accept-Language": "vi",
       "Content-Type": "application/json",
+    },
+  });
+};
+
+const getProvincesApi = () => {
+  const URL_API = "/api/user/provinces";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+    // Không gửi Authorization header
+    transformRequest: [
+      (data, headers) => {
+        delete headers.Authorization;
+        return data;
+      },
+    ],
+  });
+};
+
+const getWardsByProvinceApi = (provinceId) => {
+  const URL_API = `/api/user/wards/province/${provinceId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+    // Không gửi Authorization header
+    transformRequest: [
+      (data, headers) => {
+        delete headers.Authorization;
+        return data;
+      },
+    ],
+  });
+};
+
+const sendSellerProfileToReviewApi = (profileId) => {
+  const URL_API = `/api/user/seller-profiles/${profileId}/sendToReview`;
+  return axios.patch(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
     },
   });
 };
@@ -264,4 +309,7 @@ export {
   createSellerProfileApi,
   getMySellerProfileApi,
   updateSellerProfileApi,
+  getProvincesApi,
+  getWardsByProvinceApi,
+  sendSellerProfileToReviewApi,
 };
