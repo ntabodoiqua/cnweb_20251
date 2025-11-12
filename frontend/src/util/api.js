@@ -170,6 +170,54 @@ const getMyInfoApi = () => {
   });
 };
 
+const updateMyInfoApi = (userData) => {
+  const URL_API = "/api/user/users/myInfo";
+  return axios.put(URL_API, userData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const updateAvatarApi = (file) => {
+  const URL_API = "/api/user/users/avatar";
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+const changePasswordApi = (oldPassword, newPassword) => {
+  const URL_API = "/api/user/users/changePassword";
+  return axios.put(
+    URL_API,
+    {
+      oldPassword,
+      newPassword,
+    },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const getLoginHistoryApi = () => {
+  const URL_API = "/api/user/login-history/my";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -180,4 +228,8 @@ export {
   resetPasswordApi,
   loginWithGoogleApi,
   getMyInfoApi,
+  updateMyInfoApi,
+  updateAvatarApi,
+  changePasswordApi,
+  getLoginHistoryApi,
 };

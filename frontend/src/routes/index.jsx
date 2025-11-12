@@ -56,6 +56,9 @@ const ProfileAddressesPage = lazy(() =>
 const ProfileHistoryPage = lazy(() =>
   import("../pages/profile/ProfileHistoryPage")
 );
+const ProfileSecurityPage = lazy(() =>
+  import("../pages/profile/ProfileSecurityPage")
+);
 
 // Admin Pages
 const AdminDashboardPage = lazy(() => import("../pages/admin-dashboard"));
@@ -313,6 +316,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <ProfileHistoryPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.PROFILE_SECURITY,
+            element: (
+              <SuspenseWrapper>
+                <ProfileSecurityPage />
               </SuspenseWrapper>
             ),
           },

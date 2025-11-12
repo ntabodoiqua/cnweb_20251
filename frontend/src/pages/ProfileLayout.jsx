@@ -5,6 +5,7 @@ import {
   ShoppingOutlined,
   HomeOutlined,
   HistoryOutlined,
+  LockOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../constants/routes";
 import "./profile.css";
@@ -47,6 +48,12 @@ const ProfileLayout = () => {
       icon: <HistoryOutlined />,
       label: "Lịch sử giao dịch",
       path: PROTECTED_ROUTES.PROFILE_HISTORY,
+    },
+    {
+      key: "security",
+      icon: <LockOutlined />,
+      label: "Bảo mật tài khoản",
+      path: PROTECTED_ROUTES.PROFILE_SECURITY,
     },
   ];
 

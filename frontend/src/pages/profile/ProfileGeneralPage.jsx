@@ -52,7 +52,21 @@ const ProfileGeneralPage = () => {
     return null;
   }
 
-  return <ProfileGeneralInfo userData={userData} />;
+  // Callback to refresh user data after update
+  const handleDataUpdated = async () => {
+    try {
+      const response = await getMyInfoApi();
+      if (response && response.code === 1000) {
+        setUserData(response.result);
+      }
+    } catch (err) {
+      console.error("Error refreshing user data:", err);
+    }
+  };
+
+  return (
+    <ProfileGeneralInfo userData={userData} onDataUpdated={handleDataUpdated} />
+  );
 };
 
 export default ProfileGeneralPage;

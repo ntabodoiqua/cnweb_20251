@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   UserOutlined,
   MailOutlined,
@@ -11,10 +11,14 @@ import {
   ManOutlined,
   WomanOutlined,
   CrownOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons";
+import { notification } from "antd";
 import PropTypes from "prop-types";
+import { updateMyInfoApi, updateAvatarApi } from "../../util/api";
 
-const ProfileGeneralInfo = ({ userData }) => {
+const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     firstName: userData.firstName || "",
     lastName: userData.lastName || "",
@@ -25,6 +29,11 @@ const ProfileGeneralInfo = ({ userData }) => {
   });
 
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [currentAvatar, setCurrentAvatar] = useState(
+    userData.avatarUrl || userData.avatarName
+  );
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -34,10 +43,125 @@ const ProfileGeneralInfo = ({ userData }) => {
     }));
   };
 
-  const handleSave = () => {
-    // TODO: Call API to save profile
-    setIsEditing(false);
-    // Show success notification
+  const handleSave = async () => {
+    try {
+      setIsSaving(true);
+
+      // Prepare data for API (only send fields that API expects)
+      const updateData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        dob: formData.dob || null,
+        phone: formData.phone || null,
+        gender: formData.gender || null,
+      };
+
+      const response = await updateMyInfoApi(updateData);
+
+      if (response && response.code === 1000) {
+        notification.success({
+          message: "Cập nhật thành công!",
+          description: "Thông tin cá nhân của bạn đã được cập nhật.",
+          placement: "topRight",
+          duration: 3,
+        });
+        setIsEditing(false);
+        // Refresh user data
+        if (onDataUpdated) {
+          await onDataUpdated();
+        }
+      } else {
+        notification.error({
+          message: "Cập nhật thất bại!",
+          description:
+            response.message || "Đã xảy ra lỗi khi cập nhật thông tin.",
+          placement: "topRight",
+          duration: 4,
+        });
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      notification.error({
+        message: "Lỗi hệ thống!",
+        description:
+          "Đã xảy ra lỗi khi cập nhật thông tin. Vui lòng thử lại sau.",
+        placement: "topRight",
+        duration: 4,
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB in bytes
+    if (file.size > maxSize) {
+      notification.warning({
+        message: "File quá lớn!",
+        description: "Kích thước file không được vượt quá 10MB.",
+        placement: "topRight",
+        duration: 4,
+      });
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif"];
+    if (!allowedTypes.includes(file.type)) {
+      notification.warning({
+        message: "Định dạng file không hợp lệ!",
+        description: "Chỉ chấp nhận file ảnh định dạng JPG, PNG hoặc GIF.",
+        placement: "topRight",
+        duration: 4,
+      });
+      return;
+    }
+
+    try {
+      setIsUploadingAvatar(true);
+      const response = await updateAvatarApi(file);
+
+      if (response && response.code === 1000) {
+        notification.success({
+          message: "Cập nhật ảnh đại diện thành công!",
+          description: "Ảnh đại diện của bạn đã được cập nhật.",
+          placement: "topRight",
+          duration: 3,
+        });
+        setCurrentAvatar(response.result);
+        // Refresh user data
+        if (onDataUpdated) {
+          await onDataUpdated();
+        }
+      } else {
+        notification.error({
+          message: "Cập nhật ảnh đại diện thất bại!",
+          description: response.message || "Đã xảy ra lỗi khi tải ảnh lên.",
+          placement: "topRight",
+          duration: 4,
+        });
+      }
+    } catch (error) {
+      console.error("Error uploading avatar:", error);
+      notification.error({
+        message: "Cập nhật ảnh đại diện thất bại!",
+        description: "Đã xảy ra lỗi không mong muốn. Vui lòng thử lại.",
+        placement: "topRight",
+        duration: 4,
+      });
+    } finally {
+      setIsUploadingAvatar(false);
+      // Reset input để có thể upload lại cùng file
+      event.target.value = "";
+    }
   };
 
   const handleCancel = () => {
@@ -60,8 +184,11 @@ const ProfileGeneralInfo = ({ userData }) => {
     return (firstName.charAt(0) + lastName.charAt(0)).toUpperCase();
   };
 
-  // Get avatar URL with priority: avatarUrl > avatarName > placeholder
+  // Get avatar URL with priority: currentAvatar > avatarUrl > avatarName > placeholder
   const getAvatarUrl = () => {
+    if (currentAvatar) {
+      return currentAvatar;
+    }
     if (userData.avatarUrl) {
       return userData.avatarUrl;
     }
@@ -83,9 +210,21 @@ const ProfileGeneralInfo = ({ userData }) => {
           ) : (
             <div className="profile-avatar-placeholder">{getInitials()}</div>
           )}
-          <button className="profile-avatar-upload">
-            <CameraOutlined />
+          <button
+            className="profile-avatar-upload"
+            onClick={handleAvatarClick}
+            disabled={isUploadingAvatar}
+            title="Cập nhật ảnh đại diện"
+          >
+            {isUploadingAvatar ? <LoadingOutlined /> : <CameraOutlined />}
           </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/gif"
+            onChange={handleAvatarChange}
+            style={{ display: "none" }}
+          />
         </div>
 
         <div className="profile-avatar-info">
@@ -241,6 +380,7 @@ const ProfileGeneralInfo = ({ userData }) => {
               <button
                 className="profile-btn profile-btn-secondary"
                 onClick={handleCancel}
+                disabled={isSaving}
               >
                 <CloseOutlined />
                 Hủy
@@ -248,9 +388,10 @@ const ProfileGeneralInfo = ({ userData }) => {
               <button
                 className="profile-btn profile-btn-primary"
                 onClick={handleSave}
+                disabled={isSaving}
               >
-                <SaveOutlined />
-                Lưu thay đổi
+                {isSaving ? <LoadingOutlined /> : <SaveOutlined />}
+                {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
               </button>
             </>
           ) : (
@@ -289,6 +430,7 @@ ProfileGeneralInfo.propTypes = {
       })
     ),
   }).isRequired,
+  onDataUpdated: PropTypes.func,
 };
 
 export default ProfileGeneralInfo;
