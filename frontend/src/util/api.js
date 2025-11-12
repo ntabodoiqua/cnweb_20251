@@ -218,6 +218,35 @@ const getLoginHistoryApi = () => {
   });
 };
 
+const createSellerProfileApi = (profileData) => {
+  const URL_API = "/api/user/seller-profiles";
+  return axios.post(URL_API, profileData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const getMySellerProfileApi = () => {
+  const URL_API = "/api/user/seller-profiles/me";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const updateSellerProfileApi = (profileId, profileData) => {
+  const URL_API = `/api/user/seller-profiles/${profileId}`;
+  return axios.put(URL_API, profileData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -232,4 +261,7 @@ export {
   updateAvatarApi,
   changePasswordApi,
   getLoginHistoryApi,
+  createSellerProfileApi,
+  getMySellerProfileApi,
+  updateSellerProfileApi,
 };
