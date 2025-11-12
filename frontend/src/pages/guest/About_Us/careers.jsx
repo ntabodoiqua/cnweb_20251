@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import "./careers.css";
-import useScrollToTop from "../hooks/useScrollToTop";
+import "../../../styles/careers.css";
+import useScrollToTop from "../../../hooks/useScrollToTop";
 import {
   RocketOutlined,
   TeamOutlined,
@@ -18,7 +18,7 @@ import {
   StarOutlined,
   FireOutlined,
 } from "@ant-design/icons";
-import logo from "../assets/logo.png";
+import logo from "../../../assets/logo.png";
 
 const Careers = () => {
   useScrollToTop();
