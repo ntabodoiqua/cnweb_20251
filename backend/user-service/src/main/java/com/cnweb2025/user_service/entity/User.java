@@ -1,5 +1,6 @@
 package com.cnweb2025.user_service.entity;
 
+import com.cnweb2025.user_service.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -37,6 +38,10 @@ public class User {
 
     @Column(name = "dob")
     LocalDate dob;
+
+    @Column(name = "gender")
+    @Enumerated(EnumType.STRING)
+    Gender gender;
 
     @Column(name = "email", unique = true, nullable = false)
     String email;

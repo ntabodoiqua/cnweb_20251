@@ -332,8 +332,10 @@ public class UserServiceImp implements UserService{
 
             // Cập nhật avatar nếu có và chưa có avatar
             if (picture != null && !picture.isEmpty() &&
-                    (user.getAvatarName() == null || user.getAvatarName().isEmpty())) {
+                    (user.getAvatarName() == null || user.getAvatarName().isEmpty())
+                    && (user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty())) {
                 user.setAvatarName(picture);
+                user.setAvatarUrl(picture);
             }
 
             return userRepository.save(user);
