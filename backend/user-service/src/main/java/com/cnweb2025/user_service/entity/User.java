@@ -79,4 +79,18 @@ public class User {
     // One to many relationship with SellerProfile
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     Set<SellerProfile> sellerProfiles;
+
+    public void setFullName(String s) {
+        String[] parts = s.split(" ", 2);
+        if (parts.length == 2) {
+            this.firstName = parts[0];
+            this.lastName = parts[1];
+        } else if (parts.length == 1) {
+            this.firstName = parts[0];
+            this.lastName = "";
+        } else {
+            this.firstName = "";
+            this.lastName = "";
+        }
+    }
 }
