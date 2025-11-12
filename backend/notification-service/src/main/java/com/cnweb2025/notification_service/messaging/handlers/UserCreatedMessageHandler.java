@@ -24,6 +24,9 @@ public class UserCreatedMessageHandler implements MessageHandler<UserCreatedEven
         log.info("Handling USER_CREATED event for user: {}", payload.getEmail());
         
         try {
+            if (payload.getOtpCode() == null || payload.getOtpCode().isEmpty()) {
+                emailService.sendWelcomeEmailWithoutOtp(payload.getEmail());
+            }
             emailService.sendWelcomeEmail(
                 payload.getEmail(),
                 payload.getUsername(),

@@ -332,8 +332,10 @@ public class UserServiceImp implements UserService{
 
             // Cập nhật avatar nếu có và chưa có avatar
             if (picture != null && !picture.isEmpty() &&
-                    (user.getAvatarName() == null || user.getAvatarName().isEmpty())) {
+                    (user.getAvatarName() == null || user.getAvatarName().isEmpty())
+                    && (user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty())) {
                 user.setAvatarName(picture);
+                user.setAvatarUrl(picture);
             }
 
             return userRepository.save(user);
@@ -361,6 +363,14 @@ public class UserServiceImp implements UserService{
 
         try {
             User savedUser = userRepository.save(newUser);
+            // gửi email chào mừng
+            com.vdt2025.common_dto.dto.UserCreatedEvent event = UserCreatedEvent.builder()
+                    .id(savedUser.getId())
+                    .username(savedUser.getUsername())
+                    .email(savedUser.getEmail())
+                    .otpCode(null)
+                    .build();
+            messagePublisher.publish(MessageType.USER_CREATED, event);
             log.info("Created new user {} from Google login", email);
             return savedUser;
         } catch (DataIntegrityViolationException e) {

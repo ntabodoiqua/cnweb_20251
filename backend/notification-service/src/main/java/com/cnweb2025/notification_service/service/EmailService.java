@@ -71,6 +71,17 @@ public class EmailService {
         log.info("Welcome email with OTP sent to {}", to);
     }
 
+    public void sendWelcomeEmailWithoutOtp(String to) {
+        final String subject = "Chào mừng đến với HUSTBuy!";
+        Context context = new Context();
+        context.setVariable("subject", subject);
+
+        String htmlContent = templateEngine.process("welcome-email-no-otp", context);
+
+        sendEmail(to, subject, htmlContent);
+        log.info("Welcome email without OTP sent to {}", to);
+    }
+
     public void sendVerificationEmail(String to, String username, String otpCode) {
         final String subject = "Xác thực email của bạn - HUSTBuy";
         Context context = new Context();
