@@ -86,12 +86,12 @@ public class AuthenticationController {
         String userAgent = httpRequest.getHeader("User-Agent");
         var result = authenticationService.authenticateWithGoogle(request.getToken());
         try {
-            loginHistoryService.recordLogin(result.getUserId(), ipAddress, userAgent, SigninStatus.SUCCESS);
+            loginHistoryService.recordLogin(result.getUsername(), ipAddress, userAgent, SigninStatus.SUCCESS);
             return ApiResponse.<AuthenticationResponse>builder()
                     .result(result)
                     .build();
         } catch (Exception e) {
-            loginHistoryService.recordLogin(result.getUserId(), ipAddress, userAgent, SigninStatus.FAILED);
+            loginHistoryService.recordLogin(result.getUsername(), ipAddress, userAgent, SigninStatus.FAILED);
             throw e;
         }
     }
