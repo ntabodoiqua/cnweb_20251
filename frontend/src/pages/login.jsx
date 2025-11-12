@@ -55,8 +55,8 @@ const LoginPage = () => {
             },
           });
 
-          // Chuyển hướng về trang chủ
-          navigate("/");
+          // Chuyển hướng đến trang profile
+          navigate("/profile");
         }
       } else if (res && res.code === 1214) {
         // Email chưa được xác thực
@@ -174,8 +174,8 @@ const LoginPage = () => {
             },
           });
 
-          // Chuyển hướng về trang chủ
-          navigate("/");
+          // Chuyển hướng đến trang profile
+          navigate("/profile");
         }
       } else {
         notification.error({
