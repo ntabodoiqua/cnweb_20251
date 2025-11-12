@@ -27,6 +27,8 @@ const AboutUsPage = lazy(() => import("../pages/about-us"));
 const CareersPage = lazy(() => import("../pages/careers"));
 const TermsPage = lazy(() => import("../pages/terms"));
 const PrivacyPage = lazy(() => import("../pages/privacy"));
+const SellersPage = lazy(() => import("../pages/sellers"));
+const ContactPage = lazy(() => import("../pages/contact"));
 
 const HelpPage = lazy(() => import("../pages/HelpPage"));
 const OrdersPage = lazy(() => import("../pages/OrdersPage"));
@@ -214,6 +216,22 @@ const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <PrivacyPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.SELLERS,
+        element: (
+          <SuspenseWrapper>
+            <SellersPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.CONTACT,
+        element: (
+          <SuspenseWrapper>
+            <ContactPage />
           </SuspenseWrapper>
         ),
       },
