@@ -43,6 +43,10 @@ jwt:
   valid-duration: 3600
   refreshable-duration: 86400
 
+internal:
+  service:
+    secret: ${INTERNAL_SERVICE_SECRET:InT3rn@l-S3rv1c3-S3cr3t-K3y-2025-VDT}
+
 google:
   client:
     id: 822664978401-0d2al7gb5j17as935f17r2lu6hg6eafl.apps.googleusercontent.com
