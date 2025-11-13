@@ -18,6 +18,7 @@ import { changePasswordApi, getLoginHistoryApi } from "../../util/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
+import "./ProfileSecurity.css";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
@@ -44,7 +45,7 @@ const ProfileSecurity = () => {
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 10,
+    pageSize: 5,
     total: 0,
   });
 
@@ -54,10 +55,11 @@ const ProfileSecurity = () => {
   }, []);
 
   // Fetch login history
-  const fetchLoginHistory = async (page = 1, pageSize = 10) => {
+  const fetchLoginHistory = async (page = 1, pageSize = 5) => {
     try {
       setLoadingHistory(true);
-      const res = await getLoginHistoryApi();
+      // API page starts from 0, UI page starts from 1
+      const res = await getLoginHistoryApi(page - 1, pageSize);
 
       if (res && res.code === 1000) {
         setLoginHistory(res.result.content || []);
@@ -381,257 +383,286 @@ const ProfileSecurity = () => {
 
   return (
     <div className="profile-security">
-      {/* Section 1: Đổi mật khẩu */}
-      <div className="security-section change-password-section">
-        <div className="section-header">
-          <div className="section-title-wrapper">
-            <LockOutlined className="section-icon" />
-            <div>
-              <h3 className="section-title">Đổi mật khẩu</h3>
-              <p className="section-subtitle">
-                Cập nhật mật khẩu định kỳ để bảo vệ tài khoản của bạn
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <form onSubmit={handleChangePassword} className="password-form">
-          {/* Mật khẩu hiện tại */}
-          <div className="profile-form-group">
-            <label className="profile-form-label">
-              <LockOutlined />
-              Mật khẩu hiện tại
-              <span className="required">*</span>
-            </label>
-            <div className="password-input-wrapper">
-              <input
-                type={showOldPassword ? "text" : "password"}
-                name="oldPassword"
-                value={passwordData.oldPassword}
-                onChange={handlePasswordInputChange}
-                className="profile-form-input password-input"
-                placeholder="Nhập mật khẩu hiện tại"
-              />
-              <button
-                type="button"
-                className="password-toggle-btn"
-                onClick={() => setShowOldPassword(!showOldPassword)}
-              >
-                {showOldPassword ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-              </button>
-            </div>
-          </div>
-
-          {/* Mật khẩu mới */}
-          <div className="profile-form-group">
-            <label className="profile-form-label">
-              <SafetyOutlined />
-              Mật khẩu mới
-              <span className="required">*</span>
-            </label>
-            <div className="password-input-wrapper">
-              <input
-                type={showNewPassword ? "text" : "password"}
-                name="newPassword"
-                value={passwordData.newPassword}
-                onChange={handlePasswordInputChange}
-                className="profile-form-input password-input"
-                placeholder="Nhập mật khẩu mới"
-              />
-              <button
-                type="button"
-                className="password-toggle-btn"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-              >
-                {showNewPassword ? <EyeOutlined /> : <EyeInvisibleOutlined />}
-              </button>
-            </div>
-
-            {/* Password Strength Indicator */}
-            {passwordStrength.strength && (
-              <div className="password-strength-container">
-                <div className="password-strength-bar">
-                  <div
-                    className="password-strength-fill"
-                    style={{
-                      width: `${passwordStrength.score}%`,
-                      backgroundColor: passwordStrength.color,
-                    }}
-                  ></div>
-                </div>
-                <div className="password-strength-text">
-                  <span>Độ mạnh mật khẩu: </span>
-                  <span
-                    style={{ color: passwordStrength.color, fontWeight: 600 }}
-                  >
-                    {passwordStrength.strength}
-                  </span>
-                </div>
-                <div className="password-requirements">
-                  <div
-                    className={`requirement-item ${
-                      passwordData.newPassword?.length >= 8 ? "valid" : ""
-                    }`}
-                  >
-                    {passwordData.newPassword?.length >= 8 ? "✓" : "○"} Tối
-                    thiểu 8 ký tự
-                  </div>
-                  <div
-                    className={`requirement-item ${
-                      /[a-z]/.test(passwordData.newPassword || "")
-                        ? "valid"
-                        : ""
-                    }`}
-                  >
-                    {/[a-z]/.test(passwordData.newPassword || "") ? "✓" : "○"}{" "}
-                    Chữ thường
-                  </div>
-                  <div
-                    className={`requirement-item ${
-                      /[A-Z]/.test(passwordData.newPassword || "")
-                        ? "valid"
-                        : ""
-                    }`}
-                  >
-                    {/[A-Z]/.test(passwordData.newPassword || "") ? "✓" : "○"}{" "}
-                    Chữ hoa
-                  </div>
-                  <div
-                    className={`requirement-item ${
-                      /\d/.test(passwordData.newPassword || "") ? "valid" : ""
-                    }`}
-                  >
-                    {/\d/.test(passwordData.newPassword || "") ? "✓" : "○"} Số
-                  </div>
-                  <div
-                    className={`requirement-item ${
-                      /[@$!%*?&#]/.test(passwordData.newPassword || "")
-                        ? "valid"
-                        : ""
-                    }`}
-                  >
-                    {/[@$!%*?&#]/.test(passwordData.newPassword || "")
-                      ? "✓"
-                      : "○"}{" "}
-                    Ký tự đặc biệt
-                  </div>
+      <div className="security-layout">
+        {/* Left Column: Đổi mật khẩu */}
+        <div className="security-left-column">
+          <div className="security-section change-password-section">
+            <div className="section-header">
+              <div className="section-title-wrapper">
+                <LockOutlined className="section-icon" />
+                <div>
+                  <h3 className="section-title">Đổi mật khẩu</h3>
+                  <p className="section-subtitle">
+                    Cập nhật mật khẩu định kỳ để bảo vệ tài khoản của bạn
+                  </p>
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* Xác nhận mật khẩu mới */}
-          <div className="profile-form-group">
-            <label className="profile-form-label">
-              <SafetyOutlined />
-              Xác nhận mật khẩu mới
-              <span className="required">*</span>
-            </label>
-            <div className="password-input-wrapper">
-              <input
-                type={showConfirmPassword ? "text" : "password"}
-                name="confirmPassword"
-                value={passwordData.confirmPassword}
-                onChange={handlePasswordInputChange}
-                className="profile-form-input password-input"
-                placeholder="Nhập lại mật khẩu mới"
-              />
-              <button
-                type="button"
-                className="password-toggle-btn"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              >
-                {showConfirmPassword ? (
-                  <EyeOutlined />
-                ) : (
-                  <EyeInvisibleOutlined />
-                )}
-              </button>
             </div>
-            {passwordData.confirmPassword &&
-              passwordData.newPassword !== passwordData.confirmPassword && (
-                <div className="password-mismatch-error">
-                  <CloseCircleOutlined /> Mật khẩu xác nhận không khớp
-                </div>
-              )}
-            {passwordData.confirmPassword &&
-              passwordData.newPassword === passwordData.confirmPassword && (
-                <div className="password-match-success">
-                  <CheckCircleOutlined /> Mật khẩu khớp
-                </div>
-              )}
-          </div>
 
-          {/* Action buttons */}
-          <div className="profile-form-actions">
-            <button
-              type="submit"
-              className="profile-btn profile-btn-primary"
-              disabled={isChangingPassword}
-            >
-              {isChangingPassword ? (
-                <>
-                  <span className="spinner"></span>
-                  Đang xử lý...
-                </>
-              ) : (
-                <>
+            <form onSubmit={handleChangePassword} className="password-form">
+              {/* Mật khẩu hiện tại */}
+              <div className="profile-form-group">
+                <label className="profile-form-label">
+                  <LockOutlined />
+                  Mật khẩu hiện tại
+                  <span className="required">*</span>
+                </label>
+                <div className="password-input-wrapper">
+                  <input
+                    type={showOldPassword ? "text" : "password"}
+                    name="oldPassword"
+                    value={passwordData.oldPassword}
+                    onChange={handlePasswordInputChange}
+                    className="profile-form-input password-input"
+                    placeholder="Nhập mật khẩu hiện tại"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowOldPassword(!showOldPassword)}
+                  >
+                    {showOldPassword ? (
+                      <EyeOutlined />
+                    ) : (
+                      <EyeInvisibleOutlined />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Mật khẩu mới */}
+              <div className="profile-form-group">
+                <label className="profile-form-label">
                   <SafetyOutlined />
-                  Đổi mật khẩu
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
+                  Mật khẩu mới
+                  <span className="required">*</span>
+                </label>
+                <div className="password-input-wrapper">
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    name="newPassword"
+                    value={passwordData.newPassword}
+                    onChange={handlePasswordInputChange}
+                    className="profile-form-input password-input"
+                    placeholder="Nhập mật khẩu mới"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                  >
+                    {showNewPassword ? (
+                      <EyeOutlined />
+                    ) : (
+                      <EyeInvisibleOutlined />
+                    )}
+                  </button>
+                </div>
 
-      {/* Section 2: Lịch sử đăng nhập */}
-      <div className="security-section login-history-section">
-        <div className="section-header">
-          <div className="section-title-wrapper">
-            <HistoryOutlined className="section-icon" />
-            <div>
-              <h3 className="section-title">Lịch sử đăng nhập</h3>
-              <p className="section-subtitle">
-                Theo dõi các hoạt động đăng nhập gần đây của tài khoản
-              </p>
-            </div>
+                {/* Password Strength Indicator */}
+                {passwordStrength.strength && (
+                  <div className="password-strength-container">
+                    <div className="password-strength-bar">
+                      <div
+                        className="password-strength-fill"
+                        style={{
+                          width: `${passwordStrength.score}%`,
+                          backgroundColor: passwordStrength.color,
+                        }}
+                      ></div>
+                    </div>
+                    <div className="password-strength-text">
+                      <span>Độ mạnh: </span>
+                      <span
+                        style={{
+                          color: passwordStrength.color,
+                          fontWeight: 600,
+                        }}
+                      >
+                        {passwordStrength.strength}
+                      </span>
+                    </div>
+                    <div className="password-requirements">
+                      <div
+                        className={`requirement-item ${
+                          passwordData.newPassword?.length >= 8 ? "valid" : ""
+                        }`}
+                      >
+                        {passwordData.newPassword?.length >= 8 ? "✓" : "○"} Tối
+                        thiểu 8 ký tự
+                      </div>
+                      <div
+                        className={`requirement-item ${
+                          /[a-z]/.test(passwordData.newPassword || "")
+                            ? "valid"
+                            : ""
+                        }`}
+                      >
+                        {/[a-z]/.test(passwordData.newPassword || "")
+                          ? "✓"
+                          : "○"}{" "}
+                        Chữ thường
+                      </div>
+                      <div
+                        className={`requirement-item ${
+                          /[A-Z]/.test(passwordData.newPassword || "")
+                            ? "valid"
+                            : ""
+                        }`}
+                      >
+                        {/[A-Z]/.test(passwordData.newPassword || "")
+                          ? "✓"
+                          : "○"}{" "}
+                        Chữ hoa
+                      </div>
+                      <div
+                        className={`requirement-item ${
+                          /\d/.test(passwordData.newPassword || "")
+                            ? "valid"
+                            : ""
+                        }`}
+                      >
+                        {/\d/.test(passwordData.newPassword || "") ? "✓" : "○"}{" "}
+                        Số
+                      </div>
+                      <div
+                        className={`requirement-item ${
+                          /[@$!%*?&#]/.test(passwordData.newPassword || "")
+                            ? "valid"
+                            : ""
+                        }`}
+                      >
+                        {/[@$!%*?&#]/.test(passwordData.newPassword || "")
+                          ? "✓"
+                          : "○"}{" "}
+                        Ký tự đặc biệt
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Xác nhận mật khẩu mới */}
+              <div className="profile-form-group">
+                <label className="profile-form-label">
+                  <SafetyOutlined />
+                  Xác nhận mật khẩu mới
+                  <span className="required">*</span>
+                </label>
+                <div className="password-input-wrapper">
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    name="confirmPassword"
+                    value={passwordData.confirmPassword}
+                    onChange={handlePasswordInputChange}
+                    className="profile-form-input password-input"
+                    placeholder="Nhập lại mật khẩu mới"
+                  />
+                  <button
+                    type="button"
+                    className="password-toggle-btn"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOutlined />
+                    ) : (
+                      <EyeInvisibleOutlined />
+                    )}
+                  </button>
+                </div>
+                {passwordData.confirmPassword &&
+                  passwordData.newPassword !== passwordData.confirmPassword && (
+                    <div className="password-mismatch-error">
+                      <CloseCircleOutlined /> Mật khẩu xác nhận không khớp
+                    </div>
+                  )}
+                {passwordData.confirmPassword &&
+                  passwordData.newPassword === passwordData.confirmPassword && (
+                    <div className="password-match-success">
+                      <CheckCircleOutlined /> Mật khẩu khớp
+                    </div>
+                  )}
+              </div>
+
+              {/* Action buttons */}
+              <div className="profile-form-actions">
+                <button
+                  type="submit"
+                  className="profile-btn profile-btn-primary"
+                  disabled={isChangingPassword}
+                >
+                  {isChangingPassword ? (
+                    <>
+                      <span className="spinner"></span>
+                      Đang xử lý...
+                    </>
+                  ) : (
+                    <>
+                      <SafetyOutlined />
+                      Đổi mật khẩu
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
 
-        <div className="login-history-content">
-          <Table
-            columns={columns}
-            dataSource={loginHistory}
-            loading={loadingHistory}
-            rowKey="id"
-            pagination={false}
-            className="login-history-table"
-            locale={{
-              emptyText: (
-                <Empty
-                  description="Chưa có lịch sử đăng nhập"
-                  image={Empty.PRESENTED_IMAGE_SIMPLE}
-                />
-              ),
-            }}
-            scroll={{ x: 800 }}
-          />
-
-          {/* Custom Pagination */}
-          {loginHistory.length > 0 && (
-            <div className="table-pagination">
-              <Pagination
-                current={pagination.current}
-                pageSize={pagination.pageSize}
-                total={pagination.total}
-                onChange={(page, pageSize) => fetchLoginHistory(page, pageSize)}
-                showSizeChanger
-                showTotal={(total) => `Tổng ${total} lần đăng nhập`}
-                pageSizeOptions={[10, 20, 50, 100]}
-              />
+        {/* Right Column: Lịch sử đăng nhập */}
+        <div className="security-right-column">
+          <div className="security-section login-history-section">
+            <div className="section-header">
+              <div className="section-title-wrapper">
+                <HistoryOutlined className="section-icon" />
+                <div>
+                  <h3 className="section-title">Lịch sử đăng nhập</h3>
+                  <p className="section-subtitle">
+                    Theo dõi các hoạt động đăng nhập gần đây của tài khoản
+                  </p>
+                </div>
+              </div>
             </div>
-          )}
+
+            <div className="login-history-content">
+              <Table
+                columns={columns}
+                dataSource={loginHistory}
+                loading={loadingHistory}
+                rowKey="id"
+                pagination={false}
+                className="login-history-table"
+                locale={{
+                  emptyText: (
+                    <Empty
+                      description="Chưa có lịch sử đăng nhập"
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                    />
+                  ),
+                }}
+                scroll={{ x: 800 }}
+              />
+
+              {/* Custom Pagination */}
+              {loginHistory.length > 0 && (
+                <div className="table-pagination">
+                  <Pagination
+                    current={pagination.current}
+                    pageSize={pagination.pageSize}
+                    total={pagination.total}
+                    onChange={(page, pageSize) =>
+                      fetchLoginHistory(page, pageSize)
+                    }
+                    onShowSizeChange={(current, size) =>
+                      fetchLoginHistory(1, size)
+                    }
+                    showSizeChanger
+                    showTotal={(total) => `Tổng ${total} lần đăng nhập`}
+                    pageSizeOptions={[5, 10, 15, 20]}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

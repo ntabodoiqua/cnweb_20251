@@ -74,7 +74,7 @@ const ProfileSellerInfo = () => {
   const [sellerProfiles, setSellerProfiles] = useState([]);
   const [pagination, setPagination] = useState({
     current: 1,
-    pageSize: 20,
+    pageSize: 5,
     total: 0,
   });
   const [loading, setLoading] = useState(true);
@@ -108,10 +108,12 @@ const ProfileSellerInfo = () => {
     fetchProvinces();
   }, []);
 
-  const fetchSellerProfile = async (page = 0) => {
+  const fetchSellerProfile = async (page = 0, size = 5) => {
     try {
       setLoading(true);
-      const res = await getMySellerProfileApi(page, 20);
+      // Scroll to top
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      const res = await getMySellerProfileApi(page, size);
 
       if (res && res.code === 1000) {
         setSellerProfiles(res.result.content || []);
@@ -470,10 +472,61 @@ const ProfileSellerInfo = () => {
     }
 
     setEditingProfile(profile);
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: "smooth" });
     setIsEditing(true);
   };
 
-  const handleRegisterNew = () => {
+  const handleRegisterNew = async () => {
+    // Check if there's already a CREATED profile in the system
+    try {
+      // Fetch all profiles to check
+      const res = await getMySellerProfileApi(0, 100); // Get more profiles to check
+      if (res && res.code === 1000) {
+        const totalProfiles = res.result.totalElements;
+
+        // Check if maximum profiles limit reached (10 profiles)
+        if (totalProfiles >= 10) {
+          notification.error({
+            message: "Đã đạt giới hạn hồ sơ",
+            description: (
+              <div>
+                <p>
+                  Bạn đã có <strong>{totalProfiles}/10</strong> hồ sơ người bán.
+                </p>
+                <p>
+                  Để tạo thêm hồ sơ, vui lòng liên hệ quản trị viên hệ thống.
+                </p>
+              </div>
+            ),
+            placement: "topRight",
+            duration: 5,
+          });
+          return;
+        }
+
+        const hasCreatedProfile = res.result.content.some(
+          (profile) => profile.verificationStatus === "CREATED"
+        );
+
+        if (hasCreatedProfile) {
+          notification.warning({
+            message: "Không thể đăng ký",
+            description:
+              "Bạn đã có hồ sơ đang ở trạng thái tạo mới. Vui lòng hoàn thành hoặc gửi hồ sơ đó trước khi đăng ký lại.",
+            placement: "topRight",
+            duration: 4,
+          });
+          // Navigate to first page to show the CREATED profile
+          fetchSellerProfile(0);
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("Error checking existing profiles:", error);
+    }
+
+    // If no CREATED profile exists, allow new registration
     setFormData({
       storeName: "",
       storeDescription: "",
@@ -484,6 +537,8 @@ const ProfileSellerInfo = () => {
       provinceId: null,
     });
     setWards([]);
+    // Scroll to top
+    window.scrollTo({ top: 0, behavior: "smooth" });
     setIsRegistering(true);
   };
 
@@ -1153,6 +1208,36 @@ const ProfileSellerInfo = () => {
   if (sellerProfiles.length > 0 && !isEditing && !isRegistering) {
     return (
       <div>
+        {/* Info banner about profile limit */}
+        <div
+          style={{
+            background: "linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%)",
+            border: "1px solid #91d5ff",
+            borderRadius: "12px",
+            padding: "16px 20px",
+            marginBottom: "24px",
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+          }}
+        >
+          <InfoCircleOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
+          <div style={{ flex: 1 }}>
+            <div
+              style={{ fontWeight: 600, color: "#0050b3", marginBottom: "4px" }}
+            >
+              Thông tin giới hạn hồ sơ
+            </div>
+            <div style={{ fontSize: "14px", color: "#096dd9" }}>
+              Bạn hiện có <strong>{pagination.total}/10</strong> hồ sơ người
+              bán.
+              {pagination.total >= 10
+                ? " Đã đạt giới hạn tối đa. Vui lòng liên hệ quản trị viên để tạo thêm hồ sơ."
+                : " Bạn có thể tạo thêm hồ sơ khi cần thiết."}
+            </div>
+          </div>
+        </div>
+
         {sellerProfiles.map((profile) => renderProfileCard(profile))}
 
         {/* Pagination */}
@@ -1390,6 +1475,34 @@ const ProfileSellerInfo = () => {
   // Registration form
   return (
     <div className="seller-registration-form">
+      {/* Info banner about profile limit */}
+      <div
+        style={{
+          background: "linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%)",
+          border: "1px solid #91d5ff",
+          borderRadius: "12px",
+          padding: "16px 20px",
+          marginBottom: "24px",
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+        }}
+      >
+        <InfoCircleOutlined style={{ fontSize: "20px", color: "#1890ff" }} />
+        <div style={{ flex: 1 }}>
+          <div
+            style={{ fontWeight: 600, color: "#0050b3", marginBottom: "4px" }}
+          >
+            Lưu ý về giới hạn hồ sơ
+          </div>
+          <div style={{ fontSize: "14px", color: "#096dd9" }}>
+            Mỗi người dùng được phép tạo tối đa <strong>10 hồ sơ</strong> người
+            bán. Nếu bạn cần tạo thêm hồ sơ, vui lòng liên hệ quản trị viên hệ
+            thống.
+          </div>
+        </div>
+      </div>
+
       <div className="form-section-title">
         <ShopOutlined />
         Thông tin cửa hàng

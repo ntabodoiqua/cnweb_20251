@@ -209,9 +209,15 @@ const changePasswordApi = (oldPassword, newPassword) => {
   );
 };
 
-const getLoginHistoryApi = () => {
+const getLoginHistoryApi = (page = 0, size = 10) => {
   const URL_API = "/api/user/login-history/my";
   return axios.get(URL_API, {
+    params: {
+      page: page,
+      size: size,
+      sortBy: "loginTime",
+      direction: "desc",
+    },
     headers: {
       "Accept-Language": "vi",
     },
@@ -228,7 +234,7 @@ const createSellerProfileApi = (profileData) => {
   });
 };
 
-const getMySellerProfileApi = (page = 0, size = 20) => {
+const getMySellerProfileApi = (page = 0, size = 5) => {
   const URL_API = "/api/user/seller-profiles/me";
   return axios.get(URL_API, {
     params: {
