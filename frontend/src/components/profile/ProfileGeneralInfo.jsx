@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useContext } from "react";
 import {
   UserOutlined,
   MailOutlined,
@@ -16,9 +16,11 @@ import {
 import { notification } from "antd";
 import PropTypes from "prop-types";
 import { updateMyInfoApi, updateAvatarApi } from "../../util/api";
+import { AuthContext } from "../context/auth.context";
 
 const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
   const fileInputRef = useRef(null);
+  const { auth, setAuth } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     firstName: userData.firstName || "",
     lastName: userData.lastName || "",
@@ -70,6 +72,15 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
         if (onDataUpdated) {
           await onDataUpdated();
         }
+        // Cập nhật AuthContext với thông tin mới
+        setAuth({
+          ...auth,
+          user: {
+            ...auth.user,
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+          },
+        });
       } else {
         notification.error({
           message: "Cập nhật thất bại!",
@@ -141,6 +152,14 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
         if (onDataUpdated) {
           await onDataUpdated();
         }
+        // Cập nhật AuthContext với avatar mới
+        setAuth({
+          ...auth,
+          user: {
+            ...auth.user,
+            avatarUrl: response.result,
+          },
+        });
       } else {
         notification.error({
           message: "Cập nhật ảnh đại diện thất bại!",

@@ -22,7 +22,7 @@ import {
 import { Dropdown, Space, Drawer, Menu, Input, message } from "antd";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
-import { getRoleName, ROLES } from "../../constants/roles";
+import { getRoleName, ROLES, getHighestRole } from "../../constants/roles";
 import "./header.css";
 import logo from "../../assets/logo.png";
 
@@ -66,6 +66,9 @@ const Header = () => {
           email: "",
           name: "",
           role: "",
+          firstName: "",
+          lastName: "",
+          avatarUrl: "",
         },
       });
 
@@ -89,6 +92,43 @@ const Header = () => {
     if (value.trim()) {
       navigate(`/search?q=${encodeURIComponent(value.trim())}`);
     }
+  };
+
+  // Lấy tên hiển thị của người dùng (firstName hoặc username)
+  const getDisplayName = () => {
+    if (auth.user?.firstName) {
+      const fullName = auth.user.lastName
+        ? `${auth.user.firstName} ${auth.user.lastName}`
+        : auth.user.firstName;
+      // Cắt ngắn nếu tên quá dài (> 20 ký tự)
+      return fullName.length > 20
+        ? `${fullName.substring(0, 17)}...`
+        : fullName;
+    }
+    // Fallback về username nếu không có firstName
+    const username = auth.user?.username || "User";
+    return username.length > 20 ? `${username.substring(0, 17)}...` : username;
+  };
+
+  // Lấy initials cho avatar placeholder
+  const getAvatarInitials = () => {
+    if (auth.user?.firstName) {
+      const firstInitial = auth.user.firstName.charAt(0).toUpperCase();
+      const lastInitial = auth.user.lastName
+        ? auth.user.lastName.charAt(0).toUpperCase()
+        : "";
+      return firstInitial + lastInitial;
+    }
+    return auth.user?.username?.charAt(0).toUpperCase() || "U";
+  };
+
+  // Lấy role cao nhất để hiển thị
+  const getDisplayRole = () => {
+    if (auth.user?.role) {
+      const highestRole = getHighestRole(auth.user.role);
+      return getRoleName(highestRole);
+    }
+    return "";
   };
 
   // Categories dropdown menu
@@ -190,7 +230,7 @@ const Header = () => {
       ),
     },
     // Thêm menu Admin nếu user là ADMIN
-    ...(auth.user.role === ROLES.ADMIN
+    ...(getHighestRole(auth.user.role) === ROLES.ADMIN
       ? [
           {
             key: "admin",
@@ -325,18 +365,31 @@ const Header = () => {
               >
                 <div className="header-user-info">
                   <div className="header-user-avatar">
-                    {auth.user?.username?.charAt(0).toUpperCase() || "U"}
+                    {auth.user?.avatarUrl ? (
+                      <img
+                        src={auth.user.avatarUrl}
+                        alt="Avatar"
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          objectFit: "cover",
+                          borderRadius: "50%",
+                        }}
+                      />
+                    ) : (
+                      getAvatarInitials()
+                    )}
                   </div>
-                  <span className="header-user-name">
-                    {auth.user?.username || "User"}
-                  </span>
+                  <span className="header-user-name">{getDisplayName()}</span>
                   {auth.user?.role && (
                     <span
                       className={`header-user-role ${
-                        auth.user.role === ROLES.ADMIN ? "admin" : "user"
+                        getHighestRole(auth.user.role) === ROLES.ADMIN
+                          ? "admin"
+                          : "user"
                       }`}
                     >
-                      {getRoleName(auth.user.role)}
+                      {getDisplayRole()}
                     </span>
                   )}
                 </div>
