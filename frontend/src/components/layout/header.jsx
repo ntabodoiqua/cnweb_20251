@@ -19,7 +19,7 @@ import {
   DownOutlined,
   AppstoreOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Space, Drawer, Menu, Input } from "antd";
+import { Dropdown, Space, Drawer, Menu, Input, message } from "antd";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
 import { getRoleName, ROLES } from "../../constants/roles";
@@ -32,19 +32,53 @@ const Header = () => {
   const { auth, setAuth } = useContext(AuthContext);
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  const handleLogout = () => {
-    localStorage.removeItem("access_token");
-    setAuth({
-      isAuthenticated: false,
-      user: {
-        username: "",
-        email: "",
-        name: "",
-        role: "",
-      },
-    });
-    navigate("/");
+  const handleLogout = async () => {
+    // Ngăn chặn click nhiều lần
+    if (isLoggingOut) return;
+
+    setIsLoggingOut(true);
+
+    // Hiển thị thông báo đang đăng xuất
+    const hideLoading = message.loading("Đang đăng xuất...", 0);
+
+    try {
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        // Gọi API logout
+        const { logoutApi } = await import("../../util/api");
+        await logoutApi(token);
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+      // Vẫn thực hiện logout ở frontend ngay cả khi API thất bại
+    } finally {
+      // Đóng loading
+      hideLoading();
+
+      // Xóa token và reset auth state
+      localStorage.removeItem("access_token");
+      setAuth({
+        isAuthenticated: false,
+        user: {
+          username: "",
+          email: "",
+          name: "",
+          role: "",
+        },
+      });
+
+      // Hiển thị thông báo cảm ơn
+      message.success(
+        "Đăng xuất thành công! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi. Hẹn gặp lại! 👋",
+        2
+      );
+
+      // Chuyển về trang chủ ngay lập tức
+      setIsLoggingOut(false);
+      navigate("/", { replace: true });
+    }
   };
 
   const isActive = (path) => {
@@ -62,7 +96,10 @@ const Header = () => {
     {
       key: "electronics",
       label: (
-        <Link to="/category/electronics" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <Link
+          to="/category/electronics"
+          style={{ display: "flex", alignItems: "center", gap: "12px" }}
+        >
           <LaptopOutlined />
           <span>Điện tử</span>
         </Link>
@@ -71,7 +108,10 @@ const Header = () => {
     {
       key: "mobile",
       label: (
-        <Link to="/category/mobile" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <Link
+          to="/category/mobile"
+          style={{ display: "flex", alignItems: "center", gap: "12px" }}
+        >
           <MobileOutlined />
           <span>Điện thoại & Phụ kiện</span>
         </Link>
@@ -80,7 +120,10 @@ const Header = () => {
     {
       key: "fashion",
       label: (
-        <Link to="/category/fashion" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <Link
+          to="/category/fashion"
+          style={{ display: "flex", alignItems: "center", gap: "12px" }}
+        >
           <SkinOutlined />
           <span>Thời trang</span>
         </Link>
@@ -89,7 +132,10 @@ const Header = () => {
     {
       key: "home",
       label: (
-        <Link to="/category/home" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <Link
+          to="/category/home"
+          style={{ display: "flex", alignItems: "center", gap: "12px" }}
+        >
           <HomeIconOutlined />
           <span>Nhà cửa & Đời sống</span>
         </Link>
@@ -98,7 +144,10 @@ const Header = () => {
     {
       key: "books",
       label: (
-        <Link to="/category/books" style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        <Link
+          to="/category/books"
+          style={{ display: "flex", alignItems: "center", gap: "12px" }}
+        >
           <BookOutlined />
           <span>Sách & Văn phòng phẩm</span>
         </Link>
@@ -110,7 +159,15 @@ const Header = () => {
     {
       key: "all",
       label: (
-        <Link to="/category/all" style={{ display: "flex", alignItems: "center", gap: "12px", fontWeight: 600 }}>
+        <Link
+          to="/category/all"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "12px",
+            fontWeight: 600,
+          }}
+        >
           <ShoppingCartOutlined />
           <span>Xem tất cả danh mục</span>
         </Link>
@@ -165,7 +222,6 @@ const Header = () => {
       key: "logout",
       label: (
         <div
-          onClick={handleLogout}
           style={{
             display: "flex",
             alignItems: "center",
@@ -177,6 +233,8 @@ const Header = () => {
           <span>Đăng xuất</span>
         </div>
       ),
+      onClick: handleLogout,
+      disabled: isLoggingOut,
     },
   ];
 
@@ -200,8 +258,10 @@ const Header = () => {
           {
             key: "logout",
             icon: <LogoutOutlined />,
-            label: <span onClick={handleLogout}>Đăng xuất</span>,
+            label: <span>Đăng xuất</span>,
+            onClick: handleLogout,
             danger: true,
+            disabled: isLoggingOut,
           },
         ]
       : [
@@ -249,76 +309,83 @@ const Header = () => {
 
           {/* Actions */}
           <div className="header-actions">
-          {/* Mobile Menu Trigger */}
-          <MenuOutlined
-            className="header-mobile-trigger"
-            onClick={() => setMobileMenuVisible(true)}
-          />
+            {/* Mobile Menu Trigger */}
+            <MenuOutlined
+              className="header-mobile-trigger"
+              onClick={() => setMobileMenuVisible(true)}
+            />
 
-          {/* Desktop Actions */}
-          {auth.isAuthenticated ? (
-            <Dropdown
-              menu={{ items: userMenuItems }}
-              trigger={["click"]}
-              placement="bottomRight"
-              overlayClassName="header-dropdown-menu"
-            >
-              <div className="header-user-info">
-                <div className="header-user-avatar">
-                  {auth.user?.username?.charAt(0).toUpperCase() || "U"}
-                </div>
-                <span className="header-user-name">
-                  {auth.user?.username || "User"}
-                </span>
-                {auth.user?.role && (
-                  <span
-                    className={`header-user-role ${
-                      auth.user.role === ROLES.ADMIN ? "admin" : "user"
-                    }`}
-                  >
-                    {getRoleName(auth.user.role)}
+            {/* Desktop Actions */}
+            {auth.isAuthenticated ? (
+              <Dropdown
+                menu={{ items: userMenuItems }}
+                trigger={["click"]}
+                placement="bottomRight"
+                overlayClassName="header-dropdown-menu"
+              >
+                <div className="header-user-info">
+                  <div className="header-user-avatar">
+                    {auth.user?.username?.charAt(0).toUpperCase() || "U"}
+                  </div>
+                  <span className="header-user-name">
+                    {auth.user?.username || "User"}
                   </span>
-                )}
-              </div>
-            </Dropdown>
-          ) : (
-            <Space size="small">
-              <button
-                className="header-login-btn"
-                onClick={() => navigate("/login")}
-              >
-                <LoginOutlined />
-                Đăng nhập
-              </button>
-              <button
-                className="header-register-btn"
-                onClick={() => navigate("/register")}
-              >
-                <UserAddOutlined />
-                Đăng ký
-              </button>
-            </Space>
-          )}
+                  {auth.user?.role && (
+                    <span
+                      className={`header-user-role ${
+                        auth.user.role === ROLES.ADMIN ? "admin" : "user"
+                      }`}
+                    >
+                      {getRoleName(auth.user.role)}
+                    </span>
+                  )}
+                </div>
+              </Dropdown>
+            ) : (
+              <Space size="small">
+                <button
+                  className="header-login-btn"
+                  onClick={() => navigate("/login")}
+                >
+                  <LoginOutlined />
+                  Đăng nhập
+                </button>
+                <button
+                  className="header-register-btn"
+                  onClick={() => navigate("/register")}
+                >
+                  <UserAddOutlined />
+                  Đăng ký
+                </button>
+              </Space>
+            )}
+          </div>
         </div>
-      </div>
       </div>
 
       {/* Navigation Bar */}
       <div className="header-bottom">
         <div className="header-container">
           <nav className="header-nav">
-            <Link to="/" className={`nav-link ${isActive("/") ? "active" : ""}`}>
+            <Link
+              to="/"
+              className={`nav-link ${isActive("/") ? "active" : ""}`}
+            >
               <HomeOutlined />
               <span>Trang chủ</span>
             </Link>
-            
+
             <Dropdown
               menu={{ items: categoryMenuItems }}
               trigger={["hover"]}
               placement="bottomLeft"
               overlayClassName="category-dropdown-menu"
             >
-              <div className={`nav-link ${location.pathname.startsWith("/category") ? "active" : ""}`}>
+              <div
+                className={`nav-link ${
+                  location.pathname.startsWith("/category") ? "active" : ""
+                }`}
+              >
                 <AppstoreOutlined />
                 <span>Danh mục sản phẩm</span>
                 <DownOutlined style={{ fontSize: "10px", marginLeft: "4px" }} />
@@ -327,11 +394,17 @@ const Header = () => {
 
             {auth.isAuthenticated && (
               <>
-                <Link to="/user" className={`nav-link ${isActive("/user") ? "active" : ""}`}>
+                <Link
+                  to="/user"
+                  className={`nav-link ${isActive("/user") ? "active" : ""}`}
+                >
                   <UserOutlined />
                   <span>Người dùng</span>
                 </Link>
-                <Link to="/profile" className={`nav-link ${isActive("/profile") ? "active" : ""}`}>
+                <Link
+                  to="/profile"
+                  className={`nav-link ${isActive("/profile") ? "active" : ""}`}
+                >
                   <ProfileOutlined />
                   <span>Hồ sơ</span>
                 </Link>
