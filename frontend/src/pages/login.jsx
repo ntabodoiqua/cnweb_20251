@@ -1,6 +1,11 @@
 import React, { useState, useContext } from "react";
 import { Button, Form, Input, notification } from "antd";
-import { loginApi, resendOtpApi, loginWithGoogleApi } from "../util/api";
+import {
+  loginApi,
+  resendOtpApi,
+  loginWithGoogleApi,
+  getMyInfoApi,
+} from "../util/api";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/context/auth.context";
 import { UserOutlined, LockOutlined, GoogleOutlined } from "@ant-design/icons";
@@ -37,23 +42,81 @@ const LoginPage = () => {
           // Decode token để lấy thông tin user
           const tokenInfo = getTokenInfo(token);
 
-          notification.success({
-            message: "Đăng nhập thành công!",
-            description: `Chào mừng ${
-              tokenInfo?.username || username
-            } quay trở lại.`,
-            placement: "topRight",
-            duration: 3,
-          });
+          // Gọi API để lấy đầy đủ thông tin user
+          try {
+            const userInfoRes = await getMyInfoApi();
+            if (userInfoRes && userInfoRes.code === 1000) {
+              const userInfo = userInfoRes.result;
 
-          // Cập nhật auth context với đầy đủ thông tin
-          setAuth({
-            isAuthenticated: true,
-            user: {
-              username: tokenInfo?.username || username,
-              role: tokenInfo?.role || "",
-            },
-          });
+              notification.success({
+                message: "Đăng nhập thành công!",
+                description: `Chào mừng ${
+                  userInfo.firstName || userInfo.username || username
+                } quay trở lại.`,
+                placement: "topRight",
+                duration: 3,
+              });
+
+              // Cập nhật auth context với đầy đủ thông tin
+              setAuth({
+                isAuthenticated: true,
+                user: {
+                  username:
+                    userInfo.username || tokenInfo?.username || username,
+                  role: tokenInfo?.role || "",
+                  firstName: userInfo.firstName || "",
+                  lastName: userInfo.lastName || "",
+                  avatarUrl: userInfo.avatarUrl || userInfo.avatarName || "",
+                  email: userInfo.email || "",
+                },
+              });
+            } else {
+              // Nếu không lấy được thông tin chi tiết, dùng thông tin từ token
+              notification.success({
+                message: "Đăng nhập thành công!",
+                description: `Chào mừng ${
+                  tokenInfo?.username || username
+                } quay trở lại.`,
+                placement: "topRight",
+                duration: 3,
+              });
+
+              setAuth({
+                isAuthenticated: true,
+                user: {
+                  username: tokenInfo?.username || username,
+                  role: tokenInfo?.role || "",
+                  firstName: "",
+                  lastName: "",
+                  avatarUrl: "",
+                  email: "",
+                },
+              });
+            }
+          } catch (userInfoError) {
+            console.error("Error fetching user info:", userInfoError);
+            // Nếu có lỗi, vẫn đăng nhập với thông tin từ token
+            notification.success({
+              message: "Đăng nhập thành công!",
+              description: `Chào mừng ${
+                tokenInfo?.username || username
+              } quay trở lại.`,
+              placement: "topRight",
+              duration: 3,
+            });
+
+            setAuth({
+              isAuthenticated: true,
+              user: {
+                username: tokenInfo?.username || username,
+                role: tokenInfo?.role || "",
+                firstName: "",
+                lastName: "",
+                avatarUrl: "",
+                email: "",
+              },
+            });
+          }
 
           // Chuyển hướng đến trang profile
           navigate("/profile");
@@ -156,23 +219,78 @@ const LoginPage = () => {
           // Decode token để lấy thông tin user
           const tokenInfo = getTokenInfo(token);
 
-          notification.success({
-            message: "Đăng nhập thành công!",
-            description: `Chào mừng ${
-              tokenInfo?.username || "bạn"
-            } quay trở lại.`,
-            placement: "topRight",
-            duration: 3,
-          });
+          // Gọi API để lấy đầy đủ thông tin user
+          try {
+            const userInfoRes = await getMyInfoApi();
+            if (userInfoRes && userInfoRes.code === 1000) {
+              const userInfo = userInfoRes.result;
 
-          // Cập nhật auth context
-          setAuth({
-            isAuthenticated: true,
-            user: {
-              username: tokenInfo?.username || "",
-              role: tokenInfo?.role || "",
-            },
-          });
+              notification.success({
+                message: "Đăng nhập thành công!",
+                description: `Chào mừng ${
+                  userInfo.firstName || userInfo.username || "bạn"
+                } quay trở lại.`,
+                placement: "topRight",
+                duration: 3,
+              });
+
+              // Cập nhật auth context
+              setAuth({
+                isAuthenticated: true,
+                user: {
+                  username: userInfo.username || tokenInfo?.username || "",
+                  role: tokenInfo?.role || "",
+                  firstName: userInfo.firstName || "",
+                  lastName: userInfo.lastName || "",
+                  avatarUrl: userInfo.avatarUrl || userInfo.avatarName || "",
+                  email: userInfo.email || "",
+                },
+              });
+            } else {
+              notification.success({
+                message: "Đăng nhập thành công!",
+                description: `Chào mừng ${
+                  tokenInfo?.username || "bạn"
+                } quay trở lại.`,
+                placement: "topRight",
+                duration: 3,
+              });
+
+              setAuth({
+                isAuthenticated: true,
+                user: {
+                  username: tokenInfo?.username || "",
+                  role: tokenInfo?.role || "",
+                  firstName: "",
+                  lastName: "",
+                  avatarUrl: "",
+                  email: "",
+                },
+              });
+            }
+          } catch (userInfoError) {
+            console.error("Error fetching user info:", userInfoError);
+            notification.success({
+              message: "Đăng nhập thành công!",
+              description: `Chào mừng ${
+                tokenInfo?.username || "bạn"
+              } quay trở lại.`,
+              placement: "topRight",
+              duration: 3,
+            });
+
+            setAuth({
+              isAuthenticated: true,
+              user: {
+                username: tokenInfo?.username || "",
+                role: tokenInfo?.role || "",
+                firstName: "",
+                lastName: "",
+                avatarUrl: "",
+                email: "",
+              },
+            });
+          }
 
           // Chuyển hướng đến trang profile
           navigate("/profile");

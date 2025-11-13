@@ -364,6 +364,36 @@ const deleteAddressApi = (addressId) => {
   });
 };
 
+const logoutApi = (token) => {
+  const URL_API = "/api/user/auth/logout";
+  return axios.post(
+    URL_API,
+    {
+      token,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const refreshTokenApi = (token) => {
+  const URL_API = "/api/user/auth/refresh";
+  return axios.post(
+    URL_API,
+    {
+      token,
+    },
+    {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
 export {
   createUserApi,
   loginApi,
@@ -390,4 +420,6 @@ export {
   createAddressApi,
   updateAddressApi,
   deleteAddressApi,
+  logoutApi,
+  refreshTokenApi,
 };

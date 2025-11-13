@@ -20,6 +20,16 @@ export const ROLE_NAMES = {
 };
 
 /**
+ * Thứ tự ưu tiên của các role (số càng cao thì role càng cao)
+ */
+export const ROLE_PRIORITY = {
+  [ROLES.ADMIN]: 4,
+  [ROLES.MODERATOR]: 3,
+  [ROLES.SELLER]: 2,
+  [ROLES.USER]: 1,
+};
+
+/**
  * Kiểm tra xem role có phải là admin không
  */
 export const isAdmin = (role) => role === ROLES.ADMIN;
@@ -34,4 +44,30 @@ export const isUser = (role) => role === ROLES.USER;
  */
 export const getRoleName = (role) => {
   return ROLE_NAMES[role] || "Không xác định";
+};
+
+/**
+ * Lấy role cao nhất từ chuỗi roles (có thể có nhiều role cách nhau bởi dấu cách)
+ * @param {string} roleString - Chuỗi role (ví dụ: "ROLE_USER ROLE_SELLER" hoặc "ROLE_ADMIN")
+ * @returns {string} - Role cao nhất
+ */
+export const getHighestRole = (roleString) => {
+  if (!roleString) return "";
+
+  // Tách chuỗi role thành mảng (nếu có nhiều role)
+  const roles = roleString.includes(" ") ? roleString.split(" ") : [roleString];
+
+  // Tìm role có priority cao nhất
+  let highestRole = roles[0];
+  let highestPriority = ROLE_PRIORITY[roles[0]] || 0;
+
+  for (let i = 1; i < roles.length; i++) {
+    const currentPriority = ROLE_PRIORITY[roles[i]] || 0;
+    if (currentPriority > highestPriority) {
+      highestPriority = currentPriority;
+      highestRole = roles[i];
+    }
+  }
+
+  return highestRole;
 };

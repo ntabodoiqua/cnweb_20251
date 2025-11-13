@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { Button, Form, Input, notification, DatePicker, Checkbox } from "antd";
-import { createUserApi, loginWithGoogleApi } from "../util/api";
+import { createUserApi, loginWithGoogleApi, getMyInfoApi } from "../util/api";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/context/auth.context";
 import {
@@ -218,23 +218,78 @@ const RegisterPage = () => {
           // Decode token để lấy thông tin user
           const tokenInfo = getTokenInfo(token);
 
-          notification.success({
-            message: "Đăng ký thành công!",
-            description: `Chào mừng ${
-              tokenInfo?.username || "bạn"
-            } đã tham gia HUSTBuy!`,
-            placement: "topRight",
-            duration: 3,
-          });
+          // Gọi API để lấy đầy đủ thông tin user
+          try {
+            const userInfoRes = await getMyInfoApi();
+            if (userInfoRes && userInfoRes.code === 1000) {
+              const userInfo = userInfoRes.result;
 
-          // Cập nhật auth context
-          setAuth({
-            isAuthenticated: true,
-            user: {
-              username: tokenInfo?.username || "",
-              role: tokenInfo?.role || "",
-            },
-          });
+              notification.success({
+                message: "Đăng ký thành công!",
+                description: `Chào mừng ${
+                  userInfo.firstName || userInfo.username || "bạn"
+                } đã tham gia HUSTBuy!`,
+                placement: "topRight",
+                duration: 3,
+              });
+
+              // Cập nhật auth context
+              setAuth({
+                isAuthenticated: true,
+                user: {
+                  username: userInfo.username || tokenInfo?.username || "",
+                  role: tokenInfo?.role || "",
+                  firstName: userInfo.firstName || "",
+                  lastName: userInfo.lastName || "",
+                  avatarUrl: userInfo.avatarUrl || userInfo.avatarName || "",
+                  email: userInfo.email || "",
+                },
+              });
+            } else {
+              notification.success({
+                message: "Đăng ký thành công!",
+                description: `Chào mừng ${
+                  tokenInfo?.username || "bạn"
+                } đã tham gia HUSTBuy!`,
+                placement: "topRight",
+                duration: 3,
+              });
+
+              setAuth({
+                isAuthenticated: true,
+                user: {
+                  username: tokenInfo?.username || "",
+                  role: tokenInfo?.role || "",
+                  firstName: "",
+                  lastName: "",
+                  avatarUrl: "",
+                  email: "",
+                },
+              });
+            }
+          } catch (userInfoError) {
+            console.error("Error fetching user info:", userInfoError);
+            notification.success({
+              message: "Đăng ký thành công!",
+              description: `Chào mừng ${
+                tokenInfo?.username || "bạn"
+              } đã tham gia HUSTBuy!`,
+              placement: "topRight",
+              duration: 3,
+            });
+
+            setAuth({
+              isAuthenticated: true,
+              user: {
+                username: tokenInfo?.username || "",
+                role: tokenInfo?.role || "",
+                firstName: "",
+                lastName: "",
+                avatarUrl: "",
+                email: "",
+              },
+            });
+          }
 
           // Chuyển hướng về trang chủ
           navigate("/");
