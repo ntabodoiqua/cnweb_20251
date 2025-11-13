@@ -28,6 +28,8 @@ public interface SellerProfileService {
 
     FileInfoResponse uploadSellerDocument(String sellerProfileId, MultipartFile file, Locale locale);
 
+    FileInfoResponse getTempLinkForSellerDocument(String sellerProfileId, Locale locale);
+
     SellerProfileResponse editSellerProfile(String sellerProfileId, SellerProfileUpdateRequest request);
 
     String deleteSellerProfileDocument(String sellerProfileId, Locale locale);

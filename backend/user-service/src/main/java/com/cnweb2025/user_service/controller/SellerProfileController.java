@@ -68,9 +68,11 @@ public class SellerProfileController {
     @GetMapping("/{sellerProfileId}/document")
     public ApiResponse<FileInfoResponse> getSellerDocument(@PathVariable String sellerProfileId, Locale locale) {
         var sellerProfileResponse = sellerProfileService.getSpecificSellerProfileOfCurrentUser(sellerProfileId);
+        var url = sellerProfileService.getTempLinkForSellerDocument(sellerProfileId, locale).getFileUrl();
         var result = FileInfoResponse.builder()
                 .fileName(sellerProfileResponse.getDocumentName())
                 .uploadedAt(sellerProfileResponse.getDocumentUploadedAt())
+                .fileUrl(url)
                 .build();
         return ApiResponse.<FileInfoResponse>builder()
                 .result(result)

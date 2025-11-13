@@ -264,11 +264,6 @@ public class SellerProfileServiceImp implements SellerProfileService{
             log.error("Seller profile with ID: {} is not in PENDING status", sellerProfileId);
             throw new AppException(ErrorCode.SELLER_PROFILE_NOT_EDITABLE);
         }
-        if (sellerProfile.getDocumentName() != null) {
-            log.error("Seller profile with ID: {} already has a document uploaded", sellerProfileId);
-            throw new AppException(ErrorCode.SELLER_PROFILE_ALREADY_HAS_DOCUMENT);
-        }
-
         // validate file type and size
         if (file.isEmpty() || file.getSize() == 0) {
             log.error("Uploaded file is empty for seller profile ID: {}", sellerProfileId);
@@ -296,6 +291,31 @@ public class SellerProfileServiceImp implements SellerProfileService{
         } catch (Exception e) {
             log.error("Error uploading document for seller profile ID: {}: {}", sellerProfileId, e.getMessage());
             throw new AppException(ErrorCode.SELLER_PROFILE_UPLOAD_DOCUMENT_FAILED);
+        }
+    }
+
+    // Lấy link tài liệu của seller profile
+    public FileInfoResponse getTempLinkForSellerDocument(String sellerProfileId, Locale locale) {
+        var sellerProfile = sellerProfileRepository.findById(sellerProfileId)
+                .orElseThrow(() -> {
+                    log.error("Seller profile not found with ID: {}", sellerProfileId);
+                    return new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+                });
+        if (sellerProfile.getDocumentName() == null) {
+            log.error("No document found for seller profile ID: {}", sellerProfileId);
+            throw new AppException(ErrorCode.SELLER_PROFILE_DOCUMENT_NOT_FOUND);
+        }
+        try {
+            var response = fileServiceClient.viewPrivateFile(sellerProfile.getDocumentName(), 15); // link tồn tại trong 15 phút
+            var fileUrl = response.getResult();
+            return FileInfoResponse.builder()
+                    .fileName(sellerProfile.getDocumentName())
+                    .uploadedAt(sellerProfile.getDocumentUploadedAt())
+                    .fileUrl(fileUrl)
+                    .build();
+        } catch (Exception e) {
+            log.error("Error retrieving document link for seller profile ID: {}: {}", sellerProfileId, e.getMessage());
+            throw new AppException(ErrorCode.SELLER_PROFILE_GET_DOCUMENT_LINK_FAILED);
         }
     }
 
