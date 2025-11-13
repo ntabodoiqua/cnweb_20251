@@ -20,6 +20,10 @@ import {
   InfoCircleOutlined,
   LockOutlined,
   SendOutlined,
+  UploadOutlined,
+  FilePdfOutlined,
+  DeleteOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import { notification, Select, Tooltip, Alert, Modal } from "antd";
 import {
@@ -29,6 +33,8 @@ import {
   getProvincesApi,
   getWardsByProvinceApi,
   sendSellerProfileToReviewApi,
+  uploadSellerDocumentApi,
+  getSellerDocumentApi,
 } from "../../util/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -83,6 +89,8 @@ const ProfileSellerInfo = () => {
     contactEmail: "",
     contactPhone: "",
   });
+  const [uploadingDoc, setUploadingDoc] = useState(null);
+  const [documentInfo, setDocumentInfo] = useState({});
 
   const [formData, setFormData] = useState({
     storeName: "",
@@ -631,6 +639,110 @@ const ProfileSellerInfo = () => {
     });
   };
 
+  const fetchDocumentInfo = async (profileId) => {
+    try {
+      const res = await getSellerDocumentApi(profileId);
+      if (res && res.code === 1000) {
+        setDocumentInfo((prev) => ({
+          ...prev,
+          [profileId]: res.result,
+        }));
+      }
+    } catch (error) {
+      // Document not found is ok
+      if (error?.response?.status !== 404) {
+        console.error("Error fetching document info:", error);
+      }
+    }
+  };
+
+  const handleFileUpload = async (event, profileId) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    if (file.type !== "application/pdf") {
+      notification.error({
+        message: "File không hợp lệ",
+        description:
+          "Chỉ chấp nhận file PDF. Vui lòng gộp tất cả tài liệu vào một file PDF.",
+        placement: "topRight",
+        duration: 4,
+      });
+      event.target.value = "";
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024; // 10MB
+    if (file.size > maxSize) {
+      notification.error({
+        message: "File quá lớn",
+        description: "Kích thước file không được vượt quá 10MB.",
+        placement: "topRight",
+        duration: 3,
+      });
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      setUploadingDoc(profileId);
+      const res = await uploadSellerDocumentApi(profileId, file);
+
+      if (res && res.code === 1000) {
+        notification.success({
+          message: "Tải lên thành công",
+          description: `File "${res.result.originalFileName}" đã được tải lên thành công.`,
+          placement: "topRight",
+          duration: 3,
+        });
+
+        // Refresh document info
+        await fetchDocumentInfo(profileId);
+      } else {
+        notification.error({
+          message: "Tải lên thất bại",
+          description:
+            res.message || "Có lỗi xảy ra khi tải file. Vui lòng thử lại.",
+          placement: "topRight",
+          duration: 3,
+        });
+      }
+    } catch (error) {
+      console.error("Error uploading document:", error);
+      notification.error({
+        message: "Tải lên thất bại",
+        description:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Có lỗi xảy ra khi tải file. Vui lòng thử lại.",
+        placement: "topRight",
+        duration: 3,
+      });
+    } finally {
+      setUploadingDoc(null);
+      event.target.value = "";
+    }
+  };
+
+  const handleViewDocument = (documentInfo) => {
+    if (documentInfo?.fileUrl) {
+      window.open(documentInfo.fileUrl, "_blank");
+    }
+  };
+
+  // Helper function to extract original filename from UUID-prefixed filename
+  const getOriginalFileName = (fileName) => {
+    if (!fileName) return "Tài liệu hồ sơ";
+
+    // Remove UUID prefix (format: "uuid_originalname.pdf")
+    // UUID format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx_
+    const uuidPattern =
+      /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}_/i;
+    return fileName.replace(uuidPattern, "");
+  };
+
   // Helper function to toggle expand
   const toggleExpand = (profileId) => {
     setExpandedIds((prev) =>
@@ -638,6 +750,11 @@ const ProfileSellerInfo = () => {
         ? prev.filter((id) => id !== profileId)
         : [...prev, profileId]
     );
+
+    // Fetch document info when expanding
+    if (!expandedIds.includes(profileId)) {
+      fetchDocumentInfo(profileId);
+    }
   };
 
   // Render single profile card
@@ -782,6 +899,134 @@ const ProfileSellerInfo = () => {
                     </div>
                   </div>
                 )}
+
+              {/* Document Upload Section */}
+              <div className="document-upload-section">
+                <div className="document-upload-header">
+                  <FilePdfOutlined
+                    style={{ fontSize: "18px", color: "#1890ff" }}
+                  />
+                  <h3>Tài liệu hồ sơ</h3>
+                </div>
+
+                {documentInfo[profile.id] ? (
+                  <div className="document-info">
+                    <div className="document-details">
+                      <FilePdfOutlined
+                        style={{ fontSize: "24px", color: "#ff4d4f" }}
+                      />
+                      <div className="document-meta">
+                        <div className="document-name">
+                          {getOriginalFileName(
+                            documentInfo[profile.id].fileName
+                          )}
+                        </div>
+                        <div className="document-size-date">
+                          {documentInfo[profile.id].fileSize && (
+                            <span>
+                              {(
+                                documentInfo[profile.id].fileSize / 1024
+                              ).toFixed(2)}{" "}
+                              KB
+                            </span>
+                          )}
+                          {documentInfo[profile.id].uploadedAt && (
+                            <>
+                              {documentInfo[profile.id].fileSize && (
+                                <span className="separator">•</span>
+                              )}
+                              <span>
+                                Tải lên:{" "}
+                                {dayjs(
+                                  documentInfo[profile.id].uploadedAt
+                                ).format("DD/MM/YYYY HH:mm")}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="document-actions">
+                      <Tooltip title="Xem tài liệu">
+                        <button
+                          className="document-btn document-btn-view"
+                          onClick={() =>
+                            handleViewDocument(documentInfo[profile.id])
+                          }
+                        >
+                          <EyeOutlined />
+                          Xem
+                        </button>
+                      </Tooltip>
+                      {canEdit && (
+                        <Tooltip title="Tải lên tài liệu mới (sẽ thay thế tài liệu hiện tại)">
+                          <label className="document-btn document-btn-upload">
+                            <UploadOutlined />
+                            {uploadingDoc === profile.id
+                              ? "Đang tải..."
+                              : "Thay thế"}
+                            <input
+                              type="file"
+                              accept=".pdf"
+                              onChange={(e) => handleFileUpload(e, profile.id)}
+                              disabled={uploadingDoc === profile.id}
+                              style={{ display: "none" }}
+                            />
+                          </label>
+                        </Tooltip>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="document-empty">
+                    {canEdit ? (
+                      <>
+                        <div className="document-empty-icon">
+                          <FilePdfOutlined />
+                        </div>
+                        <p className="document-empty-text">
+                          Chưa có tài liệu hồ sơ. Vui lòng tải lên file PDF chứa
+                          các giấy tờ liên quan.
+                        </p>
+                        <Alert
+                          message="Lưu ý"
+                          description="Chỉ chấp nhận file PDF. Vui lòng gộp tất cả tài liệu (CMND, giấy phép kinh doanh, v.v.) vào một file PDF duy nhất."
+                          type="warning"
+                          showIcon
+                          style={{ marginBottom: "12px", textAlign: "left" }}
+                        />
+                        <label className="document-btn document-btn-primary document-btn-upload-large">
+                          <UploadOutlined />
+                          {uploadingDoc === profile.id ? (
+                            <>
+                              <LoadingOutlined style={{ marginRight: "8px" }} />
+                              Đang tải lên...
+                            </>
+                          ) : (
+                            "Tải lên tài liệu"
+                          )}
+                          <input
+                            type="file"
+                            accept=".pdf"
+                            onChange={(e) => handleFileUpload(e, profile.id)}
+                            disabled={uploadingDoc === profile.id}
+                            style={{ display: "none" }}
+                          />
+                        </label>
+                      </>
+                    ) : (
+                      <>
+                        <div className="document-empty-icon">
+                          <FilePdfOutlined />
+                        </div>
+                        <p className="document-empty-text">
+                          Chưa có tài liệu hồ sơ.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
 
               {/* Timestamps */}
               <div className="timestamps-section">
