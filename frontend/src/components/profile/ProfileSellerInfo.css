@@ -560,9 +560,9 @@
   font-weight: 600;
   color: #333;
   margin-bottom: 4px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.4;
 }
 
 .document-size-date {
@@ -802,6 +802,20 @@
 
 /* ==================== Responsive Design ==================== */
 
+@media (max-width: 1024px) {
+  .shop-info-section {
+    padding: 24px;
+  }
+
+  .shop-contact-info {
+    gap: 12px;
+  }
+
+  .document-info {
+    flex-wrap: wrap;
+  }
+}
+
 @media (max-width: 768px) {
   .seller-profile-compact {
     flex-direction: column;
@@ -816,7 +830,9 @@
 
   .compact-right {
     width: 100%;
-    justify-content: space-between;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 12px;
   }
 
   .compact-meta {
@@ -824,13 +840,15 @@
   }
 
   .expand-button {
-    width: auto;
+    width: 100%;
+    justify-content: center;
   }
 
   .shop-info-header {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    gap: 16px;
   }
 
   .shop-logo,
@@ -841,20 +859,23 @@
 
   .shop-contact-info {
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
+    width: 100%;
   }
 
   .shop-contact-item {
     width: 100%;
-    justify-content: center;
+    justify-content: flex-start;
   }
 
   .location-selects {
     grid-template-columns: 1fr;
+    gap: 20px;
   }
 
   .timestamps-section {
     grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .form-section-title {
@@ -862,28 +883,50 @@
   }
 
   .shop-name {
-    font-size: 18px;
+    font-size: 20px;
+  }
+
+  .document-upload-section {
+    padding: 16px;
   }
 
   .document-info {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
   }
 
   .document-details {
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    text-align: center;
+    text-align: left;
+  }
+
+  .document-name {
+    font-size: 13px;
+  }
+
+  .document-size-date {
+    font-size: 12px;
   }
 
   .document-actions {
-    flex-direction: column;
+    flex-direction: row;
     width: 100%;
+    justify-content: stretch;
   }
 
   .document-btn {
-    width: 100%;
+    flex: 1;
     justify-content: center;
+  }
+
+  .seller-profile-container .profile-form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .seller-profile-container .profile-btn {
+    width: 100%;
   }
 }
 
@@ -945,7 +988,11 @@
 
 @media (max-width: 480px) {
   .shop-info-section {
-    padding: 20px 16px;
+    padding: 16px 12px;
+  }
+
+  .seller-profile-expanded {
+    padding: 16px 12px;
   }
 
   .seller-empty-state {
@@ -964,6 +1011,16 @@
     font-size: 14px;
   }
 
+  .compact-logo {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+
+  .compact-store-name {
+    font-size: 16px;
+  }
+
   .shop-logo,
   .shop-logo-placeholder {
     width: 70px;
@@ -976,7 +1033,105 @@
   }
 
   .seller-status-badge {
-    font-size: 13px;
+    font-size: 12px;
     padding: 6px 12px;
+  }
+
+  .shop-description {
+    font-size: 13px;
+  }
+
+  .shop-contact-item {
+    font-size: 13px;
+  }
+
+  .shop-address-section {
+    padding: 12px;
+  }
+
+  .shop-address-title {
+    font-size: 14px;
+  }
+
+  .shop-address-text {
+    font-size: 13px;
+  }
+
+  .form-section-title {
+    font-size: 15px;
+    margin: 24px 0 16px;
+  }
+
+  .document-upload-section {
+    padding: 12px;
+  }
+
+  .document-upload-header h3 {
+    font-size: 14px;
+  }
+
+  .document-details {
+    gap: 8px;
+  }
+
+  .document-name {
+    font-size: 12px;
+  }
+
+  .document-size-date {
+    font-size: 11px;
+  }
+
+  .document-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .document-btn {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+
+  .document-empty {
+    padding: 24px 12px;
+  }
+
+  .document-empty-icon {
+    font-size: 40px;
+  }
+
+  .document-empty-text {
+    font-size: 13px;
+  }
+
+  .timestamps-section {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .timestamp-label {
+    font-size: 11px;
+  }
+
+  .timestamp-value {
+    font-size: 13px;
+  }
+
+  .rejection-reason-section {
+    padding: 12px;
+  }
+
+  .rejection-reason-title {
+    font-size: 14px;
+  }
+
+  .rejection-reason-text {
+    font-size: 13px;
+  }
+
+  .seller-profile-container .profile-btn {
+    min-width: 100%;
+    padding: 12px 20px;
+    font-size: 14px;
   }
 }
