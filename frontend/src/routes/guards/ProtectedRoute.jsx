@@ -37,8 +37,28 @@ const ProtectedRoute = ({
   if (allowedRoles.length > 0) {
     const userRole = auth.user?.role;
 
-    // Kiểm tra xem user có role phù hợp không
-    if (!userRole || !allowedRoles.includes(userRole)) {
+    if (!userRole) {
+      if (showNotification) {
+        notification.error({
+          message: "Không có quyền truy cập",
+          description: "Bạn không có quyền truy cập trang này.",
+          placement: "topRight",
+          duration: 3,
+        });
+      }
+      return <Navigate to={PUBLIC_ROUTES.HOME} replace />;
+    }
+
+    // Xử lý trường hợp role là string chứa nhiều roles (cách nhau bởi dấu cách)
+    // Ví dụ: "ROLE_USER ROLE_SELLER"
+    const userRoles = userRole.includes(" ") ? userRole.split(" ") : [userRole];
+
+    // Kiểm tra xem user có ít nhất một trong các role được phép không
+    const hasAllowedRole = userRoles.some((role) =>
+      allowedRoles.includes(role)
+    );
+
+    if (!hasAllowedRole) {
       if (showNotification) {
         notification.error({
           message: "Không có quyền truy cập",
