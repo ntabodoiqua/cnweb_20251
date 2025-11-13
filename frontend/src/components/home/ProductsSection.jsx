@@ -19,6 +19,9 @@ const ProductsSection = ({
   showViewAll = false,
   viewAllLink = "/products",
   viewAllText = "Xem thêm",
+  onQuickView,
+  onAddToCart,
+  onAddToWishlist,
 }) => {
   const navigate = useNavigate();
 
@@ -48,6 +51,9 @@ const ProductsSection = ({
             onProductClick={onProductClick}
             formatPrice={formatPrice}
             showProgress={showProgress}
+            onQuickView={onQuickView}
+            onAddToCart={onAddToCart}
+            onAddToWishlist={onAddToWishlist}
           />
         ))}
       </div>
@@ -65,6 +71,9 @@ ProductsSection.propTypes = {
   showViewAll: PropTypes.bool,
   viewAllLink: PropTypes.string,
   viewAllText: PropTypes.string,
+  onQuickView: PropTypes.func,
+  onAddToCart: PropTypes.func,
+  onAddToWishlist: PropTypes.func,
 };
 
 export default ProductsSection;

@@ -12,6 +12,9 @@ const FlashSaleSection = ({
   onProductClick,
   formatPrice,
   initialTime,
+  onQuickView,
+  onAddToCart,
+  onAddToWishlist,
 }) => {
   const [timeLeft, setTimeLeft] = useState(
     initialTime || {
@@ -70,6 +73,9 @@ const FlashSaleSection = ({
               onProductClick={onProductClick}
               formatPrice={formatPrice}
               showProgress={true}
+              onQuickView={onQuickView}
+              onAddToCart={onAddToCart}
+              onAddToWishlist={onAddToWishlist}
             />
           ))}
         </div>
@@ -87,6 +93,9 @@ FlashSaleSection.propTypes = {
     minutes: PropTypes.number,
     seconds: PropTypes.number,
   }),
+  onQuickView: PropTypes.func,
+  onAddToCart: PropTypes.func,
+  onAddToWishlist: PropTypes.func,
 };
 
 export default FlashSaleSection;

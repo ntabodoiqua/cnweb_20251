@@ -1,6 +1,11 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { Rate, Progress } from "antd";
+import { Rate, Progress, Button, message } from "antd";
+import {
+  ShoppingCartOutlined,
+  HeartOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
 
 /**
  * Product Card Component
@@ -11,7 +16,35 @@ const ProductCard = ({
   onProductClick,
   formatPrice,
   showProgress = false,
+  onQuickView,
+  onAddToCart,
+  onAddToWishlist,
 }) => {
+  const handleQuickView = (e) => {
+    e.stopPropagation();
+    if (onQuickView) {
+      onQuickView(product);
+    }
+  };
+
+  const handleAddToCart = (e) => {
+    e.stopPropagation();
+    if (onAddToCart) {
+      onAddToCart(product);
+    } else {
+      message.success("Đã thêm vào giỏ hàng!");
+    }
+  };
+
+  const handleAddToWishlist = (e) => {
+    e.stopPropagation();
+    if (onAddToWishlist) {
+      onAddToWishlist(product);
+    } else {
+      message.success("Đã thêm vào danh sách yêu thích!");
+    }
+  };
+
   return (
     <div
       className="product-card"
@@ -30,6 +63,34 @@ const ProductCard = ({
         {product.discount > 0 && (
           <div className="product-discount">-{product.discount}%</div>
         )}
+
+        {/* Quick Actions Overlay */}
+        <div className="product-quick-actions">
+          <Button
+            type="default"
+            shape="circle"
+            icon={<EyeOutlined />}
+            onClick={handleQuickView}
+            className="quick-action-btn"
+            title="Xem nhanh"
+          />
+          <Button
+            type="default"
+            shape="circle"
+            icon={<HeartOutlined />}
+            onClick={handleAddToWishlist}
+            className="quick-action-btn"
+            title="Yêu thích"
+          />
+          <Button
+            type="primary"
+            shape="circle"
+            icon={<ShoppingCartOutlined />}
+            onClick={handleAddToCart}
+            className="quick-action-btn"
+            title="Thêm vào giỏ"
+          />
+        </div>
       </div>
       <div className="product-info">
         <h3 className="product-name">{product.name}</h3>
@@ -95,6 +156,9 @@ ProductCard.propTypes = {
   onProductClick: PropTypes.func.isRequired,
   formatPrice: PropTypes.func.isRequired,
   showProgress: PropTypes.bool,
+  onQuickView: PropTypes.func,
+  onAddToCart: PropTypes.func,
+  onAddToWishlist: PropTypes.func,
 };
 
 export default ProductCard;

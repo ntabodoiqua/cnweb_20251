@@ -23,6 +23,10 @@ import {
   ProductsSection,
   BrandsSection,
   TestimonialsSection,
+  QuickViewModal,
+  TrustBadges,
+  RecentlyViewed,
+  addToRecentlyViewed,
 } from "../components/home";
 import "../styles/home.css";
 
@@ -30,6 +34,8 @@ const HomePage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [imagesLoaded, setImagesLoaded] = useState(false);
+  const [quickViewVisible, setQuickViewVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Simulate loading and wait for critical images
   useEffect(() => {
@@ -87,7 +93,34 @@ const HomePage = () => {
   // Handle product click
   const handleProductClick = (productId) => {
     message.info("Chi tiết sản phẩm sẽ được thêm sau khi ghép API");
+    // Save to recently viewed
+    const product = [
+      ...flashSaleProducts,
+      ...featuredProducts,
+      ...dailyDeals,
+    ].find((p) => p.id === productId);
+    if (product) {
+      addToRecentlyViewed(product);
+    }
     // navigate(`/product/${productId}`);
+  };
+
+  // Handle quick view
+  const handleQuickView = (product) => {
+    setSelectedProduct(product);
+    setQuickViewVisible(true);
+  };
+
+  // Handle add to cart
+  const handleAddToCart = (product) => {
+    message.success(`Đã thêm "${product.name}" vào giỏ hàng!`);
+    // TODO: Implement actual cart logic
+  };
+
+  // Handle add to wishlist
+  const handleAddToWishlist = (product) => {
+    message.success(`Đã thêm "${product.name}" vào danh sách yêu thích!`);
+    // TODO: Implement actual wishlist logic
   };
 
   // Handle category click
@@ -124,6 +157,9 @@ const HomePage = () => {
         <HeroBanner slides={bannerSlides} />
 
         <div className="home-container">
+          {/* Trust Badges */}
+          <TrustBadges />
+
           {/* Promotion Banners */}
           <PromotionBanners banners={promotionBanners} />
 
@@ -138,6 +174,9 @@ const HomePage = () => {
             products={flashSaleProducts}
             onProductClick={handleProductClick}
             formatPrice={formatPrice}
+            onQuickView={handleQuickView}
+            onAddToCart={handleAddToCart}
+            onAddToWishlist={handleAddToWishlist}
           />
 
           {/* Featured Products Section */}
@@ -150,6 +189,9 @@ const HomePage = () => {
             showViewAll={true}
             viewAllLink="/products"
             viewAllText="Xem thêm"
+            onQuickView={handleQuickView}
+            onAddToCart={handleAddToCart}
+            onAddToWishlist={handleAddToWishlist}
           />
 
           {/* Daily Deals Section */}
@@ -160,6 +202,15 @@ const HomePage = () => {
             onProductClick={handleProductClick}
             formatPrice={formatPrice}
             showProgress={true}
+            onQuickView={handleQuickView}
+            onAddToCart={handleAddToCart}
+            onAddToWishlist={handleAddToWishlist}
+          />
+
+          {/* Recently Viewed Section */}
+          <RecentlyViewed
+            formatPrice={formatPrice}
+            onProductClick={handleProductClick}
           />
 
           {/* Top Brands Section */}
@@ -168,6 +219,14 @@ const HomePage = () => {
           {/* Testimonials Section */}
           <TestimonialsSection testimonials={testimonials} />
         </div>
+
+        {/* Quick View Modal */}
+        <QuickViewModal
+          visible={quickViewVisible}
+          onClose={() => setQuickViewVisible(false)}
+          product={selectedProduct}
+          formatPrice={formatPrice}
+        />
 
         {/* Hidden content for SEO */}
         <div className="visually-hidden">
