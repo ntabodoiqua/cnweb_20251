@@ -292,6 +292,28 @@ const sendSellerProfileToReviewApi = (profileId) => {
   });
 };
 
+const uploadSellerDocumentApi = (profileId, file) => {
+  const URL_API = `/api/user/seller-profiles/${profileId}/uploadDocument`;
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return axios.patch(URL_API, formData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+const getSellerDocumentApi = (profileId) => {
+  const URL_API = `/api/user/seller-profiles/${profileId}/document`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // Address APIs
 const getAddressesApi = (page = 0, size = 20) => {
   const URL_API = "/api/user/address";
@@ -356,6 +378,8 @@ export {
   getProvincesApi,
   getWardsByProvinceApi,
   sendSellerProfileToReviewApi,
+  uploadSellerDocumentApi,
+  getSellerDocumentApi,
   getAddressesApi,
   createAddressApi,
   updateAddressApi,
