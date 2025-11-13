@@ -5,7 +5,7 @@ import {
   SyncOutlined,
   CustomerServiceOutlined,
   CreditCardOutlined,
-  ShieldCheckOutlined,
+  SafetyCertificateOutlined,
 } from "@ant-design/icons";
 
 /**
@@ -51,7 +51,7 @@ const TrustBadges = () => {
     },
     {
       id: 6,
-      icon: <ShieldCheckOutlined />,
+      icon: <SafetyCertificateOutlined />,
       title: "Bảo Hành Chính Hãng",
       description: "Lên đến 24 tháng",
       color: "#13c2c2",

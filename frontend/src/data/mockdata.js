@@ -137,7 +137,7 @@ export const flashSaleProducts = [
     id: 1,
     name: "iPhone 15 Pro Max 256GB",
     image:
-      "https://images.unsplash.com/photo-1697912510820-00fdccfd0eff?w=400&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1709178295038-acbeec786fcf?q=80&w=627&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     originalPrice: 29990000,
     salePrice: 24990000,
     discount: 17,
@@ -275,7 +275,7 @@ export const featuredProducts = [
     id: 15,
     name: "Máy Lọc Không Khí Xiaomi",
     image:
-      "https://images.unsplash.com/photo-1588614959060-4d14f1bcb2ce?w=400&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1652352529254-5106f4c8e03c?q=80&w=764&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     price: 2490000,
     originalPrice: 3990000,
     discount: 38,

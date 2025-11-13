@@ -10,14 +10,12 @@ import {
   featuredProducts,
   dailyDeals,
   topBrands,
-  promotionBanners,
   testimonials,
   homePageMeta,
 } from "../data/mockdata";
 import LoadingSpinner from "../components/LoadingSpinner";
 import {
   HeroBanner,
-  PromotionBanners,
   CategoriesSection,
   FlashSaleSection,
   ProductsSection,
@@ -160,9 +158,6 @@ const HomePage = () => {
           {/* Trust Badges */}
           <TrustBadges />
 
-          {/* Promotion Banners */}
-          <PromotionBanners banners={promotionBanners} />
-
           {/* Categories Section */}
           <CategoriesSection
             categories={categories}
@@ -211,6 +206,9 @@ const HomePage = () => {
           <RecentlyViewed
             formatPrice={formatPrice}
             onProductClick={handleProductClick}
+            onQuickView={handleQuickView}
+            onAddToCart={handleAddToCart}
+            onAddToWishlist={handleAddToWishlist}
           />
 
           {/* Top Brands Section */}
