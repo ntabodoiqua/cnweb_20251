@@ -261,7 +261,7 @@ const router = createBrowserRouter([
         path: PROTECTED_ROUTES.USER,
         element: (
           <SuspenseWrapper>
-            <ProtectedRoute allowedRoles={[ROLES.USER, ROLES.ADMIN]}>
+            <ProtectedRoute allowedRoles={[ROLES.USER, ROLES.ADMIN, ROLES.SELLER]}>
               <UserPage />
             </ProtectedRoute>
           </SuspenseWrapper>
@@ -273,7 +273,7 @@ const router = createBrowserRouter([
         path: PROTECTED_ROUTES.PROFILE,
         element: (
           <SuspenseWrapper>
-            <ProtectedRoute allowedRoles={[ROLES.USER, ROLES.ADMIN]}>
+            <ProtectedRoute allowedRoles={[ROLES.USER, ROLES.ADMIN, ROLES.SELLER]}>
               <ProfileLayout />
             </ProtectedRoute>
           </SuspenseWrapper>
