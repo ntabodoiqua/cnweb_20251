@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
-import "./about-us.css";
-import useScrollToTop from "../hooks/useScrollToTop";
+import "../../../styles/about-us.css";
+import useScrollToTop from "../../../hooks/useScrollToTop";
 import {
   EyeOutlined,
   RocketOutlined,
@@ -8,12 +8,12 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 // Import ảnh cho team members
-import tomImg from "../assets/teams/tom.jpg";
-import lightningImg from "../assets/teams/lightning.jpg";
-import meatheadImg from "../assets/teams/meathead.jpg";
-import butchImg from "../assets/teams/butch.jpg";
+import tomImg from "../../../assets/teams/tom.jpg";
+import lightningImg from "../../../assets/teams/lightning.jpg";
+import meatheadImg from "../../../assets/teams/meathead.jpg";
+import butchImg from "../../../assets/teams/butch.jpg";
 // Import logo
-import logo from "../assets/logo.png";
+import logo from "../../../assets/logo.png";
 
 const AboutUs = () => {
   // Sử dụng custom hook để cuộn lên đầu trang
