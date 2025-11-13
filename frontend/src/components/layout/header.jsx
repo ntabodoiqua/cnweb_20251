@@ -283,11 +283,6 @@ const Header = () => {
     ...(auth.isAuthenticated
       ? [
           {
-            key: "user",
-            icon: <UserOutlined />,
-            label: <Link to="/user">Người dùng</Link>,
-          },
-          {
             key: "profile",
             icon: <ProfileOutlined />,
             label: <Link to="/profile">Hồ sơ</Link>,
@@ -447,13 +442,6 @@ const Header = () => {
 
             {auth.isAuthenticated && (
               <>
-                <Link
-                  to="/user"
-                  className={`nav-link ${isActive("/user") ? "active" : ""}`}
-                >
-                  <UserOutlined />
-                  <span>Người dùng</span>
-                </Link>
                 <Link
                   to="/profile"
                   className={`nav-link ${isActive("/profile") ? "active" : ""}`}

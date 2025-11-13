@@ -31,13 +31,22 @@ const SellersPage = lazy(() => import("../pages/guest/About_Us/sellers"));
 const ContactPage = lazy(() => import("../pages/guest/About_Us/contact"));
 
 const HelpPage = lazy(() => import("../pages/guest/Customer support/HelpPage"));
-const OrdersPage = lazy(() => import("../pages/guest/Customer support/OrdersPage"));
-const PaymentPage = lazy(() => import("../pages/guest/Customer support/PaymentPage"));
-const ReturnsPage = lazy(() => import("../pages/guest/Customer support/ReturnsPage"));
-const ShippingPage = lazy(() => import("../pages/guest/Customer support/ShippingPage"));
-const WarrantyPage = lazy(() => import("../pages/guest/Customer support/WarrantyPage"));
+const OrdersPage = lazy(() =>
+  import("../pages/guest/Customer support/OrdersPage")
+);
+const PaymentPage = lazy(() =>
+  import("../pages/guest/Customer support/PaymentPage")
+);
+const ReturnsPage = lazy(() =>
+  import("../pages/guest/Customer support/ReturnsPage")
+);
+const ShippingPage = lazy(() =>
+  import("../pages/guest/Customer support/ShippingPage")
+);
+const WarrantyPage = lazy(() =>
+  import("../pages/guest/Customer support/WarrantyPage")
+);
 // Protected Pages
-const UserPage = lazy(() => import("../pages/user"));
 const ProfileLayout = lazy(() => import("../pages/ProfileLayout"));
 
 // Profile sub-pages
@@ -257,23 +266,14 @@ const router = createBrowserRouter([
       },
 
       // ==================== PROTECTED ROUTES (USER + ADMIN) ====================
-      {
-        path: PROTECTED_ROUTES.USER,
-        element: (
-          <SuspenseWrapper>
-            <ProtectedRoute allowedRoles={[ROLES.USER, ROLES.ADMIN, ROLES.SELLER]}>
-              <UserPage />
-            </ProtectedRoute>
-          </SuspenseWrapper>
-        ),
-      },
-
       // Profile routes with nested pages
       {
         path: PROTECTED_ROUTES.PROFILE,
         element: (
           <SuspenseWrapper>
-            <ProtectedRoute allowedRoles={[ROLES.USER, ROLES.ADMIN, ROLES.SELLER]}>
+            <ProtectedRoute
+              allowedRoles={[ROLES.USER, ROLES.ADMIN, ROLES.SELLER]}
+            >
               <ProfileLayout />
             </ProtectedRoute>
           </SuspenseWrapper>
