@@ -16,9 +16,9 @@
 }
 
 .content {
-    display: flex;
-    gap: 0;
-    align-items: flex-start;
+  display: flex;
+  gap: 0;
+  align-items: flex-start;
 }
 
 /* ==================== Collapsible Sidebar Navigation ==================== */
@@ -36,7 +36,7 @@
   flex-shrink: 0;
 }
 
-.profile-sidebar.collapsed {
+.sidebar.collapsed {
   width: 80px;
 }
 
@@ -50,7 +50,7 @@
   gap: 12px;
 }
 
-.profile-sidebar.collapsed .profile-sidebar-header {
+.sidebar.collapsed .sidebarHeader {
   padding: 0 16px 20px;
   flex-direction: column;
   gap: 8px;
@@ -69,7 +69,7 @@
   flex: 1;
 }
 
-.profile-sidebar.collapsed .profile-sidebar-title {
+.sidebar.collapsed .sidebarTitle {
   font-size: 0;
   justify-content: center;
 }
@@ -80,21 +80,21 @@
   flex-shrink: 0;
 }
 
-.profile-sidebar.collapsed .profile-sidebar-title .anticon {
+.sidebar.collapsed .sidebarTitle .anticon {
   font-size: 24px;
 }
 
-.profile-sidebar-title span {
+.sidebarTitle span {
   transition: opacity 0.2s ease;
 }
 
-.profile-sidebar.collapsed .profile-sidebar-title span {
+.sidebar.collapsed .sidebarTitle span {
   opacity: 0;
   width: 0;
   overflow: hidden;
 }
 
-.profile-sidebar-toggle {
+.sidebarToggle {
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
   color: white;
   border: none;
@@ -145,10 +145,10 @@
   border-left: 3px solid transparent;
 }
 
-.profile-sidebar.collapsed .profile-menu-link {
-    padding: 14px 16px;
-    justify-content: center;
-    gap: 0;
+.sidebar.collapsed .menuLink {
+  padding: 14px 16px;
+  justify-content: center;
+  gap: 0;
 }
 
 .menuLink::before {
@@ -178,8 +178,8 @@
   padding-left: 28px;
 }
 
-.profile-sidebar.collapsed .profile-menu-link:hover {
-    padding-left: 16px;
+.sidebar.collapsed .menuLink:hover {
+  padding-left: 16px;
 }
 
 .menuLink.active {
@@ -189,8 +189,8 @@
   padding-left: 28px;
 }
 
-.profile-sidebar.collapsed .profile-menu-link.active {
-    padding-left: 16px;
+.sidebar.collapsed .menuLink.active {
+  padding-left: 16px;
 }
 
 .menuLink .anticon {
@@ -202,22 +202,18 @@
   flex-shrink: 0;
 }
 
-.profile-menu-link:hover .profile-menu-icon,
-.profile-menu-link.active .profile-menu-icon {
+.menuLink:hover .anticon,
+.menuLink.active .anticon {
   transform: scale(1.15);
 }
 
-.profile-menu-label {
+.menuLabel {
   white-space: nowrap;
   overflow: hidden;
   transition: opacity 0.2s ease;
 }
 
-.menuLink:hover .anticon,
-.menuLink.active .anticon {
-  transform: scale(1.1);
-
-.profile-sidebar.collapsed .profile-menu-label {
+.sidebar.collapsed .menuLabel {
   opacity: 0;
   width: 0;
   overflow: hidden;
@@ -226,8 +222,8 @@
 /* ==================== Main Content Area ==================== */
 
 .main {
-    flex: 1;
-    background: white;
+  flex: 1;
+  background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(238, 77, 45, 0.08);
   padding: 32px;
@@ -236,7 +232,7 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.profile-main.sidebar-collapsed {
+.main.sidebarCollapsed {
   margin-left: 30px;
 }
 
@@ -392,11 +388,11 @@
   margin: 0 0 8px;
 }
 
-.profile-roles-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 12px;
+.rolesContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .roleBadge {
@@ -488,7 +484,7 @@
   font-size: 16px;
 }
 
-.formLabel .required {
+.required {
   color: #ff4d4f;
   margin-left: 2px;
 }
@@ -772,18 +768,18 @@
     gap: 0;
   }
 
-    .profile-main {
-        margin-left: 20px;
-    }
+  .main {
+    margin-left: 20px;
+  }
 
   .sidebar {
     top: 130px;
-      width: 260px;
+    width: 260px;
   }
 
-    .profile-sidebar.collapsed {
-        width: 70px;
-    }
+  .sidebar.collapsed {
+    width: 70px;
+  }
 }
 
 @media (max-width: 768px) {
@@ -792,7 +788,7 @@
   }
 
   .content {
-      flex-direction: column;
+    flex-direction: column;
     gap: 20px;
   }
 
@@ -802,38 +798,38 @@
     margin-bottom: 20px;
   }
 
-    .profile-sidebar.collapsed {
-        width: 100% !important;
-    }
+  .sidebar.collapsed {
+    width: 100% !important;
+  }
 
-    .profile-sidebar.collapsed .profile-sidebar-header {
-        flex-direction: row;
-        justify-content: space-between;
-    }
+  .sidebar.collapsed .sidebarHeader {
+    flex-direction: row;
+    justify-content: space-between;
+  }
 
-    .profile-sidebar.collapsed .profile-sidebar-title {
-        font-size: 18px;
-        justify-content: flex-start;
-    }
+  .sidebar.collapsed .sidebarTitle {
+    font-size: 18px;
+    justify-content: flex-start;
+  }
 
-    .profile-sidebar.collapsed .profile-sidebar-title span {
-        opacity: 1;
-        width: auto;
-    }
+  .sidebar.collapsed .sidebarTitle span {
+    opacity: 1;
+    width: auto;
+  }
 
-    .profile-sidebar.collapsed .profile-menu-link {
-        padding: 14px 24px;
-        justify-content: flex-start;
-    }
+  .sidebar.collapsed .menuLink {
+    padding: 14px 24px;
+    justify-content: flex-start;
+  }
 
-    .profile-sidebar.collapsed .profile-menu-label {
-        opacity: 1;
-        width: auto;
-    }
+  .sidebar.collapsed .menuLabel {
+    opacity: 1;
+    width: auto;
+  }
 
   .main {
-      margin-left: 0;
-      padding: 24px 16px;
+    margin-left: 0;
+    padding: 24px 16px;
   }
 
   .avatarSection {
