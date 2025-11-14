@@ -99,6 +99,9 @@ const SellerOverviewPage = lazy(() =>
 const SellerProductsPage = lazy(() =>
   import("../pages/seller/SellerProductsPage")
 );
+const SellerProductDetailPage = lazy(() =>
+  import("../pages/seller/SellerProductDetailPage")
+);
 const SellerOrdersPage = lazy(() => import("../pages/seller/SellerOrdersPage"));
 const SellerCategoriesPage = lazy(() =>
   import("../pages/seller/SellerCategoriesPage")
@@ -465,6 +468,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <SellerProductsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: `${PROTECTED_ROUTES.SELLER_PRODUCTS}/:productId`,
+            element: (
+              <SuspenseWrapper>
+                <SellerProductDetailPage />
               </SuspenseWrapper>
             ),
           },
