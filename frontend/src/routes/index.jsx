@@ -70,7 +70,24 @@ const ProfileSecurityPage = lazy(() =>
 );
 
 // Admin Pages
-const AdminDashboardPage = lazy(() => import("../pages/admin-dashboard"));
+const AdminDashboardLayout = lazy(() =>
+  import("../pages/admin/AdminDashboardLayout")
+);
+const AdminOverviewPage = lazy(() =>
+  import("../pages/admin/AdminOverviewPage")
+);
+const AdminUsersPage = lazy(() => import("../pages/admin/AdminUsersPage"));
+const AdminProductsPage = lazy(() =>
+  import("../pages/admin/AdminProductsPage")
+);
+const AdminOrdersPage = lazy(() => import("../pages/admin/AdminOrdersPage"));
+const AdminPaymentsPage = lazy(() =>
+  import("../pages/admin/AdminPaymentsPage")
+);
+const AdminReportsPage = lazy(() => import("../pages/admin/AdminReportsPage"));
+const AdminSettingsPage = lazy(() =>
+  import("../pages/admin/AdminSettingsPage")
+);
 
 // Error Pages
 const NotFoundPage = lazy(() => import("../pages/not-found"));
@@ -336,10 +353,68 @@ const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <AdminDashboardPage />
+              <AdminDashboardLayout />
             </ProtectedRoute>
           </SuspenseWrapper>
         ),
+        children: [
+          {
+            index: true,
+            element: (
+              <SuspenseWrapper>
+                <AdminOverviewPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_USERS,
+            element: (
+              <SuspenseWrapper>
+                <AdminUsersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_PRODUCTS,
+            element: (
+              <SuspenseWrapper>
+                <AdminProductsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_ORDERS,
+            element: (
+              <SuspenseWrapper>
+                <AdminOrdersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_PAYMENTS,
+            element: (
+              <SuspenseWrapper>
+                <AdminPaymentsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_REPORTS,
+            element: (
+              <SuspenseWrapper>
+                <AdminReportsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_SETTINGS,
+            element: (
+              <SuspenseWrapper>
+                <AdminSettingsPage />
+              </SuspenseWrapper>
+            ),
+          },
+        ],
       },
 
       // ==================== ERROR ROUTES ====================
