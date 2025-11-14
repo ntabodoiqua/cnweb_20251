@@ -15,10 +15,11 @@ import {
 } from "@ant-design/icons";
 import { notification, Table, Tag, Tooltip, Empty, Pagination } from "antd";
 import { changePasswordApi, getLoginHistoryApi } from "../../util/api";
+import LoadingSpinner from "../LoadingSpinner";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
-import "./ProfileSecurity.css";
+import styles from "./ProfileSecurity.module.css";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
@@ -313,11 +314,11 @@ const ProfileSecurity = () => {
       key: "loginTime",
       width: "20%",
       render: (time) => (
-        <div className="login-time-cell">
-          <div className="login-time-primary">
+        <div className={styles.loginTimeCell}>
+          <div className={styles.loginTimePrimary}>
             {dayjs(time).format("DD/MM/YYYY HH:mm:ss")}
           </div>
-          <div className="login-time-relative">
+          <div className={styles.loginTimeRelative}>
             <ClockCircleOutlined /> {dayjs(time).fromNow()}
           </div>
         </div>
@@ -329,15 +330,15 @@ const ProfileSecurity = () => {
       key: "device",
       width: "25%",
       render: (_, record) => (
-        <div className="device-info-cell">
-          <div className="device-icon-wrapper">
+        <div className={styles.deviceInfoCell}>
+          <div className={styles.deviceIconWrapper}>
             {getDeviceIcon(record.userAgent)}
           </div>
-          <div className="device-details">
-            <div className="device-browser">
+          <div className={styles.deviceDetails}>
+            <div className={styles.deviceBrowser}>
               {getBrowserName(record.userAgent)}
             </div>
-            <div className="device-os">{getOSName(record.userAgent)}</div>
+            <div className={styles.deviceOs}>{getOSName(record.userAgent)}</div>
           </div>
         </div>
       ),
@@ -348,7 +349,7 @@ const ProfileSecurity = () => {
       key: "ipAddress",
       width: "20%",
       render: (ip) => (
-        <div className="ip-address-cell">
+        <div className={styles.ipAddressCell}>
           <EnvironmentOutlined /> {ip ? ip.split(",")[0] : "N/A"}
         </div>
       ),
@@ -368,7 +369,7 @@ const ProfileSecurity = () => {
             )
           }
           color={status === "SUCCESS" ? "success" : "error"}
-          className="status-tag"
+          className={styles.statusTag}
         >
           {status === "SUCCESS" ? "Thành công" : "Thất bại"}
         </Tag>
@@ -382,43 +383,46 @@ const ProfileSecurity = () => {
   ];
 
   return (
-    <div className="profile-security">
-      <div className="security-layout">
+    <div className={styles.profileSecurity}>
+      <div className={styles.securityLayout}>
         {/* Left Column: Đổi mật khẩu */}
-        <div className="security-left-column">
-          <div className="security-section change-password-section">
-            <div className="section-header">
-              <div className="section-title-wrapper">
-                <LockOutlined className="section-icon" />
+        <div className={styles.securityLeftColumn}>
+          <div className={styles.securitySection}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionTitleWrapper}>
+                <LockOutlined className={styles.sectionIcon} />
                 <div>
-                  <h3 className="section-title">Đổi mật khẩu</h3>
-                  <p className="section-subtitle">
+                  <h3 className={styles.sectionTitle}>Đổi mật khẩu</h3>
+                  <p className={styles.sectionSubtitle}>
                     Cập nhật mật khẩu định kỳ để bảo vệ tài khoản của bạn
                   </p>
                 </div>
               </div>
             </div>
 
-            <form onSubmit={handleChangePassword} className="password-form">
+            <form
+              onSubmit={handleChangePassword}
+              className={styles.passwordForm}
+            >
               {/* Mật khẩu hiện tại */}
-              <div className="profile-form-group">
-                <label className="profile-form-label">
+              <div className={styles.profileFormGroup}>
+                <label className={styles.profileFormLabel}>
                   <LockOutlined />
                   Mật khẩu hiện tại
-                  <span className="required">*</span>
+                  <span className={styles.required}>*</span>
                 </label>
-                <div className="password-input-wrapper">
+                <div className={styles.passwordInputWrapper}>
                   <input
                     type={showOldPassword ? "text" : "password"}
                     name="oldPassword"
                     value={passwordData.oldPassword}
                     onChange={handlePasswordInputChange}
-                    className="profile-form-input password-input"
+                    className={`${styles.profileFormInput} ${styles.passwordInput}`}
                     placeholder="Nhập mật khẩu hiện tại"
                   />
                   <button
                     type="button"
-                    className="password-toggle-btn"
+                    className={styles.passwordToggleBtn}
                     onClick={() => setShowOldPassword(!showOldPassword)}
                   >
                     {showOldPassword ? (
@@ -431,24 +435,24 @@ const ProfileSecurity = () => {
               </div>
 
               {/* Mật khẩu mới */}
-              <div className="profile-form-group">
-                <label className="profile-form-label">
+              <div className={styles.profileFormGroup}>
+                <label className={styles.profileFormLabel}>
                   <SafetyOutlined />
                   Mật khẩu mới
-                  <span className="required">*</span>
+                  <span className={styles.required}>*</span>
                 </label>
-                <div className="password-input-wrapper">
+                <div className={styles.passwordInputWrapper}>
                   <input
                     type={showNewPassword ? "text" : "password"}
                     name="newPassword"
                     value={passwordData.newPassword}
                     onChange={handlePasswordInputChange}
-                    className="profile-form-input password-input"
+                    className={`${styles.profileFormInput} ${styles.passwordInput}`}
                     placeholder="Nhập mật khẩu mới"
                   />
                   <button
                     type="button"
-                    className="password-toggle-btn"
+                    className={styles.passwordToggleBtn}
                     onClick={() => setShowNewPassword(!showNewPassword)}
                   >
                     {showNewPassword ? (
@@ -461,17 +465,17 @@ const ProfileSecurity = () => {
 
                 {/* Password Strength Indicator */}
                 {passwordStrength.strength && (
-                  <div className="password-strength-container">
-                    <div className="password-strength-bar">
+                  <div className={styles.passwordStrengthContainer}>
+                    <div className={styles.passwordStrengthBar}>
                       <div
-                        className="password-strength-fill"
+                        className={styles.passwordStrengthFill}
                         style={{
                           width: `${passwordStrength.score}%`,
                           backgroundColor: passwordStrength.color,
                         }}
                       ></div>
                     </div>
-                    <div className="password-strength-text">
+                    <div className={styles.passwordStrengthText}>
                       <span>Độ mạnh: </span>
                       <span
                         style={{
@@ -482,19 +486,21 @@ const ProfileSecurity = () => {
                         {passwordStrength.strength}
                       </span>
                     </div>
-                    <div className="password-requirements">
+                    <div className={styles.passwordRequirements}>
                       <div
-                        className={`requirement-item ${
-                          passwordData.newPassword?.length >= 8 ? "valid" : ""
+                        className={`${styles.requirementItem} ${
+                          passwordData.newPassword?.length >= 8
+                            ? styles.valid
+                            : ""
                         }`}
                       >
                         {passwordData.newPassword?.length >= 8 ? "✓" : "○"} Tối
                         thiểu 8 ký tự
                       </div>
                       <div
-                        className={`requirement-item ${
+                        className={`${styles.requirementItem} ${
                           /[a-z]/.test(passwordData.newPassword || "")
-                            ? "valid"
+                            ? styles.valid
                             : ""
                         }`}
                       >
@@ -504,9 +510,9 @@ const ProfileSecurity = () => {
                         Chữ thường
                       </div>
                       <div
-                        className={`requirement-item ${
+                        className={`${styles.requirementItem} ${
                           /[A-Z]/.test(passwordData.newPassword || "")
-                            ? "valid"
+                            ? styles.valid
                             : ""
                         }`}
                       >
@@ -516,9 +522,9 @@ const ProfileSecurity = () => {
                         Chữ hoa
                       </div>
                       <div
-                        className={`requirement-item ${
+                        className={`${styles.requirementItem} ${
                           /\d/.test(passwordData.newPassword || "")
-                            ? "valid"
+                            ? styles.valid
                             : ""
                         }`}
                       >
@@ -526,9 +532,9 @@ const ProfileSecurity = () => {
                         Số
                       </div>
                       <div
-                        className={`requirement-item ${
+                        className={`${styles.requirementItem} ${
                           /[@$!%*?&#]/.test(passwordData.newPassword || "")
-                            ? "valid"
+                            ? styles.valid
                             : ""
                         }`}
                       >
@@ -543,24 +549,24 @@ const ProfileSecurity = () => {
               </div>
 
               {/* Xác nhận mật khẩu mới */}
-              <div className="profile-form-group">
-                <label className="profile-form-label">
+              <div className={styles.profileFormGroup}>
+                <label className={styles.profileFormLabel}>
                   <SafetyOutlined />
                   Xác nhận mật khẩu mới
-                  <span className="required">*</span>
+                  <span className={styles.required}>*</span>
                 </label>
-                <div className="password-input-wrapper">
+                <div className={styles.passwordInputWrapper}>
                   <input
                     type={showConfirmPassword ? "text" : "password"}
                     name="confirmPassword"
                     value={passwordData.confirmPassword}
                     onChange={handlePasswordInputChange}
-                    className="profile-form-input password-input"
+                    className={`${styles.profileFormInput} ${styles.passwordInput}`}
                     placeholder="Nhập lại mật khẩu mới"
                   />
                   <button
                     type="button"
-                    className="password-toggle-btn"
+                    className={styles.passwordToggleBtn}
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
                     {showConfirmPassword ? (
@@ -572,28 +578,28 @@ const ProfileSecurity = () => {
                 </div>
                 {passwordData.confirmPassword &&
                   passwordData.newPassword !== passwordData.confirmPassword && (
-                    <div className="password-mismatch-error">
+                    <div className={styles.passwordMismatchError}>
                       <CloseCircleOutlined /> Mật khẩu xác nhận không khớp
                     </div>
                   )}
                 {passwordData.confirmPassword &&
                   passwordData.newPassword === passwordData.confirmPassword && (
-                    <div className="password-match-success">
+                    <div className={styles.passwordMatchSuccess}>
                       <CheckCircleOutlined /> Mật khẩu khớp
                     </div>
                   )}
               </div>
 
               {/* Action buttons */}
-              <div className="profile-form-actions">
+              <div className={styles.profileFormActions}>
                 <button
                   type="submit"
-                  className="profile-btn profile-btn-primary"
+                  className={`${styles.profileBtn} ${styles.profileBtnPrimary}`}
                   disabled={isChangingPassword}
                 >
                   {isChangingPassword ? (
                     <>
-                      <span className="spinner"></span>
+                      <span className={styles.spinner}></span>
                       Đang xử lý...
                     </>
                   ) : (
@@ -609,42 +615,48 @@ const ProfileSecurity = () => {
         </div>
 
         {/* Right Column: Lịch sử đăng nhập */}
-        <div className="security-right-column">
-          <div className="security-section login-history-section">
-            <div className="section-header">
-              <div className="section-title-wrapper">
-                <HistoryOutlined className="section-icon" />
+        <div className={styles.securityRightColumn}>
+          <div className={styles.securitySection}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionTitleWrapper}>
+                <HistoryOutlined className={styles.sectionIcon} />
                 <div>
-                  <h3 className="section-title">Lịch sử đăng nhập</h3>
-                  <p className="section-subtitle">
+                  <h3 className={styles.sectionTitle}>Lịch sử đăng nhập</h3>
+                  <p className={styles.sectionSubtitle}>
                     Theo dõi các hoạt động đăng nhập gần đây của tài khoản
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="login-history-content">
-              <Table
-                columns={columns}
-                dataSource={loginHistory}
-                loading={loadingHistory}
-                rowKey="id"
-                pagination={false}
-                className="login-history-table"
-                locale={{
-                  emptyText: (
-                    <Empty
-                      description="Chưa có lịch sử đăng nhập"
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                    />
-                  ),
-                }}
-                scroll={{ x: 800 }}
-              />
+            <div className={styles.loginHistoryContent}>
+              {loadingHistory ? (
+                <LoadingSpinner
+                  tip="Đang tải lịch sử đăng nhập..."
+                  fullScreen={false}
+                />
+              ) : (
+                <Table
+                  columns={columns}
+                  dataSource={loginHistory}
+                  rowKey="id"
+                  pagination={false}
+                  className={styles.loginHistoryTable}
+                  locale={{
+                    emptyText: (
+                      <Empty
+                        description="Chưa có lịch sử đăng nhập"
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      />
+                    ),
+                  }}
+                  scroll={{ x: 800 }}
+                />
+              )}
 
               {/* Custom Pagination */}
               {loginHistory.length > 0 && (
-                <div className="table-pagination">
+                <div className={styles.tablePagination}>
                   <Pagination
                     current={pagination.current}
                     pageSize={pagination.pageSize}
