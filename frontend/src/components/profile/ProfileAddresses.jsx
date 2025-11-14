@@ -23,7 +23,8 @@ import {
   getProvincesApi,
   getWardsByProvinceApi,
 } from "../../util/api";
-import "./ProfileSellerInfo.css";
+import styles from "./ProfileSellerInfo.module.css";
+import profileStyles from "../../pages/Profile.module.css";
 
 const { Option } = Select;
 
@@ -463,7 +464,7 @@ const ProfileAddresses = () => {
   // Loading state
   if (loading && addresses.length === 0 && !isAdding && !editingId) {
     return (
-      <div className="seller-loading">
+      <div className={styles.sellerLoading}>
         <LoadingOutlined />
         <p>Đang tải danh sách địa chỉ...</p>
       </div>
@@ -473,13 +474,16 @@ const ProfileAddresses = () => {
   // Empty state
   if (addresses.length === 0 && !isAdding && !editingId) {
     return (
-      <div className="seller-empty-state">
+      <div className={styles.sellerEmptyState}>
         <HomeOutlined />
         <h3>Sổ địa chỉ trống</h3>
         <p>
           Bạn chưa có địa chỉ nào. Thêm địa chỉ để việc mua hàng dễ dàng hơn.
         </p>
-        <button className="profile-btn profile-btn-primary" onClick={handleAdd}>
+        <button
+          className={`${profileStyles.btn} ${profileStyles.btnPrimary}`}
+          onClick={handleAdd}
+        >
           <PlusOutlined />
           Thêm địa chỉ mới
         </button>
@@ -490,15 +494,15 @@ const ProfileAddresses = () => {
   // If adding or editing
   if (isAdding || editingId) {
     return (
-      <div className="seller-registration-form">
-        <div className="form-section-title">
+      <div className={styles.sellerRegistrationForm}>
+        <div className={styles.formSectionTitle}>
           <FileTextOutlined />
           {isAdding ? "Thêm địa chỉ mới" : "Chỉnh sửa địa chỉ"}
         </div>
 
-        <div className="profile-form-row">
-          <div className="profile-form-group">
-            <label className="profile-form-label">
+        <div className={profileStyles.formRow}>
+          <div className={profileStyles.formGroup}>
+            <label className={profileStyles.formLabel}>
               <UserOutlined />
               Họ tên người nhận <span className="required">*</span>
             </label>
@@ -507,13 +511,13 @@ const ProfileAddresses = () => {
               name="receiverName"
               value={formData.receiverName}
               onChange={handleInputChange}
-              className="profile-form-input"
+              className={profileStyles.formInput}
               placeholder="Nhập họ tên người nhận"
             />
           </div>
 
-          <div className="profile-form-group">
-            <label className="profile-form-label">
+          <div className={profileStyles.formGroup}>
+            <label className={profileStyles.formLabel}>
               <PhoneOutlined />
               Số điện thoại <span className="required">*</span>
             </label>
@@ -522,26 +526,28 @@ const ProfileAddresses = () => {
               name="receiverPhone"
               value={formData.receiverPhone}
               onChange={handleInputChange}
-              className={`profile-form-input ${
-                errors.receiverPhone ? "input-error" : ""
+              className={`${profileStyles.formInput} ${
+                errors.receiverPhone ? styles.inputError : ""
               }`}
               placeholder="0123456789"
               maxLength={10}
             />
             {errors.receiverPhone && (
-              <span className="error-message">{errors.receiverPhone}</span>
+              <span className={styles.errorMessage}>
+                {errors.receiverPhone}
+              </span>
             )}
           </div>
         </div>
 
-        <div className="form-section-title">
+        <div className={styles.formSectionTitle}>
           <EnvironmentOutlined />
           Địa chỉ giao hàng
         </div>
 
-        <div className="location-selects">
-          <div className="location-select-group">
-            <label className="location-select-label">
+        <div className={styles.locationSelects}>
+          <div className={styles.locationSelectGroup}>
+            <label className={styles.locationSelectLabel}>
               <GlobalOutlined />
               Tỉnh/Thành phố <span className="required">*</span>
             </label>
@@ -562,8 +568,8 @@ const ProfileAddresses = () => {
             </Select>
           </div>
 
-          <div className="location-select-group">
-            <label className="location-select-label">
+          <div className={styles.locationSelectGroup}>
+            <label className={styles.locationSelectLabel}>
               <HomeOutlined />
               Phường/Xã <span className="required">*</span>
             </label>
@@ -586,8 +592,10 @@ const ProfileAddresses = () => {
           </div>
         </div>
 
-        <div className="profile-form-group full-width">
-          <label className="profile-form-label">
+        <div
+          className={`${profileStyles.formGroup} ${profileStyles.fullWidth}`}
+        >
+          <label className={profileStyles.formLabel}>
             <EnvironmentOutlined />
             Địa chỉ cụ thể <span className="required">*</span>
           </label>
@@ -596,7 +604,7 @@ const ProfileAddresses = () => {
             name="street"
             value={formData.street}
             onChange={handleInputChange}
-            className="profile-form-input"
+            className={profileStyles.formInput}
             placeholder="Số nhà, tên đường..."
           />
         </div>
@@ -623,9 +631,9 @@ const ProfileAddresses = () => {
           </label>
         </div>
 
-        <div className="profile-form-actions">
+        <div className={profileStyles.formActions}>
           <button
-            className="profile-btn profile-btn-secondary"
+            className={`${profileStyles.btn} ${profileStyles.btnSecondary}`}
             onClick={handleCancel}
             disabled={submitting}
           >
@@ -633,7 +641,7 @@ const ProfileAddresses = () => {
             Hủy
           </button>
           <button
-            className="profile-btn profile-btn-primary"
+            className={`${profileStyles.btn} ${profileStyles.btnPrimary}`}
             onClick={handleSave}
             disabled={submitting}
           >
@@ -659,7 +667,10 @@ const ProfileAddresses = () => {
     <div>
       {/* Add Address Button */}
       <div style={{ marginBottom: "24px" }}>
-        <button className="profile-btn profile-btn-primary" onClick={handleAdd}>
+        <button
+          className={`${profileStyles.btn} ${profileStyles.btnPrimary}`}
+          onClick={handleAdd}
+        >
           <PlusOutlined />
           Thêm địa chỉ mới
         </button>
@@ -667,7 +678,7 @@ const ProfileAddresses = () => {
 
       {/* Addresses List */}
       {loading ? (
-        <div className="seller-loading">
+        <div className={styles.sellerLoading}>
           <LoadingOutlined />
           <p>Đang tải...</p>
         </div>
@@ -752,7 +763,7 @@ const ProfileAddresses = () => {
               {/* Address Actions */}
               <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                 <button
-                  className="profile-btn profile-btn-secondary"
+                  className={`${profileStyles.btn} ${profileStyles.btnSecondary}`}
                   style={{ minWidth: "auto", padding: "8px 16px" }}
                   onClick={() => handleEdit(address)}
                   disabled={loading}
@@ -764,7 +775,7 @@ const ProfileAddresses = () => {
                 {!address.isDefault && (
                   <>
                     <button
-                      className="profile-btn profile-btn-secondary"
+                      className={`${profileStyles.btn} ${profileStyles.btnSecondary}`}
                       style={{ minWidth: "auto", padding: "8px 16px" }}
                       onClick={() => handleSetDefault(address.id)}
                       disabled={loading}
@@ -773,7 +784,7 @@ const ProfileAddresses = () => {
                       Đặt làm mặc định
                     </button>
                     <button
-                      className="profile-btn profile-btn-secondary"
+                      className={`${profileStyles.btn} ${profileStyles.btnSecondary}`}
                       style={{
                         minWidth: "auto",
                         padding: "8px 16px",
@@ -798,7 +809,7 @@ const ProfileAddresses = () => {
       {!loading && pagination.total > pagination.pageSize && (
         <div style={{ textAlign: "center", marginTop: "24px" }}>
           <button
-            className="profile-btn profile-btn-secondary"
+            className={`${profileStyles.btn} ${profileStyles.btnSecondary}`}
             disabled={pagination.current === 1 || loading}
             onClick={() => fetchAddresses(pagination.current - 2)}
             style={{ marginRight: "10px" }}
@@ -810,7 +821,7 @@ const ProfileAddresses = () => {
             {Math.ceil(pagination.total / pagination.pageSize)}
           </span>
           <button
-            className="profile-btn profile-btn-secondary"
+            className={`${profileStyles.btn} ${profileStyles.btnSecondary}`}
             disabled={
               pagination.current >=
                 Math.ceil(pagination.total / pagination.pageSize) || loading

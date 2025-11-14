@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { ProfileGeneralInfo } from "../../components/profile";
 import { getMyInfoApi } from "../../util/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
+import styles from "../Profile.module.css";
 
 const ProfileGeneralPage = () => {
   const [userData, setUserData] = useState(null);
@@ -40,7 +41,7 @@ const ProfileGeneralPage = () => {
   // Show error message if fetch failed
   if (error) {
     return (
-      <div className="profile-error">
+      <div className={styles.error}>
         <h2>⚠️ {error}</h2>
         <p>Vui lòng thử lại sau hoặc liên hệ với bộ phận hỗ trợ.</p>
       </div>

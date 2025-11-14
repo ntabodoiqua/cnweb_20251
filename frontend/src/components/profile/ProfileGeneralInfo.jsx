@@ -17,6 +17,7 @@ import { notification } from "antd";
 import PropTypes from "prop-types";
 import { updateMyInfoApi, updateAvatarApi } from "../../util/api";
 import { AuthContext } from "../context/auth.context";
+import styles from "../../pages/Profile.module.css";
 
 const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
   const fileInputRef = useRef(null);
@@ -220,17 +221,17 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
   const avatarUrl = getAvatarUrl();
 
   return (
-    <div className="profile-general-info">
+    <div className={styles.generalInfo}>
       {/* Avatar and Basic Info */}
-      <div className="profile-avatar-section">
-        <div className="profile-avatar-wrapper">
+      <div className={styles.avatarSection}>
+        <div className={styles.avatarWrapper}>
           {avatarUrl ? (
-            <img src={avatarUrl} alt="Avatar" className="profile-avatar" />
+            <img src={avatarUrl} alt="Avatar" className={styles.avatar} />
           ) : (
-            <div className="profile-avatar-placeholder">{getInitials()}</div>
+            <div className={styles.avatarPlaceholder}>{getInitials()}</div>
           )}
           <button
-            className="profile-avatar-upload"
+            className={styles.avatarUpload}
             onClick={handleAvatarClick}
             disabled={isUploadingAvatar}
             title="Cập nhật ảnh đại diện"
@@ -246,8 +247,8 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
           />
         </div>
 
-        <div className="profile-avatar-info">
-          <h2 className="profile-username">
+        <div className={styles.avatarInfo}>
+          <h2 className={styles.username}>
             {formData.firstName && formData.lastName
               ? `${formData.firstName} ${formData.lastName}`
               : userData.username}
@@ -269,26 +270,25 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
             )}
           </div>
 
-          <div className="profile-meta-info">
-            {/**/}
-            <div className="profile-meta-item">
+          <div className={styles.metaInfo}>
+            <div className={styles.metaItem}>
               <MailOutlined />
               <span>{userData.email}</span>
             </div>
-            <div className="profile-meta-item">
+            <div className={styles.metaItem}>
               <PhoneOutlined />
               <span>{userData.phone}</span>
             </div>
             {userData.isVerified && (
-              <div className="profile-verified-badge">
+              <div className={styles.verifiedBadge}>
                 <CheckCircleOutlined />
                 Đã xác thực
               </div>
             )}
           </div>
 
-          <div className="profile-meta-info" style={{ marginTop: "8px" }}>
-            <div className="profile-meta-item">
+          <div className={styles.metaInfo} style={{ marginTop: "8px" }}>
+            <div className={styles.metaItem}>
               <CalendarOutlined />
               <span>
                 Tham gia:{" "}
@@ -300,10 +300,10 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
       </div>
 
       {/* Detailed Info Form */}
-      <div className="profile-info-form">
-        <div className="profile-form-row">
-          <div className="profile-form-group">
-            <label className="profile-form-label">
+      <div className={styles.infoForm}>
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
               <UserOutlined />
               Họ <span className="required">*</span>
             </label>
@@ -313,13 +313,13 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
               value={formData.firstName}
               onChange={handleInputChange}
               disabled={!isEditing}
-              className="profile-form-input"
+              className={styles.formInput}
               placeholder="Nhập họ của bạn"
             />
           </div>
 
-          <div className="profile-form-group">
-            <label className="profile-form-label">
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
               <UserOutlined />
               Tên <span className="required">*</span>
             </label>
@@ -329,15 +329,15 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
               value={formData.lastName}
               onChange={handleInputChange}
               disabled={!isEditing}
-              className="profile-form-input"
+              className={styles.formInput}
               placeholder="Nhập tên của bạn"
             />
           </div>
         </div>
 
-        <div className="profile-form-row">
-          <div className="profile-form-group">
-            <label className="profile-form-label">
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
               <MailOutlined />
               Email <span className="required">*</span>
             </label>
@@ -347,13 +347,13 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
               value={formData.email}
               onChange={handleInputChange}
               disabled={true} // Email không cho phép thay đổi
-              className="profile-form-input"
+              className={styles.formInput}
               placeholder="email@example.com"
             />
           </div>
 
-          <div className="profile-form-group">
-            <label className="profile-form-label">
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
               <PhoneOutlined />
               Số điện thoại
             </label>
@@ -363,15 +363,15 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
               value={formData.phone}
               onChange={handleInputChange}
               disabled={!isEditing}
-              className="profile-form-input"
+              className={styles.formInput}
               placeholder="0123456789"
             />
           </div>
         </div>
 
-        <div className="profile-form-row">
-          <div className="profile-form-group">
-            <label className="profile-form-label">
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
               <CalendarOutlined />
               Ngày sinh
             </label>
@@ -381,12 +381,12 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
               value={formData.dob}
               onChange={handleInputChange}
               disabled={!isEditing}
-              className="profile-form-input"
+              className={styles.formInput}
             />
           </div>
 
-          <div className="profile-form-group">
-            <label className="profile-form-label">
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
               {formData.gender === "MALE" ? <ManOutlined /> : <WomanOutlined />}
               Giới tính
             </label>
@@ -395,7 +395,7 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
               value={formData.gender}
               onChange={handleInputChange}
               disabled={!isEditing}
-              className="profile-form-select"
+              className={styles.formSelect}
             >
               <option value="">Chọn giới tính</option>
               <option value="MALE">Nam</option>
@@ -405,11 +405,11 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
           </div>
         </div>
 
-        <div className="profile-form-actions">
+        <div className={styles.formActions}>
           {isEditing ? (
             <>
               <button
-                className="profile-btn profile-btn-secondary"
+                className={`${styles.btn} ${styles.btnSecondary}`}
                 onClick={handleCancel}
                 disabled={isSaving}
               >
@@ -417,7 +417,7 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
                 Hủy
               </button>
               <button
-                className="profile-btn profile-btn-primary"
+                className={`${styles.btn} ${styles.btnPrimary}`}
                 onClick={handleSave}
                 disabled={isSaving}
               >
@@ -427,7 +427,7 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
             </>
           ) : (
             <button
-              className="profile-btn profile-btn-primary"
+              className={`${styles.btn} ${styles.btnPrimary}`}
               onClick={() => setIsEditing(true)}
             >
               <UserOutlined />

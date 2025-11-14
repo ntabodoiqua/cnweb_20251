@@ -1,6 +1,7 @@
 import { useState } from "react";
 import ProfileSecurity from "../../components/profile/ProfileSecurity";
 import LoadingSpinner from "../../components/LoadingSpinner";
+import styles from "../Profile.module.css";
 
 /**
  * ProfileSecurityPage - Security and password management page

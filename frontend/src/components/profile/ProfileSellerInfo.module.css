@@ -3,13 +3,13 @@
    Giao diện trang hồ sơ người bán
    ======================================== */
 
-.seller-profile-container {
+.sellerProfileContainer {
   animation: fadeInUp 0.5s ease-out;
 }
 
 /* ==================== Compact View ==================== */
 
-.seller-profile-compact {
+.sellerProfileCompact {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -22,20 +22,20 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.seller-profile-compact:hover {
+.sellerProfileCompact:hover {
   border-color: #ee4d2d;
   box-shadow: 0 4px 16px rgba(238, 77, 45, 0.15);
   transform: translateY(-2px);
 }
 
-.compact-left {
+.compactLeft {
   display: flex;
   align-items: center;
   gap: 16px;
   flex: 1;
 }
 
-.compact-logo {
+.compactLogo {
   width: 60px;
   height: 60px;
   border-radius: 12px;
@@ -50,42 +50,42 @@
   overflow: hidden;
 }
 
-.compact-logo img {
+.compactLogo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.compact-info {
+.compactInfo {
   flex: 1;
 }
 
-.compact-store-name {
+.compactStoreName {
   font-size: 18px;
   font-weight: 700;
   color: #333;
   margin: 0 0 8px;
 }
 
-.seller-status-badge.compact {
+.sellerStatusBadge.compact {
   font-size: 12px;
   padding: 4px 10px;
 }
 
-.compact-right {
+.compactRight {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.compact-meta {
+.compactMeta {
   display: flex;
   flex-direction: column;
   align-items: flex-end;
   gap: 4px;
 }
 
-.compact-date {
+.compactDate {
   font-size: 13px;
   color: #666;
   display: flex;
@@ -93,11 +93,11 @@
   gap: 6px;
 }
 
-.compact-date .anticon {
+.compactDate :global(.anticon) {
   color: #ee4d2d;
 }
 
-.expand-button {
+.expandButton {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -113,19 +113,19 @@
   box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
 }
 
-.expand-button:hover {
+.expandButton:hover {
   background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(238, 77, 45, 0.4);
 }
 
-.expand-button:active {
+.expandButton:active {
   transform: translateY(0);
 }
 
 /* ==================== Expanded View ==================== */
 
-.seller-profile-expanded {
+.sellerProfileExpanded {
   margin-top: 16px;
   padding: 24px;
   background: linear-gradient(
@@ -135,13 +135,13 @@
   );
   border: 1px solid rgba(238, 77, 45, 0.1);
   border-radius: 12px;
-  animation: fadeInDown 0.3s ease-out;
+  animation: fadeInDown 0.15s ease-out;
 }
 
 @keyframes fadeInDown {
   from {
-    opacity: 0;
-    transform: translateY(-10px);
+    opacity: 0.5;
+    transform: translateY(-5px);
   }
   to {
     opacity: 1;
@@ -151,7 +151,7 @@
 
 /* ==================== Status Badge ==================== */
 
-.seller-status-badge {
+.sellerStatusBadge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -164,33 +164,33 @@
   animation: scaleIn 0.4s ease-out;
 }
 
-.seller-status-badge.created {
+.sellerStatusBadge.created {
   background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
   color: white;
 }
 
-.seller-status-badge.pending {
+.sellerStatusBadge.pending {
   background: linear-gradient(135deg, #faad14 0%, #ffc53d 100%);
   color: white;
 }
 
-.seller-status-badge.verified {
+.sellerStatusBadge.verified {
   background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
   color: white;
 }
 
-.seller-status-badge.rejected {
+.sellerStatusBadge.rejected {
   background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
   color: white;
 }
 
-.seller-status-badge .anticon {
+.sellerStatusBadge :global(.anticon) {
   font-size: 16px;
 }
 
 /* ==================== Shop Info Section ==================== */
 
-.shop-info-section {
+.shopInfoSection {
   background: linear-gradient(
     135deg,
     rgba(238, 77, 45, 0.03) 0%,
@@ -204,13 +204,13 @@
   animation: slideInFromLeft 0.5s ease-out;
 }
 
-.shop-info-section:hover {
+.shopInfoSection:hover {
   box-shadow: 0 8px 24px rgba(238, 77, 45, 0.12);
   border-color: rgba(238, 77, 45, 0.2);
   transform: translateY(-2px);
 }
 
-.shop-info-header {
+.shopInfoHeader {
   display: flex;
   align-items: flex-start;
   gap: 24px;
@@ -219,13 +219,13 @@
   border-bottom: 2px solid rgba(238, 77, 45, 0.1);
 }
 
-.shop-logo-wrapper {
+.shopLogoWrapper {
   position: relative;
   flex-shrink: 0;
   animation: scaleIn 0.6s ease-out;
 }
 
-.shop-logo {
+.shopLogo {
   width: 100px;
   height: 100px;
   border-radius: 16px;
@@ -235,12 +235,12 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.shop-logo:hover {
+.shopLogo:hover {
   transform: scale(1.05);
   box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
 }
 
-.shop-logo-placeholder {
+.shopLogoPlaceholder {
   width: 100px;
   height: 100px;
   border-radius: 16px;
@@ -255,23 +255,23 @@
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.shop-logo-placeholder:hover {
+.shopLogoPlaceholder:hover {
   transform: scale(1.05) rotate(5deg);
   box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
 }
 
-.shop-basic-info {
+.shopBasicInfo {
   flex: 1;
 }
 
-.shop-name {
+.shopName {
   font-size: 24px;
   font-weight: 700;
   color: #333;
   margin: 0 0 12px;
 }
 
-.shop-description {
+.shopDescription {
   font-size: 14px;
   color: #666;
   line-height: 1.6;
@@ -282,14 +282,14 @@
   border-left: 3px solid #ee4d2d;
 }
 
-.shop-contact-info {
+.shopContactInfo {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
   margin-top: 12px;
 }
 
-.shop-contact-item {
+.shopContactItem {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -302,21 +302,21 @@
   transition: all 0.3s ease;
 }
 
-.shop-contact-item:hover {
+.shopContactItem:hover {
   border-color: #ee4d2d;
   color: #ee4d2d;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(238, 77, 45, 0.15);
 }
 
-.shop-contact-item .anticon {
+.shopContactItem :global(.anticon) {
   color: #ee4d2d;
   font-size: 16px;
 }
 
 /* ==================== Address Info ==================== */
 
-.shop-address-section {
+.shopAddressSection {
   margin-top: 16px;
   padding: 16px;
   background: white;
@@ -324,7 +324,7 @@
   border: 1px solid rgba(238, 77, 45, 0.1);
 }
 
-.shop-address-title {
+.shopAddressTitle {
   font-size: 15px;
   font-weight: 600;
   color: #333;
@@ -334,11 +334,11 @@
   gap: 8px;
 }
 
-.shop-address-title .anticon {
+.shopAddressTitle :global(.anticon) {
   color: #ee4d2d;
 }
 
-.shop-address-text {
+.shopAddressText {
   font-size: 14px;
   color: #666;
   line-height: 1.6;
@@ -346,12 +346,12 @@
 
 /* ==================== Registration Form ==================== */
 
-.seller-registration-form {
+.sellerRegistrationForm {
   max-width: 900px;
   animation: fadeInUp 0.5s ease-out;
 }
 
-.form-section-title {
+.formSectionTitle {
   font-size: 18px;
   font-weight: 700;
   color: #333;
@@ -363,29 +363,29 @@
   gap: 10px;
 }
 
-.form-section-title:first-child {
+.formSectionTitle:first-child {
   margin-top: 0;
 }
 
-.form-section-title .anticon {
+.formSectionTitle :global(.anticon) {
   color: #ee4d2d;
   font-size: 20px;
 }
 
-.location-selects {
+.locationSelects {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   margin-bottom: 24px;
 }
 
-.location-select-group {
+.locationSelectGroup {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.location-select-label {
+.locationSelectLabel {
   font-size: 14px;
   font-weight: 600;
   color: #333;
@@ -394,25 +394,25 @@
   gap: 6px;
 }
 
-.location-select-label .anticon {
+.locationSelectLabel :global(.anticon) {
   color: #ee4d2d;
   font-size: 16px;
 }
 
-.location-select-label .required {
+.locationSelectLabel .required {
   color: #ff4d4f;
   margin-left: 2px;
 }
 
 /* ==================== Empty State ==================== */
 
-.seller-empty-state {
+.sellerEmptyState {
   text-align: center;
   padding: 80px 20px;
   animation: fadeIn 0.6s ease-out;
 }
 
-.seller-empty-state .anticon {
+.sellerEmptyState :global(.anticon) {
   font-size: 100px;
   color: #ee4d2d;
   margin-bottom: 24px;
@@ -420,14 +420,14 @@
   animation: pulse 2s ease-in-out infinite;
 }
 
-.seller-empty-state h3 {
+.sellerEmptyState h3 {
   font-size: 24px;
   color: #333;
   margin-bottom: 12px;
   font-weight: 700;
 }
 
-.seller-empty-state p {
+.sellerEmptyState p {
   font-size: 16px;
   color: #666;
   line-height: 1.6;
@@ -435,7 +435,7 @@
   margin: 0 auto;
 }
 
-.seller-empty-state .profile-btn {
+.sellerEmptyState :global(.profile-btn) {
   margin-top: 24px;
   min-width: 200px;
   height: 48px;
@@ -444,7 +444,7 @@
 
 /* ==================== Loading State ==================== */
 
-.seller-loading {
+.sellerLoading {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -453,20 +453,20 @@
   gap: 20px;
 }
 
-.seller-loading .anticon {
+.sellerLoading :global(.anticon) {
   font-size: 48px;
   color: #ee4d2d;
   animation: spin 1s linear infinite;
 }
 
-.seller-loading p {
+.sellerLoading p {
   font-size: 16px;
   color: #666;
 }
 
 /* ==================== Rejection Reason ==================== */
 
-.rejection-reason-section {
+.rejectionReasonSection {
   margin-top: 24px;
   padding: 16px;
   background: rgba(255, 77, 79, 0.05);
@@ -475,7 +475,7 @@
   animation: shake 0.5s ease-out;
 }
 
-.rejection-reason-title {
+.rejectionReasonTitle {
   font-size: 15px;
   font-weight: 600;
   color: #ff4d4f;
@@ -485,7 +485,7 @@
   gap: 8px;
 }
 
-.rejection-reason-text {
+.rejectionReasonText {
   font-size: 14px;
   color: #666;
   line-height: 1.6;
@@ -496,7 +496,7 @@
 
 /* ==================== Document Upload Section ==================== */
 
-.document-upload-section {
+.documentUploadSection {
   margin-top: 24px;
   padding: 20px;
   background: linear-gradient(
@@ -509,7 +509,7 @@
   animation: fadeInUp 0.4s ease-out;
 }
 
-.document-upload-header {
+.documentUploadHeader {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -518,14 +518,14 @@
   border-bottom: 2px solid rgba(24, 144, 255, 0.1);
 }
 
-.document-upload-header h3 {
+.documentUploadHeader h3 {
   font-size: 16px;
   font-weight: 600;
   color: #333;
   margin: 0;
 }
 
-.document-info {
+.documentInfo {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -537,12 +537,12 @@
   transition: all 0.3s ease;
 }
 
-.document-info:hover {
+.documentInfo:hover {
   border-color: #1890ff;
   box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
 }
 
-.document-details {
+.documentDetails {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -550,12 +550,12 @@
   min-width: 0;
 }
 
-.document-meta {
+.documentMeta {
   flex: 1;
   min-width: 0;
 }
 
-.document-name {
+.documentName {
   font-size: 14px;
   font-weight: 600;
   color: #333;
@@ -565,7 +565,7 @@
   line-height: 1.4;
 }
 
-.document-size-date {
+.documentSizeDate {
   font-size: 13px;
   color: #999;
   display: flex;
@@ -573,17 +573,17 @@
   gap: 8px;
 }
 
-.document-size-date .separator {
+.documentSizeDate .separator {
   color: #ddd;
 }
 
-.document-actions {
+.documentActions {
   display: flex;
   gap: 8px;
   flex-shrink: 0;
 }
 
-.document-btn {
+.documentBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -599,73 +599,73 @@
   white-space: nowrap;
 }
 
-.document-btn-view {
+.documentBtnView {
   background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
   color: white;
   box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3);
 }
 
-.document-btn-view:hover {
+.documentBtnView:hover {
   background: linear-gradient(135deg, #096dd9 0%, #1890ff 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(24, 144, 255, 0.4);
 }
 
-.document-btn-upload {
+.documentBtnUpload {
   background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
   color: white;
   box-shadow: 0 2px 6px rgba(82, 196, 26, 0.3);
 }
 
-.document-btn-upload:hover {
+.documentBtnUpload:hover {
   background: linear-gradient(135deg, #389e0d 0%, #52c41a 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 10px rgba(82, 196, 26, 0.4);
 }
 
-.document-btn-upload input {
+.documentBtnUpload input {
   display: none;
 }
 
-.document-empty {
+.documentEmpty {
   text-align: center;
   padding: 32px 20px;
 }
 
-.document-empty-icon {
+.documentEmptyIcon {
   font-size: 48px;
   color: #1890ff;
   margin-bottom: 16px;
   opacity: 0.6;
 }
 
-.document-empty-text {
+.documentEmptyText {
   font-size: 14px;
   color: #666;
   margin-bottom: 16px;
   line-height: 1.6;
 }
 
-.document-btn-primary {
+.documentBtnPrimary {
   background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
   color: white;
   box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
 }
 
-.document-btn-primary:hover {
+.documentBtnPrimary:hover {
   background: linear-gradient(135deg, #096dd9 0%, #1890ff 100%);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
 }
 
-.document-btn-upload-large {
+.documentBtnUploadLarge {
   padding: 12px 24px;
   font-size: 15px;
   min-width: 200px;
   height: 44px;
 }
 
-.document-btn-upload-large:disabled {
+.documentBtnUploadLarge:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none !important;
@@ -673,7 +673,7 @@
 
 /* ==================== Timestamps ==================== */
 
-.timestamps-section {
+.timestampsSection {
   margin-top: 24px;
   padding: 16px;
   background: rgba(238, 77, 45, 0.03);
@@ -683,13 +683,13 @@
   gap: 16px;
 }
 
-.timestamp-item {
+.timestampItem {
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
 
-.timestamp-label {
+.timestampLabel {
   font-size: 12px;
   color: #999;
   text-transform: uppercase;
@@ -697,7 +697,7 @@
   letter-spacing: 0.5px;
 }
 
-.timestamp-value {
+.timestampValue {
   font-size: 14px;
   color: #333;
   font-weight: 500;
@@ -706,14 +706,14 @@
   gap: 6px;
 }
 
-.timestamp-value .anticon {
+.timestampValue :global(.anticon) {
   color: #ee4d2d;
   font-size: 14px;
 }
 
 /* ==================== Action Buttons ==================== */
 
-.seller-profile-container .profile-form-actions {
+.sellerProfileContainer :global(.profile-form-actions) {
   display: flex;
   justify-content: center;
   gap: 12px;
@@ -721,7 +721,7 @@
   border-top: 2px solid rgba(238, 77, 45, 0.1);
 }
 
-.seller-profile-container .profile-btn {
+.sellerProfileContainer :global(.profile-btn) {
   min-width: 180px;
 }
 
@@ -803,146 +803,146 @@
 /* ==================== Responsive Design ==================== */
 
 @media (max-width: 1024px) {
-  .shop-info-section {
+  .shopInfoSection {
     padding: 24px;
   }
 
-  .shop-contact-info {
+  .shopContactInfo {
     gap: 12px;
   }
 
-  .document-info {
+  .documentInfo {
     flex-wrap: wrap;
   }
 }
 
 @media (max-width: 768px) {
-  .seller-profile-compact {
+  .sellerProfileCompact {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
     padding: 16px;
   }
 
-  .compact-left {
+  .compactLeft {
     width: 100%;
   }
 
-  .compact-right {
+  .compactRight {
     width: 100%;
     flex-direction: column-reverse;
     align-items: stretch;
     gap: 12px;
   }
 
-  .compact-meta {
+  .compactMeta {
     align-items: flex-start;
   }
 
-  .expand-button {
+  .expandButton {
     width: 100%;
     justify-content: center;
   }
 
-  .shop-info-header {
+  .shopInfoHeader {
     flex-direction: column;
     align-items: center;
     text-align: center;
     gap: 16px;
   }
 
-  .shop-logo,
-  .shop-logo-placeholder {
+  .shopLogo,
+  .shopLogoPlaceholder {
     width: 80px;
     height: 80px;
   }
 
-  .shop-contact-info {
+  .shopContactInfo {
     flex-direction: column;
     align-items: stretch;
     width: 100%;
   }
 
-  .shop-contact-item {
+  .shopContactItem {
     width: 100%;
     justify-content: flex-start;
   }
 
-  .location-selects {
+  .locationSelects {
     grid-template-columns: 1fr;
     gap: 20px;
   }
 
-  .timestamps-section {
+  .timestampsSection {
     grid-template-columns: 1fr;
     gap: 12px;
   }
 
-  .form-section-title {
+  .formSectionTitle {
     font-size: 16px;
   }
 
-  .shop-name {
+  .shopName {
     font-size: 20px;
   }
 
-  .document-upload-section {
+  .documentUploadSection {
     padding: 16px;
   }
 
-  .document-info {
+  .documentInfo {
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
   }
 
-  .document-details {
+  .documentDetails {
     flex-direction: row;
     align-items: center;
     text-align: left;
   }
 
-  .document-name {
+  .documentName {
     font-size: 13px;
   }
 
-  .document-size-date {
+  .documentSizeDate {
     font-size: 12px;
   }
 
-  .document-actions {
+  .documentActions {
     flex-direction: row;
     width: 100%;
     justify-content: stretch;
   }
 
-  .document-btn {
+  .documentBtn {
     flex: 1;
     justify-content: center;
   }
 
-  .seller-profile-container .profile-form-actions {
+  .sellerProfileContainer :global(.profile-form-actions) {
     flex-direction: column-reverse;
   }
 
-  .seller-profile-container .profile-btn {
+  .sellerProfileContainer :global(.profile-btn) {
     width: 100%;
   }
 }
 
 /* ==================== Form Validation Styles ==================== */
 
-.input-error {
+.inputError {
   border-color: #ff4d4f !important;
   background-color: #fff2f0 !important;
 }
 
-.input-error:focus {
+.inputError:focus {
   border-color: #ff4d4f !important;
   box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1) !important;
 }
 
-.error-message {
+.errorMessage {
   display: block;
   color: #ff4d4f;
   font-size: 13px;
@@ -952,17 +952,17 @@
   animation: fadeInDown 0.3s ease-out;
 }
 
-.error-message::before {
+.errorMessage::before {
   content: "⚠ ";
   margin-right: 4px;
 }
 
-.profile-form-group {
+:global(.profile-form-group) {
   position: relative;
 }
 
-.profile-form-input.input-error,
-.profile-form-textarea.input-error {
+:global(.profile-form-input).inputError,
+:global(.profile-form-textarea).inputError {
   animation: shake 0.4s;
 }
 
@@ -987,149 +987,149 @@
 }
 
 @media (max-width: 480px) {
-  .shop-info-section {
+  .shopInfoSection {
     padding: 16px 12px;
   }
 
-  .seller-profile-expanded {
+  .sellerProfileExpanded {
     padding: 16px 12px;
   }
 
-  .seller-empty-state {
+  .sellerEmptyState {
     padding: 60px 16px;
   }
 
-  .seller-empty-state .anticon {
+  .sellerEmptyState :global(.anticon) {
     font-size: 80px;
   }
 
-  .seller-empty-state h3 {
+  .sellerEmptyState h3 {
     font-size: 20px;
   }
 
-  .seller-empty-state p {
+  .sellerEmptyState p {
     font-size: 14px;
   }
 
-  .compact-logo {
+  .compactLogo {
     width: 50px;
     height: 50px;
     font-size: 24px;
   }
 
-  .compact-store-name {
+  .compactStoreName {
     font-size: 16px;
   }
 
-  .shop-logo,
-  .shop-logo-placeholder {
+  .shopLogo,
+  .shopLogoPlaceholder {
     width: 70px;
     height: 70px;
     font-size: 32px;
   }
 
-  .shop-name {
+  .shopName {
     font-size: 18px;
   }
 
-  .seller-status-badge {
+  .sellerStatusBadge {
     font-size: 12px;
     padding: 6px 12px;
   }
 
-  .shop-description {
+  .shopDescription {
     font-size: 13px;
   }
 
-  .shop-contact-item {
+  .shopContactItem {
     font-size: 13px;
   }
 
-  .shop-address-section {
+  .shopAddressSection {
     padding: 12px;
   }
 
-  .shop-address-title {
+  .shopAddressTitle {
     font-size: 14px;
   }
 
-  .shop-address-text {
+  .shopAddressText {
     font-size: 13px;
   }
 
-  .form-section-title {
+  .formSectionTitle {
     font-size: 15px;
     margin: 24px 0 16px;
   }
 
-  .document-upload-section {
+  .documentUploadSection {
     padding: 12px;
   }
 
-  .document-upload-header h3 {
+  .documentUploadHeader h3 {
     font-size: 14px;
   }
 
-  .document-details {
+  .documentDetails {
     gap: 8px;
   }
 
-  .document-name {
+  .documentName {
     font-size: 12px;
   }
 
-  .document-size-date {
+  .documentSizeDate {
     font-size: 11px;
   }
 
-  .document-actions {
+  .documentActions {
     flex-direction: column;
     gap: 8px;
   }
 
-  .document-btn {
+  .documentBtn {
     font-size: 13px;
     padding: 10px 14px;
   }
 
-  .document-empty {
+  .documentEmpty {
     padding: 24px 12px;
   }
 
-  .document-empty-icon {
+  .documentEmptyIcon {
     font-size: 40px;
   }
 
-  .document-empty-text {
+  .documentEmptyText {
     font-size: 13px;
   }
 
-  .timestamps-section {
+  .timestampsSection {
     padding: 12px;
     gap: 10px;
   }
 
-  .timestamp-label {
+  .timestampLabel {
     font-size: 11px;
   }
 
-  .timestamp-value {
+  .timestampValue {
     font-size: 13px;
   }
 
-  .rejection-reason-section {
+  .rejectionReasonSection {
     padding: 12px;
   }
 
-  .rejection-reason-title {
+  .rejectionReasonTitle {
     font-size: 14px;
   }
 
-  .rejection-reason-text {
+  .rejectionReasonText {
     font-size: 13px;
   }
 
-  .seller-profile-container .profile-btn {
+  .sellerProfileContainer :global(.profile-btn) {
     min-width: 100%;
     padding: 12px 20px;
     font-size: 14px;

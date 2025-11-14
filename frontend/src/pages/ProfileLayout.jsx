@@ -11,9 +11,9 @@ import {
   MenuUnfoldOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../constants/routes";
+import styles from "./Profile.module.css";
 import { AuthContext } from "../components/context/auth.context";
 import { ROLES, hasAnyRole } from "../constants/roles";
-import "./profile.css";
 
 /**
  * ProfileLayout - Layout component for profile pages with collapsible sidebar navigation
@@ -87,13 +87,13 @@ const ProfileLayout = () => {
   };
 
   return (
-    <div className="profile-page">
-      <div className="profile-container">
-        <div className="profile-content">
-          {/* Collapsible Sidebar Navigation */}
-          <aside className={`profile-sidebar ${collapsed ? "collapsed" : ""}`}>
-            <div className="profile-sidebar-header">
-              <h3 className="profile-sidebar-title">
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.content}>
+          {/* Sidebar Navigation */}
+          <aside className={styles.sidebar}>
+            <div className={styles.sidebarHeader}>
+              <h3 className={styles.sidebarTitle}>
                 <UserOutlined />
                 {!collapsed && <span>Tài khoản của tôi</span>}
               </h3>
@@ -107,13 +107,13 @@ const ProfileLayout = () => {
             </div>
 
             <nav>
-              <ul className="profile-menu">
+              <ul className={styles.menu}>
                 {menuItems.map((item) => (
-                  <li key={item.key} className="profile-menu-item">
+                  <li key={item.key} className={styles.menuItem}>
                     <Link
                       to={item.path}
-                      className={`profile-menu-link ${
-                        location.pathname === item.path ? "active" : ""
+                      className={`${styles.menuLink} ${
+                        location.pathname === item.path ? styles.active : ""
                       }`}
                       title={collapsed ? item.label : ""}
                     >
@@ -137,7 +137,7 @@ const ProfileLayout = () => {
                 {activeItem.icon}
                 <span>{activeItem.label}</span>
               </h1>
-              <p className="profile-main-subtitle">
+              <p className={styles.mainSubtitle}>
                 Quản lý thông tin cá nhân của bạn
               </p>
             </div>

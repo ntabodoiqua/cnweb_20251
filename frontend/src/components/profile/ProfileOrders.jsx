@@ -10,6 +10,7 @@ import {
   FilterOutlined,
 } from "@ant-design/icons";
 import PropTypes from "prop-types";
+import styles from "../../pages/Profile.module.css";
 
 const ProfileOrders = ({ orders }) => {
   const [activeTab, setActiveTab] = useState("all");
@@ -124,58 +125,58 @@ const ProfileOrders = ({ orders }) => {
     return (
       <>
         {/* Stats Cards */}
-        <div className="profile-stats-grid">
-          <div className="profile-stat-card">
-            <div className="profile-stat-header">
-              <span className="profile-stat-title">Chờ xác nhận</span>
-              <div className="profile-stat-icon">
+        <div className={styles.statsGrid}>
+          <div className={styles.statCard}>
+            <div className={styles.statHeader}>
+              <span className={styles.statTitle}>Chờ xác nhận</span>
+              <div className={styles.statIcon}>
                 <ClockCircleOutlined />
               </div>
             </div>
-            <p className="profile-stat-value">0</p>
-            <p className="profile-stat-label">đơn hàng</p>
+            <p className={styles.statValue}>0</p>
+            <p className={styles.statLabel}>đơn hàng</p>
           </div>
 
-          <div className="profile-stat-card">
-            <div className="profile-stat-header">
-              <span className="profile-stat-title">Đang giao</span>
-              <div className="profile-stat-icon">
+          <div className={styles.statCard}>
+            <div className={styles.statHeader}>
+              <span className={styles.statTitle}>Đang giao</span>
+              <div className={styles.statIcon}>
                 <TruckOutlined />
               </div>
             </div>
-            <p className="profile-stat-value">0</p>
-            <p className="profile-stat-label">đơn hàng</p>
+            <p className={styles.statValue}>0</p>
+            <p className={styles.statLabel}>đơn hàng</p>
           </div>
 
-          <div className="profile-stat-card">
-            <div className="profile-stat-header">
-              <span className="profile-stat-title">Hoàn thành</span>
-              <div className="profile-stat-icon">
+          <div className={styles.statCard}>
+            <div className={styles.statHeader}>
+              <span className={styles.statTitle}>Hoàn thành</span>
+              <div className={styles.statIcon}>
                 <CheckCircleOutlined />
               </div>
             </div>
-            <p className="profile-stat-value">0</p>
-            <p className="profile-stat-label">đơn hàng</p>
+            <p className={styles.statValue}>0</p>
+            <p className={styles.statLabel}>đơn hàng</p>
           </div>
 
-          <div className="profile-stat-card">
-            <div className="profile-stat-header">
-              <span className="profile-stat-title">Đã hủy</span>
-              <div className="profile-stat-icon">
+          <div className={styles.statCard}>
+            <div className={styles.statHeader}>
+              <span className={styles.statTitle}>Đã hủy</span>
+              <div className={styles.statIcon}>
                 <CloseOutlined />
               </div>
             </div>
-            <p className="profile-stat-value">0</p>
-            <p className="profile-stat-label">đơn hàng</p>
+            <p className={styles.statValue}>0</p>
+            <p className={styles.statLabel}>đơn hàng</p>
           </div>
         </div>
 
-        <div className="profile-empty-state">
+        <div className={styles.emptyState}>
           <ShoppingOutlined />
           <h3>Chưa có đơn hàng nào</h3>
           <p>Bạn chưa có đơn hàng nào. Hãy bắt đầu mua sắm ngay!</p>
           <button
-            className="profile-btn profile-btn-primary"
+            className={`${styles.btn} ${styles.btnPrimary}`}
             style={{ marginTop: "20px" }}
           >
             Tiếp tục mua sắm
@@ -188,56 +189,56 @@ const ProfileOrders = ({ orders }) => {
   return (
     <div>
       {/* Stats Cards */}
-      <div className="profile-stats-grid">
-        <div className="profile-stat-card">
-          <div className="profile-stat-header">
-            <span className="profile-stat-title">Chờ xác nhận</span>
-            <div className="profile-stat-icon">
+      <div className={styles.statsGrid}>
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <span className={styles.statTitle}>Chờ xác nhận</span>
+            <div className={styles.statIcon}>
               <ClockCircleOutlined />
             </div>
           </div>
-          <p className="profile-stat-value">{getOrderCount("pending")}</p>
-          <p className="profile-stat-label">đơn hàng</p>
+          <p className={styles.statValue}>{getOrderCount("pending")}</p>
+          <p className={styles.statLabel}>đơn hàng</p>
         </div>
 
-        <div className="profile-stat-card">
-          <div className="profile-stat-header">
-            <span className="profile-stat-title">Đang giao</span>
-            <div className="profile-stat-icon">
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <span className={styles.statTitle}>Đang giao</span>
+            <div className={styles.statIcon}>
               <TruckOutlined />
             </div>
           </div>
-          <p className="profile-stat-value">{getOrderCount("shipping")}</p>
-          <p className="profile-stat-label">đơn hàng</p>
+          <p className={styles.statValue}>{getOrderCount("shipping")}</p>
+          <p className={styles.statLabel}>đơn hàng</p>
         </div>
 
-        <div className="profile-stat-card">
-          <div className="profile-stat-header">
-            <span className="profile-stat-title">Hoàn thành</span>
-            <div className="profile-stat-icon">
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <span className={styles.statTitle}>Hoàn thành</span>
+            <div className={styles.statIcon}>
               <CheckCircleOutlined />
             </div>
           </div>
-          <p className="profile-stat-value">{getOrderCount("completed")}</p>
-          <p className="profile-stat-label">đơn hàng</p>
+          <p className={styles.statValue}>{getOrderCount("completed")}</p>
+          <p className={styles.statLabel}>đơn hàng</p>
         </div>
 
-        <div className="profile-stat-card">
-          <div className="profile-stat-header">
-            <span className="profile-stat-title">Đã hủy</span>
-            <div className="profile-stat-icon">
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <span className={styles.statTitle}>Đã hủy</span>
+            <div className={styles.statIcon}>
               <CloseOutlined />
             </div>
           </div>
-          <p className="profile-stat-value">{getOrderCount("cancelled")}</p>
-          <p className="profile-stat-label">đơn hàng</p>
+          <p className={styles.statValue}>{getOrderCount("cancelled")}</p>
+          <p className={styles.statLabel}>đơn hàng</p>
         </div>
       </div>
 
       {/* Search and Filter */}
       <div style={{ marginTop: "32px", marginBottom: "24px" }}>
-        <div className="profile-form-group">
-          <label className="profile-form-label">
+        <div className={styles.formGroup}>
+          <label className={styles.formLabel}>
             <SearchOutlined />
             Tìm kiếm đơn hàng
           </label>
@@ -245,7 +246,7 @@ const ProfileOrders = ({ orders }) => {
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="profile-form-input"
+            className={styles.formInput}
             placeholder="Tìm theo mã đơn hàng hoặc tên sản phẩm..."
           />
         </div>
@@ -288,7 +289,7 @@ const ProfileOrders = ({ orders }) => {
 
       {/* Orders List */}
       {filteredOrders.length === 0 ? (
-        <div className="profile-empty-state">
+        <div className={styles.emptyState}>
           <FilterOutlined />
           <h3>Không tìm thấy đơn hàng</h3>
           <p>Không có đơn hàng nào phù hợp với bộ lọc.</p>
@@ -423,7 +424,7 @@ const ProfileOrders = ({ orders }) => {
                     {formatCurrency(order.totalAmount)}
                   </span>
                 </div>
-                <button className="profile-btn profile-btn-primary">
+                <button className={`${styles.btn} ${styles.btnPrimary}`}>
                   <EyeOutlined />
                   Xem chi tiết
                 </button>
