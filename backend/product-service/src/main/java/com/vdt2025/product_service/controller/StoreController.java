@@ -50,6 +50,16 @@ public class StoreController {
                 .build();
     }
 
+    // Active cửa hàng theo store ID
+    @PutMapping("/{storeId}/activate")
+    public ApiResponse<Void> activateStore(@PathVariable String storeId, Locale locale) {
+        log.info("Request to activate store ID: {}", storeId);
+        storeService.activateStoreById(storeId);
+        return ApiResponse.<Void>builder()
+                .message(messageSource.getMessage("success.store.activated", null, locale))
+                .build();
+    }
+
     // Lấy tất cả cửa hàng của người bán hiện tại với phân trang
     @GetMapping("/myStores")
     public ApiResponse<Page<StoreResponse>> getMyStores(Pageable pageable, Locale locale) {

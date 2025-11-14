@@ -20,6 +20,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,6 +77,8 @@ public class StoreServiceImp implements StoreService {
         return savedStore;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @Override
     public Page<StoreResponse> getAllStores(Pageable pageable) {
         log.info("Fetching all stores for page: {}", pageable);
         try {
@@ -96,11 +99,33 @@ public class StoreServiceImp implements StoreService {
                     log.error("Store not found for seller profile ID: {}", sellerProfileId);
                     return new AppException(ErrorCode.STORE_NOT_FOUND);
                 });
-        
+        if (isStoreOwnedByCurrentSeller(store.getId())) {
+            log.error("Unauthorized attempt to deactivate store ID: {} by current seller", store.getId());
+            throw new AppException(ErrorCode.UNAUTHORIZED_STORE_ACCESS);
+        }
         store.setActive(false);
         storeRepository.save(store);
         log.info("Store with ID: {} deactivated successfully for seller profile ID: {}", 
                 store.getId(), sellerProfileId);
+    }
+
+    @Override
+    @Transactional
+    @CacheEvict(value = "storesOfCurrentSeller", allEntries = true)
+    public void activateStoreById(String storeId) {
+        log.info("Activating store with ID: {}", storeId);
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> {
+                    log.error("Store not found with ID: {}", storeId);
+                    return new AppException(ErrorCode.STORE_NOT_FOUND);
+                });
+        if (isStoreOwnedByCurrentSeller(store.getId())) {
+            log.error("Unauthorized attempt to deactivate store ID: {} by current seller", store.getId());
+            throw new AppException(ErrorCode.UNAUTHORIZED_STORE_ACCESS);
+        }
+        store.setActive(true);
+        storeRepository.save(store);
+        log.info("Store with ID: {} activated successfully", storeId);
     }
 
     @Override
@@ -147,7 +172,10 @@ public class StoreServiceImp implements StoreService {
                     log.error("Store not found with ID: {}", storeId);
                     return new AppException(ErrorCode.STORE_NOT_FOUND);
                 });
-
+        if (isStoreOwnedByCurrentSeller(store.getId())) {
+            log.error("Unauthorized attempt to deactivate store ID: {} by current seller", store.getId());
+            throw new AppException(ErrorCode.UNAUTHORIZED_STORE_ACCESS);
+        }
         store.setStoreName(request.getStoreName() == null ? store.getStoreName() : request.getStoreName());
         store.setStoreDescription(request.getStoreDescription() == null ? store.getStoreDescription() : request.getStoreDescription());
 
@@ -174,7 +202,10 @@ public class StoreServiceImp implements StoreService {
             log.error("Invalid file type: {} for store ID: {}", file.getContentType(), storeId);
             throw new AppException(ErrorCode.INVALID_IMAGE_TYPE);
         }
-
+        if (isStoreOwnedByCurrentSeller(store.getId())) {
+            log.error("Unauthorized attempt to deactivate store ID: {} by current seller", store.getId());
+            throw new AppException(ErrorCode.UNAUTHORIZED_STORE_ACCESS);
+        }
         try {
             if (mediaType == 1) { // Logo
                 store.setLogoName(file.getOriginalFilename());
@@ -196,5 +227,15 @@ public class StoreServiceImp implements StoreService {
             log.error("Failed to update media for store ID: {}", storeId, e);
             throw new AppException(ErrorCode.STORE_MEDIA_UPDATE_FAILED);
         }
+    }
+
+    /**
+     * Helper method để kiểm tra xem một cửa hàng có thuộc về người bán hiện tại hay không
+     * @param storeId ID của cửa hàng
+     * @return true nếu cửa hàng thuộc về người bán hiện tại, false nếu không
+     */
+    private boolean isStoreOwnedByCurrentSeller(String storeId) {
+        String currentUsername = SecurityContextHolder.getContext().getAuthentication().getName();
+        return !storeRepository.existsByIdAndUserNameIgnoreCase(storeId, currentUsername);
     }
 }

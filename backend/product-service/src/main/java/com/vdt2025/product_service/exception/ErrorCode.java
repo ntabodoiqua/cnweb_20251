@@ -88,6 +88,7 @@ public enum ErrorCode {
     STORE_FETCH_FAILED(1704, "error.1704", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_MEDIA_TYPE(1705, "error.1705", HttpStatus.BAD_REQUEST),
     STORE_MEDIA_UPDATE_FAILED(1706, "error.1706", HttpStatus.INTERNAL_SERVER_ERROR),
+    UNAUTHORIZED_STORE_ACCESS(1707, "error.1707", HttpStatus.FORBIDDEN),
 
     // Lỗi thuộc tính (18xx)
     ATTRIBUTE_NAME_REQUIRED(1801, "error.1801", HttpStatus.BAD_REQUEST),

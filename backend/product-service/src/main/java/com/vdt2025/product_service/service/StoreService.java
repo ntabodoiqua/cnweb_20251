@@ -21,4 +21,6 @@ public interface StoreService {
     StoreResponse updateStoreBasicInfo(String storeId, StoreSimpleRequest request);
 
     StoreResponse updateStoreMedia(String storeId, Integer mediaType, MultipartFile file);
+
+    void activateStoreById(String storeId);
 }
