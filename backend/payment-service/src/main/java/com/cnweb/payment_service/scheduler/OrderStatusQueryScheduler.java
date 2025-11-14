@@ -77,9 +77,20 @@ public class OrderStatusQueryScheduler {
         log.info("Query result for {}: status={}, message={}", 
                 appTransId, response.getStatus(), response.getMessage());
         
-        // Nếu đơn hàng đã expired (quá 15 phút mà vẫn PENDING), update status
-        if ("PENDING".equals(response.getStatus()) && isExpired(transaction)) {
-            updateTransactionToExpired(transaction);
+        // Reload transaction để lấy status mới nhất sau khi queryOrderStatus đã update
+        ZaloPayTransaction updatedTransaction = transactionRepository
+                .findByAppTransId(appTransId)
+                .orElse(null);
+        
+        if (updatedTransaction == null) {
+            log.warn("Transaction not found after query: {}", appTransId);
+            return;
+        }
+        
+        // Nếu đơn hàng vẫn PENDING sau khi query và đã expired, update status
+        if (updatedTransaction.getStatus() == ZaloPayTransaction.TransactionStatus.PENDING 
+                && isExpired(updatedTransaction)) {
+            updateTransactionToExpired(updatedTransaction);
         }
     }
     
@@ -93,13 +104,19 @@ public class OrderStatusQueryScheduler {
     }
     
     /**
-     * Update transaction sang trạng thái EXPIRED
+     * Update transaction sang trạng thái EXPIRED và gửi thông báo
      */
     private void updateTransactionToExpired(ZaloPayTransaction transaction) {
         try {
             transaction.setStatus(ZaloPayTransaction.TransactionStatus.EXPIRED);
             transactionRepository.save(transaction);
             log.info("Updated transaction {} to EXPIRED", transaction.getAppTransId());
+            
+            // Gửi email thông báo giao dịch hết hạn
+            zaloPayService.sendPaymentFailedNotification(
+                    transaction,
+                    "Giao dịch đã hết hạn thanh toán (quá 15 phút)"
+            );
         } catch (Exception e) {
             log.error("Error updating transaction to expired: {}", e.getMessage(), e);
         }

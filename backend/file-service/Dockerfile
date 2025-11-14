@@ -23,7 +23,11 @@ RUN cd file-service && mvn clean package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
-
+# Set timezone to Asia/Ho_Chi_Minh (fix lệch giờ)
+RUN apk add --no-cache tzdata \
+    && cp /usr/share/zoneinfo/Asia/Ho_Chi_Minh /etc/localtime \
+    && echo "Asia/Ho_Chi_Minh" > /etc/timezone \
+    && apk del tzdata
 # Create a non-root user
 RUN addgroup -S spring && adduser -S spring -G spring && \
     chown -R spring:spring /app

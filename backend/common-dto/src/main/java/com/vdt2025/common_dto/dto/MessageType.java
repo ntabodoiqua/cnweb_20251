@@ -11,7 +11,11 @@ public enum MessageType {
     EMAIL_VERIFICATION("user.email.verification", "email-verification-queue"),
     SELLER_PROFILE_APPROVED("seller.profile.approved", "seller-profile-approved-queue"),
     STORE_CREATED("store.created", "store-created-queue"),
-    SELLER_PROFILE_REJECTED("seller.profile.rejected", "seller-profile-rejected-queue");
+    SELLER_PROFILE_REJECTED("seller.profile.rejected", "seller-profile-rejected-queue"),
+    PAYMENT_SUCCESS("payment.success", "payment-success-queue"),
+    PAYMENT_FAILED("payment.failed", "payment-failed-queue"),
+    REFUND_SUCCESS("refund.success", "refund-success-queue"),
+    REFUND_FAILED("refund.failed", "refund-failed-queue");
 
     private final String routingKey;
     private final String queueName;

@@ -1,0 +1,1049 @@
+/* ========================================
+   Seller Settings Page Styles
+   Giao diện trang quản lý cửa hàng
+   ======================================== */
+
+.seller-settings {
+  animation: fadeInUp 0.5s ease-out;
+  padding: 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== Info Banner ==================== */
+
+.settings-info-banner {
+  background: linear-gradient(135deg, #e6f7ff 0%, #bae7ff 100%);
+  border: 1px solid #91d5ff;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+}
+
+.settings-info-banner .anticon {
+  font-size: 20px;
+  color: #1890ff;
+}
+
+.settings-info-content {
+  flex: 1;
+}
+
+.settings-info-title {
+  font-weight: 600;
+  color: #0050b3;
+  margin-bottom: 4px;
+  font-size: 15px;
+}
+
+.settings-info-text {
+  font-size: 14px;
+  color: #096dd9;
+  margin: 0;
+}
+
+.settings-info-text strong {
+  font-weight: 700;
+}
+
+/* ==================== Store Container ==================== */
+
+.store-container {
+  margin-bottom: 20px;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* ==================== Compact View ==================== */
+
+.store-compact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border: 2px solid rgba(238, 77, 45, 0.15);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  position: relative;
+  overflow: hidden;
+  background-color: white;
+}
+
+.store-compact:hover {
+  border-color: #ee4d2d;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.15);
+  transform: translateY(-2px);
+}
+
+.compact-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.compact-logo {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 28px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+  overflow: hidden;
+}
+
+.compact-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.compact-info {
+  flex: 1;
+}
+
+.compact-store-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px;
+  text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+}
+
+.compact-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.compact-status.active {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+}
+
+.compact-status.inactive {
+  background: linear-gradient(135deg, #d9d9d9 0%, #f0f0f0 100%);
+  color: #595959;
+}
+
+.compact-right {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.compact-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.compact-date {
+  font-size: 13px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.compact-date .anticon {
+  color: #ee4d2d;
+}
+
+.expand-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+}
+
+.expand-button:hover {
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.4);
+}
+
+.expand-button:active {
+  transform: translateY(0);
+}
+
+/* ==================== Expanded View ==================== */
+
+.store-expanded {
+  margin-top: 16px;
+  padding: 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.02) 0%,
+    rgba(255, 107, 53, 0.02) 100%
+  );
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  border-radius: 12px;
+  animation: fadeInDown 0.3s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== Store Info Section ==================== */
+
+.store-info-section {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.03) 0%,
+    rgba(255, 107, 53, 0.03) 100%
+  );
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  border-radius: 16px;
+  padding: 0;
+  margin-bottom: 20px;
+  overflow: hidden;
+}
+
+/* Banner Section */
+.store-banner-section {
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.store-banner-wrapper {
+  position: relative;
+  width: 100%;
+  height: 280px;
+  overflow: hidden;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.05) 0%,
+    rgba(255, 107, 53, 0.05) 100%
+  );
+}
+
+.store-banner-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.store-banner-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: rgba(238, 77, 45, 0.4);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.store-banner-placeholder .anticon {
+  font-size: 64px;
+}
+
+.store-banner-upload {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #ee4d2d;
+  color: white;
+  border: 4px solid white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.4);
+}
+
+.store-banner-upload:hover:not(:disabled) {
+  background: #d73211;
+  transform: scale(1.15) rotate(15deg);
+  box-shadow: 0 6px 16px rgba(238, 77, 45, 0.6);
+}
+
+.store-banner-upload:active:not(:disabled) {
+  transform: scale(1.05) rotate(10deg);
+}
+
+.store-banner-upload:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.store-banner-upload:disabled:hover {
+  background: #ccc;
+  transform: none;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.4);
+}
+
+.store-banner-upload .anticon {
+  font-size: 22px;
+}
+
+.store-info-header {
+  display: flex;
+  gap: 24px;
+  padding: 28px 28px 24px;
+  margin-bottom: 0;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.1);
+}
+
+.store-logo-wrapper {
+  flex-shrink: 0;
+  position: relative;
+  width: 120px;
+  height: 120px;
+}
+
+.store-logo {
+  width: 120px;
+  height: 120px;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 4px solid white;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.store-logo:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
+}
+
+.store-logo-placeholder {
+  width: 120px;
+  height: 120px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  color: white;
+  border: 4px solid white;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.store-logo-placeholder:hover {
+  transform: scale(1.05) rotate(5deg);
+  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
+}
+
+.store-logo-upload {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #ee4d2d;
+  color: white;
+  border: 3px solid white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+}
+
+.store-logo-upload:hover:not(:disabled) {
+  background: #d73211;
+  transform: scale(1.15) rotate(15deg);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.4);
+}
+
+.store-logo-upload:active:not(:disabled) {
+  transform: scale(1.05) rotate(10deg);
+}
+
+.store-logo-upload:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.store-logo-upload:disabled:hover {
+  background: #ccc;
+  transform: none;
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+}
+
+.store-logo-upload .anticon {
+  font-size: 16px;
+}
+
+.store-basic-info {
+  flex: 1;
+}
+
+.store-name {
+  font-size: 28px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 12px;
+  line-height: 1.3;
+}
+
+.store-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.store-status-badge.active {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+}
+
+.store-status-badge.inactive {
+  background: linear-gradient(135deg, #d9d9d9 0%, #f0f0f0 100%);
+  color: #595959;
+}
+
+.store-status-badge .anticon {
+  font-size: 16px;
+}
+
+.store-description {
+  color: #666;
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  border-left: 3px solid #ee4d2d;
+}
+
+.store-contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.store-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #555;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.store-contact-item:hover {
+  background: rgba(238, 77, 45, 0.05);
+  transform: translateX(4px);
+}
+
+.store-contact-item .anticon {
+  color: #ee4d2d;
+  font-size: 16px;
+}
+
+/* ==================== Store Address Section ==================== */
+
+.store-address-section {
+  margin-top: 0;
+  padding: 20px 28px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 0;
+  border-left: 4px solid #ee4d2d;
+  border-top: 1px solid rgba(238, 77, 45, 0.1);
+}
+
+.store-address-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.store-address-title .anticon {
+  color: #ee4d2d;
+  font-size: 18px;
+}
+
+.store-address-text {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.6;
+  padding-left: 26px;
+}
+
+/* ==================== Location Details ==================== */
+
+.store-location-details {
+  margin-top: 16px;
+  padding: 16px;
+  background: rgba(238, 77, 45, 0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(238, 77, 45, 0.1);
+}
+
+.location-detail-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 14px;
+}
+
+.location-detail-item:not(:last-child) {
+  border-bottom: 1px solid rgba(238, 77, 45, 0.08);
+}
+
+.location-label {
+  font-weight: 600;
+  color: #ee4d2d;
+  min-width: 130px;
+  flex-shrink: 0;
+}
+
+.location-value {
+  color: #333;
+  flex: 1;
+}
+
+.location-loading {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(238, 77, 45, 0.05);
+  border-radius: 8px;
+  color: #ee4d2d;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-style: italic;
+}
+
+.location-loading .anticon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==================== Timestamps Section ==================== */
+
+.timestamps-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-top: 0;
+  padding: 20px 28px;
+  border-top: 1px solid rgba(238, 77, 45, 0.1);
+}
+
+.timestamp-item {
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.timestamp-item:hover {
+  background: rgba(238, 77, 45, 0.05);
+  transform: translateY(-2px);
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.1);
+}
+
+.timestamp-label {
+  font-size: 12px;
+  color: #999;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.timestamp-value {
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timestamp-value .anticon {
+  color: #ee4d2d;
+}
+
+/* ==================== Action Buttons ==================== */
+
+.store-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 2px solid rgba(238, 77, 45, 0.1);
+}
+
+.profile-btn {
+  flex: 1;
+  min-width: 140px;
+  padding: 12px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.2);
+}
+
+.profile-btn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.profile-btn:hover:not(:disabled)::before {
+  width: 300px;
+  height: 300px;
+}
+
+.profile-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none !important;
+}
+
+.profile-btn-primary {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  color: white;
+}
+
+.profile-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(238, 77, 45, 0.4);
+}
+
+.profile-btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+}
+
+.profile-btn-secondary {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e8e8e8 100%);
+  color: #333;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.profile-btn-secondary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #e8e8e8 0%, #d9d9d9 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.profile-btn-activate {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+}
+
+.profile-btn-activate:hover:not(:disabled) {
+  background: linear-gradient(135deg, #73d13d 0%, #95de64 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.4);
+}
+
+.profile-btn-danger {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  color: white;
+}
+
+.profile-btn-danger:hover:not(:disabled) {
+  background: linear-gradient(135deg, #ff7875 0%, #ffa39e 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 77, 79, 0.4);
+}
+
+.profile-btn-danger:disabled {
+  background: linear-gradient(135deg, #d9d9d9 0%, #f0f0f0 100%);
+  color: #8c8c8c;
+  box-shadow: none;
+}
+
+/* Remove old action-btn styles */
+.action-btn {
+  display: none;
+}
+
+/* ==================== Pagination ==================== */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  margin-top: 24px;
+  background: white;
+  border-radius: 12px;
+  border: 2px solid rgba(238, 77, 45, 0.15);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.pagination-btn {
+  padding: 10px 20px;
+  border: 2px solid rgba(238, 77, 45, 0.2);
+  background: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #ee4d2d;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: #ee4d2d;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  color: #8c8c8c;
+}
+
+.pagination-info {
+  font-weight: 700;
+  color: #333;
+  font-size: 15px;
+}
+
+/* ==================== Empty State ==================== */
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.02) 0%,
+    rgba(255, 107, 53, 0.02) 100%
+  );
+  border-radius: 16px;
+  border: 2px dashed rgba(238, 77, 45, 0.2);
+}
+
+.empty-state .anticon {
+  font-size: 80px;
+  color: rgba(238, 77, 45, 0.3);
+  margin-bottom: 16px;
+}
+
+.empty-state h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 12px;
+}
+
+.empty-state p {
+  color: #666;
+  margin-bottom: 28px;
+  font-size: 15px;
+}
+
+/* Use profile-btn for empty state button */
+
+/* ==================== Loading State ==================== */
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.02) 0%,
+    rgba(255, 107, 53, 0.02) 100%
+  );
+  border-radius: 16px;
+}
+
+.loading-container .anticon-spin {
+  font-size: 48px;
+  color: #ee4d2d;
+}
+
+.loading-text {
+  margin-top: 16px;
+  font-size: 15px;
+  color: #666;
+}
+
+/* ==================== Form Modal ==================== */
+
+.store-form {
+  padding: 20px 0;
+}
+
+.form-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.form-section-title .anticon {
+  color: #ee4d2d;
+  font-size: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.form-label .anticon {
+  color: #ee4d2d;
+}
+
+.required {
+  color: #ff4d4f;
+}
+
+.form-input,
+.form-textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  outline: none;
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+}
+
+.form-input-readonly {
+  background-color: #f5f5f5;
+  cursor: not-allowed;
+  color: #8c8c8c;
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-info-section {
+  margin-top: 32px;
+  padding: 20px;
+  background: rgba(24, 144, 255, 0.02);
+  border: 1px solid rgba(24, 144, 255, 0.1);
+  border-radius: 12px;
+}
+
+.form-info-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1890ff;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.form-info-title .anticon {
+  font-size: 16px;
+}
+
+.form-location-info {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(238, 77, 45, 0.03);
+  border-radius: 8px;
+  border-left: 3px solid #ee4d2d;
+}
+
+.location-info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.location-info-item:not(:last-child) {
+  border-bottom: 1px solid rgba(238, 77, 45, 0.08);
+}
+
+.location-info-label {
+  font-weight: 600;
+  color: #ee4d2d;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.location-info-value {
+  color: #333;
+  flex: 1;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 2px solid #f0f0f0;
+}
+
+/* Form buttons use profile-btn classes */
+
+/* ==================== Responsive Design ==================== */
+
+@media (max-width: 768px) {
+  .store-compact {
+    flex-direction: column;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .compact-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .store-info-header {
+    flex-direction: column;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .store-actions {
+    flex-direction: column;
+  }
+
+  .profile-btn {
+    min-width: 100%;
+  }
+
+  .timestamps-section {
+    grid-template-columns: 1fr;
+  }
+}

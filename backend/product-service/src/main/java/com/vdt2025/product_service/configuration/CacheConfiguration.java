@@ -1,6 +1,7 @@
 package com.vdt2025.product_service.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.cache.annotation.EnableCaching;
@@ -29,16 +30,30 @@ public class CacheConfiguration {
                 // 2. Đăng ký module để xử lý LocalDateTime, ZonedDateTime, v.v.
                 .registerModule(new JavaTimeModule());
 
-        // 2. Lưu thông tin kiểu dữ liệu vào JSON để deserialization chính xác
+        // 3. Enable Default Typing để lưu thông tin kiểu dữ liệu (cần thiết cho cache)
+        // BasicPolymorphicTypeValidator giới hạn các class được phép để tăng bảo mật
+        BasicPolymorphicTypeValidator ptv = BasicPolymorphicTypeValidator.builder()
+                .allowIfSubType("com.vdt2025.product_service")
+                .allowIfSubType("java.util")
+                .allowIfSubType("java.time")
+                .allowIfSubType("com.vdt2025.common_dto")
+                .allowIfSubType("org.springframework.data.domain")
+                .allowIfSubType("org.springframework.data.support")
+                .allowIfSubType("org.springframework.data")
+                .allowIfSubType("java.math")
+                .build();
+
         objectMapper.activateDefaultTyping(
-                BasicPolymorphicTypeValidator.builder().allowIfBaseType(Object.class).build(),
-                ObjectMapper.DefaultTyping.NON_FINAL
+                ptv,
+                ObjectMapper.DefaultTyping.EVERYTHING
         );
 
-        // 3. Tạo serializer với ObjectMapper đã được cấu hình
+        objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
+        // 4. Tạo serializer với ObjectMapper đã được cấu hình
         GenericJackson2JsonRedisSerializer serializer = new GenericJackson2JsonRedisSerializer(objectMapper);
 
-        // 4. Sử dụng serializer này cho cấu hình cache
+        // 5. Sử dụng serializer này cho cấu hình cache
         return RedisCacheConfiguration.defaultCacheConfig()
                 .entryTtl(Duration.ofMinutes(10))
                 .disableCachingNullValues()

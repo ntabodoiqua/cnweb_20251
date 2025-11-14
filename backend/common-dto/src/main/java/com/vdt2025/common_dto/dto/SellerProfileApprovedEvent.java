@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class SellerProfileApprovedEvent {
     String sellerProfileId;
-    String userId;
+    String userName;
     String storeName;
     String storeDescription;
     String logoName;
