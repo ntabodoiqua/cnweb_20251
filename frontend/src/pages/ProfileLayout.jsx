@@ -8,7 +8,7 @@ import {
   LockOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../constants/routes";
-import "./profile.css";
+import styles from "./Profile.module.css";
 
 /**
  * ProfileLayout - Layout component for profile pages with sidebar navigation
@@ -62,26 +62,26 @@ const ProfileLayout = () => {
     menuItems.find((item) => item.path === location.pathname) || menuItems[0];
 
   return (
-    <div className="profile-page">
-      <div className="profile-container">
-        <div className="profile-content">
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.content}>
           {/* Sidebar Navigation */}
-          <aside className="profile-sidebar">
-            <div className="profile-sidebar-header">
-              <h3 className="profile-sidebar-title">
+          <aside className={styles.sidebar}>
+            <div className={styles.sidebarHeader}>
+              <h3 className={styles.sidebarTitle}>
                 <UserOutlined />
                 Tài khoản của tôi
               </h3>
             </div>
 
             <nav>
-              <ul className="profile-menu">
+              <ul className={styles.menu}>
                 {menuItems.map((item) => (
-                  <li key={item.key} className="profile-menu-item">
+                  <li key={item.key} className={styles.menuItem}>
                     <Link
                       to={item.path}
-                      className={`profile-menu-link ${
-                        location.pathname === item.path ? "active" : ""
+                      className={`${styles.menuLink} ${
+                        location.pathname === item.path ? styles.active : ""
                       }`}
                     >
                       {item.icon}
@@ -94,13 +94,13 @@ const ProfileLayout = () => {
           </aside>
 
           {/* Main Content Area */}
-          <main className="profile-main">
-            <div className="profile-main-header">
-              <h1 className="profile-main-title">
+          <main className={styles.main}>
+            <div className={styles.mainHeader}>
+              <h1 className={styles.mainTitle}>
                 {activeItem.icon}
                 {activeItem.label}
               </h1>
-              <p className="profile-main-subtitle">
+              <p className={styles.mainSubtitle}>
                 Quản lý thông tin cá nhân của bạn
               </p>
             </div>

@@ -9,6 +9,7 @@ import {
   WalletOutlined,
 } from "@ant-design/icons";
 import PropTypes from "prop-types";
+import styles from "../../pages/Profile.module.css";
 
 const ProfileHistory = ({ transactions }) => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,53 +66,53 @@ const ProfileHistory = ({ transactions }) => {
     return (
       <>
         {/* Stats Cards */}
-        <div className="profile-stats-grid">
-          <div className="profile-stat-card">
-            <div className="profile-stat-header">
-              <span className="profile-stat-title">Tổng chi tiêu</span>
-              <div className="profile-stat-icon">
+        <div className={styles.statsGrid}>
+          <div className={styles.statCard}>
+            <div className={styles.statHeader}>
+              <span className={styles.statTitle}>Tổng chi tiêu</span>
+              <div className={styles.statIcon}>
                 <ArrowDownOutlined />
               </div>
             </div>
-            <p className="profile-stat-value">0đ</p>
-            <p className="profile-stat-label">tất cả giao dịch</p>
+            <p className={styles.statValue}>0đ</p>
+            <p className={styles.statLabel}>tất cả giao dịch</p>
           </div>
 
-          <div className="profile-stat-card">
-            <div className="profile-stat-header">
-              <span className="profile-stat-title">Tổng hoàn tiền</span>
-              <div className="profile-stat-icon">
+          <div className={styles.statCard}>
+            <div className={styles.statHeader}>
+              <span className={styles.statTitle}>Tổng hoàn tiền</span>
+              <div className={styles.statIcon}>
                 <ArrowUpOutlined />
               </div>
             </div>
-            <p className="profile-stat-value">0đ</p>
-            <p className="profile-stat-label">tất cả giao dịch</p>
+            <p className={styles.statValue}>0đ</p>
+            <p className={styles.statLabel}>tất cả giao dịch</p>
           </div>
 
-          <div className="profile-stat-card">
-            <div className="profile-stat-header">
-              <span className="profile-stat-title">Số giao dịch</span>
-              <div className="profile-stat-icon">
+          <div className={styles.statCard}>
+            <div className={styles.statHeader}>
+              <span className={styles.statTitle}>Số giao dịch</span>
+              <div className={styles.statIcon}>
                 <HistoryOutlined />
               </div>
             </div>
-            <p className="profile-stat-value">0</p>
-            <p className="profile-stat-label">giao dịch</p>
+            <p className={styles.statValue}>0</p>
+            <p className={styles.statLabel}>giao dịch</p>
           </div>
 
-          <div className="profile-stat-card">
-            <div className="profile-stat-header">
-              <span className="profile-stat-title">Ví của tôi</span>
-              <div className="profile-stat-icon">
+          <div className={styles.statCard}>
+            <div className={styles.statHeader}>
+              <span className={styles.statTitle}>Ví của tôi</span>
+              <div className={styles.statIcon}>
                 <WalletOutlined />
               </div>
             </div>
-            <p className="profile-stat-value">0đ</p>
-            <p className="profile-stat-label">số dư hiện tại</p>
+            <p className={styles.statValue}>0đ</p>
+            <p className={styles.statLabel}>số dư hiện tại</p>
           </div>
         </div>
 
-        <div className="profile-empty-state">
+        <div className={styles.emptyState}>
           <HistoryOutlined />
           <h3>Lịch sử giao dịch</h3>
           <p>Chưa có giao dịch nào được thực hiện.</p>
@@ -123,67 +124,67 @@ const ProfileHistory = ({ transactions }) => {
   return (
     <div>
       {/* Stats Cards */}
-      <div className="profile-stats-grid">
-        <div className="profile-stat-card">
-          <div className="profile-stat-header">
-            <span className="profile-stat-title">Tổng chi tiêu</span>
-            <div className="profile-stat-icon">
+      <div className={styles.statsGrid}>
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <span className={styles.statTitle}>Tổng chi tiêu</span>
+            <div className={styles.statIcon}>
               <ArrowDownOutlined />
             </div>
           </div>
-          <p className="profile-stat-value">
+          <p className={styles.statValue}>
             {(getTotalAmount("payment") / 1000000).toFixed(1)}M
           </p>
-          <p className="profile-stat-label">VNĐ</p>
+          <p className={styles.statLabel}>VNĐ</p>
         </div>
 
-        <div className="profile-stat-card">
-          <div className="profile-stat-header">
-            <span className="profile-stat-title">Tổng hoàn tiền</span>
-            <div className="profile-stat-icon">
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <span className={styles.statTitle}>Tổng hoàn tiền</span>
+            <div className={styles.statIcon}>
               <ArrowUpOutlined />
             </div>
           </div>
-          <p className="profile-stat-value">
+          <p className={styles.statValue}>
             {(getTotalAmount("refund") / 1000000).toFixed(1)}M
           </p>
-          <p className="profile-stat-label">VNĐ</p>
+          <p className={styles.statLabel}>VNĐ</p>
         </div>
 
-        <div className="profile-stat-card">
-          <div className="profile-stat-header">
-            <span className="profile-stat-title">Số giao dịch</span>
-            <div className="profile-stat-icon">
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <span className={styles.statTitle}>Số giao dịch</span>
+            <div className={styles.statIcon}>
               <HistoryOutlined />
             </div>
           </div>
-          <p className="profile-stat-value">{transactions.length}</p>
-          <p className="profile-stat-label">giao dịch</p>
+          <p className={styles.statValue}>{transactions.length}</p>
+          <p className={styles.statLabel}>giao dịch</p>
         </div>
 
-        <div className="profile-stat-card">
-          <div className="profile-stat-header">
-            <span className="profile-stat-title">Ví của tôi</span>
-            <div className="profile-stat-icon">
+        <div className={styles.statCard}>
+          <div className={styles.statHeader}>
+            <span className={styles.statTitle}>Ví của tôi</span>
+            <div className={styles.statIcon}>
               <WalletOutlined />
             </div>
           </div>
-          <p className="profile-stat-value">
+          <p className={styles.statValue}>
             {(
               (getTotalAmount("refund") - getTotalAmount("payment")) /
               1000000
             ).toFixed(1)}
             M
           </p>
-          <p className="profile-stat-label">VNĐ</p>
+          <p className={styles.statLabel}>VNĐ</p>
         </div>
       </div>
 
       {/* Search and Filter */}
       <div style={{ marginTop: "32px", marginBottom: "24px" }}>
-        <div className="profile-form-row">
-          <div className="profile-form-group">
-            <label className="profile-form-label">
+        <div className={styles.formRow}>
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
               <SearchOutlined />
               Tìm kiếm
             </label>
@@ -191,20 +192,20 @@ const ProfileHistory = ({ transactions }) => {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="profile-form-input"
+              className={styles.formInput}
               placeholder="Tìm theo mã giao dịch hoặc mô tả..."
             />
           </div>
 
-          <div className="profile-form-group">
-            <label className="profile-form-label">
+          <div className={styles.formGroup}>
+            <label className={styles.formLabel}>
               <FilterOutlined />
               Loại giao dịch
             </label>
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="profile-form-select"
+              className={styles.formSelect}
             >
               <option value="all">Tất cả</option>
               <option value="payment">Thanh toán</option>
@@ -216,7 +217,7 @@ const ProfileHistory = ({ transactions }) => {
 
       {/* Transactions List */}
       {filteredTransactions.length === 0 ? (
-        <div className="profile-empty-state">
+        <div className={styles.emptyState}>
           <FilterOutlined />
           <h3>Không tìm thấy giao dịch</h3>
           <p>Không có giao dịch nào phù hợp với bộ lọc.</p>

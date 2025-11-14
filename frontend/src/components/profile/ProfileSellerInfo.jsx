@@ -39,7 +39,8 @@ import {
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
-import "./ProfileSellerInfo.css";
+import styles from "./ProfileSellerInfo.module.css";
+import profileStyles from "../../pages/Profile.module.css";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
@@ -822,39 +823,43 @@ const ProfileSellerInfo = () => {
     return (
       <div
         key={profile.id}
-        className="seller-profile-container"
+        className={styles.sellerProfileContainer}
         style={{ marginBottom: "20px" }}
       >
         {/* Compact View */}
         <div
-          className="seller-profile-compact"
+          className={styles.sellerProfileCompact}
           onClick={() => toggleExpand(profile.id)}
         >
-          <div className="compact-left">
-            <div className="compact-logo">
+          <div className={styles.compactLeft}>
+            <div className={styles.compactLogo}>
               {profile.logoUrl ? (
                 <img src={profile.logoUrl} alt="Logo" />
               ) : (
                 <ShopOutlined />
               )}
             </div>
-            <div className="compact-info">
-              <h3 className="compact-store-name">{profile.storeName}</h3>
-              <div className={`seller-status-badge ${status.color} compact`}>
+            <div className={styles.compactInfo}>
+              <h3 className={styles.compactStoreName}>{profile.storeName}</h3>
+              <div
+                className={`${styles.sellerStatusBadge} ${
+                  styles[status.color]
+                } ${styles.compact}`}
+              >
                 {status.icon}
                 {status.label}
               </div>
             </div>
           </div>
 
-          <div className="compact-right">
-            <div className="compact-meta">
-              <span className="compact-date">
+          <div className={styles.compactRight}>
+            <div className={styles.compactMeta}>
+              <span className={styles.compactDate}>
                 <ClockCircleOutlined />{" "}
                 {dayjs(profile.createdAt).format("DD/MM/YYYY")}
               </span>
             </div>
-            <button className="expand-button" type="button">
+            <button className={styles.expandButton} type="button">
               {isExpanded ? <UpOutlined /> : <DownOutlined />}
               {isExpanded ? "Thu gọn" : "Xem chi tiết"}
             </button>
@@ -879,44 +884,48 @@ const ProfileSellerInfo = () => {
 
         {/* Expanded View */}
         {isExpanded && (
-          <div className="seller-profile-expanded">
-            <div className="shop-info-section">
-              <div className="shop-info-header">
-                <div className="shop-logo-wrapper">
+          <div className={styles.sellerProfileExpanded}>
+            <div className={styles.shopInfoSection}>
+              <div className={styles.shopInfoHeader}>
+                <div className={styles.shopLogoWrapper}>
                   {profile.logoUrl ? (
                     <img
                       src={profile.logoUrl}
+                      className={styles.shopLogo}
                       alt="Shop Logo"
-                      className="shop-logo"
                     />
                   ) : (
-                    <div className="shop-logo-placeholder">
+                    <div className={styles.shopLogoPlaceholder}>
                       <ShopOutlined />
                     </div>
                   )}
                 </div>
 
-                <div className="shop-basic-info">
-                  <h2 className="shop-name">{profile.storeName}</h2>
+                <div className={styles.shopBasicInfo}>
+                  <h2 className={styles.shopName}>{profile.storeName}</h2>
 
-                  <div className={`seller-status-badge ${status.color}`}>
+                  <div
+                    className={`${styles.sellerStatusBadge} ${
+                      styles[status.color]
+                    }`}
+                  >
                     {status.icon}
                     {status.label}
                   </div>
 
                   {profile.storeDescription && (
-                    <div className="shop-description">
+                    <div className={styles.shopDescription}>
                       <FileTextOutlined style={{ marginRight: "8px" }} />
                       {profile.storeDescription}
                     </div>
                   )}
 
-                  <div className="shop-contact-info">
-                    <div className="shop-contact-item">
+                  <div className={styles.shopContactInfo}>
+                    <div className={styles.shopContactItem}>
                       <MailOutlined />
                       <span>{profile.contactEmail}</span>
                     </div>
-                    <div className="shop-contact-item">
+                    <div className={styles.shopContactItem}>
                       <PhoneOutlined />
                       <span>{profile.contactPhone}</span>
                     </div>
@@ -925,12 +934,12 @@ const ProfileSellerInfo = () => {
               </div>
 
               {/* Address Info */}
-              <div className="shop-address-section">
-                <div className="shop-address-title">
+              <div className={styles.shopAddressSection}>
+                <div className={styles.shopAddressTitle}>
                   <EnvironmentOutlined />
                   Địa chỉ cửa hàng
                 </div>
-                <div className="shop-address-text">
+                <div className={styles.shopAddressText}>
                   {profile.shopAddress}
                   {profile.ward && (
                     <>
@@ -944,20 +953,20 @@ const ProfileSellerInfo = () => {
               {/* Rejection Reason */}
               {profile.verificationStatus === "REJECTED" &&
                 profile.rejectionReason && (
-                  <div className="rejection-reason-section">
-                    <div className="rejection-reason-title">
+                  <div className={styles.rejectionReasonSection}>
+                    <div className={styles.rejectionReasonTitle}>
                       <CloseCircleOutlined />
                       Lý do từ chối
                     </div>
-                    <div className="rejection-reason-text">
+                    <div className={styles.rejectionReasonText}>
                       {profile.rejectionReason}
                     </div>
                   </div>
                 )}
 
               {/* Document Upload Section */}
-              <div className="document-upload-section">
-                <div className="document-upload-header">
+              <div className={styles.documentUploadSection}>
+                <div className={styles.documentUploadHeader}>
                   <FilePdfOutlined
                     style={{ fontSize: "18px", color: "#1890ff" }}
                   />
@@ -965,18 +974,18 @@ const ProfileSellerInfo = () => {
                 </div>
 
                 {documentInfo[profile.id] ? (
-                  <div className="document-info">
-                    <div className="document-details">
+                  <div className={styles.documentInfo}>
+                    <div className={styles.documentDetails}>
                       <FilePdfOutlined
                         style={{ fontSize: "24px", color: "#ff4d4f" }}
                       />
-                      <div className="document-meta">
-                        <div className="document-name">
+                      <div className={styles.documentMeta}>
+                        <div className={styles.documentName}>
                           {getOriginalFileName(
                             documentInfo[profile.id].fileName
                           )}
                         </div>
-                        <div className="document-size-date">
+                        <div className={styles.documentSizeDate}>
                           {documentInfo[profile.id].fileSize && (
                             <span>
                               {(
@@ -988,7 +997,7 @@ const ProfileSellerInfo = () => {
                           {documentInfo[profile.id].uploadedAt && (
                             <>
                               {documentInfo[profile.id].fileSize && (
-                                <span className="separator">•</span>
+                                <span className={styles.separator}>•</span>
                               )}
                               <span>
                                 Tải lên:{" "}
@@ -1001,10 +1010,10 @@ const ProfileSellerInfo = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="document-actions">
+                    <div className={styles.documentActions}>
                       <Tooltip title="Xem tài liệu">
                         <button
-                          className="document-btn document-btn-view"
+                          className={`${styles.documentBtn} ${styles.documentBtnView}`}
                           onClick={() =>
                             handleViewDocument(documentInfo[profile.id])
                           }
@@ -1015,7 +1024,9 @@ const ProfileSellerInfo = () => {
                       </Tooltip>
                       {canEdit && (
                         <Tooltip title="Tải lên tài liệu mới (sẽ thay thế tài liệu hiện tại)">
-                          <label className="document-btn document-btn-upload">
+                          <label
+                            className={`${styles.documentBtn} ${styles.documentBtnUpload}`}
+                          >
                             <UploadOutlined />
                             {uploadingDoc === profile.id
                               ? "Đang tải..."
@@ -1033,13 +1044,13 @@ const ProfileSellerInfo = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="document-empty">
+                  <div className={styles.documentEmpty}>
                     {canEdit ? (
                       <>
-                        <div className="document-empty-icon">
+                        <div className={styles.documentEmptyIcon}>
                           <FilePdfOutlined />
                         </div>
-                        <p className="document-empty-text">
+                        <p className={styles.documentEmptyText}>
                           Chưa có tài liệu hồ sơ. Vui lòng tải lên file PDF chứa
                           các giấy tờ liên quan.
                         </p>
@@ -1050,7 +1061,10 @@ const ProfileSellerInfo = () => {
                           showIcon
                           style={{ marginBottom: "12px", textAlign: "left" }}
                         />
-                        <label className="document-btn document-btn-primary document-btn-upload-large">
+                        ) : (
+                        <label
+                          className={`${styles.documentBtn} ${styles.documentBtnPrimary} ${styles.documentBtnUploadLarge}`}
+                        >
                           <UploadOutlined />
                           {uploadingDoc === profile.id ? (
                             <>
@@ -1071,10 +1085,10 @@ const ProfileSellerInfo = () => {
                       </>
                     ) : (
                       <>
-                        <div className="document-empty-icon">
+                        <div className={styles.documentEmptyIcon}>
                           <FilePdfOutlined />
                         </div>
-                        <p className="document-empty-text">
+                        <p className={styles.documentEmptyText}>
                           Chưa có tài liệu hồ sơ.
                         </p>
                       </>
@@ -1084,19 +1098,19 @@ const ProfileSellerInfo = () => {
               </div>
 
               {/* Timestamps */}
-              <div className="timestamps-section">
-                <div className="timestamp-item">
-                  <div className="timestamp-label">Ngày tạo</div>
-                  <div className="timestamp-value">
+              <div className={styles.timestampsSection}>
+                <div className={styles.timestampItem}>
+                  <div className={styles.timestampLabel}>Ngày tạo</div>
+                  <div className={styles.timestampValue}>
                     <ClockCircleOutlined />
                     {dayjs(profile.createdAt).format("DD/MM/YYYY HH:mm")}
                   </div>
                 </div>
 
                 {profile.approvedAt && (
-                  <div className="timestamp-item">
-                    <div className="timestamp-label">Ngày duyệt</div>
-                    <div className="timestamp-value">
+                  <div className={styles.timestampItem}>
+                    <div className={styles.timestampLabel}>Ngày duyệt</div>
+                    <div className={styles.timestampValue}>
                       <CheckCircleOutlined />
                       {dayjs(profile.approvedAt).format("DD/MM/YYYY HH:mm")}
                     </div>
@@ -1104,18 +1118,18 @@ const ProfileSellerInfo = () => {
                 )}
 
                 {profile.rejectedAt && (
-                  <div className="timestamp-item">
-                    <div className="timestamp-label">Ngày từ chối</div>
-                    <div className="timestamp-value">
+                  <div className={styles.timestampItem}>
+                    <div className={styles.timestampLabel}>Ngày từ chối</div>
+                    <div className={styles.timestampValue}>
                       <CloseCircleOutlined />
                       {dayjs(profile.rejectedAt).format("DD/MM/YYYY HH:mm")}
                     </div>
                   </div>
                 )}
 
-                <div className="timestamp-item">
-                  <div className="timestamp-label">Cập nhật lần cuối</div>
-                  <div className="timestamp-value">
+                <div className={styles.timestampItem}>
+                  <div className={styles.timestampLabel}>Cập nhật lần cuối</div>
+                  <div className={styles.timestampValue}>
                     <SyncOutlined />
                     {dayjs(profile.updatedAt).fromNow()}
                   </div>
@@ -1124,12 +1138,15 @@ const ProfileSellerInfo = () => {
             </div>
 
             {/* Action Buttons based on status */}
-            <div className="profile-form-actions" style={{ marginTop: "24px" }}>
+            <div
+              className={profileStyles.formActions}
+              style={{ marginTop: "24px" }}
+            >
               {canEdit && (
                 <>
                   <Tooltip title="Chỉnh sửa thông tin hồ sơ người bán">
                     <button
-                      className="profile-btn profile-btn-secondary"
+                      className={`${profileStyles.btn} ${profileStyles.btnSecondary}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleEdit(profile);
@@ -1141,7 +1158,7 @@ const ProfileSellerInfo = () => {
                   </Tooltip>
                   <Tooltip title="Gửi hồ sơ để admin xem xét và phê duyệt">
                     <button
-                      className="profile-btn profile-btn-primary"
+                      className={`${profileStyles.btn} ${profileStyles.btnPrimary}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handleSendToReview(profile);
@@ -1157,7 +1174,7 @@ const ProfileSellerInfo = () => {
               {canRegisterNew && (
                 <Tooltip title="Tạo hồ sơ mới sau khi bị từ chối">
                   <button
-                    className="profile-btn profile-btn-primary"
+                    className={`${profileStyles.btn} ${profileStyles.btnPrimary}`}
                     onClick={(e) => {
                       e.stopPropagation();
                       handleRegisterNew();
@@ -1178,7 +1195,7 @@ const ProfileSellerInfo = () => {
                   }
                 >
                   <button
-                    className="profile-btn profile-btn-secondary"
+                    className={`${profileStyles.btn} ${profileStyles.btnSecondary}`}
                     disabled
                     style={{ cursor: "not-allowed", opacity: 0.6 }}
                   >
@@ -1197,7 +1214,7 @@ const ProfileSellerInfo = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="seller-loading">
+      <div className={styles.sellerLoading}>
         <LoadingOutlined />
         <p>Đang tải thông tin hồ sơ người bán...</p>
       </div>
@@ -1244,7 +1261,7 @@ const ProfileSellerInfo = () => {
         {pagination.total > pagination.pageSize && (
           <div style={{ textAlign: "center", marginTop: "20px" }}>
             <button
-              className="profile-btn profile-btn-secondary"
+              className={`${profileStyles.btn} ${profileStyles.btnSecondary}`}
               disabled={pagination.current === 1}
               onClick={() => fetchSellerProfile(pagination.current - 2)}
               style={{ marginRight: "10px" }}
@@ -1256,7 +1273,7 @@ const ProfileSellerInfo = () => {
               {Math.ceil(pagination.total / pagination.pageSize)}
             </span>
             <button
-              className="profile-btn profile-btn-secondary"
+              className={`${profileStyles.btn} ${profileStyles.btnSecondary}`}
               disabled={
                 pagination.current >=
                 Math.ceil(pagination.total / pagination.pageSize)
@@ -1274,72 +1291,77 @@ const ProfileSellerInfo = () => {
   // If editing existing profile
   if (isEditing) {
     return (
-      <div className="seller-registration-form">
-        <div className="form-section-title">
+      <div className={styles.sellerRegistrationForm}>
+        <div className={styles.formSectionTitle}>
           <FileTextOutlined />
           Chỉnh sửa hồ sơ người bán
         </div>
 
-        <div className="profile-form-row">
-          <div className="profile-form-group">
-            <label className="profile-form-label">
+        <div className={profileStyles.formRow}>
+          <div className={profileStyles.formGroup}>
+            <label className={profileStyles.formLabel}>
               <ShopOutlined />
-              Tên cửa hàng <span className="required">*</span>
+              Tên cửa hàng <span className={profileStyles.required}>*</span>
             </label>
             <input
               type="text"
               name="storeName"
               value={formData.storeName}
               onChange={handleInputChange}
-              className="profile-form-input"
+              className={profileStyles.formInput}
               placeholder="VD: Cửa hàng điện tử ABC"
             />
           </div>
 
-          <div className="profile-form-group">
-            <label className="profile-form-label">
+          <div className={profileStyles.formGroup}>
+            <label className={profileStyles.formLabel}>
               <PhoneOutlined />
-              Số điện thoại <span className="required">*</span>
+              Số điện thoại <span className={profileStyles.required}>*</span>
             </label>
             <input
               type="tel"
               name="contactPhone"
               value={formData.contactPhone}
               onChange={handleInputChange}
-              className={`profile-form-input ${
-                errors.contactPhone ? "input-error" : ""
+              className={`${profileStyles.formInput} ${
+                errors.contactPhone ? styles.inputError : ""
               }`}
               placeholder="0123456789"
               maxLength={10}
             />
             {errors.contactPhone && (
-              <span className="error-message">{errors.contactPhone}</span>
+              <span className={styles.errorMessage}>{errors.contactPhone}</span>
             )}
           </div>
         </div>
 
-        <div className="profile-form-group full-width">
-          <label className="profile-form-label">
+        <div
+          className={`${profileStyles.formGroup} ${profileStyles.fullWidth}`}
+        >
+          <label className={profileStyles.formLabel}>
             <MailOutlined />
-            Email liên hệ <span className="required">*</span>
+            Email liên hệ <span className={profileStyles.required}>*</span>
           </label>
           <input
             type="email"
             name="contactEmail"
             value={formData.contactEmail}
             onChange={handleInputChange}
-            className={`profile-form-input ${
-              errors.contactEmail ? "input-error" : ""
+            className={`${profileStyles.formInput} ${
+              errors.contactEmail ? styles.inputError : ""
             }`}
             placeholder="shop@example.com"
           />
           {errors.contactEmail && (
-            <span className="error-message">{errors.contactEmail}</span>
+            <span className={styles.errorMessage}>{errors.contactEmail}</span>
           )}
         </div>
 
-        <div className="profile-form-group full-width">
-          <label className="profile-form-label">
+        <div
+          className={`${profileStyles.formGroup} ${profileStyles.fullWidth}`}
+          style={{ marginTop: "24px" }}
+        >
+          <label className={profileStyles.formLabel}>
             <FileTextOutlined />
             Mô tả cửa hàng
           </label>
@@ -1347,22 +1369,22 @@ const ProfileSellerInfo = () => {
             name="storeDescription"
             value={formData.storeDescription}
             onChange={handleInputChange}
-            className="profile-form-textarea"
+            className={profileStyles.formTextarea}
             placeholder="Giới thiệu về cửa hàng của bạn, sản phẩm/dịch vụ cung cấp..."
             rows={4}
           />
         </div>
 
-        <div className="form-section-title">
+        <div className={styles.formSectionTitle}>
           <EnvironmentOutlined />
           Địa chỉ cửa hàng
         </div>
 
-        <div className="location-selects">
-          <div className="location-select-group">
-            <label className="location-select-label">
+        <div className={styles.locationSelects}>
+          <div className={styles.locationSelectGroup}>
+            <label className={styles.locationSelectLabel}>
               <GlobalOutlined />
-              Tỉnh/Thành phố <span className="required">*</span>
+              Tỉnh/Thành phố <span className={profileStyles.required}>*</span>
             </label>
             <Select
               showSearch
@@ -1381,10 +1403,10 @@ const ProfileSellerInfo = () => {
             </Select>
           </div>
 
-          <div className="location-select-group">
-            <label className="location-select-label">
+          <div className={styles.locationSelectGroup}>
+            <label className={styles.locationSelectLabel}>
               <HomeOutlined />
-              Phường/Xã <span className="required">*</span>
+              Phường/Xã <span className={profileStyles.required}>*</span>
             </label>
             <Select
               showSearch
@@ -1405,24 +1427,26 @@ const ProfileSellerInfo = () => {
           </div>
         </div>
 
-        <div className="profile-form-group full-width">
-          <label className="profile-form-label">
+        <div
+          className={`${profileStyles.formGroup} ${profileStyles.fullWidth}`}
+        >
+          <label className={profileStyles.formLabel}>
             <EnvironmentOutlined />
-            Địa chỉ cụ thể <span className="required">*</span>
+            Địa chỉ cụ thể <span className={profileStyles.required}>*</span>
           </label>
           <input
             type="text"
             name="shopAddress"
             value={formData.shopAddress}
             onChange={handleInputChange}
-            className="profile-form-input"
+            className={profileStyles.formInput}
             placeholder="Số nhà, tên đường/thôn/xóm..."
           />
         </div>
 
-        <div className="profile-form-actions">
+        <div className={profileStyles.formActions}>
           <button
-            className="profile-btn profile-btn-secondary"
+            className={`${profileStyles.btn} ${profileStyles.btnSecondary}`}
             onClick={handleCancel}
             disabled={submitting}
           >
@@ -1430,7 +1454,7 @@ const ProfileSellerInfo = () => {
             Hủy
           </button>
           <button
-            className="profile-btn profile-btn-primary"
+            className={`${profileStyles.btn} ${profileStyles.btnPrimary}`}
             onClick={handleSubmit}
             disabled={submitting}
           >
@@ -1454,7 +1478,7 @@ const ProfileSellerInfo = () => {
   // If user hasn't registered as seller yet OR not in edit/register mode
   if (!isRegistering && !isEditing) {
     return (
-      <div className="seller-empty-state">
+      <div className={styles.sellerEmptyState}>
         <ShopOutlined />
         <h3>Hồ sơ người bán</h3>
         <p>
@@ -1462,7 +1486,7 @@ const ProfileSellerInfo = () => {
           nền tảng HUSTBuy và tiếp cận hàng triệu khách hàng tiềm năng.
         </p>
         <button
-          className="profile-btn profile-btn-primary"
+          className={`${profileStyles.btn} ${profileStyles.btnPrimary}`}
           onClick={handleRegisterNew}
         >
           <ShopOutlined />
@@ -1474,7 +1498,7 @@ const ProfileSellerInfo = () => {
 
   // Registration form
   return (
-    <div className="seller-registration-form">
+    <div className={styles.sellerRegistrationForm}>
       {/* Info banner about profile limit */}
       <div
         style={{
@@ -1503,71 +1527,74 @@ const ProfileSellerInfo = () => {
         </div>
       </div>
 
-      <div className="form-section-title">
+      <div className={styles.formSectionTitle}>
         <ShopOutlined />
         Thông tin cửa hàng
       </div>
 
-      <div className="profile-form-row">
-        <div className="profile-form-group">
-          <label className="profile-form-label">
+      <div className={profileStyles.formRow}>
+        <div className={profileStyles.formGroup}>
+          <label className={profileStyles.formLabel}>
             <ShopOutlined />
-            Tên cửa hàng <span className="required">*</span>
+            Tên cửa hàng <span className={profileStyles.required}>*</span>
           </label>
           <input
             type="text"
             name="storeName"
             value={formData.storeName}
             onChange={handleInputChange}
-            className="profile-form-input"
+            className={profileStyles.formInput}
             placeholder="VD: Cửa hàng điện tử ABC"
           />
         </div>
 
-        <div className="profile-form-group">
-          <label className="profile-form-label">
+        <div className={profileStyles.formGroup}>
+          <label className={profileStyles.formLabel}>
             <PhoneOutlined />
-            Số điện thoại <span className="required">*</span>
+            Số điện thoại <span className={profileStyles.required}>*</span>
           </label>
           <input
             type="tel"
             name="contactPhone"
             value={formData.contactPhone}
             onChange={handleInputChange}
-            className={`profile-form-input ${
-              errors.contactPhone ? "input-error" : ""
+            className={`${profileStyles.formInput} ${
+              errors.contactPhone ? styles.inputError : ""
             }`}
             placeholder="0123456789"
             maxLength={10}
           />
           {errors.contactPhone && (
-            <span className="error-message">{errors.contactPhone}</span>
+            <span className={styles.errorMessage}>{errors.contactPhone}</span>
           )}
         </div>
       </div>
 
-      <div className="profile-form-group full-width">
-        <label className="profile-form-label">
+      <div className={`${profileStyles.formGroup} ${profileStyles.fullWidth}`}>
+        <label className={profileStyles.formLabel}>
           <MailOutlined />
-          Email liên hệ <span className="required">*</span>
+          Email liên hệ <span className={profileStyles.required}>*</span>
         </label>
         <input
           type="email"
           name="contactEmail"
           value={formData.contactEmail}
           onChange={handleInputChange}
-          className={`profile-form-input ${
-            errors.contactEmail ? "input-error" : ""
+          className={`${profileStyles.formInput} ${
+            errors.contactEmail ? styles.inputError : ""
           }`}
           placeholder="shop@example.com"
         />
         {errors.contactEmail && (
-          <span className="error-message">{errors.contactEmail}</span>
+          <span className={styles.errorMessage}>{errors.contactEmail}</span>
         )}
       </div>
 
-      <div className="profile-form-group full-width">
-        <label className="profile-form-label">
+      <div
+        className={`${profileStyles.formGroup} ${profileStyles.fullWidth}`}
+        style={{ marginTop: "24px" }}
+      >
+        <label className={profileStyles.formLabel}>
           <FileTextOutlined />
           Mô tả cửa hàng
         </label>
@@ -1575,22 +1602,22 @@ const ProfileSellerInfo = () => {
           name="storeDescription"
           value={formData.storeDescription}
           onChange={handleInputChange}
-          className="profile-form-textarea"
+          className={profileStyles.formTextarea}
           placeholder="Giới thiệu về cửa hàng của bạn, sản phẩm/dịch vụ cung cấp..."
           rows={4}
         />
       </div>
 
-      <div className="form-section-title">
+      <div className={styles.formSectionTitle}>
         <EnvironmentOutlined />
         Địa chỉ cửa hàng
       </div>
 
-      <div className="location-selects">
-        <div className="location-select-group">
-          <label className="location-select-label">
+      <div className={styles.locationSelects}>
+        <div className={styles.locationSelectGroup}>
+          <label className={styles.locationSelectLabel}>
             <GlobalOutlined />
-            Tỉnh/Thành phố <span className="required">*</span>
+            Tỉnh/Thành phố <span className={profileStyles.required}>*</span>
           </label>
           <Select
             showSearch
@@ -1609,10 +1636,10 @@ const ProfileSellerInfo = () => {
           </Select>
         </div>
 
-        <div className="location-select-group">
-          <label className="location-select-label">
+        <div className={styles.locationSelectGroup}>
+          <label className={styles.locationSelectLabel}>
             <HomeOutlined />
-            Phường/Xã <span className="required">*</span>
+            Phường/Xã <span className={profileStyles.required}>*</span>
           </label>
           <Select
             showSearch
@@ -1633,24 +1660,24 @@ const ProfileSellerInfo = () => {
         </div>
       </div>
 
-      <div className="profile-form-group full-width">
-        <label className="profile-form-label">
+      <div className={`${profileStyles.formGroup} ${profileStyles.fullWidth}`}>
+        <label className={profileStyles.formLabel}>
           <EnvironmentOutlined />
-          Địa chỉ cụ thể <span className="required">*</span>
+          Địa chỉ cụ thể <span className={profileStyles.required}>*</span>
         </label>
         <input
           type="text"
           name="shopAddress"
           value={formData.shopAddress}
           onChange={handleInputChange}
-          className="profile-form-input"
+          className={profileStyles.formInput}
           placeholder="Số nhà, tên đường/thôn/xóm..."
         />
       </div>
 
-      <div className="profile-form-actions">
+      <div className={profileStyles.formActions}>
         <button
-          className="profile-btn profile-btn-secondary"
+          className={`${profileStyles.btn} ${profileStyles.btnSecondary}`}
           onClick={handleCancel}
           disabled={submitting}
         >
@@ -1658,7 +1685,7 @@ const ProfileSellerInfo = () => {
           Hủy
         </button>
         <button
-          className="profile-btn profile-btn-primary"
+          className={`${profileStyles.btn} ${profileStyles.btnPrimary}`}
           onClick={handleSubmit}
           disabled={submitting}
         >
