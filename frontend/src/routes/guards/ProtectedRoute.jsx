@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { AuthContext } from "../../components/context/auth.context";
 import { notification } from "antd";
 import { PUBLIC_ROUTES } from "../../constants/routes";
+import { hasAnyRole } from "../../constants/roles";
 
 /**
  * Component bảo vệ route dựa trên authentication và role
@@ -49,14 +50,10 @@ const ProtectedRoute = ({
       return <Navigate to={PUBLIC_ROUTES.HOME} replace />;
     }
 
+    // Sử dụng helper function hasAnyRole để kiểm tra
     // Xử lý trường hợp role là string chứa nhiều roles (cách nhau bởi dấu cách)
     // Ví dụ: "ROLE_USER ROLE_SELLER"
-    const userRoles = userRole.includes(" ") ? userRole.split(" ") : [userRole];
-
-    // Kiểm tra xem user có ít nhất một trong các role được phép không
-    const hasAllowedRole = userRoles.some((role) =>
-      allowedRoles.includes(role)
-    );
+    const hasAllowedRole = hasAnyRole(userRole, allowedRoles);
 
     if (!hasAllowedRole) {
       if (showNotification) {

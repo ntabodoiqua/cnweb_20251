@@ -1,5 +1,5 @@
 /* Sellers Container */
-.sellers-container {
+.container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px 60px;
@@ -7,7 +7,7 @@
 }
 
 /* Hero Section */
-.sellers-hero {
+.hero {
   position: relative;
   padding: 100px 20px;
   margin: 0 -20px 60px;
@@ -16,7 +16,7 @@
   border-radius: 0 0 32px 32px;
 }
 
-.hero-background {
+.heroBackground {
   position: absolute;
   top: 0;
   left: 0;
@@ -25,14 +25,14 @@
   overflow: hidden;
 }
 
-.hero-circle {
+.heroCircle {
   position: absolute;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   animation: float 6s ease-in-out infinite;
 }
 
-.hero-circle-1 {
+.heroCircle1 {
   width: 400px;
   height: 400px;
   top: -100px;
@@ -40,7 +40,7 @@
   animation-delay: 0s;
 }
 
-.hero-circle-2 {
+.heroCircle2 {
   width: 300px;
   height: 300px;
   top: 50%;
@@ -48,7 +48,7 @@
   animation-delay: 2s;
 }
 
-.hero-circle-3 {
+.heroCircle3 {
   width: 200px;
   height: 200px;
   bottom: -50px;
@@ -66,14 +66,14 @@
   }
 }
 
-.hero-content {
+.heroContent {
   position: relative;
   z-index: 1;
   text-align: center;
   animation: fadeInDown 1s ease;
 }
 
-.hero-logo {
+.heroLogo {
   width: 150px;
   height: auto;
   margin-bottom: 24px;
@@ -91,7 +91,7 @@
   }
 }
 
-.hero-title {
+.heroTitle {
   font-size: 52px;
   font-weight: 900;
   color: white;
@@ -101,7 +101,7 @@
   animation: slideInUp 0.8s ease 0.3s both;
 }
 
-.hero-subtitle {
+.heroSubtitle {
   font-size: 20px;
   color: rgba(255, 255, 255, 0.95);
   font-weight: 500;
@@ -110,14 +110,14 @@
   animation: slideInUp 0.8s ease 0.5s both;
 }
 
-.hero-buttons {
+.heroButtons {
   display: flex;
   gap: 16px;
   justify-content: center;
   animation: slideInUp 0.8s ease 0.7s both;
 }
 
-.hero-cta-primary {
+.heroCtaPrimary {
   background: white !important;
   color: #ee4d2d !important;
   border: 2px solid #ee4d2d !important;
@@ -125,18 +125,16 @@
   height: 48px;
   padding: 0 32px;
   font-size: 16px;
-
 }
 
-.hero-cta-primary:hover {
+.heroCtaPrimary:hover {
   background: #fff5f5 !important;
   color: #ee4d2d !important;
   border-color: #ee4d2d !important;
   transform: translateY(-2px);
-
 }
 
-.hero-cta-secondary {
+.heroCtaSecondary {
   background: transparent;
   color: white;
   border: 2px solid white;
@@ -146,7 +144,7 @@
   font-size: 16px;
 }
 
-.hero-cta-secondary:hover {
+.heroCtaSecondary:hover {
   background: rgba(255, 255, 255, 0.1);
   color: white;
   border-color: white;
@@ -165,18 +163,18 @@
 }
 
 /* Stats Section */
-.stats-section {
+.statsSection {
   margin-bottom: 80px;
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
-.stats-grid {
+.statsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 24px;
 }
 
-.stat-card {
+.statCard {
   background: white;
   padding: 40px 24px;
   border-radius: 16px;
@@ -186,33 +184,33 @@
   transition: all 0.3s ease;
 }
 
-.stat-card:hover {
+.statCard:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 32px rgba(238, 77, 45, 0.2);
   border-color: #ee4d2d;
 }
 
-.stat-icon {
+.statIcon {
   font-size: 48px;
   color: #ee4d2d;
   margin-bottom: 16px;
 }
 
-.stat-number {
+.statNumber {
   font-size: 42px;
   font-weight: 900;
   color: #222;
   margin-bottom: 8px;
 }
 
-.stat-label {
+.statLabel {
   font-size: 16px;
   color: #666;
   font-weight: 500;
 }
 
 /* Section Title */
-.section-title {
+.sectionTitle {
   font-size: 36px;
   font-weight: 800;
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
@@ -224,18 +222,18 @@
 }
 
 /* Benefits Section */
-.benefits-section {
+.benefitsSection {
   margin-bottom: 80px;
 }
 
-.benefits-grid {
+.benefitsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: 24px;
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
-.benefit-card {
+.benefitCard {
   background: white;
   padding: 32px;
   border-radius: 16px;
@@ -245,43 +243,43 @@
   text-align: center;
 }
 
-.benefit-card:hover {
+.benefitCard:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 32px rgba(238, 77, 45, 0.2);
   border-color: #fee;
 }
 
-.benefit-icon {
+.benefitIcon {
   font-size: 56px;
   margin-bottom: 20px;
 }
 
-.benefit-card h3 {
+.benefitCard h3 {
   color: #222;
   margin-bottom: 12px;
   font-size: 20px;
   font-weight: 700;
 }
 
-.benefit-card p {
+.benefitCard p {
   color: #666;
   line-height: 1.6;
   font-size: 15px;
 }
 
 /* Steps Section */
-.steps-section {
+.stepsSection {
   margin-bottom: 80px;
 }
 
-.steps-grid {
+.stepsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 24px;
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
-.step-card {
+.stepCard {
   background: white;
   padding: 32px;
   border-radius: 16px;
@@ -292,13 +290,13 @@
   transition: all 0.4s ease;
 }
 
-.step-card:hover {
+.stepCard:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 32px rgba(238, 77, 45, 0.2);
   border-color: #ee4d2d;
 }
 
-.step-number {
+.stepNumber {
   position: absolute;
   top: -20px;
   right: 24px;
@@ -308,7 +306,7 @@
   line-height: 1;
 }
 
-.step-icon {
+.stepIcon {
   font-size: 48px;
   color: #ee4d2d;
   margin-bottom: 20px;
@@ -316,7 +314,7 @@
   z-index: 1;
 }
 
-.step-card h3 {
+.stepCard h3 {
   color: #222;
   margin-bottom: 12px;
   font-size: 20px;
@@ -325,7 +323,7 @@
   z-index: 1;
 }
 
-.step-card p {
+.stepCard p {
   color: #666;
   line-height: 1.6;
   font-size: 15px;
@@ -334,18 +332,18 @@
 }
 
 /* Features Section */
-.features-section {
+.featuresSection {
   margin-bottom: 80px;
 }
 
-.features-grid {
+.featuresGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 24px;
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
-.feature-card {
+.featureCard {
   background: white;
   padding: 32px;
   border-radius: 16px;
@@ -357,26 +355,26 @@
   transition: all 0.3s ease;
 }
 
-.feature-card:hover {
+.featureCard:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15);
   border-color: #fee;
 }
 
-.feature-card .feature-icon {
+.featureIcon {
   font-size: 32px;
   color: #52c41a;
   flex-shrink: 0;
 }
 
-.feature-content h3 {
+.featureContent h3 {
   color: #222;
   margin-bottom: 8px;
   font-size: 18px;
   font-weight: 700;
 }
 
-.feature-content p {
+.featureContent p {
   color: #666;
   line-height: 1.6;
   font-size: 15px;
@@ -384,7 +382,7 @@
 }
 
 /* Registration Section */
-.registration-section {
+.registrationSection {
   background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
   padding: 60px 40px;
   border-radius: 24px;
@@ -393,7 +391,7 @@
   animation: fadeInUp 0.8s ease 0.4s both;
 }
 
-.registration-content {
+.registrationContent {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 60px;
@@ -401,27 +399,27 @@
   margin: 0 auto;
 }
 
-.registration-info h2 {
+.registrationInfo h2 {
   font-size: 32px;
   font-weight: 800;
   color: #222;
   margin-bottom: 16px;
 }
 
-.registration-info p {
+.registrationInfo p {
   font-size: 16px;
   color: #666;
   line-height: 1.8;
   margin-bottom: 32px;
 }
 
-.info-highlights {
+.infoHighlights {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.highlight-item {
+.highlightItem {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -430,19 +428,19 @@
   font-weight: 500;
 }
 
-.highlight-icon {
+.highlightIcon {
   font-size: 20px;
   color: #52c41a;
 }
 
-.registration-form {
+.registrationForm {
   background: white;
   padding: 32px;
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(238, 77, 45, 0.08);
 }
 
-.submit-btn {
+.submitBtn {
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
   border: none;
   height: 48px;
@@ -452,13 +450,13 @@
   box-shadow: 0 4px 16px rgba(238, 77, 45, 0.3);
 }
 
-.submit-btn:hover {
+.submitBtn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(238, 77, 45, 0.4);
 }
 
 /* Support Section */
-.support-section {
+.supportSection {
   text-align: center;
   padding: 40px;
   background: white;
@@ -467,20 +465,20 @@
   animation: fadeInUp 0.8s ease 0.6s both;
 }
 
-.support-section h3 {
+.supportSection h3 {
   font-size: 24px;
   font-weight: 700;
   color: #222;
   margin-bottom: 16px;
 }
 
-.support-section p {
+.supportSection p {
   font-size: 16px;
   color: #666;
   margin-bottom: 8px;
 }
 
-.support-section strong {
+.supportSection strong {
   color: #ee4d2d;
   font-weight: 600;
 }
@@ -519,123 +517,123 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .sellers-container {
+  .container {
     padding: 0 20px 48px;
   }
 
-  .sellers-hero {
+  .hero {
     padding: 80px 20px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 44px;
   }
 
-  .registration-content {
+  .registrationContent {
     grid-template-columns: 1fr;
     gap: 40px;
   }
 
-  .features-grid {
+  .featuresGrid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .sellers-container {
+  .container {
     padding: 0 16px 40px;
   }
 
-  .sellers-hero {
+  .hero {
     padding: 60px 16px;
     margin: 0 -16px 40px;
     border-radius: 0 0 24px 24px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 120px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 36px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 16px;
   }
 
-  .hero-buttons {
+  .heroButtons {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .section-title {
+  .sectionTitle {
     font-size: 28px;
   }
 
-  .stats-grid {
+  .statsGrid {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .benefits-grid {
+  .benefitsGrid {
     grid-template-columns: 1fr;
   }
 
-  .steps-grid {
+  .stepsGrid {
     grid-template-columns: 1fr;
   }
 
-  .registration-section {
+  .registrationSection {
     padding: 40px 24px;
   }
 
-  .registration-info h2 {
+  .registrationInfo h2 {
     font-size: 26px;
   }
 
-  .registration-form {
+  .registrationForm {
     padding: 24px;
   }
 }
 
 @media (max-width: 480px) {
-  .sellers-hero {
+  .hero {
     padding: 48px 16px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 100px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 28px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 15px;
   }
 
-  .section-title {
+  .sectionTitle {
     font-size: 24px;
   }
 
-  .stats-grid {
+  .statsGrid {
     grid-template-columns: 1fr;
   }
 
-  .stat-number {
+  .statNumber {
     font-size: 36px;
   }
 
-  .registration-section {
+  .registrationSection {
     padding: 32px 20px;
   }
 
-  .registration-info h2 {
+  .registrationInfo h2 {
     font-size: 24px;
   }
 
-  .support-section {
+  .supportSection {
     padding: 32px 20px;
   }
 }

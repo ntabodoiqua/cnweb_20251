@@ -1,13 +1,13 @@
-/* About Us Container - Đồng bộ với design system của website */
-.about-us-container {
+/* About Us Container */
+.container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px 60px;
   animation: fadeIn 0.6s ease;
 }
 
-/* Hero Section với Logo */
-.about-us-hero {
+/* Hero Section */
+.hero {
   position: relative;
   padding: 80px 20px;
   margin: 0 -20px 60px;
@@ -16,7 +16,7 @@
   border-radius: 0 0 32px 32px;
 }
 
-.hero-background {
+.heroBackground {
   position: absolute;
   top: 0;
   left: 0;
@@ -25,14 +25,14 @@
   overflow: hidden;
 }
 
-.hero-circle {
+.heroCircle {
   position: absolute;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   animation: float 6s ease-in-out infinite;
 }
 
-.hero-circle-1 {
+.heroCircle1 {
   width: 400px;
   height: 400px;
   top: -100px;
@@ -40,7 +40,7 @@
   animation-delay: 0s;
 }
 
-.hero-circle-2 {
+.heroCircle2 {
   width: 300px;
   height: 300px;
   top: 50%;
@@ -48,7 +48,7 @@
   animation-delay: 2s;
 }
 
-.hero-circle-3 {
+.heroCircle3 {
   width: 200px;
   height: 200px;
   bottom: -50px;
@@ -66,14 +66,14 @@
   }
 }
 
-.hero-content {
+.heroContent {
   position: relative;
   z-index: 1;
   text-align: center;
   animation: fadeInDown 1s ease;
 }
 
-.hero-logo {
+.heroLogo {
   width: 180px;
   height: auto;
   margin-bottom: 24px;
@@ -82,7 +82,7 @@
   transition: transform 0.3s ease;
 }
 
-.hero-logo:hover {
+.heroLogo:hover {
   transform: scale(1.1) rotate(5deg);
 }
 
@@ -96,7 +96,7 @@
   }
 }
 
-.hero-title {
+.heroTitle {
   font-size: 56px;
   font-weight: 900;
   color: white;
@@ -106,7 +106,7 @@
   animation: slideInUp 0.8s ease 0.3s both;
 }
 
-.hero-subtitle {
+.heroSubtitle {
   font-size: 20px;
   color: rgba(255, 255, 255, 0.95);
   font-weight: 500;
@@ -126,13 +126,13 @@
 }
 
 /* Header Section */
-.about-us-header {
+.header {
   text-align: center;
   margin-bottom: 60px;
   animation: fadeInDown 0.8s ease;
 }
 
-.about-us-header h1 {
+.header h1 {
   font-size: 42px;
   font-weight: 800;
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
@@ -143,7 +143,7 @@
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.about-us-header p {
+.header p {
   font-size: 18px;
   color: #666;
   max-width: 800px;
@@ -153,7 +153,7 @@
 }
 
 /* Content Sections */
-.about-us-content {
+.content {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 24px;
@@ -161,7 +161,7 @@
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
-.about-us-section {
+.section {
   background: white;
   padding: 32px;
   border-radius: 16px;
@@ -173,7 +173,7 @@
   overflow: hidden;
 }
 
-.about-us-section::before {
+.section::before {
   content: "";
   position: absolute;
   top: 0;
@@ -186,7 +186,7 @@
   transition: transform 0.4s ease;
 }
 
-.about-us-section::after {
+.section::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -199,22 +199,22 @@
   transition: width 0.6s ease, height 0.6s ease;
 }
 
-.about-us-section:hover::after {
+.section:hover::after {
   width: 500px;
   height: 500px;
 }
 
-.about-us-section:hover {
+.section:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 12px 32px rgba(238, 77, 45, 0.2);
   border-color: #ee4d2d;
 }
 
-.about-us-section:hover::before {
+.section:hover::before {
   transform: scaleX(1);
 }
 
-.section-icon {
+.sectionIcon {
   width: 64px;
   height: 64px;
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
@@ -231,12 +231,12 @@
   z-index: 1;
 }
 
-.about-us-section:hover .section-icon {
+.section:hover .sectionIcon {
   transform: scale(1.1) rotate(5deg);
   box-shadow: 0 6px 24px rgba(238, 77, 45, 0.5);
 }
 
-.about-us-section h2 {
+.section h2 {
   color: #222;
   margin-bottom: 16px;
   font-size: 24px;
@@ -248,7 +248,7 @@
   z-index: 1;
 }
 
-.about-us-section h2::before {
+.section h2::before {
   content: "●";
   color: #ee4d2d;
   font-size: 20px;
@@ -267,7 +267,7 @@
   }
 }
 
-.about-us-section p {
+.section p {
   color: #666;
   line-height: 1.8;
   font-size: 15px;
@@ -276,13 +276,13 @@
 }
 
 /* Team Section */
-.team-section {
+.teamSection {
   margin-top: 80px;
   text-align: center;
   animation: fadeInUp 0.8s ease 0.4s both;
 }
 
-.team-section h2 {
+.teamSection h2 {
   font-size: 36px;
   font-weight: 800;
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
@@ -294,14 +294,14 @@
   align-items: center;
 }
 
-.team-grid {
+.teamGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 32px;
   padding: 20px;
 }
 
-.team-member {
+.teamMember {
   background: white;
   padding: 32px 24px;
   border-radius: 16px;
@@ -313,7 +313,7 @@
   overflow: hidden;
 }
 
-.team-member::before {
+.teamMember::before {
   content: "";
   position: absolute;
   top: 0;
@@ -329,7 +329,7 @@
   transition: opacity 0.4s ease;
 }
 
-.team-member::after {
+.teamMember::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -342,22 +342,22 @@
   transition: width 0.6s ease, height 0.6s ease;
 }
 
-.team-member:hover::after {
+.teamMember:hover::after {
   width: 400px;
   height: 400px;
 }
 
-.team-member:hover {
+.teamMember:hover {
   transform: translateY(-12px) scale(1.03);
   box-shadow: 0 12px 32px rgba(238, 77, 45, 0.25);
   border-color: #ee4d2d;
 }
 
-.team-member:hover::before {
+.teamMember:hover::before {
   opacity: 1;
 }
 
-.team-member img {
+.teamMember img {
   width: 140px;
   height: 140px;
   border-radius: 50%;
@@ -370,13 +370,13 @@
   z-index: 1;
 }
 
-.team-member:hover img {
+.teamMember:hover img {
   transform: scale(1.1) rotate(5deg);
   box-shadow: 0 8px 24px rgba(238, 77, 45, 0.4);
   border-color: #ee4d2d;
 }
 
-.team-member h3 {
+.teamMember h3 {
   color: #222;
   margin-bottom: 8px;
   font-size: 20px;
@@ -386,11 +386,11 @@
   transition: color 0.3s ease;
 }
 
-.team-member:hover h3 {
+.teamMember:hover h3 {
   color: #ee4d2d;
 }
 
-.team-member p {
+.teamMember p {
   color: #666;
   font-size: 15px;
   font-weight: 500;
@@ -399,7 +399,7 @@
   transition: color 0.3s ease;
 }
 
-.team-member:hover p {
+.teamMember:hover p {
   color: #ff6b35;
 }
 
@@ -437,204 +437,204 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .about-us-container {
+  .container {
     padding: 0 20px 48px;
   }
 
-  .about-us-hero {
+  .hero {
     padding: 60px 20px;
     margin: 0 -20px 48px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 160px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 48px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 18px;
   }
 
-  .about-us-header h1 {
+  .header h1 {
     font-size: 36px;
   }
 }
 
 @media (max-width: 768px) {
-  .about-us-container {
+  .container {
     padding: 0 16px 40px;
   }
 
-  .about-us-hero {
+  .hero {
     padding: 48px 16px;
     margin: 0 -16px 40px;
     border-radius: 0 0 24px 24px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 140px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 40px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 16px;
   }
 
-  .hero-circle-1 {
+  .heroCircle1 {
     width: 300px;
     height: 300px;
   }
 
-  .hero-circle-2 {
+  .heroCircle2 {
     width: 200px;
     height: 200px;
   }
 
-  .hero-circle-3 {
+  .heroCircle3 {
     width: 150px;
     height: 150px;
   }
 
-  .about-us-header h1 {
+  .header h1 {
     font-size: 32px;
   }
 
-  .about-us-header p {
+  .header p {
     font-size: 16px;
   }
 
-  .about-us-content {
+  .content {
     grid-template-columns: 1fr;
     gap: 20px;
   }
 
-  .about-us-section {
+  .section {
     padding: 24px;
   }
 
-  .section-icon {
+  .sectionIcon {
     width: 56px;
     height: 56px;
     font-size: 24px;
   }
 
-  .about-us-section h2 {
+  .section h2 {
     font-size: 20px;
   }
 
-  .team-section h2 {
+  .teamSection h2 {
     font-size: 28px;
   }
 
-  .team-grid {
+  .teamGrid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 24px;
     padding: 10px;
   }
 
-  .team-member {
+  .teamMember {
     padding: 24px 20px;
   }
 
-  .team-member img {
+  .teamMember img {
     width: 120px;
     height: 120px;
   }
 }
 
 @media (max-width: 480px) {
-  .about-us-container {
+  .container {
     padding: 0 16px 32px;
   }
 
-  .about-us-hero {
+  .hero {
     padding: 40px 16px;
     margin: 0 -16px 32px;
     border-radius: 0 0 20px 20px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 120px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 32px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 15px;
   }
 
-  .about-us-header h1 {
+  .header h1 {
     font-size: 28px;
   }
 
-  .about-us-header p {
+  .header p {
     font-size: 15px;
   }
 
-  .about-us-section {
+  .section {
     padding: 20px;
   }
 
-  .section-icon {
+  .sectionIcon {
     width: 48px;
     height: 48px;
     font-size: 20px;
     border-radius: 12px;
   }
 
-  .about-us-section h2 {
+  .section h2 {
     font-size: 18px;
   }
 
-  .team-section {
+  .teamSection {
     margin-top: 60px;
   }
 
-  .team-section h2 {
+  .teamSection h2 {
     font-size: 24px;
   }
 
-  .team-grid {
+  .teamGrid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
 
-  .team-member img {
+  .teamMember img {
     width: 100px;
     height: 100px;
   }
 
-  .team-member h3 {
+  .teamMember h3 {
     font-size: 18px;
   }
 
-  .team-member p {
+  .teamMember p {
     font-size: 14px;
   }
 }
 
-/* Custom scrollbar - Đồng bộ với các trang khác */
-::-webkit-scrollbar {
+/* Custom scrollbar - Global styles */
+:global(::-webkit-scrollbar) {
   width: 8px;
 }
 
-::-webkit-scrollbar-track {
+:global(::-webkit-scrollbar-track) {
   background: #f1f1f1;
 }
 
-::-webkit-scrollbar-thumb {
+:global(::-webkit-scrollbar-thumb) {
   background: #ee4d2d;
   border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+:global(::-webkit-scrollbar-thumb:hover) {
   background: #d73211;
 }

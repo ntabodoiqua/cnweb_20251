@@ -1,5 +1,5 @@
-/* Privacy Container */
-.privacy-container {
+/* Terms Container */
+.container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px 60px;
@@ -7,7 +7,7 @@
 }
 
 /* Hero Section */
-.privacy-hero {
+.hero {
   position: relative;
   padding: 80px 20px;
   margin: 0 -20px 60px;
@@ -16,7 +16,7 @@
   border-radius: 0 0 32px 32px;
 }
 
-.hero-background {
+.heroBackground {
   position: absolute;
   top: 0;
   left: 0;
@@ -25,14 +25,14 @@
   overflow: hidden;
 }
 
-.hero-circle {
+.heroCircle {
   position: absolute;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   animation: float 6s ease-in-out infinite;
 }
 
-.hero-circle-1 {
+.heroCircle1 {
   width: 400px;
   height: 400px;
   top: -100px;
@@ -40,7 +40,7 @@
   animation-delay: 0s;
 }
 
-.hero-circle-2 {
+.heroCircle2 {
   width: 300px;
   height: 300px;
   top: 50%;
@@ -48,7 +48,7 @@
   animation-delay: 2s;
 }
 
-.hero-circle-3 {
+.heroCircle3 {
   width: 200px;
   height: 200px;
   bottom: -50px;
@@ -66,14 +66,14 @@
   }
 }
 
-.hero-content {
+.heroContent {
   position: relative;
   z-index: 1;
   text-align: center;
   animation: fadeInDown 1s ease;
 }
 
-.hero-logo {
+.heroLogo {
   width: 120px;
   height: auto;
   margin-bottom: 24px;
@@ -91,7 +91,7 @@
   }
 }
 
-.hero-title {
+.heroTitle {
   font-size: 48px;
   font-weight: 900;
   color: white;
@@ -101,7 +101,7 @@
   animation: slideInUp 0.8s ease 0.3s both;
 }
 
-.hero-subtitle {
+.heroSubtitle {
   font-size: 18px;
   color: rgba(255, 255, 255, 0.95);
   font-weight: 500;
@@ -110,7 +110,7 @@
   animation: slideInUp 0.8s ease 0.5s both;
 }
 
-.last-updated {
+.lastUpdated {
   display: inline-block;
   background: rgba(255, 255, 255, 0.2);
   color: white;
@@ -134,21 +134,134 @@
 }
 
 /* Introduction */
-.privacy-intro {
+.termsIntro {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  border: 2px solid #f0f0f0;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.08);
+  margin-bottom: 40px;
+  animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+.termsIntro p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #444;
+  margin: 0;
+  text-align: justify;
+}
+
+/* Terms Content */
+.termsContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeInUp 0.8s ease 0.4s both;
+}
+
+.termsSection {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  border: 2px solid #f0f0f0;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.termsSection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #ee4d2d 0%, #ff6b35 100%);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.3s ease;
+}
+
+.termsSection:hover {
+  border-color: #fee;
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15);
+}
+
+.termsSection:hover::before {
+  transform: scaleY(1);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.sectionIcon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.termsSection:hover .sectionIcon {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.5);
+}
+
+.sectionHeader h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+.sectionContent {
+  position: relative;
+  z-index: 1;
+}
+
+.sectionContent p {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #666;
+  margin-bottom: 12px;
+  text-align: justify;
+}
+
+.sectionContent p:last-child {
+  margin-bottom: 0;
+}
+
+/* Important Notice */
+.termsNotice {
   background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
   padding: 32px;
   border-radius: 16px;
   border: 2px solid #ffd8bf;
-  margin-bottom: 40px;
+  margin-top: 40px;
   display: flex;
   gap: 20px;
   align-items: flex-start;
-  animation: fadeInUp 0.8s ease 0.2s both;
+  animation: fadeInUp 0.8s ease 0.6s both;
   box-shadow: 0 4px 16px rgba(238, 77, 45, 0.1);
 }
 
-.intro-icon {
-  font-size: 48px;
+.noticeIcon {
+  font-size: 40px;
   color: #ee4d2d;
   flex-shrink: 0;
   animation: pulse 2s ease-in-out infinite;
@@ -166,190 +279,17 @@
   }
 }
 
-.intro-content h3 {
-  font-size: 22px;
+.noticeContent h3 {
+  font-size: 20px;
   font-weight: 700;
   color: #ee4d2d;
   margin-bottom: 12px;
 }
 
-.intro-content p {
-  font-size: 16px;
-  line-height: 1.8;
-  color: #444;
-  margin: 0;
-  text-align: justify;
-}
-
-/* Privacy Content */
-.privacy-content {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  animation: fadeInUp 0.8s ease 0.4s both;
-}
-
-.privacy-section {
-  background: white;
-  padding: 32px;
-  border-radius: 16px;
-  border: 2px solid #f0f0f0;
-  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.08);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.privacy-section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: linear-gradient(180deg, #ee4d2d 0%, #ff6b35 100%);
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: transform 0.3s ease;
-}
-
-.privacy-section:hover {
-  border-color: #fee;
-  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15);
-}
-
-.privacy-section:hover::before {
-  transform: scaleY(1);
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-  position: relative;
-  z-index: 1;
-}
-
-.section-icon {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  color: white;
-  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-}
-
-.privacy-section:hover .section-icon {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.5);
-}
-
-.section-header h2 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #222;
-  margin: 0;
-}
-
-.section-content {
-  position: relative;
-  z-index: 1;
-}
-
-.section-content p {
+.noticeContent p {
   font-size: 15px;
   line-height: 1.8;
   color: #666;
-  margin-bottom: 12px;
-  text-align: justify;
-}
-
-.section-content p:last-child {
-  margin-bottom: 0;
-}
-
-/* Trust Badge */
-.privacy-badge {
-  background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
-  padding: 40px;
-  border-radius: 20px;
-  border: 2px solid #ffd8bf;
-  margin-top: 40px;
-  display: flex;
-  gap: 24px;
-  align-items: center;
-  animation: fadeInUp 0.8s ease 0.6s both;
-  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15);
-  position: relative;
-  overflow: hidden;
-}
-
-.privacy-badge::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  right: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(
-    circle,
-    rgba(238, 77, 45, 0.1) 0%,
-    transparent 70%
-  );
-  animation: rotate 20s linear infinite;
-}
-
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.badge-icon {
-  font-size: 64px;
-  color: #ee4d2d;
-  flex-shrink: 0;
-  animation: shield 3s ease-in-out infinite;
-  position: relative;
-  z-index: 1;
-}
-
-@keyframes shield {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-.badge-content {
-  position: relative;
-  z-index: 1;
-}
-
-.badge-content h3 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #ee4d2d;
-  margin-bottom: 12px;
-}
-
-.badge-content p {
-  font-size: 16px;
-  line-height: 1.8;
-  color: #444;
   margin: 0;
   text-align: justify;
 }
@@ -388,202 +328,167 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .privacy-container {
+  .container {
     padding: 0 20px 48px;
   }
 
-  .privacy-hero {
+  .hero {
     padding: 60px 20px;
     margin: 0 -20px 48px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 100px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 42px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 16px;
-  }
-
-  .badge-icon {
-    font-size: 56px;
-  }
-
-  .badge-content h3 {
-    font-size: 22px;
   }
 }
 
 @media (max-width: 768px) {
-  .privacy-container {
+  .container {
     padding: 0 16px 40px;
   }
 
-  .privacy-hero {
+  .hero {
     padding: 48px 16px;
     margin: 0 -16px 40px;
     border-radius: 0 0 24px 24px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 90px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 36px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 15px;
   }
 
-  .last-updated {
+  .lastUpdated {
     font-size: 13px;
     padding: 6px 16px;
   }
 
-  .hero-circle-1 {
+  .heroCircle1 {
     width: 300px;
     height: 300px;
   }
 
-  .hero-circle-2 {
+  .heroCircle2 {
     width: 200px;
     height: 200px;
   }
 
-  .hero-circle-3 {
+  .heroCircle3 {
     width: 150px;
     height: 150px;
   }
 
-  .privacy-intro {
+  .termsIntro {
     padding: 24px;
-    gap: 16px;
   }
 
-  .intro-icon {
-    font-size: 40px;
-  }
-
-  .intro-content h3 {
-    font-size: 20px;
-  }
-
-  .intro-content p {
+  .termsIntro p {
     font-size: 15px;
   }
 
-  .privacy-section {
+  .termsSection {
     padding: 24px;
   }
 
-  .section-header {
+  .sectionHeader {
     gap: 12px;
   }
 
-  .section-icon {
+  .sectionIcon {
     width: 40px;
     height: 40px;
     font-size: 20px;
   }
 
-  .section-header h2 {
+  .sectionHeader h2 {
     font-size: 20px;
   }
 
-  .section-content p {
+  .sectionContent p {
     font-size: 14px;
   }
 
-  .privacy-badge {
-    padding: 32px 24px;
-    gap: 20px;
+  .termsNotice {
+    padding: 24px;
+    gap: 16px;
   }
 
-  .badge-icon {
-    font-size: 48px;
+  .noticeIcon {
+    font-size: 32px;
   }
 
-  .badge-content h3 {
-    font-size: 20px;
+  .noticeContent h3 {
+    font-size: 18px;
   }
 
-  .badge-content p {
-    font-size: 15px;
+  .noticeContent p {
+    font-size: 14px;
   }
 }
 
 @media (max-width: 480px) {
-  .privacy-hero {
+  .hero {
     padding: 40px 16px;
     margin: 0 -16px 32px;
     border-radius: 0 0 20px 20px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 80px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 28px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 14px;
   }
 
-  .last-updated {
+  .lastUpdated {
     font-size: 12px;
   }
 
-  .privacy-intro {
-    padding: 20px;
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .intro-icon {
-    font-size: 36px;
-  }
-
-  .intro-content h3 {
-    font-size: 18px;
-  }
-
-  .privacy-section {
+  .termsIntro {
     padding: 20px;
   }
 
-  .section-icon {
+  .termsSection {
+    padding: 20px;
+  }
+
+  .sectionIcon {
     width: 36px;
     height: 36px;
     font-size: 18px;
   }
 
-  .section-header h2 {
+  .sectionHeader h2 {
     font-size: 18px;
   }
 
-  .privacy-badge {
-    padding: 24px 20px;
+  .termsNotice {
+    padding: 20px;
     flex-direction: column;
     text-align: center;
   }
 
-  .badge-icon {
-    font-size: 40px;
-  }
-
-  .badge-content h3 {
-    font-size: 18px;
-  }
-
-  .badge-content p {
-    font-size: 14px;
+  .noticeIcon {
+    font-size: 28px;
   }
 }
