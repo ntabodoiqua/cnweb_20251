@@ -87,8 +87,12 @@ const ProfileSellerInfo = () => {
   const [wards, setWards] = useState([]);
   const [expandedIds, setExpandedIds] = useState([]);
   const [errors, setErrors] = useState({
+    storeName: "",
     contactEmail: "",
     contactPhone: "",
+    provinceId: "",
+    wardId: "",
+    shopAddress: "",
   });
   const [uploadingDoc, setUploadingDoc] = useState(null);
   const [documentInfo, setDocumentInfo] = useState({});
@@ -268,80 +272,70 @@ const ProfileSellerInfo = () => {
       provinceId,
     } = formData;
 
-    // Check required fields
-    if (
-      !storeName ||
-      !contactEmail ||
-      !contactPhone ||
-      !shopAddress ||
-      !wardId ||
-      !provinceId
-    ) {
-      notification.error({
-        message: "Thiếu thông tin",
-        description: "Vui lòng điền đầy đủ các trường bắt buộc (*)",
-        placement: "topRight",
-        duration: 3,
-      });
-      return false;
-    }
+    const newErrors = {
+      storeName: "",
+      contactEmail: "",
+      contactPhone: "",
+      provinceId: "",
+      wardId: "",
+      shopAddress: "",
+    };
+    let isValid = true;
 
-    // Validate store name length
-    if (storeName.trim().length < 3) {
-      notification.error({
-        message: "Tên cửa hàng không hợp lệ",
-        description: "Tên cửa hàng phải có ít nhất 3 ký tự",
-        placement: "topRight",
-        duration: 3,
-      });
-      return false;
-    }
-
-    if (storeName.trim().length > 100) {
-      notification.error({
-        message: "Tên cửa hàng quá dài",
-        description: "Tên cửa hàng không được vượt quá 100 ký tự",
-        placement: "topRight",
-        duration: 3,
-      });
-      return false;
+    // Validate store name
+    if (!storeName || !storeName.trim()) {
+      newErrors.storeName = "Vui lòng nhập tên cửa hàng";
+      isValid = false;
+    } else if (storeName.trim().length < 3) {
+      newErrors.storeName = "Tên cửa hàng phải có ít nhất 3 ký tự";
+      isValid = false;
+    } else if (storeName.trim().length > 100) {
+      newErrors.storeName = "Tên cửa hàng không được vượt quá 100 ký tự";
+      isValid = false;
     }
 
     // Validate email
-    if (!validateEmail(contactEmail)) {
-      notification.error({
-        message: "Email không hợp lệ",
-        description:
-          "Vui lòng nhập đúng định dạng email (VD: example@domain.com)",
-        placement: "topRight",
-        duration: 3,
-      });
-      return false;
+    if (!contactEmail || !contactEmail.trim()) {
+      newErrors.contactEmail = "Vui lòng nhập email liên hệ";
+      isValid = false;
+    } else if (!validateEmail(contactEmail)) {
+      newErrors.contactEmail = "Email không hợp lệ (VD: example@domain.com)";
+      isValid = false;
     }
 
     // Validate phone
-    if (!validatePhone(contactPhone)) {
-      notification.error({
-        message: "Số điện thoại không hợp lệ",
-        description: "Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0",
-        placement: "topRight",
-        duration: 3,
-      });
-      return false;
+    if (!contactPhone || !contactPhone.trim()) {
+      newErrors.contactPhone = "Vui lòng nhập số điện thoại";
+      isValid = false;
+    } else if (!validatePhone(contactPhone)) {
+      newErrors.contactPhone =
+        "Số điện thoại phải có 10 chữ số và bắt đầu bằng số 0";
+      isValid = false;
+    }
+
+    // Validate province
+    if (!provinceId) {
+      newErrors.provinceId = "Vui lòng chọn tỉnh/thành phố";
+      isValid = false;
+    }
+
+    // Validate ward
+    if (!wardId) {
+      newErrors.wardId = "Vui lòng chọn phường/xã";
+      isValid = false;
     }
 
     // Validate shop address
-    if (shopAddress.trim().length < 5) {
-      notification.error({
-        message: "Địa chỉ không hợp lệ",
-        description: "Địa chỉ cửa hàng phải có ít nhất 5 ký tự",
-        placement: "topRight",
-        duration: 3,
-      });
-      return false;
+    if (!shopAddress || !shopAddress.trim()) {
+      newErrors.shopAddress = "Vui lòng nhập địa chỉ cửa hàng";
+      isValid = false;
+    } else if (shopAddress.trim().length < 5) {
+      newErrors.shopAddress = "Địa chỉ cửa hàng phải có ít nhất 5 ký tự";
+      isValid = false;
     }
 
-    return true;
+    setErrors(newErrors);
+    return isValid;
   };
 
   const handleSubmit = async () => {
@@ -1543,9 +1537,14 @@ const ProfileSellerInfo = () => {
             name="storeName"
             value={formData.storeName}
             onChange={handleInputChange}
-            className={profileStyles.formInput}
+            className={`${profileStyles.formInput} ${
+              errors.storeName ? styles.inputError : ""
+            }`}
             placeholder="VD: Cửa hàng điện tử ABC"
           />
+          {errors.storeName && (
+            <span className={styles.errorMessage}>{errors.storeName}</span>
+          )}
         </div>
 
         <div className={profileStyles.formGroup}>
@@ -1627,6 +1626,7 @@ const ProfileSellerInfo = () => {
             onChange={handleProvinceChange}
             style={{ width: "100%" }}
             size="large"
+            status={errors.provinceId ? "error" : ""}
           >
             {provinces.map((province) => (
               <Option key={province.id} value={province.id}>
@@ -1634,6 +1634,9 @@ const ProfileSellerInfo = () => {
               </Option>
             ))}
           </Select>
+          {errors.provinceId && (
+            <span className={styles.errorMessage}>{errors.provinceId}</span>
+          )}
         </div>
 
         <div className={styles.locationSelectGroup}>
@@ -1650,6 +1653,7 @@ const ProfileSellerInfo = () => {
             style={{ width: "100%" }}
             size="large"
             disabled={!formData.provinceId}
+            status={errors.wardId ? "error" : ""}
           >
             {wards.map((ward) => (
               <Option key={ward.id} value={ward.id}>
@@ -1657,6 +1661,9 @@ const ProfileSellerInfo = () => {
               </Option>
             ))}
           </Select>
+          {errors.wardId && (
+            <span className={styles.errorMessage}>{errors.wardId}</span>
+          )}
         </div>
       </div>
 
@@ -1670,9 +1677,14 @@ const ProfileSellerInfo = () => {
           name="shopAddress"
           value={formData.shopAddress}
           onChange={handleInputChange}
-          className={profileStyles.formInput}
+          className={`${profileStyles.formInput} ${
+            errors.shopAddress ? styles.inputError : ""
+          }`}
           placeholder="Số nhà, tên đường/thôn/xóm..."
         />
+        {errors.shopAddress && (
+          <span className={styles.errorMessage}>{errors.shopAddress}</span>
+        )}
       </div>
 
       <div className={profileStyles.formActions}>
