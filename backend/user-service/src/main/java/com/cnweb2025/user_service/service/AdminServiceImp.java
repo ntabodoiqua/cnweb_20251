@@ -3,6 +3,7 @@ package com.cnweb2025.user_service.service;
 import com.cnweb2025.user_service.dto.request.user.UserFilterRequest;
 import com.cnweb2025.user_service.dto.request.user.UserUpdateRequest;
 import com.cnweb2025.user_service.dto.response.UserResponse;
+import com.cnweb2025.user_service.dto.response.UserStatisticResponse;
 import com.cnweb2025.user_service.entity.Role;
 import com.cnweb2025.user_service.exception.AppException;
 import com.cnweb2025.user_service.exception.ErrorCode;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -119,5 +122,39 @@ public class AdminServiceImp implements AdminService{
 
         return "User disabled successfully";
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserStatisticResponse getUserStatistic() {
+        log.info("Fetching user statistics");
+
+        long totalUsers = userRepository.count();
+        long enabledUsers = userRepository.countEnabledUsers();
+        long disabledUsers = userRepository.countDisabledUsers();
+
+        // Thống kê theo vai trò
+        Map<String, Long> usersByRole = userRepository.countUsersByRole()
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> (String) row[0],
+                        row -> (Long) row[1]
+                ));
+
+        // Thống kê theo tháng tạo tài khoản
+        Map<String, Long> usersByMonth = userRepository.countUsersByCreatedMonth()
+                .stream()
+                .collect(Collectors.toMap(
+                        row -> "Tháng " + row[0],
+                        row -> (Long) row[1]
+                ));
+
+        return UserStatisticResponse.builder()
+                .totalUsers(totalUsers)
+                .activeUsers(enabledUsers)
+                .disabledUsers(disabledUsers)
+                .usersByRole(usersByRole)
+                .usersByMonth(usersByMonth)
+                .build();
+    }
+
 
 }

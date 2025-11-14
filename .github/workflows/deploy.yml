@@ -39,10 +39,14 @@ jobs:
             path: api-gateway
           - name: user-service
             path: user-service
+          - name: product-service
+            path: product-service
           - name: notification-service
             path: notification-service
           - name: file-service
             path: file-service
+          - name: payment-service
+            path: payment-service
 
     steps:
       - name: Checkout code
@@ -95,6 +99,7 @@ jobs:
 
             # Pull latest changes
             git pull origin be/dev
+            git checkout be/dev
 
             # Login to GitHub Container Registry
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
@@ -124,7 +129,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             # Wait for services to be healthy
-            sleep 60
+            sleep 120
 
             # Check service health
             echo "Checking Discovery Service..."
@@ -136,11 +141,17 @@ jobs:
             echo "Checking User Service..."
             curl -f http://localhost:8081/actuator/health || exit 1
 
+            echo "Checking Product Service..."
+            curl -f http://localhost:8082/actuator/health || exit 1
+
             echo "Checking Notification Service..."
             curl -f http://localhost:8084/actuator/health || exit 1
 
             echo "Checking File Service..."
             curl -f http://localhost:8083/actuator/health || exit 1
+
+            echo "Checking Payment Service..."
+            curl -f http://localhost:8086/actuator/health || exit 1
 
             echo "All services are healthy!"
 

@@ -5,6 +5,7 @@ import com.cnweb2025.user_service.dto.request.user.UserFilterRequest;
 import com.cnweb2025.user_service.dto.request.user.UserRoleChangeRequest;
 import com.cnweb2025.user_service.dto.request.user.UserUpdateRequest;
 import com.cnweb2025.user_service.dto.response.UserResponse;
+import com.cnweb2025.user_service.dto.response.UserStatisticResponse;
 import com.cnweb2025.user_service.service.AdminServiceImp;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -69,5 +70,13 @@ public class AdminController {
                 .message("User disabled successfully")
                 .build();
     }
+
+    @GetMapping("/statistic/users")
+    public ApiResponse<UserStatisticResponse> getUserStatistic() {
+        return ApiResponse.<UserStatisticResponse>builder()
+                .result(adminService.getUserStatistic())
+                .build();
+    }
+
 
 }

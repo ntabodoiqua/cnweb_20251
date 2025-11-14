@@ -35,16 +35,16 @@ public class StoreServiceImp implements StoreService {
             log.error("Store already exists for seller profile ID: {}", event.getSellerProfileId());
             throw new AppException(ErrorCode.STORE_ALREADY_EXISTS);
         }
-        
-        if (storeRepository.existsByUserId(event.getUserId())) {
-            log.error("Store already exists for user ID: {}", event.getUserId());
+
+        if (storeRepository.existsByUserName(event.getUserName())) {
+            log.error("Store already exists for user ID: {}", event.getUserName());
             throw new AppException(ErrorCode.STORE_ALREADY_EXISTS);
         }
         
         // Tạo store mới từ thông tin seller profile
         Store store = Store.builder()
                 .sellerProfileId(event.getSellerProfileId())
-                .userId(event.getUserId())
+                .userName(event.getUserName())
                 .storeName(event.getStoreName())
                 .storeDescription(event.getStoreDescription())
                 .logoName(event.getLogoName())

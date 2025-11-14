@@ -11,4 +11,5 @@ import lombok.experimental.FieldDefaults;
 public class CategoryFilterRequest {
     String name;
     String createdBy;
+    Boolean isActive;
 }

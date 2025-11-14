@@ -43,6 +43,11 @@ jwt:
   valid-duration: 3600
   refreshable-duration: 86400
 
+google:
+  client:
+    id: 822664978401-0d2al7gb5j17as935f17r2lu6hg6eafl.apps.googleusercontent.com
+    secret: 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
+
 file:
   directory: ./uploads/
   max-size: 10MB
