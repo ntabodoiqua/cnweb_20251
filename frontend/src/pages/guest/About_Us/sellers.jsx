@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../../../styles/sellers.css";
+import styles from "../../../styles/sellers.module.css";
 import useScrollToTop from "../../../hooks/useScrollToTop";
 import {
   ShopOutlined,
@@ -141,14 +141,15 @@ const Sellers = () => {
     try {
       // TODO: Implement API call to register seller
       console.log("Seller registration:", values);
-      
+
       notification.success({
         message: "Đăng ký thành công!",
-        description: "Chúng tôi sẽ liên hệ với bạn trong vòng 24h. Cảm ơn bạn đã quan tâm!",
+        description:
+          "Chúng tôi sẽ liên hệ với bạn trong vòng 24h. Cảm ơn bạn đã quan tâm!",
         placement: "topRight",
         duration: 5,
       });
-      
+
       form.resetFields();
     } catch (error) {
       notification.error({
@@ -163,25 +164,25 @@ const Sellers = () => {
   };
 
   return (
-    <div className="sellers-container">
+    <div className={styles.container}>
       {/* Hero Section */}
-      <div className="sellers-hero">
-        <div className="hero-background">
-          <div className="hero-circle hero-circle-1"></div>
-          <div className="hero-circle hero-circle-2"></div>
-          <div className="hero-circle hero-circle-3"></div>
+      <div className={styles.hero}>
+        <div className={styles.heroBackground}>
+          <div className={`${styles.heroCircle} ${styles.heroCircle1}`}></div>
+          <div className={`${styles.heroCircle} ${styles.heroCircle2}`}></div>
+          <div className={`${styles.heroCircle} ${styles.heroCircle3}`}></div>
         </div>
-        <div className="hero-content">
-          <img src={logo} alt="HUSTBuy Logo" className="hero-logo" />
-          <h1 className="hero-title">Bán Hàng Cùng HUSTBuy</h1>
-          <div className="hero-subtitle">
+        <div className={styles.heroContent}>
+          <img src={logo} alt="HUSTBuy Logo" className={styles.heroLogo} />
+          <h1 className={styles.heroTitle}>Bán Hàng Cùng HUSTBuy</h1>
+          <div className={styles.heroSubtitle}>
             Mở rộng kinh doanh, tiếp cận hàng triệu khách hàng trên toàn quốc
           </div>
-          <div className="hero-buttons">
+          <div className={styles.heroButtons}>
             <Button
               size="large"
               icon={<RocketOutlined />}
-              className="hero-cta-primary"
+              className={styles.heroCtaPrimary}
               onClick={() => {
                 document
                   .getElementById("register-form")
@@ -190,7 +191,7 @@ const Sellers = () => {
             >
               Đăng ký ngay
             </Button>
-            <Button size="large" className="hero-cta-secondary">
+            <Button size="large" className={styles.heroCtaSecondary}>
               Tìm hiểu thêm
             </Button>
           </div>
@@ -198,25 +199,25 @@ const Sellers = () => {
       </div>
 
       {/* Stats Section */}
-      <div className="stats-section">
-        <div className="stats-grid">
+      <div className={styles.statsSection}>
+        <div className={styles.statsGrid}>
           {stats.map((stat, index) => (
-            <div key={index} className="stat-card">
-              <div className="stat-icon">{stat.icon}</div>
-              <div className="stat-number">{stat.number}</div>
-              <div className="stat-label">{stat.label}</div>
+            <div key={index} className={styles.statCard}>
+              <div className={styles.statIcon}>{stat.icon}</div>
+              <div className={styles.statNumber}>{stat.number}</div>
+              <div className={styles.statLabel}>{stat.label}</div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Benefits Section */}
-      <div className="benefits-section">
-        <h2 className="section-title">Lợi Ích Khi Bán Hàng Trên HUSTBuy</h2>
-        <div className="benefits-grid">
+      <div className={styles.benefitsSection}>
+        <h2 className={styles.sectionTitle}>Lợi Ích Khi Bán Hàng Trên HUSTBuy</h2>
+        <div className={styles.benefitsGrid}>
           {benefits.map((benefit, index) => (
-            <div key={index} className="benefit-card">
-              <div className="benefit-icon" style={{ color: benefit.color }}>
+            <div key={index} className={styles.benefitCard}>
+              <div className={styles.benefitIcon} style={{ color: benefit.color }}>
                 {benefit.icon}
               </div>
               <h3>{benefit.title}</h3>
@@ -227,13 +228,13 @@ const Sellers = () => {
       </div>
 
       {/* Steps Section */}
-      <div className="steps-section">
-        <h2 className="section-title">Bắt Đầu Bán Hàng Chỉ Với 4 Bước</h2>
-        <div className="steps-grid">
+      <div className={styles.stepsSection}>
+        <h2 className={styles.sectionTitle}>Bắt Đầu Bán Hàng Chỉ Với 4 Bước</h2>
+        <div className={styles.stepsGrid}>
           {steps.map((step, index) => (
-            <div key={index} className="step-card">
-              <div className="step-number">{step.number}</div>
-              <div className="step-icon">{step.icon}</div>
+            <div key={index} className={styles.stepCard}>
+              <div className={styles.stepNumber}>{step.number}</div>
+              <div className={styles.stepIcon}>{step.icon}</div>
               <h3>{step.title}</h3>
               <p>{step.description}</p>
             </div>
@@ -242,13 +243,13 @@ const Sellers = () => {
       </div>
 
       {/* Features Section */}
-      <div className="features-section">
-        <h2 className="section-title">Tại Sao Chọn HUSTBuy?</h2>
-        <div className="features-grid">
+      <div className={styles.featuresSection}>
+        <h2 className={styles.sectionTitle}>Tại Sao Chọn HUSTBuy?</h2>
+        <div className={styles.featuresGrid}>
           {features.map((feature, index) => (
-            <div key={index} className="feature-card">
-              <div className="feature-icon">{feature.icon}</div>
-              <div className="feature-content">
+            <div key={index} className={styles.featureCard}>
+              <div className={styles.featureIcon}>{feature.icon}</div>
+              <div className={styles.featureContent}>
                 <h3>{feature.title}</h3>
                 <p>{feature.description}</p>
               </div>
@@ -258,30 +259,30 @@ const Sellers = () => {
       </div>
 
       {/* Registration Form */}
-      <div className="registration-section" id="register-form">
-        <div className="registration-content">
-          <div className="registration-info">
+      <div className={styles.registrationSection} id="register-form">
+        <div className={styles.registrationContent}>
+          <div className={styles.registrationInfo}>
             <h2>Đăng Ký Trở Thành Người Bán</h2>
             <p>
               Điền thông tin bên dưới và chúng tôi sẽ liên hệ với bạn trong
               vòng 24 giờ để hỗ trợ quá trình đăng ký.
             </p>
-            <div className="info-highlights">
-              <div className="highlight-item">
-                <CheckCircleOutlined className="highlight-icon" />
+            <div className={styles.infoHighlights}>
+              <div className={styles.highlightItem}>
+                <CheckCircleOutlined className={styles.highlightIcon} />
                 <span>Miễn phí đăng ký</span>
               </div>
-              <div className="highlight-item">
-                <CheckCircleOutlined className="highlight-icon" />
+              <div className={styles.highlightItem}>
+                <CheckCircleOutlined className={styles.highlightIcon} />
                 <span>Hỗ trợ tận tình</span>
               </div>
-              <div className="highlight-item">
-                <CheckCircleOutlined className="highlight-icon" />
+              <div className={styles.highlightItem}>
+                <CheckCircleOutlined className={styles.highlightIcon} />
                 <span>Hoa hồng hấp dẫn</span>
               </div>
             </div>
           </div>
-          <div className="registration-form">
+          <div className={styles.registrationForm}>
             <Form
               form={form}
               layout="vertical"
@@ -366,7 +367,7 @@ const Sellers = () => {
                   size="large"
                   block
                   loading={loading}
-                  className="submit-btn"
+                  className={styles.submitBtn}
                   icon={<RocketOutlined />}
                 >
                   Đăng ký ngay
@@ -378,10 +379,14 @@ const Sellers = () => {
       </div>
 
       {/* Support Section */}
-      <div className="support-section">
+      <div className={styles.supportSection}>
         <h3>Cần hỗ trợ?</h3>
-        <p>Liên hệ với chúng tôi qua hotline: <strong>0966 277 109</strong></p>
-        <p>Email: <strong>anhnta2004@gmail.com</strong></p>
+        <p>
+          Liên hệ với chúng tôi qua hotline: <strong>0966 277 109</strong>
+        </p>
+        <p>
+          Email: <strong>anhnta2004@gmail.com</strong>
+        </p>
       </div>
     </div>
   );
