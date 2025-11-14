@@ -37,7 +37,7 @@ import LoadingSpinner from "../../components/LoadingSpinner";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
-import "./SellerSettingsPage.css";
+import styles from "./SellerSettingsPage.module.css";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
@@ -169,7 +169,7 @@ const SellerSettingsPage = () => {
     });
   };
 
-  const handleDeactivateStore = (storeId) => {
+  const handleDeactivateStore = (sellerProfileId) => {
     Modal.confirm({
       title: "Xác nhận vô hiệu hóa cửa hàng",
       content:
@@ -179,7 +179,7 @@ const SellerSettingsPage = () => {
       okButtonProps: { danger: true },
       onOk: async () => {
         try {
-          const response = await deactivateStoreApi(storeId);
+          const response = await deactivateStoreApi(sellerProfileId);
           if (response?.code === 1000) {
             notification.success({
               message: "Vô hiệu hóa thành công",
@@ -421,7 +421,7 @@ const SellerSettingsPage = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="seller-settings">
+      <div className={styles.sellerSettings}>
         <LoadingSpinner
           tip="Đang tải danh sách cửa hàng..."
           fullScreen={false}
@@ -433,8 +433,8 @@ const SellerSettingsPage = () => {
   // Empty state
   if (stores.length === 0) {
     return (
-      <div className="seller-settings">
-        <div className="empty-state">
+      <div className={styles.sellerSettings}>
+        <div className={styles.emptyState}>
           <ShopOutlined />
           <h3>Chưa có cửa hàng nào</h3>
           <p>
@@ -447,13 +447,13 @@ const SellerSettingsPage = () => {
   }
 
   return (
-    <div className="seller-settings">
+    <div className={styles.sellerSettings}>
       {/* Info Banner */}
-      <div className="settings-info-banner">
+      <div className={styles.settingsInfoBanner}>
         <InfoCircleOutlined />
-        <div className="settings-info-content">
-          <div className="settings-info-title">Quản lý cửa hàng</div>
-          <div className="settings-info-text">
+        <div className={styles.settingsInfoContent}>
+          <div className={styles.settingsInfoTitle}>Quản lý cửa hàng</div>
+          <div className={styles.settingsInfoText}>
             Bạn hiện có <strong>{totalElements}</strong> cửa hàng.
             {totalElements === 0
               ? " Cửa hàng sẽ được tạo tự động sau khi hồ sơ được phê duyệt."
@@ -470,11 +470,11 @@ const SellerSettingsPage = () => {
           <div
             key={store.id}
             id={`store-${store.id}`}
-            className="store-container"
+            className={styles.storeContainer}
           >
             {/* Compact View */}
             <div
-              className="store-compact"
+              className={styles.storeCompact}
               onClick={() => toggleExpand(store.id)}
               style={{
                 backgroundImage: store.bannerUrl
@@ -485,19 +485,19 @@ const SellerSettingsPage = () => {
                 backgroundRepeat: store.bannerUrl ? "no-repeat" : undefined,
               }}
             >
-              <div className="compact-left">
-                <div className="compact-logo">
+              <div className={styles.compactLeft}>
+                <div className={styles.compactLogo}>
                   {store.logoUrl ? (
                     <img src={store.logoUrl} alt="Logo" />
                   ) : (
                     <ShopOutlined />
                   )}
                 </div>
-                <div className="compact-info">
-                  <h3 className="compact-store-name">{store.storeName}</h3>
+                <div className={styles.compactInfo}>
+                  <h3 className={styles.compactStoreName}>{store.storeName}</h3>
                   <div
-                    className={`compact-status ${
-                      store.isActive ? "active" : "inactive"
+                    className={`${styles.compactStatus} ${
+                      store.isActive ? styles.active : styles.inactive
                     }`}
                   >
                     {store.isActive ? (
@@ -513,14 +513,14 @@ const SellerSettingsPage = () => {
                 </div>
               </div>
 
-              <div className="compact-right">
-                <div className="compact-meta">
-                  <span className="compact-date">
+              <div className={styles.compactRight}>
+                <div className={styles.compactMeta}>
+                  <span className={styles.compactDate}>
                     <ClockCircleOutlined />
                     {dayjs(store.createdAt).format("DD/MM/YYYY")}
                   </span>
                 </div>
-                <button className="expand-button" type="button">
+                <button className={styles.expandButton} type="button">
                   {isExpanded ? <UpOutlined /> : <DownOutlined />}
                   {isExpanded ? "Thu gọn" : "Xem chi tiết"}
                 </button>
@@ -529,18 +529,18 @@ const SellerSettingsPage = () => {
 
             {/* Expanded View */}
             {isExpanded && (
-              <div className="store-expanded">
+              <div className={styles.storeExpanded}>
                 {editingStoreId === store.id ? (
                   // Edit Mode
-                  <form onSubmit={handleSubmit} className="store-form">
-                    <div className="form-section-title">
+                  <form onSubmit={handleSubmit} className={styles.storeForm}>
+                    <div className={styles.formSectionTitle}>
                       <EditOutlined />
                       Chỉnh sửa thông tin cửa hàng
                     </div>
 
-                    <div className="form-group">
-                      <label htmlFor="storeName" className="form-label">
-                        Tên cửa hàng <span className="required">*</span>
+                    <div className={styles.formGroup}>
+                      <label htmlFor="storeName" className={styles.formLabel}>
+                        Tên cửa hàng <span className={styles.required}>*</span>
                       </label>
                       <input
                         type="text"
@@ -548,13 +548,16 @@ const SellerSettingsPage = () => {
                         name="storeName"
                         value={formData.storeName}
                         onChange={handleInputChange}
-                        className="form-input"
+                        className={styles.formInput}
                         required
                       />
                     </div>
 
-                    <div className="form-group">
-                      <label htmlFor="storeDescription" className="form-label">
+                    <div className={styles.formGroup}>
+                      <label
+                        htmlFor="storeDescription"
+                        className={styles.formLabel}
+                      >
                         Mô tả cửa hàng
                       </label>
                       <textarea
@@ -562,68 +565,72 @@ const SellerSettingsPage = () => {
                         name="storeDescription"
                         value={formData.storeDescription}
                         onChange={handleInputChange}
-                        className="form-textarea"
+                        className={styles.formTextarea}
                         rows="4"
                       />
                     </div>
 
                     {/* Read-only fields */}
-                    <div className="form-info-section">
-                      <div className="form-info-title">
+                    <div className={styles.formInfoSection}>
+                      <div className={styles.formInfoTitle}>
                         <InfoCircleOutlined />
                         Thông tin liên hệ (không thể chỉnh sửa)
                       </div>
 
-                      <div className="form-row">
-                        <div className="form-group">
-                          <label className="form-label">Email</label>
+                      <div className={styles.formRow}>
+                        <div className={styles.formGroup}>
+                          <label className={styles.formLabel}>Email</label>
                           <input
                             type="email"
                             value={store.contactEmail}
-                            className="form-input form-input-readonly"
+                            className={`${styles.formInput} ${styles.formInputReadonly}`}
                             readOnly
                             disabled
                           />
                         </div>
 
-                        <div className="form-group">
-                          <label className="form-label">Số điện thoại</label>
+                        <div className={styles.formGroup}>
+                          <label className={styles.formLabel}>
+                            Số điện thoại
+                          </label>
                           <input
                             type="tel"
                             value={store.contactPhone}
-                            className="form-input form-input-readonly"
+                            className={`${styles.formInput} ${styles.formInputReadonly}`}
                             readOnly
                             disabled
                           />
                         </div>
                       </div>
 
-                      <div className="form-group">
-                        <label className="form-label">Địa chỉ cửa hàng</label>
+                      <div className={styles.formGroup}>
+                        <label className={styles.formLabel}>
+                          Địa chỉ cửa hàng
+                        </label>
                         <input
                           type="text"
                           value={store.shopAddress}
-                          className="form-input form-input-readonly"
+                          className={`${styles.formInput} ${styles.formInputReadonly}`}
                           readOnly
                           disabled
                         />
                       </div>
 
                       {store.wardId && wardInfo[store.wardId] && (
-                        <div className="form-location-info">
-                          <div className="location-info-item">
-                            <span className="location-info-label">
+                        <div className={styles.formLocationInfo}>
+                          <div className={styles.locationInfoItem}>
+                            <span className={styles.locationInfoLabel}>
                               Xã/Phường:
                             </span>
-                            <span className="location-info-value">
+                            <span className={styles.locationInfoValue}>
                               {wardInfo[store.wardId].nameWithType}
                             </span>
                           </div>
-                          <div className="location-info-item">
-                            <span className="location-info-label">
+                          <div className={styles.locationInfoItem}>
+                            <span className={styles.locationInfoLabel}>
                               Tỉnh/Thành phố:
                             </span>
-                            <span className="location-info-value">
+                            <span className={styles.locationInfoValue}>
                               {wardInfo[store.wardId].province?.fullName}
                             </span>
                           </div>
@@ -631,18 +638,18 @@ const SellerSettingsPage = () => {
                       )}
                     </div>
 
-                    <div className="form-actions">
+                    <div className={styles.formActions}>
                       <button
                         type="button"
                         onClick={handleCancelEdit}
-                        className="profile-btn profile-btn-secondary"
+                        className={`${styles.profileBtn} ${styles.profileBtnSecondary}`}
                       >
                         <CloseOutlined />
                         Hủy bỏ
                       </button>
                       <button
                         type="submit"
-                        className="profile-btn profile-btn-primary"
+                        className={`${styles.profileBtn} ${styles.profileBtnPrimary}`}
                       >
                         <SaveOutlined />
                         Lưu thay đổi
@@ -652,25 +659,25 @@ const SellerSettingsPage = () => {
                 ) : (
                   // View Mode
                   <>
-                    <div className="store-info-section">
+                    <div className={styles.storeInfoSection}>
                       {/* Banner Section */}
-                      <div className="store-banner-section">
-                        <div className="store-banner-wrapper">
+                      <div className={styles.storeBannerSection}>
+                        <div className={styles.storeBannerWrapper}>
                           {store.bannerUrl ? (
                             <img
                               src={store.bannerUrl}
                               alt="Store Banner"
-                              className="store-banner-image"
+                              className={styles.storeBannerImage}
                             />
                           ) : (
-                            <div className="store-banner-placeholder">
+                            <div className={styles.storeBannerPlaceholder}>
                               <PictureOutlined />
                               <span>Chưa có banner</span>
                             </div>
                           )}
                           <button
                             type="button"
-                            className="store-banner-upload"
+                            className={styles.storeBannerUpload}
                             onClick={() =>
                               bannerInputRefs.current[store.id]?.click()
                             }
@@ -701,22 +708,22 @@ const SellerSettingsPage = () => {
                         </div>
                       </div>
 
-                      <div className="store-info-header">
-                        <div className="store-logo-wrapper">
+                      <div className={styles.storeInfoHeader}>
+                        <div className={styles.storeLogoWrapper}>
                           {store.logoUrl ? (
                             <img
                               src={store.logoUrl}
                               alt="Store Logo"
-                              className="store-logo"
+                              className={styles.storeLogo}
                             />
                           ) : (
-                            <div className="store-logo-placeholder">
+                            <div className={styles.storeLogoPlaceholder}>
                               <ShopOutlined />
                             </div>
                           )}
                           <button
                             type="button"
-                            className="store-logo-upload"
+                            className={styles.storeLogoUpload}
                             onClick={() =>
                               logoInputRefs.current[store.id]?.click()
                             }
@@ -744,12 +751,14 @@ const SellerSettingsPage = () => {
                           />
                         </div>
 
-                        <div className="store-basic-info">
-                          <h2 className="store-name">{store.storeName}</h2>
+                        <div className={styles.storeBasicInfo}>
+                          <h2 className={styles.storeName}>
+                            {store.storeName}
+                          </h2>
 
                           <div
-                            className={`store-status-badge ${
-                              store.isActive ? "active" : "inactive"
+                            className={`${styles.storeStatusBadge} ${
+                              store.isActive ? styles.active : styles.inactive
                             }`}
                           >
                             {store.isActive ? (
@@ -764,18 +773,18 @@ const SellerSettingsPage = () => {
                           </div>
 
                           {store.storeDescription && (
-                            <div className="store-description">
+                            <div className={styles.storeDescription}>
                               <ShopOutlined style={{ marginRight: "8px" }} />
                               {store.storeDescription}
                             </div>
                           )}
 
-                          <div className="store-contact-info">
-                            <div className="store-contact-item">
+                          <div className={styles.storeContactInfo}>
+                            <div className={styles.storeContactItem}>
                               <MailOutlined />
                               <span>{store.contactEmail}</span>
                             </div>
-                            <div className="store-contact-item">
+                            <div className={styles.storeContactItem}>
                               <PhoneOutlined />
                               <span>{store.contactPhone}</span>
                             </div>
@@ -784,62 +793,66 @@ const SellerSettingsPage = () => {
                       </div>
 
                       {/* Address Info */}
-                      <div className="store-address-section">
-                        <div className="store-address-title">
+                      <div className={styles.storeAddressSection}>
+                        <div className={styles.storeAddressTitle}>
                           <EnvironmentOutlined />
                           Địa chỉ cửa hàng
                         </div>
-                        <div className="store-address-text">
+                        <div className={styles.storeAddressText}>
                           {store.shopAddress}
                         </div>
                         {store.wardId && wardInfo[store.wardId] && (
-                          <div className="store-location-details">
-                            <div className="location-detail-item">
-                              <span className="location-label">Xã/Phường:</span>
-                              <span className="location-value">
+                          <div className={styles.storeLocationDetails}>
+                            <div className={styles.locationDetailItem}>
+                              <span className={styles.locationLabel}>
+                                Xã/Phường:
+                              </span>
+                              <span className={styles.locationValue}>
                                 {wardInfo[store.wardId].nameWithType}
                               </span>
                             </div>
-                            <div className="location-detail-item">
-                              <span className="location-label">
+                            <div className={styles.locationDetailItem}>
+                              <span className={styles.locationLabel}>
                                 Tỉnh/Thành phố:
                               </span>
-                              <span className="location-value">
+                              <span className={styles.locationValue}>
                                 {wardInfo[store.wardId].province?.fullName}
                               </span>
                             </div>
                           </div>
                         )}
                         {store.wardId && loadingWards[store.wardId] && (
-                          <div className="location-loading">
+                          <div className={styles.locationLoading}>
                             <LoadingOutlined /> Đang tải thông tin địa chỉ...
                           </div>
                         )}
                       </div>
 
                       {/* Timestamps */}
-                      <div className="timestamps-section">
-                        <div className="timestamp-item">
-                          <div className="timestamp-label">Ngày tạo</div>
-                          <div className="timestamp-value">
+                      <div className={styles.timestampsSection}>
+                        <div className={styles.timestampItem}>
+                          <div className={styles.timestampLabel}>Ngày tạo</div>
+                          <div className={styles.timestampValue}>
                             <ClockCircleOutlined />
                             {dayjs(store.createdAt).format("DD/MM/YYYY HH:mm")}
                           </div>
                         </div>
 
-                        <div className="timestamp-item">
-                          <div className="timestamp-label">
+                        <div className={styles.timestampItem}>
+                          <div className={styles.timestampLabel}>
                             Cập nhật lần cuối
                           </div>
-                          <div className="timestamp-value">
+                          <div className={styles.timestampValue}>
                             <SyncOutlined />
                             {dayjs(store.updatedAt).fromNow()}
                           </div>
                         </div>
 
-                        <div className="timestamp-item">
-                          <div className="timestamp-label">Người dùng</div>
-                          <div className="timestamp-value">
+                        <div className={styles.timestampItem}>
+                          <div className={styles.timestampLabel}>
+                            Người dùng
+                          </div>
+                          <div className={styles.timestampValue}>
                             @{store.userName}
                           </div>
                         </div>
@@ -847,7 +860,7 @@ const SellerSettingsPage = () => {
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="store-actions">
+                    <div className={styles.storeActions}>
                       {!store.isActive ? (
                         <Tooltip title="Kích hoạt cửa hàng để sử dụng">
                           <button
@@ -855,7 +868,7 @@ const SellerSettingsPage = () => {
                               e.stopPropagation();
                               handleActivateStore(store.id);
                             }}
-                            className="profile-btn profile-btn-activate"
+                            className={`${styles.profileBtn} ${styles.profileBtnActivate}`}
                           >
                             <CheckCircleOutlined /> Kích hoạt
                           </button>
@@ -865,9 +878,9 @@ const SellerSettingsPage = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleDeactivateStore(store.id);
+                              handleDeactivateStore(store.sellerProfileId);
                             }}
-                            className="profile-btn profile-btn-danger"
+                            className={`${styles.profileBtn} ${styles.profileBtnDanger}`}
                           >
                             <CloseOutlined /> Vô hiệu hóa
                           </button>
@@ -879,7 +892,7 @@ const SellerSettingsPage = () => {
                             e.stopPropagation();
                             handleEditStore(store);
                           }}
-                          className="profile-btn profile-btn-secondary"
+                          className={`${styles.profileBtn} ${styles.profileBtnSecondary}`}
                         >
                           <EditOutlined /> Chỉnh sửa
                         </button>
@@ -895,21 +908,21 @@ const SellerSettingsPage = () => {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="pagination">
+        <div className={styles.pagination}>
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 0}
-            className="pagination-btn"
+            className={styles.paginationBtn}
           >
             <LeftOutlined /> Trước
           </button>
-          <span className="pagination-info">
+          <span className={styles.paginationInfo}>
             Trang {currentPage + 1} / {totalPages}
           </span>
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage === totalPages - 1}
-            className="pagination-btn"
+            className={styles.paginationBtn}
           >
             Sau <RightOutlined />
           </button>

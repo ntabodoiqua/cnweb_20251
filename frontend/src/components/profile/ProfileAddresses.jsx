@@ -43,7 +43,11 @@ const ProfileAddresses = () => {
   const [editingId, setEditingId] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({
+    receiverName: "",
     receiverPhone: "",
+    provinceId: "",
+    wardId: "",
+    street: "",
   });
   const [formData, setFormData] = useState({
     receiverName: "",
@@ -202,7 +206,11 @@ const ProfileAddresses = () => {
     });
     setWards([]);
     setErrors({
+      receiverName: "",
       receiverPhone: "",
+      provinceId: "",
+      wardId: "",
+      street: "",
     });
   };
 
@@ -224,70 +232,51 @@ const ProfileAddresses = () => {
   };
 
   const validateForm = () => {
+    const newErrors = {
+      receiverName: "",
+      receiverPhone: "",
+      provinceId: "",
+      wardId: "",
+      street: "",
+    };
+    let isValid = true;
+
     if (!formData.receiverName.trim()) {
-      notification.error({
-        message: "Lỗi",
-        description: "Vui lòng nhập tên người nhận",
-        placement: "topRight",
-        duration: 3,
-      });
-      return false;
+      newErrors.receiverName = "Vui lòng nhập tên người nhận";
+      isValid = false;
     }
 
     // Validate phone Vietnamese format
     const phoneRegex = /^0[0-9]{9}$/;
-    if (!phoneRegex.test(formData.receiverPhone)) {
-      notification.error({
-        message: "Lỗi",
-        description:
-          "Số điện thoại không hợp lệ. Vui lòng nhập 10 số bắt đầu bằng 0",
-        placement: "topRight",
-        duration: 3,
-      });
-      return false;
+    if (!formData.receiverPhone.trim()) {
+      newErrors.receiverPhone = "Vui lòng nhập số điện thoại";
+      isValid = false;
+    } else if (!phoneRegex.test(formData.receiverPhone)) {
+      newErrors.receiverPhone =
+        "Số điện thoại không hợp lệ. Vui lòng nhập 10 số bắt đầu bằng 0";
+      isValid = false;
     }
 
     if (!formData.provinceId) {
-      notification.error({
-        message: "Thiếu thông tin",
-        description: "Vui lòng chọn tỉnh/thành phố",
-        placement: "topRight",
-        duration: 3,
-      });
-      return false;
+      newErrors.provinceId = "Vui lòng chọn tỉnh/thành phố";
+      isValid = false;
     }
 
     if (!formData.wardId) {
-      notification.error({
-        message: "Thiếu thông tin",
-        description: "Vui lòng chọn phường/xã",
-        placement: "topRight",
-        duration: 3,
-      });
-      return false;
+      newErrors.wardId = "Vui lòng chọn phường/xã";
+      isValid = false;
     }
 
     if (!formData.street.trim()) {
-      notification.error({
-        message: "Thiếu thông tin",
-        description: "Vui lòng nhập địa chỉ cụ thể",
-        placement: "topRight",
-        duration: 3,
-      });
-      return false;
+      newErrors.street = "Vui lòng nhập địa chỉ cụ thể";
+      isValid = false;
+    } else if (formData.street.trim().length < 5) {
+      newErrors.street = "Địa chỉ cụ thể phải có ít nhất 5 ký tự";
+      isValid = false;
     }
 
-    if (formData.street.trim().length < 5) {
-      notification.error({
-        message: "Địa chỉ không hợp lệ",
-        description: "Địa chỉ cụ thể phải có ít nhất 5 ký tự",
-        placement: "topRight",
-        duration: 3,
-      });
-      return false;
-    }
-
-    return true;
+    setErrors(newErrors);
+    return isValid;
   };
 
   const handleSave = async () => {
@@ -371,7 +360,11 @@ const ProfileAddresses = () => {
       isDefault: false,
     });
     setErrors({
+      receiverName: "",
       receiverPhone: "",
+      provinceId: "",
+      wardId: "",
+      street: "",
     });
   };
 
@@ -511,9 +504,14 @@ const ProfileAddresses = () => {
               name="receiverName"
               value={formData.receiverName}
               onChange={handleInputChange}
-              className={profileStyles.formInput}
+              className={`${profileStyles.formInput} ${
+                errors.receiverName ? styles.inputError : ""
+              }`}
               placeholder="Nhập họ tên người nhận"
             />
+            {errors.receiverName && (
+              <span className={styles.errorMessage}>{errors.receiverName}</span>
+            )}
           </div>
 
           <div className={profileStyles.formGroup}>
@@ -559,6 +557,7 @@ const ProfileAddresses = () => {
               onChange={handleProvinceChange}
               style={{ width: "100%" }}
               size="large"
+              status={errors.provinceId ? "error" : ""}
             >
               {provinces.map((province) => (
                 <Option key={province.id} value={province.id}>
@@ -566,6 +565,9 @@ const ProfileAddresses = () => {
                 </Option>
               ))}
             </Select>
+            {errors.provinceId && (
+              <span className={styles.errorMessage}>{errors.provinceId}</span>
+            )}
           </div>
 
           <div className={styles.locationSelectGroup}>
@@ -582,6 +584,7 @@ const ProfileAddresses = () => {
               style={{ width: "100%" }}
               size="large"
               disabled={!formData.provinceId}
+              status={errors.wardId ? "error" : ""}
             >
               {wards.map((ward) => (
                 <Option key={ward.id} value={ward.id}>
@@ -589,6 +592,9 @@ const ProfileAddresses = () => {
                 </Option>
               ))}
             </Select>
+            {errors.wardId && (
+              <span className={styles.errorMessage}>{errors.wardId}</span>
+            )}
           </div>
         </div>
 
@@ -604,9 +610,14 @@ const ProfileAddresses = () => {
             name="street"
             value={formData.street}
             onChange={handleInputChange}
-            className={profileStyles.formInput}
+            className={`${profileStyles.formInput} ${
+              errors.street ? styles.inputError : ""
+            }`}
             placeholder="Số nhà, tên đường..."
           />
+          {errors.street && (
+            <span className={styles.errorMessage}>{errors.street}</span>
+          )}
         </div>
 
         <div style={{ marginTop: "16px" }}>

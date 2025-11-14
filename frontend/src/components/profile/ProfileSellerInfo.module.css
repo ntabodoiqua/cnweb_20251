@@ -413,33 +413,34 @@
 }
 
 .sellerEmptyState :global(.anticon) {
-  font-size: 100px;
+  font-size: 80px;
   color: #ee4d2d;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   opacity: 0.8;
   animation: pulse 2s ease-in-out infinite;
 }
 
 .sellerEmptyState h3 {
-  font-size: 24px;
+  font-size: 20px;
   color: #333;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
   font-weight: 700;
 }
 
 .sellerEmptyState p {
-  font-size: 16px;
+  font-size: 15px;
   color: #666;
   line-height: 1.6;
-  max-width: 500px;
-  margin: 0 auto;
+  max-width: 480px;
+  margin: 0 auto 20px;
 }
 
-.sellerEmptyState :global(.profile-btn) {
-  margin-top: 24px;
-  min-width: 200px;
-  height: 48px;
-  font-size: 16px;
+.sellerEmptyState button {
+  font-size: 15px;
+}
+
+.sellerEmptyState button :global(.anticon) {
+  font-size: 15px;
 }
 
 /* ==================== Loading State ==================== */
