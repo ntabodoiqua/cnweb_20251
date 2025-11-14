@@ -254,16 +254,16 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
               : userData.username}
           </h2>
 
-          <div className="profile-roles-container">
+          <div className={styles.rolesContainer}>
             {userData.roles && userData.roles.length > 0 ? (
               userData.roles.map((role, index) => (
-                <div key={index} className="profile-role-badge">
+                <div key={index} className={styles.roleBadge}>
                   <CrownOutlined />
                   {role.name}
                 </div>
               ))
             ) : (
-              <div className="profile-role-badge">
+              <div className={styles.roleBadge}>
                 <CrownOutlined />
                 USER
               </div>
@@ -305,7 +305,7 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
               <UserOutlined />
-              Họ <span className="required">*</span>
+              Họ <span className={styles.required}>*</span>
             </label>
             <input
               type="text"
@@ -321,7 +321,7 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
               <UserOutlined />
-              Tên <span className="required">*</span>
+              Tên <span className={styles.required}>*</span>
             </label>
             <input
               type="text"
@@ -339,7 +339,7 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
           <div className={styles.formGroup}>
             <label className={styles.formLabel}>
               <MailOutlined />
-              Email <span className="required">*</span>
+              Email <span className={styles.required}>*</span>
             </label>
             <input
               type="email"

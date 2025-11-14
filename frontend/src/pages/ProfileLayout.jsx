@@ -91,14 +91,16 @@ const ProfileLayout = () => {
       <div className={styles.container}>
         <div className={styles.content}>
           {/* Sidebar Navigation */}
-          <aside className={styles.sidebar}>
+          <aside
+            className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}
+          >
             <div className={styles.sidebarHeader}>
               <h3 className={styles.sidebarTitle}>
                 <UserOutlined />
-                {!collapsed && <span>Tài khoản của tôi</span>}
+                <span>Tài khoản của tôi</span>
               </h3>
               <button
-                className="profile-sidebar-toggle"
+                className={styles.sidebarToggle}
                 onClick={toggleSidebar}
                 title={collapsed ? "Mở rộng" : "Thu nhỏ"}
               >
@@ -117,10 +119,8 @@ const ProfileLayout = () => {
                       }`}
                       title={collapsed ? item.label : ""}
                     >
-                      <span className="profile-menu-icon">{item.icon}</span>
-                      {!collapsed && (
-                        <span className="profile-menu-label">{item.label}</span>
-                      )}
+                      {item.icon}
+                      <span className={styles.menuLabel}>{item.label}</span>
                     </Link>
                   </li>
                 ))}
@@ -130,10 +130,12 @@ const ProfileLayout = () => {
 
           {/* Main Content Area */}
           <main
-            className={`profile-main ${collapsed ? "sidebar-collapsed" : ""}`}
+            className={`${styles.main} ${
+              collapsed ? styles.sidebarCollapsed : ""
+            }`}
           >
-            <div className="profile-main-header">
-              <h1 className="profile-main-title">
+            <div className={styles.mainHeader}>
+              <h1 className={styles.mainTitle}>
                 {activeItem.icon}
                 <span>{activeItem.label}</span>
               </h1>
