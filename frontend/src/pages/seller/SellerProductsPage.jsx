@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   PlusOutlined,
-  EditOutlined,
-  DeleteOutlined,
   SearchOutlined,
   EyeOutlined,
   ShopOutlined,
@@ -323,18 +321,6 @@ const SellerProductsPage = () => {
                         onClick={() => handleViewProduct(product.id)}
                       >
                         <EyeOutlined />
-                      </button>
-                      <button
-                        className={`${styles.actionBtn} ${styles.editBtn}`}
-                        title="Chỉnh sửa"
-                      >
-                        <EditOutlined />
-                      </button>
-                      <button
-                        className={`${styles.actionBtn} ${styles.deleteBtn}`}
-                        title="Xóa"
-                      >
-                        <DeleteOutlined />
                       </button>
                     </div>
                   </td>
