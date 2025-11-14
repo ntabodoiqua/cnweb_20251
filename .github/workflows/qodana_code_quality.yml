@@ -19,7 +19,6 @@ jobs:
       contents: write
       pull-requests: write
       checks: write
-      # Thêm permission 'security-events: write' để đẩy kết quả SARIF lên GitHub Security tab
       security-events: write
     steps:
       - uses: actions/checkout@v4
@@ -37,10 +36,9 @@ jobs:
           use-caches: true
           post-pr-comment: true
           use-annotations: true
-          # 2. Upload Báo cáo: Đặt 'upload-result' là 'true' để upload report HTML dưới dạng Artifact.
           upload-result: true
           push-fixes: 'none'
       - name: 'Upload SARIF to GitHub Security'
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: ${{ runner.temp }}/qodana/results/qodana.sarif.json
