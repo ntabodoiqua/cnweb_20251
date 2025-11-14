@@ -58,3 +58,7 @@ app:
 
 product-images:
   max-per-product: 5
+
+internal:
+  service:
+    secret: ${INTERNAL_SERVICE_SECRET:InT3rn@l-S3rv1c3-S3cr3t-K3y-2025-VDT}
