@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   PlusOutlined,
   EditOutlined,
@@ -17,6 +18,7 @@ import styles from "./SellerProductsPage.module.css";
  * SellerProductsPage - Trang quản lý sản phẩm của người bán
  */
 const SellerProductsPage = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -212,6 +214,10 @@ const SellerProductsPage = () => {
     message.success("Tạo sản phẩm thành công!");
   };
 
+  const handleViewProduct = (productId) => {
+    navigate(`/seller/products/${productId}`);
+  };
+
   return (
     <div className={styles.sellerProducts}>
       {/* Header Actions */}
@@ -260,11 +266,12 @@ const SellerProductsPage = () => {
           <thead>
             <tr>
               <th>Sản phẩm</th>
-              <th>SKU</th>
-              <th>Danh mục</th>
+              <th>Danh mục Shop</th>
+              <th>Danh mục Platform</th>
+              <th>Thương hiệu</th>
               <th>Giá bán</th>
-              <th>Tồn kho</th>
               <th>Đã bán</th>
+              <th>Đánh giá</th>
               <th>Trạng thái</th>
               <th>Thao tác</th>
             </tr>
@@ -280,30 +287,40 @@ const SellerProductsPage = () => {
                         alt={product.name}
                         className={styles.productImage}
                       />
-                      <strong>{product.name}</strong>
+                      <div>
+                        <strong>{product.name}</strong>
+                        <div style={{ fontSize: "12px", color: "#999" }}>
+                          ID: {product.id.substring(0, 8)}...
+                        </div>
+                      </div>
                     </div>
                   </td>
-                  <td>{product.sku}</td>
+                  <td>{product.storeCategory || "-"}</td>
                   <td>{product.category}</td>
+                  <td>{product.brandName || "-"}</td>
                   <td>
                     <strong style={{ color: "#ee4d2d" }}>
                       {product.price}
                     </strong>
                   </td>
-                  <td>
-                    <span
-                      className={product.stock < 10 ? styles.lowStockText : ""}
-                    >
-                      {product.stock}
-                    </span>
-                  </td>
                   <td>{product.sold}</td>
+                  <td>
+                    {product.rating ? (
+                      <div>
+                        <span style={{ color: "#ffce3d" }}>★</span>{" "}
+                        {product.rating.toFixed(1)} ({product.ratingCount})
+                      </div>
+                    ) : (
+                      <span style={{ color: "#999" }}>Chưa có đánh giá</span>
+                    )}
+                  </td>
                   <td>{getStatusBadge(product.status, product.stock)}</td>
                   <td>
                     <div className={styles.actionButtons}>
                       <button
                         className={`${styles.actionBtn} ${styles.viewBtn}`}
                         title="Xem chi tiết"
+                        onClick={() => handleViewProduct(product.id)}
                       >
                         <EyeOutlined />
                       </button>
@@ -325,7 +342,7 @@ const SellerProductsPage = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="8" className={styles.noData}>
+                <td colSpan="9" className={styles.noData}>
                   <ShopOutlined style={{ fontSize: "48px", color: "#ccc" }} />
                   <p>Không tìm thấy sản phẩm nào</p>
                 </td>

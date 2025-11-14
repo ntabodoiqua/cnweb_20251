@@ -583,6 +583,15 @@ const getProductsByStoreApi = (storeId, page = 0, size = 20) => {
   });
 };
 
+const getProductDetailApi = (productId) => {
+  const URL_API = `/api/product/products/${productId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 const getCategoriesApi = () => {
   const URL_API = "/api/product/categories";
   return axios.get(URL_API, {
@@ -646,6 +655,7 @@ export {
   createProductApi,
   getProductsApi,
   getProductsByStoreApi,
+  getProductDetailApi,
   getCategoriesApi,
   getBrandsApi,
 };

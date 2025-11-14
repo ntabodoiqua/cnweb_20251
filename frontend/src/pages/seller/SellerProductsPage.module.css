@@ -239,8 +239,10 @@
 
 .sellerTable {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   min-width: 900px; /* Minimum width to maintain table structure */
+  position: relative;
 }
 
 .sellerTable thead {
@@ -259,6 +261,21 @@
   color: #333;
   border-bottom: 2px solid rgba(238, 77, 45, 0.15);
   white-space: nowrap;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.05) 0%,
+    rgba(255, 107, 53, 0.05) 100%
+  );
+  position: relative;
+}
+
+/* Cố định cột Thao tác */
+.sellerTable thead tr th:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 10;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
+  background: #fef5f3;
 }
 
 .sellerTable tbody tr {
@@ -275,6 +292,21 @@
   font-size: 14px;
   color: #333;
   vertical-align: middle;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Cố định cột Thao tác trong tbody */
+.sellerTable tbody tr td:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 5;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
+  background: white;
+}
+
+.sellerTable tbody tr:hover td:last-child {
+  background: #fef5f3;
 }
 
 /* ==================== Product Info Cell ==================== */
