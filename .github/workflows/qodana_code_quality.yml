@@ -32,6 +32,7 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
+          linter: jetbrains/qodana-jvm-community:2025.2
           args: --project-dir,backend
           pr-mode: false
           use-caches: true
