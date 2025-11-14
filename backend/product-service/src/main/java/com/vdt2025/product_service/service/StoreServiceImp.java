@@ -38,6 +38,7 @@ public class StoreServiceImp implements StoreService {
     StoreRepository storeRepository;
     UserServiceClient userServiceClient;
     FileServiceClient fileServiceClient;
+    CacheEvictService cacheEvictService;
     
     @Override
     @Transactional
@@ -104,6 +105,7 @@ public class StoreServiceImp implements StoreService {
             throw new AppException(ErrorCode.UNAUTHORIZED_STORE_ACCESS);
         }
         store.setActive(false);
+        cacheEvictService.evictUserStores(store.getUserName());
         storeRepository.save(store);
         log.info("Store with ID: {} deactivated successfully for seller profile ID: {}", 
                 store.getId(), sellerProfileId);
@@ -131,7 +133,9 @@ public class StoreServiceImp implements StoreService {
     @Override
     @Cacheable(
             value = "storesOfCurrentSeller",
-            key = "#pageable.pageNumber + '-' + #pageable.pageSize"
+            key = "T(org.springframework.security.core.context.SecurityContextHolder)"
+                    + ".getContext().getAuthentication().getName()"
+                    + " + '-' + #pageable.pageNumber + '-' + #pageable.pageSize"
     )
     public PageCacheDTO<StoreResponse> getStoresOfCurrentSeller(Pageable pageable) {
         log.info("Fetching stores for current seller with pagination: {}", pageable);
@@ -164,7 +168,6 @@ public class StoreServiceImp implements StoreService {
 
     @Override
     @Transactional
-    @CacheEvict(value = "storesOfCurrentSeller", allEntries = true)
     public StoreResponse updateStoreBasicInfo(String storeId, StoreSimpleRequest request) {
         log.info("Updating basic info for store ID: {}", storeId);
         Store store = storeRepository.findById(storeId)
@@ -180,13 +183,13 @@ public class StoreServiceImp implements StoreService {
         store.setStoreDescription(request.getStoreDescription() == null ? store.getStoreDescription() : request.getStoreDescription());
 
         Store updatedStore = storeRepository.save(store);
+        cacheEvictService.evictUserStores(store.getUserName());
         log.info("Store with ID: {} updated successfully", storeId);
         return storeMapper.toStoreResponse(updatedStore);
     }
 
     @Override
     @Transactional
-    @CacheEvict(value = "storesOfCurrentSeller", allEntries = true)
     public StoreResponse updateStoreMedia(String storeId, Integer mediaType, MultipartFile file) {
         log.info("Updating media for store ID: {}, media type: {}", storeId, mediaType);
         Store store = storeRepository.findById(storeId)
@@ -222,6 +225,7 @@ public class StoreServiceImp implements StoreService {
 
             Store updatedStore = storeRepository.save(store);
             log.info("Media updated successfully for store ID: {}", storeId);
+            cacheEvictService.evictUserStores(store.getUserName());
             return storeMapper.toStoreResponse(updatedStore);
         } catch (Exception e) {
             log.error("Failed to update media for store ID: {}", storeId, e);
