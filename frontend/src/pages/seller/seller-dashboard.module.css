@@ -4,19 +4,19 @@
    Tương tự admin-dashboard.css nhưng tùy chỉnh cho seller
    ======================================== */
 
-.seller-dashboard-page {
+.page {
   min-height: calc(100vh - 70px - 200px); /* viewport - header - footer */
   background: linear-gradient(135deg, #f5f7fa 0%, #fef5f1 100%);
   padding: 40px 0;
 }
 
-.seller-dashboard-container {
+.container {
   max-width: 1600px;
   margin: 0 auto;
   padding: 0 20px;
 }
 
-.seller-dashboard-content {
+.content {
   display: flex;
   gap: 0;
   align-items: flex-start;
@@ -24,7 +24,7 @@
 
 /* ==================== Collapsible Sidebar Navigation ==================== */
 
-.seller-sidebar {
+.sidebar {
   background: white;
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(238, 77, 45, 0.08);
@@ -38,11 +38,11 @@
   z-index: 100;
 }
 
-.seller-sidebar.collapsed {
+.sidebar.collapsed {
   width: 80px;
 }
 
-.seller-sidebar-header {
+.sidebarHeader {
   padding: 0 24px 20px;
   border-bottom: 2px solid rgba(238, 77, 45, 0.1);
   margin-bottom: 16px;
@@ -52,13 +52,13 @@
   gap: 12px;
 }
 
-.seller-sidebar.collapsed .seller-sidebar-header {
+.sidebar.collapsed .sidebarHeader {
   padding: 0 16px 20px;
   flex-direction: column;
   gap: 8px;
 }
 
-.seller-sidebar-title {
+.sidebarTitle {
   font-size: 18px;
   font-weight: 700;
   color: #333;
@@ -71,32 +71,32 @@
   flex: 1;
 }
 
-.seller-sidebar.collapsed .seller-sidebar-title {
+.sidebar.collapsed .sidebarTitle {
   font-size: 0;
   justify-content: center;
 }
 
-.seller-sidebar-title .anticon {
+.sidebarTitle :global(.anticon) {
   color: #ee4d2d;
   font-size: 22px;
   flex-shrink: 0;
 }
 
-.seller-sidebar.collapsed .seller-sidebar-title .anticon {
+.sidebar.collapsed .sidebarTitle :global(.anticon) {
   font-size: 24px;
 }
 
-.seller-sidebar-title span {
+.sidebarTitle span {
   transition: opacity 0.2s ease;
 }
 
-.seller-sidebar.collapsed .seller-sidebar-title span {
+.sidebar.collapsed .sidebarTitle span {
   opacity: 0;
   width: 0;
   overflow: hidden;
 }
 
-.seller-sidebar-toggle {
+.sidebarToggle {
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
   color: white;
   border: none;
@@ -112,28 +112,28 @@
   font-size: 16px;
 }
 
-.seller-sidebar-toggle:hover {
+.sidebarToggle:hover {
   background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
   transform: scale(1.1) rotate(90deg);
   box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
 }
 
-.seller-sidebar-toggle:active {
+.sidebarToggle:active {
   transform: scale(0.95) rotate(90deg);
 }
 
-.seller-menu {
+.menu {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.seller-menu-item {
+.menuItem {
   margin: 0;
   padding: 0;
 }
 
-.seller-menu-link {
+.menuLink {
   display: flex;
   align-items: center;
   gap: 14px;
@@ -147,13 +147,13 @@
   border-left: 3px solid transparent;
 }
 
-.seller-sidebar.collapsed .seller-menu-link {
+.sidebar.collapsed .menuLink {
   padding: 14px 16px;
   justify-content: center;
   gap: 0;
 }
 
-.seller-menu-link::before {
+.menuLink::before {
   content: "";
   position: absolute;
   left: 0;
@@ -169,33 +169,33 @@
   z-index: -1;
 }
 
-.seller-menu-link:hover::before,
-.seller-menu-link.active::before {
+.menuLink:hover::before,
+.menuLink.active::before {
   width: 100%;
 }
 
-.seller-menu-link:hover {
+.menuLink:hover {
   color: #ee4d2d;
   border-left-color: #ee4d2d;
   padding-left: 28px;
 }
 
-.seller-sidebar.collapsed .seller-menu-link:hover {
+.sidebar.collapsed .menuLink:hover {
   padding-left: 16px;
 }
 
-.seller-menu-link.active {
+.menuLink.active {
   color: #ee4d2d;
   font-weight: 600;
   border-left-color: #ee4d2d;
   padding-left: 28px;
 }
 
-.seller-sidebar.collapsed .seller-menu-link.active {
+.sidebar.collapsed .menuLink.active {
   padding-left: 16px;
 }
 
-.seller-menu-icon {
+.menuIcon {
   font-size: 20px;
   transition: transform 0.3s ease;
   display: flex;
@@ -204,18 +204,18 @@
   flex-shrink: 0;
 }
 
-.seller-menu-link:hover .seller-menu-icon,
-.seller-menu-link.active .seller-menu-icon {
+.menuLink:hover .menuIcon,
+.menuLink.active .menuIcon {
   transform: scale(1.15);
 }
 
-.seller-menu-label {
+.menuLabel {
   white-space: nowrap;
   overflow: hidden;
   transition: opacity 0.2s ease;
 }
 
-.seller-sidebar.collapsed .seller-menu-label {
+.sidebar.collapsed .menuLabel {
   opacity: 0;
   width: 0;
   overflow: hidden;
@@ -223,7 +223,7 @@
 
 /* ==================== Main Content Area ==================== */
 
-.seller-main {
+.main {
   flex: 1;
   background: white;
   border-radius: 16px;
@@ -234,23 +234,23 @@
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.seller-main.sidebar-collapsed {
+.main.sidebarCollapsed {
   margin-left: 30px;
 }
 
 /* Animation for content transitions */
-.seller-main-content > * {
+.mainContent > * {
   animation: fadeInUp 0.4s ease-out;
 }
 
-.seller-main-header {
+.mainHeader {
   margin-bottom: 32px;
   padding-bottom: 20px;
   border-bottom: 2px solid rgba(238, 77, 45, 0.1);
   animation: slideInFromTop 0.5s ease-out;
 }
 
-.seller-main-title {
+.mainTitle {
   font-size: 28px;
   font-weight: 700;
   color: #333;
@@ -260,31 +260,31 @@
   gap: 12px;
 }
 
-.seller-main-title .anticon {
+.mainTitle :global(.anticon) {
   color: #ee4d2d;
   font-size: 32px;
 }
 
-.seller-main-subtitle {
+.mainSubtitle {
   font-size: 14px;
   color: #888;
   margin: 0;
 }
 
-.seller-main-content {
+.mainContent {
   animation: fadeIn 0.6s ease-out;
 }
 
 /* ==================== Stats Cards ==================== */
 
-.seller-stats-grid {
+.statsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 24px;
   margin-bottom: 32px;
 }
 
-.seller-stat-card {
+.statCard {
   background: linear-gradient(
     135deg,
     rgba(238, 77, 45, 0.05) 0%,
@@ -300,7 +300,7 @@
   overflow: hidden;
 }
 
-.seller-stat-card::before {
+.statCard::before {
   content: "";
   position: absolute;
   top: -50%;
@@ -315,40 +315,40 @@
   transition: all 0.5s ease;
 }
 
-.seller-stat-card:hover::before {
+.statCard:hover::before {
   top: -30%;
   right: -30%;
   width: 250px;
   height: 250px;
 }
 
-.seller-stat-card:nth-child(1) {
+.statCard:nth-child(1) {
   animation-delay: 0.1s;
 }
-.seller-stat-card:nth-child(2) {
+.statCard:nth-child(2) {
   animation-delay: 0.2s;
 }
-.seller-stat-card:nth-child(3) {
+.statCard:nth-child(3) {
   animation-delay: 0.3s;
 }
-.seller-stat-card:nth-child(4) {
+.statCard:nth-child(4) {
   animation-delay: 0.4s;
 }
 
-.seller-stat-card:hover {
+.statCard:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 12px 32px rgba(238, 77, 45, 0.25);
   border-color: rgba(238, 77, 45, 0.3);
 }
 
-.seller-stat-header {
+.statHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 16px;
 }
 
-.seller-stat-title {
+.statTitle {
   font-size: 14px;
   color: #666;
   font-weight: 500;
@@ -356,7 +356,7 @@
   letter-spacing: 0.5px;
 }
 
-.seller-stat-icon {
+.statIcon {
   width: 48px;
   height: 48px;
   border-radius: 12px;
@@ -370,12 +370,12 @@
   transition: all 0.3s ease;
 }
 
-.seller-stat-card:hover .seller-stat-icon {
+.statCard:hover .statIcon {
   transform: rotate(10deg) scale(1.1);
   box-shadow: 0 6px 16px rgba(238, 77, 45, 0.4);
 }
 
-.seller-stat-value {
+.statValue {
   font-size: 32px;
   font-weight: 700;
   color: #333;
@@ -383,7 +383,7 @@
   line-height: 1;
 }
 
-.seller-stat-label {
+.statLabel {
   font-size: 13px;
   color: #888;
   display: flex;
@@ -391,7 +391,7 @@
   gap: 6px;
 }
 
-.seller-stat-trend {
+.statTrend {
   font-size: 12px;
   font-weight: 600;
   padding: 4px 8px;
@@ -401,19 +401,19 @@
   gap: 4px;
 }
 
-.seller-stat-trend.up {
+.statTrend.up {
   color: #52c41a;
   background: rgba(82, 196, 26, 0.1);
 }
 
-.seller-stat-trend.down {
+.statTrend.down {
   color: #ff4d4f;
   background: rgba(255, 77, 79, 0.1);
 }
 
 /* ==================== Data Table ==================== */
 
-.seller-table-container {
+.tableContainer {
   background: white;
   border-radius: 12px;
   overflow: hidden;
@@ -421,12 +421,12 @@
   margin-bottom: 24px;
 }
 
-.seller-table {
+.table {
   width: 100%;
   border-collapse: collapse;
 }
 
-.seller-table thead {
+.table thead {
   background: linear-gradient(
     135deg,
     rgba(238, 77, 45, 0.08) 0%,
@@ -434,7 +434,7 @@
   );
 }
 
-.seller-table th {
+.table th {
   padding: 16px 20px;
   text-align: left;
   font-size: 13px;
@@ -445,29 +445,29 @@
   border-bottom: 2px solid rgba(238, 77, 45, 0.1);
 }
 
-.seller-table td {
+.table td {
   padding: 16px 20px;
   font-size: 14px;
   color: #555;
   border-bottom: 1px solid rgba(238, 77, 45, 0.05);
 }
 
-.seller-table tbody tr {
+.table tbody tr {
   transition: all 0.3s ease;
 }
 
-.seller-table tbody tr:hover {
+.table tbody tr:hover {
   background: rgba(238, 77, 45, 0.03);
   transform: scale(1.01);
 }
 
-.seller-table tbody tr:last-child td {
+.table tbody tr:last-child td {
   border-bottom: none;
 }
 
 /* ==================== Action Buttons ==================== */
 
-.seller-btn {
+.btn {
   padding: 10px 20px;
   border-radius: 8px;
   font-size: 14px;
@@ -482,7 +482,7 @@
   overflow: hidden;
 }
 
-.seller-btn::before {
+.btn::before {
   content: "";
   position: absolute;
   top: 50%;
@@ -495,37 +495,37 @@
   transition: width 0.6s, height 0.6s;
 }
 
-.seller-btn:hover::before {
+.btn:hover::before {
   width: 300px;
   height: 300px;
 }
 
-.seller-btn-primary {
+.btnPrimary {
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
   color: white;
   box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
 }
 
-.seller-btn-primary:hover {
+.btnPrimary:hover {
   background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(238, 77, 45, 0.4);
 }
 
-.seller-btn-secondary {
+.btnSecondary {
   background: white;
   color: #666;
   border: 2px solid #e8e8e8;
 }
 
-.seller-btn-secondary:hover {
+.btnSecondary:hover {
   border-color: #ee4d2d;
   color: #ee4d2d;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(238, 77, 45, 0.15);
 }
 
-.seller-btn:disabled {
+.btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   pointer-events: none;
@@ -534,109 +534,109 @@
 /* ==================== Mobile Responsive ==================== */
 
 @media (max-width: 1024px) {
-  .seller-dashboard-content {
+  .content {
     gap: 0;
   }
 
-  .seller-main {
+  .main {
     margin-left: 20px;
   }
 
-  .seller-sidebar {
+  .sidebar {
     top: 100px;
     width: 260px;
   }
 
-  .seller-sidebar.collapsed {
+  .sidebar.collapsed {
     width: 70px;
   }
 }
 
 @media (max-width: 768px) {
-  .seller-dashboard-page {
+  .page {
     padding: 20px 0;
   }
 
-  .seller-dashboard-content {
+  .content {
     flex-direction: column;
     gap: 20px;
   }
 
-  .seller-sidebar {
+  .sidebar {
     position: static;
     width: 100% !important;
     margin-bottom: 20px;
   }
 
-  .seller-sidebar.collapsed {
+  .sidebar.collapsed {
     width: 100% !important;
   }
 
-  .seller-sidebar.collapsed .seller-sidebar-header {
+  .sidebar.collapsed .sidebarHeader {
     flex-direction: row;
     justify-content: space-between;
   }
 
-  .seller-sidebar.collapsed .seller-sidebar-title {
+  .sidebar.collapsed .sidebarTitle {
     font-size: 18px;
     justify-content: flex-start;
   }
 
-  .seller-sidebar.collapsed .seller-sidebar-title span {
+  .sidebar.collapsed .sidebarTitle span {
     opacity: 1;
     width: auto;
   }
 
-  .seller-sidebar.collapsed .seller-menu-link {
+  .sidebar.collapsed .menuLink {
     padding: 14px 24px;
     justify-content: flex-start;
   }
 
-  .seller-sidebar.collapsed .seller-menu-label {
+  .sidebar.collapsed .menuLabel {
     opacity: 1;
     width: auto;
   }
 
-  .seller-main {
+  .main {
     margin-left: 0;
     padding: 24px 16px;
   }
 
-  .seller-stats-grid {
+  .statsGrid {
     grid-template-columns: 1fr;
   }
 
-  .seller-main-title {
+  .mainTitle {
     font-size: 22px;
   }
 
-  .seller-table-container {
+  .tableContainer {
     overflow-x: auto;
   }
 
-  .seller-table {
+  .table {
     min-width: 600px;
   }
 }
 
 @media (max-width: 480px) {
-  .seller-dashboard-container {
+  .container {
     padding: 0 12px;
   }
 
-  .seller-sidebar {
+  .sidebar {
     padding: 16px 0;
   }
 
-  .seller-main {
+  .main {
     padding: 20px 12px;
   }
 
-  .seller-main-title {
+  .mainTitle {
     font-size: 20px;
   }
 
-  .seller-stat-card {
+  .statCard {
     padding: 20px;
   }
 }
@@ -686,29 +686,29 @@
 }
 
 /* Smooth transition for menu items */
-.seller-menu-item {
+.menuItem {
   animation: fadeInUp 0.3s ease-out;
   animation-fill-mode: both;
 }
 
-.seller-menu-item:nth-child(1) {
+.menuItem:nth-child(1) {
   animation-delay: 0.05s;
 }
-.seller-menu-item:nth-child(2) {
+.menuItem:nth-child(2) {
   animation-delay: 0.1s;
 }
-.seller-menu-item:nth-child(3) {
+.menuItem:nth-child(3) {
   animation-delay: 0.15s;
 }
-.seller-menu-item:nth-child(4) {
+.menuItem:nth-child(4) {
   animation-delay: 0.2s;
 }
-.seller-menu-item:nth-child(5) {
+.menuItem:nth-child(5) {
   animation-delay: 0.25s;
 }
-.seller-menu-item:nth-child(6) {
+.menuItem:nth-child(6) {
   animation-delay: 0.3s;
 }
-.seller-menu-item:nth-child(7) {
+.menuItem:nth-child(7) {
   animation-delay: 0.35s;
 }

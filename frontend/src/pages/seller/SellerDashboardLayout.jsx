@@ -12,7 +12,7 @@ import {
   TeamOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../../constants/routes";
-import "./seller-dashboard.css";
+import styles from "./seller-dashboard.module.css";
 
 /**
  * SellerDashboardLayout - Layout component for seller dashboard with collapsible sidebar
@@ -77,19 +77,21 @@ const SellerDashboardLayout = () => {
   };
 
   return (
-    <div className="seller-dashboard-page">
-      <div className="seller-dashboard-container">
-        <div className="seller-dashboard-content">
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.content}>
           {/* Collapsible Sidebar Navigation */}
-          <aside className={`seller-sidebar ${collapsed ? "collapsed" : ""}`}>
+          <aside
+            className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}
+          >
             {/* Sidebar Header */}
-            <div className="seller-sidebar-header">
-              <h3 className="seller-sidebar-title">
+            <div className={styles.sidebarHeader}>
+              <h3 className={styles.sidebarTitle}>
                 <ShopOutlined />
                 {!collapsed && <span>Kênh Người Bán</span>}
               </h3>
               <button
-                className="seller-sidebar-toggle"
+                className={styles.sidebarToggle}
                 onClick={toggleSidebar}
                 title={collapsed ? "Mở rộng" : "Thu nhỏ"}
               >
@@ -99,19 +101,19 @@ const SellerDashboardLayout = () => {
 
             {/* Sidebar Menu */}
             <nav>
-              <ul className="seller-menu">
+              <ul className={styles.menu}>
                 {menuItems.map((item) => (
-                  <li key={item.key} className="seller-menu-item">
+                  <li key={item.key} className={styles.menuItem}>
                     <Link
                       to={item.path}
-                      className={`seller-menu-link ${
-                        location.pathname === item.path ? "active" : ""
+                      className={`${styles.menuLink} ${
+                        location.pathname === item.path ? styles.active : ""
                       }`}
                       title={collapsed ? item.label : ""}
                     >
-                      <span className="seller-menu-icon">{item.icon}</span>
+                      <span className={styles.menuIcon}>{item.icon}</span>
                       {!collapsed && (
-                        <span className="seller-menu-label">{item.label}</span>
+                        <span className={styles.menuLabel}>{item.label}</span>
                       )}
                     </Link>
                   </li>
@@ -122,20 +124,22 @@ const SellerDashboardLayout = () => {
 
           {/* Main Content Area */}
           <main
-            className={`seller-main ${collapsed ? "sidebar-collapsed" : ""}`}
+            className={`${styles.main} ${
+              collapsed ? styles.sidebarCollapsed : ""
+            }`}
           >
-            <div className="seller-main-header">
-              <h1 className="seller-main-title">
+            <div className={styles.mainHeader}>
+              <h1 className={styles.mainTitle}>
                 {activeItem.icon}
                 <span>{activeItem.label}</span>
               </h1>
-              <p className="seller-main-subtitle">
+              <p className={styles.mainSubtitle}>
                 Quản lý cửa hàng của bạn trên HUSTBuy
               </p>
             </div>
 
             {/* Nested routes will render here */}
-            <div className="seller-main-content">
+            <div className={styles.mainContent}>
               <Outlet />
             </div>
           </main>

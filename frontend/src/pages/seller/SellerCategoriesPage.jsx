@@ -31,7 +31,7 @@ import {
   getMyStoresApi,
 } from "../../util/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
-import "./SellerCategoriesPage.css";
+import styles from "./SellerCategoriesPage.module.css";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
@@ -397,7 +397,7 @@ const SellerCategoriesPage = () => {
   // Loading state for stores
   if (loadingStores) {
     return (
-      <div className="seller-categories">
+      <div className={styles.sellerCategories}>
         <LoadingSpinner tip="Đang tải thông tin..." fullScreen={false} />
       </div>
     );
@@ -406,8 +406,8 @@ const SellerCategoriesPage = () => {
   // No stores state
   if (stores.length === 0) {
     return (
-      <div className="seller-categories">
-        <div className="empty-state">
+      <div className={styles.sellerCategories}>
+        <div className={styles.emptyState}>
           <FolderOutlined />
           <h3>Chưa có cửa hàng nào</h3>
           <p>
@@ -421,13 +421,13 @@ const SellerCategoriesPage = () => {
   const selectedStore = stores.find((s) => s.id === selectedStoreId);
 
   return (
-    <div className="seller-categories">
+    <div className={styles.sellerCategories}>
       {/* Info Banner */}
-      <div className="categories-info-banner">
+      <div className={styles.infoBanner}>
         <InfoCircleOutlined />
-        <div className="categories-info-content">
-          <div className="categories-info-title">Quản lý danh mục sản phẩm</div>
-          <div className="categories-info-text">
+        <div className={styles.infoContent}>
+          <div className={styles.infoTitle}>Quản lý danh mục sản phẩm</div>
+          <div className={styles.infoText}>
             Tạo và quản lý danh mục sản phẩm cho cửa hàng của bạn. Danh mục giúp
             khách hàng dễ dàng tìm kiếm sản phẩm.
           </div>
@@ -435,15 +435,15 @@ const SellerCategoriesPage = () => {
       </div>
 
       {/* Store Selector */}
-      <div className="store-selector-section">
-        <label htmlFor="store-select" className="store-selector-label">
+      <div className={styles.storeSelectorSection}>
+        <label htmlFor="store-select" className={styles.storeSelectorLabel}>
           <FolderOutlined /> Chọn cửa hàng:
         </label>
         <select
           id="store-select"
           value={selectedStoreId || ""}
           onChange={handleStoreChange}
-          className="store-selector"
+          className={styles.storeSelector}
         >
           {stores.map((store) => (
             <option key={store.id} value={store.id}>
@@ -452,21 +452,23 @@ const SellerCategoriesPage = () => {
           ))}
         </select>
         {selectedStore && (
-          <div className="selected-store-info">
-            <span className="store-badge">
+          <div className={styles.selectedStoreInfo}>
+            <span className={styles.storeBadge}>
               <CheckCircleOutlined /> {selectedStore.storeName}
             </span>
-            <span className="category-count">{categories.length} danh mục</span>
+            <span className={styles.categoryCount}>
+              {categories.length} danh mục
+            </span>
           </div>
         )}
       </div>
 
       {/* Create Category Button */}
       {!showCreateForm && (
-        <div className="create-category-section">
+        <div className={styles.createCategorySection}>
           <button
             onClick={handleShowCreateForm}
-            className="profile-btn profile-btn-primary"
+            className={`${styles.profileBtn} ${styles.profileBtnPrimary}`}
           >
             <PlusOutlined /> Tạo danh mục mới
           </button>
@@ -475,16 +477,16 @@ const SellerCategoriesPage = () => {
 
       {/* Create Form */}
       {showCreateForm && (
-        <div className="category-create-form">
-          <form onSubmit={handleCreateCategory} className="category-form">
-            <div className="form-section-title">
+        <div className={styles.categoryCreateForm}>
+          <form onSubmit={handleCreateCategory} className={styles.categoryForm}>
+            <div className={styles.formSectionTitle}>
               <PlusOutlined />
               Tạo danh mục mới
             </div>
 
-            <div className="form-group">
-              <label htmlFor="name" className="form-label">
-                Tên danh mục <span className="required">*</span>
+            <div className={styles.formGroup}>
+              <label htmlFor="name" className={styles.formLabel}>
+                Tên danh mục <span className={styles.required}>*</span>
               </label>
               <input
                 type="text"
@@ -492,14 +494,14 @@ const SellerCategoriesPage = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleInputChange}
-                className="form-input"
+                className={styles.formInput}
                 placeholder="Nhập tên danh mục..."
                 required
               />
             </div>
 
-            <div className="form-group">
-              <label htmlFor="description" className="form-label">
+            <div className={styles.formGroup}>
+              <label htmlFor="description" className={styles.formLabel}>
                 Mô tả danh mục
               </label>
               <textarea
@@ -507,22 +509,25 @@ const SellerCategoriesPage = () => {
                 name="description"
                 value={formData.description}
                 onChange={handleInputChange}
-                className="form-textarea"
+                className={styles.formTextarea}
                 placeholder="Nhập mô tả danh mục..."
                 rows="4"
               />
             </div>
 
-            <div className="form-actions">
+            <div className={styles.formActions}>
               <button
                 type="button"
                 onClick={handleCancelCreate}
-                className="profile-btn profile-btn-secondary"
+                className={`${styles.profileBtn} ${styles.profileBtnSecondary}`}
               >
                 <CloseOutlined />
                 Hủy bỏ
               </button>
-              <button type="submit" className="profile-btn profile-btn-primary">
+              <button
+                type="submit"
+                className={`${styles.profileBtn} ${styles.profileBtnPrimary}`}
+              >
                 <SaveOutlined />
                 Tạo danh mục
               </button>
@@ -541,7 +546,7 @@ const SellerCategoriesPage = () => {
         <>
           {/* Categories List */}
           {categories.length === 0 ? (
-            <div className="empty-state">
+            <div className={styles.emptyState}>
               <AppstoreOutlined />
               <h3>Chưa có danh mục nào</h3>
               <p>Tạo danh mục đầu tiên để bắt đầu phân loại sản phẩm.</p>
@@ -554,31 +559,33 @@ const SellerCategoriesPage = () => {
                 <div
                   key={category.id}
                   id={`category-${category.id}`}
-                  className="category-container"
+                  className={styles.categoryContainer}
                 >
                   {/* Compact View */}
                   <div
-                    className="category-compact"
+                    className={styles.categoryCompact}
                     onClick={() => toggleExpand(category.id)}
                   >
-                    <div className="compact-left">
-                      <div className="compact-image">
+                    <div className={styles.compactLeft}>
+                      <div className={styles.compactImage}>
                         {category.imageUrl ? (
                           <img src={category.imageUrl} alt={category.name} />
                         ) : (
                           <AppstoreOutlined />
                         )}
                       </div>
-                      <div className="compact-info">
-                        <h3 className="compact-category-name">
+                      <div className={styles.compactInfo}>
+                        <h3 className={styles.compactCategoryName}>
                           {category.name}
                         </h3>
-                        <div className="compact-meta">
-                          <span className="compact-product-count">
+                        <div className={styles.compactMeta}>
+                          <span className={styles.compactProductCount}>
                             <FolderOutlined /> {category.productCount} sản phẩm
                           </span>
                           {category.active && (
-                            <span className="compact-status active">
+                            <span
+                              className={`${styles.compactStatus} ${styles.active}`}
+                            >
                               <CheckCircleOutlined /> Hoạt động
                             </span>
                           )}
@@ -586,14 +593,14 @@ const SellerCategoriesPage = () => {
                       </div>
                     </div>
 
-                    <div className="compact-right">
-                      <div className="compact-meta-info">
-                        <span className="compact-date">
+                    <div className={styles.compactRight}>
+                      <div className={styles.compactMetaInfo}>
+                        <span className={styles.compactDate}>
                           <ClockCircleOutlined />
                           {dayjs(category.createdAt).format("DD/MM/YYYY")}
                         </span>
                       </div>
-                      <button className="expand-button" type="button">
+                      <button className={styles.expandButton} type="button">
                         {isExpanded ? <UpOutlined /> : <DownOutlined />}
                         {isExpanded ? "Thu gọn" : "Xem chi tiết"}
                       </button>
@@ -602,21 +609,25 @@ const SellerCategoriesPage = () => {
 
                   {/* Expanded View */}
                   {isExpanded && (
-                    <div className="category-expanded">
+                    <div className={styles.categoryExpanded}>
                       {editingCategoryId === category.id ? (
                         // Edit Mode
                         <form
                           onSubmit={handleUpdateCategory}
-                          className="category-form"
+                          className={styles.categoryForm}
                         >
-                          <div className="form-section-title">
+                          <div className={styles.formSectionTitle}>
                             <EditOutlined />
                             Chỉnh sửa danh mục
                           </div>
 
-                          <div className="form-group">
-                            <label htmlFor="edit-name" className="form-label">
-                              Tên danh mục <span className="required">*</span>
+                          <div className={styles.formGroup}>
+                            <label
+                              htmlFor="edit-name"
+                              className={styles.formLabel}
+                            >
+                              Tên danh mục{" "}
+                              <span className={styles.required}>*</span>
                             </label>
                             <input
                               type="text"
@@ -624,15 +635,15 @@ const SellerCategoriesPage = () => {
                               name="name"
                               value={formData.name}
                               onChange={handleInputChange}
-                              className="form-input"
+                              className={styles.formInput}
                               required
                             />
                           </div>
 
-                          <div className="form-group">
+                          <div className={styles.formGroup}>
                             <label
                               htmlFor="edit-description"
-                              className="form-label"
+                              className={styles.formLabel}
                             >
                               Mô tả danh mục
                             </label>
@@ -641,23 +652,23 @@ const SellerCategoriesPage = () => {
                               name="description"
                               value={formData.description}
                               onChange={handleInputChange}
-                              className="form-textarea"
+                              className={styles.formTextarea}
                               rows="4"
                             />
                           </div>
 
-                          <div className="form-actions">
+                          <div className={styles.formActions}>
                             <button
                               type="button"
                               onClick={handleCancelEdit}
-                              className="profile-btn profile-btn-secondary"
+                              className={`${styles.profileBtn} ${styles.profileBtnSecondary}`}
                             >
                               <CloseOutlined />
                               Hủy bỏ
                             </button>
                             <button
                               type="submit"
-                              className="profile-btn profile-btn-primary"
+                              className={`${styles.profileBtn} ${styles.profileBtnPrimary}`}
                             >
                               <SaveOutlined />
                               Lưu thay đổi
@@ -667,25 +678,27 @@ const SellerCategoriesPage = () => {
                       ) : (
                         // View Mode
                         <>
-                          <div className="category-info-section">
+                          <div className={styles.categoryInfoSection}>
                             {/* Image Section */}
-                            <div className="category-image-section">
-                              <div className="category-image-wrapper">
+                            <div className={styles.categoryImageSection}>
+                              <div className={styles.categoryImageWrapper}>
                                 {category.imageUrl ? (
                                   <img
                                     src={category.imageUrl}
                                     alt={category.name}
-                                    className="category-image"
+                                    className={styles.categoryImage}
                                   />
                                 ) : (
-                                  <div className="category-image-placeholder">
+                                  <div
+                                    className={styles.categoryImagePlaceholder}
+                                  >
                                     <PictureOutlined />
                                     <span>Chưa có ảnh</span>
                                   </div>
                                 )}
                                 <button
                                   type="button"
-                                  className="category-image-upload"
+                                  className={styles.categoryImageUpload}
                                   onClick={() =>
                                     imageInputRefs.current[category.id]?.click()
                                   }
@@ -717,11 +730,13 @@ const SellerCategoriesPage = () => {
                             </div>
 
                             {/* Category Details */}
-                            <div className="category-details">
-                              <h2 className="category-name">{category.name}</h2>
+                            <div className={styles.categoryDetails}>
+                              <h2 className={styles.categoryName}>
+                                {category.name}
+                              </h2>
 
                               {category.description && (
-                                <div className="category-description">
+                                <div className={styles.categoryDescription}>
                                   <AppstoreOutlined
                                     style={{ marginRight: "8px" }}
                                   />
@@ -729,24 +744,32 @@ const SellerCategoriesPage = () => {
                                 </div>
                               )}
 
-                              <div className="category-meta-grid">
-                                <div className="meta-item">
-                                  <div className="meta-label">Số sản phẩm</div>
-                                  <div className="meta-value">
+                              <div className={styles.categoryMetaGrid}>
+                                <div className={styles.metaItem}>
+                                  <div className={styles.metaLabel}>
+                                    Số sản phẩm
+                                  </div>
+                                  <div className={styles.metaValue}>
                                     <FolderOutlined />
                                     {category.productCount} sản phẩm
                                   </div>
                                 </div>
 
-                                <div className="meta-item">
-                                  <div className="meta-label">Trạng thái</div>
-                                  <div className="meta-value">
+                                <div className={styles.metaItem}>
+                                  <div className={styles.metaLabel}>
+                                    Trạng thái
+                                  </div>
+                                  <div className={styles.metaValue}>
                                     {category.active ? (
-                                      <span className="status-badge active">
+                                      <span
+                                        className={`${styles.statusBadge} ${styles.active}`}
+                                      >
                                         <CheckCircleOutlined /> Hoạt động
                                       </span>
                                     ) : (
-                                      <span className="status-badge inactive">
+                                      <span
+                                        className={`${styles.statusBadge} ${styles.inactive}`}
+                                      >
                                         <ExclamationCircleOutlined /> Không hoạt
                                         động
                                       </span>
@@ -754,9 +777,11 @@ const SellerCategoriesPage = () => {
                                   </div>
                                 </div>
 
-                                <div className="meta-item">
-                                  <div className="meta-label">Ngày tạo</div>
-                                  <div className="meta-value">
+                                <div className={styles.metaItem}>
+                                  <div className={styles.metaLabel}>
+                                    Ngày tạo
+                                  </div>
+                                  <div className={styles.metaValue}>
                                     <ClockCircleOutlined />
                                     {dayjs(category.createdAt).format(
                                       "DD/MM/YYYY HH:mm"
@@ -764,27 +789,31 @@ const SellerCategoriesPage = () => {
                                   </div>
                                 </div>
 
-                                <div className="meta-item">
-                                  <div className="meta-label">
+                                <div className={styles.metaItem}>
+                                  <div className={styles.metaLabel}>
                                     Cập nhật lần cuối
                                   </div>
-                                  <div className="meta-value">
+                                  <div className={styles.metaValue}>
                                     <SyncOutlined />
                                     {dayjs(category.updatedAt).fromNow()}
                                   </div>
                                 </div>
 
-                                <div className="meta-item">
-                                  <div className="meta-label">Người tạo</div>
-                                  <div className="meta-value">
+                                <div className={styles.metaItem}>
+                                  <div className={styles.metaLabel}>
+                                    Người tạo
+                                  </div>
+                                  <div className={styles.metaValue}>
                                     @{category.createdBy}
                                   </div>
                                 </div>
 
                                 {category.level !== undefined && (
-                                  <div className="meta-item">
-                                    <div className="meta-label">Cấp độ</div>
-                                    <div className="meta-value">
+                                  <div className={styles.metaItem}>
+                                    <div className={styles.metaLabel}>
+                                      Cấp độ
+                                    </div>
+                                    <div className={styles.metaValue}>
                                       Cấp {category.level}
                                     </div>
                                   </div>
@@ -794,14 +823,14 @@ const SellerCategoriesPage = () => {
                           </div>
 
                           {/* Action Buttons */}
-                          <div className="category-actions">
+                          <div className={styles.categoryActions}>
                             <Tooltip title="Chỉnh sửa danh mục">
                               <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleEditCategory(category);
                                 }}
-                                className="profile-btn profile-btn-secondary"
+                                className={`${styles.profileBtn} ${styles.profileBtnSecondary}`}
                               >
                                 <EditOutlined /> Chỉnh sửa
                               </button>
@@ -815,7 +844,7 @@ const SellerCategoriesPage = () => {
                                     category.name
                                   );
                                 }}
-                                className="profile-btn profile-btn-danger"
+                                className={`${styles.profileBtn} ${styles.profileBtnDanger}`}
                               >
                                 <DeleteOutlined /> Xóa
                               </button>
