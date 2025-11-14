@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link, Outlet, useLocation } from "react-router-dom";
 import {
   UserOutlined,
@@ -6,16 +7,19 @@ import {
   HomeOutlined,
   HistoryOutlined,
   LockOutlined,
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../constants/routes";
 import "./profile.css";
 
 /**
- * ProfileLayout - Layout component for profile pages with sidebar navigation
+ * ProfileLayout - Layout component for profile pages with collapsible sidebar navigation
  * Uses <Outlet> for nested routes
  */
 const ProfileLayout = () => {
   const location = useLocation();
+  const [collapsed, setCollapsed] = useState(false);
 
   // Menu items configuration
   const menuItems = [
@@ -61,17 +65,28 @@ const ProfileLayout = () => {
   const activeItem =
     menuItems.find((item) => item.path === location.pathname) || menuItems[0];
 
+  const toggleSidebar = () => {
+    setCollapsed(!collapsed);
+  };
+
   return (
     <div className="profile-page">
       <div className="profile-container">
         <div className="profile-content">
-          {/* Sidebar Navigation */}
-          <aside className="profile-sidebar">
+          {/* Collapsible Sidebar Navigation */}
+          <aside className={`profile-sidebar ${collapsed ? "collapsed" : ""}`}>
             <div className="profile-sidebar-header">
               <h3 className="profile-sidebar-title">
                 <UserOutlined />
-                Tài khoản của tôi
+                {!collapsed && <span>Tài khoản của tôi</span>}
               </h3>
+              <button
+                className="profile-sidebar-toggle"
+                onClick={toggleSidebar}
+                title={collapsed ? "Mở rộng" : "Thu nhỏ"}
+              >
+                {collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+              </button>
             </div>
 
             <nav>
@@ -83,9 +98,12 @@ const ProfileLayout = () => {
                       className={`profile-menu-link ${
                         location.pathname === item.path ? "active" : ""
                       }`}
+                      title={collapsed ? item.label : ""}
                     >
-                      {item.icon}
-                      <span>{item.label}</span>
+                      <span className="profile-menu-icon">{item.icon}</span>
+                      {!collapsed && (
+                        <span className="profile-menu-label">{item.label}</span>
+                      )}
                     </Link>
                   </li>
                 ))}
@@ -94,11 +112,13 @@ const ProfileLayout = () => {
           </aside>
 
           {/* Main Content Area */}
-          <main className="profile-main">
+          <main
+            className={`profile-main ${collapsed ? "sidebar-collapsed" : ""}`}
+          >
             <div className="profile-main-header">
               <h1 className="profile-main-title">
                 {activeItem.icon}
-                {activeItem.label}
+                <span>{activeItem.label}</span>
               </h1>
               <p className="profile-main-subtitle">
                 Quản lý thông tin cá nhân của bạn
