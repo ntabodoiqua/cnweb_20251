@@ -394,6 +394,111 @@ const refreshTokenApi = (token) => {
   );
 };
 
+// Store APIs
+const getMyStoresApi = (page = 0, size = 20) => {
+  const URL_API = "/api/product/stores/myStores";
+  return axios.get(URL_API, {
+    params: {
+      page,
+      size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const createStoreApi = (storeData) => {
+  const URL_API = "/api/product/stores";
+  return axios.post(URL_API, storeData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const updateStoreApi = (storeId, storeData) => {
+  const URL_API = `/api/product/stores/${storeId}`;
+  return axios.put(URL_API, storeData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const deleteStoreApi = (storeId) => {
+  const URL_API = `/api/product/stores/${storeId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const activateStoreApi = (storeId) => {
+  const URL_API = `/api/product/stores/${storeId}/activate`;
+  return axios.patch(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const deactivateStoreApi = (storeId) => {
+  const URL_API = `/api/product/stores/${storeId}/deactivate`;
+  return axios.patch(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const uploadStoreLogoApi = (storeId, file) => {
+  const URL_API = `/api/product/stores/${storeId}/media`;
+  const formData = new FormData();
+  formData.append("type", "1"); // type=1 for logo
+  formData.append("file", file);
+
+  return axios.put(URL_API, formData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+const uploadStoreBannerApi = (storeId, file) => {
+  const URL_API = `/api/product/stores/${storeId}/media`;
+  const formData = new FormData();
+  formData.append("type", "2"); // type=2 for banner
+  formData.append("file", file);
+
+  return axios.put(URL_API, formData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+const getWardInfoApi = (wardId) => {
+  const URL_API = `/api/user/wards/${wardId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+    // Không gửi Authorization header cho API public
+    transformRequest: [
+      (data, headers) => {
+        delete headers.Authorization;
+        return data;
+      },
+    ],
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -422,4 +527,13 @@ export {
   deleteAddressApi,
   logoutApi,
   refreshTokenApi,
+  getMyStoresApi,
+  createStoreApi,
+  updateStoreApi,
+  deleteStoreApi,
+  activateStoreApi,
+  deactivateStoreApi,
+  uploadStoreLogoApi,
+  uploadStoreBannerApi,
+  getWardInfoApi,
 };
