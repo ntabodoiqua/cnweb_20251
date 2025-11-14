@@ -548,6 +548,59 @@ const uploadCategoryImageApi = (storeId, categoryId, file) => {
   });
 };
 
+// Product APIs
+const createProductApi = (productData) => {
+  const URL_API = "/api/product/products";
+  return axios.post(URL_API, productData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const getProductsApi = (params) => {
+  const URL_API = "/api/product/products";
+  return axios.get(URL_API, {
+    params,
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const getProductsByStoreApi = (storeId, page = 0, size = 20) => {
+  const URL_API = `/api/product/products/by-store/${storeId}`;
+  return axios.get(URL_API, {
+    params: {
+      page,
+      size,
+      sort: "createdAt,desc",
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const getCategoriesApi = () => {
+  const URL_API = "/api/product/categories";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const getBrandsApi = () => {
+  const URL_API = "/api/product/brands";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -590,4 +643,9 @@ export {
   updateStoreCategoryApi,
   deleteStoreCategoryApi,
   uploadCategoryImageApi,
+  createProductApi,
+  getProductsApi,
+  getProductsByStoreApi,
+  getCategoriesApi,
+  getBrandsApi,
 };

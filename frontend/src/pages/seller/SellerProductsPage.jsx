@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   PlusOutlined,
   EditOutlined,
@@ -6,7 +6,12 @@ import {
   SearchOutlined,
   EyeOutlined,
   ShopOutlined,
+  LoadingOutlined,
 } from "@ant-design/icons";
+import { message } from "antd";
+import AddProductModal from "../../components/seller/AddProductModal";
+import { getProductsByStoreApi } from "../../util/api";
+import styles from "./SellerProductsPage.module.css";
 
 /**
  * SellerProductsPage - Trang quản lý sản phẩm của người bán
@@ -14,9 +19,79 @@ import {
 const SellerProductsPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedStoreId, setSelectedStoreId] = useState(
+    "61127fcd-8c22-4e3e-9419-93c7c05d9f83"
+  );
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 0,
+    size: 20,
+    totalElements: 0,
+    totalPages: 0,
+  });
 
-  // Mock data
-  const products = [
+  // Fetch products from API
+  useEffect(() => {
+    fetchProducts();
+  }, [selectedStoreId]);
+
+  const fetchProducts = async () => {
+    try {
+      setLoading(true);
+      const response = await getProductsByStoreApi(
+        selectedStoreId,
+        pagination.page,
+        pagination.size
+      );
+
+      if (response && response.result) {
+        const { content, totalElements, totalPages, number, size } =
+          response.result;
+
+        // Transform API data to component format
+        const transformedProducts = content.map((product) => ({
+          id: product.id,
+          name: product.name,
+          sku: `SKU-${product.id.substring(0, 8).toUpperCase()}`,
+          category: product.platformCategoryName || "Chưa phân loại",
+          storeCategory: product.storeCategoryName,
+          price: `₫${product.minPrice.toLocaleString("vi-VN")}${
+            product.maxPrice > product.minPrice
+              ? ` - ₫${product.maxPrice.toLocaleString("vi-VN")}`
+              : ""
+          }`,
+          minPrice: product.minPrice,
+          maxPrice: product.maxPrice,
+          stock: 0, // API doesn't provide stock info
+          sold: product.soldCount,
+          status: product.active ? "active" : "inactive",
+          image: product.thumbnailImage || "https://via.placeholder.com/60",
+          brandName: product.brandName,
+          rating: product.averageRating,
+          ratingCount: product.ratingCount,
+          createdAt: product.createdAt,
+        }));
+
+        setProducts(transformedProducts);
+        setPagination({
+          page: number,
+          size: size,
+          totalElements: totalElements,
+          totalPages: totalPages,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      message.error("Không thể tải danh sách sản phẩm");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Mock data for fallback
+  const mockProducts = [
     {
       id: 1,
       name: "iPhone 15 Pro Max 256GB",
@@ -104,33 +179,58 @@ const SellerProductsPage = () => {
 
   const getStatusBadge = (status, stock) => {
     if (status === "out_of_stock" || stock === 0) {
-      return <span className="status-badge status-out-of-stock">Hết hàng</span>;
+      return (
+        <span className={`${styles.statusBadge} ${styles.statusOutOfStock}`}>
+          Hết hàng
+        </span>
+      );
     }
     if (stock < 10) {
-      return <span className="status-badge status-low-stock">Sắp hết</span>;
+      return (
+        <span className={`${styles.statusBadge} ${styles.statusLowStock}`}>
+          Sắp hết
+        </span>
+      );
     }
-    return <span className="status-badge status-active">Đang bán</span>;
+    return (
+      <span className={`${styles.statusBadge} ${styles.statusActive}`}>
+        Đang bán
+      </span>
+    );
+  };
+
+  const handleAddProduct = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+  };
+
+  const handleProductCreated = () => {
+    fetchProducts(); // Refresh product list
+    message.success("Tạo sản phẩm thành công!");
   };
 
   return (
-    <div className="seller-products">
+    <div className={styles.sellerProducts}>
       {/* Header Actions */}
-      <div className="seller-products-header">
-        <div className="seller-search-box">
-          <SearchOutlined className="search-icon" />
+      <div className={styles.sellerProductsHeader}>
+        <div className={styles.sellerSearchBox}>
+          <SearchOutlined className={styles.searchIcon} />
           <input
             type="text"
             placeholder="Tìm kiếm sản phẩm theo tên hoặc SKU..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="search-input"
+            className={styles.searchInput}
           />
         </div>
-        <div className="seller-filter-group">
+        <div className={styles.sellerFilterGroup}>
           <select
             value={filterCategory}
             onChange={(e) => setFilterCategory(e.target.value)}
-            className="filter-select"
+            className={styles.filterSelect}
           >
             {categories.map((cat) => (
               <option key={cat} value={cat}>
@@ -138,7 +238,10 @@ const SellerProductsPage = () => {
               </option>
             ))}
           </select>
-          <button className="seller-btn seller-btn-primary">
+          <button
+            className={`${styles.sellerBtn} ${styles.sellerBtnPrimary}`}
+            onClick={handleAddProduct}
+          >
             <PlusOutlined />
             Thêm sản phẩm
           </button>
@@ -146,8 +249,14 @@ const SellerProductsPage = () => {
       </div>
 
       {/* Products Table */}
-      <div className="seller-table-container">
-        <table className="seller-table">
+      <div className={styles.sellerTableContainer}>
+        {loading && (
+          <div className={styles.loadingOverlay}>
+            <LoadingOutlined style={{ fontSize: 48, color: "#ee4d2d" }} />
+            <p>Đang tải sản phẩm...</p>
+          </div>
+        )}
+        <table className={styles.sellerTable}>
           <thead>
             <tr>
               <th>Sản phẩm</th>
@@ -165,11 +274,11 @@ const SellerProductsPage = () => {
               filteredProducts.map((product) => (
                 <tr key={product.id}>
                   <td>
-                    <div className="product-info">
+                    <div className={styles.productInfo}>
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="product-image"
+                        className={styles.productImage}
                       />
                       <strong>{product.name}</strong>
                     </div>
@@ -183,7 +292,7 @@ const SellerProductsPage = () => {
                   </td>
                   <td>
                     <span
-                      className={product.stock < 10 ? "low-stock-text" : ""}
+                      className={product.stock < 10 ? styles.lowStockText : ""}
                     >
                       {product.stock}
                     </span>
@@ -191,17 +300,23 @@ const SellerProductsPage = () => {
                   <td>{product.sold}</td>
                   <td>{getStatusBadge(product.status, product.stock)}</td>
                   <td>
-                    <div className="action-buttons">
+                    <div className={styles.actionButtons}>
                       <button
-                        className="action-btn view-btn"
+                        className={`${styles.actionBtn} ${styles.viewBtn}`}
                         title="Xem chi tiết"
                       >
                         <EyeOutlined />
                       </button>
-                      <button className="action-btn edit-btn" title="Chỉnh sửa">
+                      <button
+                        className={`${styles.actionBtn} ${styles.editBtn}`}
+                        title="Chỉnh sửa"
+                      >
                         <EditOutlined />
                       </button>
-                      <button className="action-btn delete-btn" title="Xóa">
+                      <button
+                        className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                        title="Xóa"
+                      >
                         <DeleteOutlined />
                       </button>
                     </div>
@@ -210,7 +325,7 @@ const SellerProductsPage = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="8" className="no-data">
+                <td colSpan="8" className={styles.noData}>
                   <ShopOutlined style={{ fontSize: "48px", color: "#ccc" }} />
                   <p>Không tìm thấy sản phẩm nào</p>
                 </td>
@@ -221,14 +336,14 @@ const SellerProductsPage = () => {
       </div>
 
       {/* Summary Stats */}
-      <div className="products-summary">
-        <div className="summary-item">
-          <span className="summary-label">Tổng sản phẩm:</span>
-          <span className="summary-value">{filteredProducts.length}</span>
+      <div className={styles.productsSummary}>
+        <div className={styles.summaryItem}>
+          <span className={styles.summaryLabel}>Tổng sản phẩm:</span>
+          <span className={styles.summaryValue}>{filteredProducts.length}</span>
         </div>
-        <div className="summary-item">
-          <span className="summary-label">Đang bán:</span>
-          <span className="summary-value">
+        <div className={styles.summaryItem}>
+          <span className={styles.summaryLabel}>Đang bán:</span>
+          <span className={styles.summaryValue}>
             {
               filteredProducts.filter(
                 (p) => p.status === "active" && p.stock > 0
@@ -236,241 +351,21 @@ const SellerProductsPage = () => {
             }
           </span>
         </div>
-        <div className="summary-item">
-          <span className="summary-label">Hết hàng:</span>
-          <span className="summary-value">
+        <div className={styles.summaryItem}>
+          <span className={styles.summaryLabel}>Hết hàng:</span>
+          <span className={styles.summaryValue}>
             {filteredProducts.filter((p) => p.stock === 0).length}
           </span>
         </div>
       </div>
 
-      <style jsx>{`
-        .seller-products {
-          animation: fadeIn 0.5s ease-out;
-        }
-
-        .seller-products-header {
-          display: flex;
-          gap: 16px;
-          margin-bottom: 24px;
-          align-items: center;
-          flex-wrap: wrap;
-        }
-
-        .seller-search-box {
-          flex: 1;
-          min-width: 300px;
-          position: relative;
-        }
-
-        .search-icon {
-          position: absolute;
-          left: 16px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #999;
-          font-size: 18px;
-        }
-
-        .search-input {
-          width: 100%;
-          padding: 12px 16px 12px 48px;
-          border: 2px solid #e8e8e8;
-          border-radius: 8px;
-          font-size: 14px;
-          transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-          outline: none;
-          border-color: #ee4d2d;
-          box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
-        }
-
-        .seller-filter-group {
-          display: flex;
-          gap: 12px;
-          align-items: center;
-        }
-
-        .filter-select {
-          padding: 12px 16px;
-          border: 2px solid #e8e8e8;
-          border-radius: 8px;
-          font-size: 14px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          background: white;
-        }
-
-        .filter-select:focus {
-          outline: none;
-          border-color: #ee4d2d;
-        }
-
-        .product-info {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .product-image {
-          width: 60px;
-          height: 60px;
-          object-fit: cover;
-          border-radius: 8px;
-          border: 1px solid #e8e8e8;
-        }
-
-        .low-stock-text {
-          color: #ff4d4f;
-          font-weight: 600;
-        }
-
-        .status-badge {
-          padding: 6px 12px;
-          border-radius: 6px;
-          font-size: 12px;
-          font-weight: 600;
-          display: inline-block;
-        }
-
-        .status-active {
-          background: rgba(82, 196, 26, 0.1);
-          color: #52c41a;
-        }
-
-        .status-low-stock {
-          background: rgba(250, 173, 20, 0.1);
-          color: #faad14;
-        }
-
-        .status-out-of-stock {
-          background: rgba(255, 77, 79, 0.1);
-          color: #ff4d4f;
-        }
-
-        .action-buttons {
-          display: flex;
-          gap: 8px;
-          justify-content: center;
-        }
-
-        .action-btn {
-          width: 32px;
-          height: 32px;
-          border-radius: 6px;
-          border: none;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.3s ease;
-          font-size: 14px;
-        }
-
-        .view-btn {
-          background: rgba(24, 144, 255, 0.1);
-          color: #1890ff;
-        }
-
-        .view-btn:hover {
-          background: #1890ff;
-          color: white;
-          transform: scale(1.1);
-        }
-
-        .edit-btn {
-          background: rgba(250, 173, 20, 0.1);
-          color: #faad14;
-        }
-
-        .edit-btn:hover {
-          background: #faad14;
-          color: white;
-          transform: scale(1.1);
-        }
-
-        .delete-btn {
-          background: rgba(255, 77, 79, 0.1);
-          color: #ff4d4f;
-        }
-
-        .delete-btn:hover {
-          background: #ff4d4f;
-          color: white;
-          transform: scale(1.1);
-        }
-
-        .no-data {
-          text-align: center;
-          padding: 60px 20px;
-          color: #999;
-        }
-
-        .no-data p {
-          margin-top: 16px;
-          font-size: 16px;
-        }
-
-        .products-summary {
-          margin-top: 24px;
-          padding: 20px;
-          background: linear-gradient(
-            135deg,
-            rgba(238, 77, 45, 0.05) 0%,
-            rgba(255, 107, 53, 0.05) 100%
-          );
-          border-radius: 12px;
-          display: flex;
-          gap: 40px;
-          justify-content: center;
-          flex-wrap: wrap;
-        }
-
-        .summary-item {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .summary-label {
-          font-size: 14px;
-          color: #666;
-        }
-
-        .summary-value {
-          font-size: 20px;
-          font-weight: 700;
-          color: #ee4d2d;
-        }
-
-        @media (max-width: 768px) {
-          .seller-products-header {
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .seller-search-box {
-            min-width: 100%;
-          }
-
-          .seller-filter-group {
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .filter-select,
-          .seller-btn {
-            width: 100%;
-          }
-
-          .products-summary {
-            flex-direction: column;
-            gap: 16px;
-          }
-        }
-      `}</style>
+      {/* Add Product Modal */}
+      <AddProductModal
+        visible={isModalVisible}
+        onClose={handleModalClose}
+        onSuccess={handleProductCreated}
+        storeId={selectedStoreId}
+      />
     </div>
   );
 };
