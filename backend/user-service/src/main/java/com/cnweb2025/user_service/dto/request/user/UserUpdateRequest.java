@@ -1,5 +1,6 @@
 package com.cnweb2025.user_service.dto.request.user;
 
+import com.cnweb2025.user_service.enums.Gender;
 import com.cnweb2025.user_service.validator.DobConstrain;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -20,5 +21,6 @@ public class UserUpdateRequest {
     LocalDate dob;
     String phone;
     String avatarName;
+    Gender gender;
     List<String> roles;
 }

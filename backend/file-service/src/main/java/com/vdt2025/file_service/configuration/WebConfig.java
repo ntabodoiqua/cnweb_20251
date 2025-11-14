@@ -27,15 +27,17 @@ public class WebConfig implements WebMvcConfigurer {
         configurer.setUrlPathHelper(urlPathHelper);
     }
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173/") // Địa chỉ frontend
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
-                .allowedHeaders("*")
-                .allowCredentials(true)
-                .maxAge(3600);
-    }
+    // CORS được cấu hình tập trung tại API Gateway
+    // Không cần cấu hình CORS ở đây nữa
+//    @Override
+//    public void addCorsMappings(CorsRegistry registry) {
+//        registry.addMapping("/**")
+//                .allowedOrigins("http://localhost:5173") // Địa chỉ frontend
+//                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+//                .allowedHeaders("*")
+//                .allowCredentials(true)
+//                .maxAge(3600);
+//    }
 
     // Không cần interceptor nữa vì logic đã được chuyển vào Service layer
 //    @Override

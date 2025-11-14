@@ -1,5 +1,6 @@
 package com.cnweb2025.user_service.dto.response;
 
+import com.cnweb2025.user_service.enums.Gender;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -28,5 +29,6 @@ public class UserResponse {
     LocalDateTime updatedAt;
     Set<RoleResponse> roles;
     Set<AddressResponse> addresses;
+    Gender gender;
     SellerProfileResponse sellerProfile;
 }

@@ -3,11 +3,20 @@ package com.cnweb.payment_service.service.impl;
 import com.cnweb.payment_service.config.ZaloPayConfig;
 import com.cnweb.payment_service.dto.zalopay.*;
 import com.cnweb.payment_service.entity.ZaloPayTransaction;
+import com.cnweb.payment_service.entity.ZaloPayRefundTransaction;
+import com.cnweb.payment_service.enums.ZaloPaySubReturnCode;
+import com.cnweb.payment_service.messaging.RabbitMQMessagePublisher;
 import com.cnweb.payment_service.repository.ZaloPayTransactionRepository;
+import com.cnweb.payment_service.repository.ZaloPayRefundTransactionRepository;
 import com.cnweb.payment_service.service.ZaloPayService;
 import com.cnweb.payment_service.util.ZaloPayHMACUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vdt2025.common_dto.dto.MessageType;
+import com.vdt2025.common_dto.dto.PaymentFailedEvent;
+import com.vdt2025.common_dto.dto.PaymentSuccessEvent;
+import com.vdt2025.common_dto.dto.RefundSuccessEvent;
+import com.vdt2025.common_dto.dto.RefundFailedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -35,7 +44,9 @@ public class ZaloPayServiceImpl implements ZaloPayService {
     private final ZaloPayConfig zaloPayConfig;
     private final ObjectMapper objectMapper;
     private final ZaloPayTransactionRepository transactionRepository;
+    private final ZaloPayRefundTransactionRepository refundTransactionRepository;
     private final RestTemplate restTemplate = new RestTemplate();
+    private final RabbitMQMessagePublisher rabbitMQMessagePublisher;
     
     private static final String DATE_FORMAT = "yyMMdd";
     
@@ -372,10 +383,19 @@ public class ZaloPayServiceImpl implements ZaloPayService {
                                      : ZaloPayTransaction.TransactionStatus.FAILED)
                     .returnCode(zaloPayResponse != null ? zaloPayResponse.getReturnCode() : null)
                     .returnMessage(zaloPayResponse != null ? zaloPayResponse.getReturnMessage() : null)
+                    .email(request.getEmail())  // Lưu email từ request
+                    .title(request.getTitle())  // Lưu title từ request
                     .build();
             
             transactionRepository.save(transaction);
             log.info("Saved transaction to database: {}", appTransId);
+            
+            // Nếu tạo order thất bại, gửi thông báo
+            if (!isSuccess) {
+                String failureReason = zaloPayResponse != null ? 
+                        zaloPayResponse.getReturnMessage() : "Không thể kết nối đến ZaloPay";
+                sendPaymentFailedNotification(transaction, failureReason);
+            }
             
         } catch (Exception e) {
             log.error("Error saving transaction: {}", e.getMessage(), e);
@@ -393,6 +413,9 @@ public class ZaloPayServiceImpl implements ZaloPayService {
                     .orElseThrow(() -> new RuntimeException(
                             "Transaction not found: " + callbackData.getAppTransId()));
             
+            // Gửi thông báo thanh toán thành công TRƯỚC KHI update status (để check PENDING)
+            sendPaymentSuccessNotification(transaction);
+            
             // Cập nhật thông tin từ callback
             transaction.setZpTransId(callbackData.getZpTransId());
             transaction.setStatus(ZaloPayTransaction.TransactionStatus.SUCCESS);
@@ -409,11 +432,147 @@ public class ZaloPayServiceImpl implements ZaloPayService {
             }
             
             transactionRepository.save(transaction);
+            
             log.info("Updated transaction on callback: {}", callbackData.getAppTransId());
             
         } catch (Exception e) {
             log.error("Error updating transaction on callback: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to update transaction", e);
+        }
+    }
+    
+    /**
+     * Gửi thông báo thanh toán thành công qua RabbitMQ
+     */
+    @Override
+    public void sendPaymentSuccessNotification(ZaloPayTransaction transaction) {
+        try {
+            // Chỉ gửi thông báo nếu transaction đang ở trạng thái PENDING (tránh gửi trùng lặp)
+            if (transaction.getStatus() != ZaloPayTransaction.TransactionStatus.PENDING) {
+                log.info("Transaction {} not in PENDING status (current: {}). Skip sending success notification.", 
+                        transaction.getAppTransId(), transaction.getStatus());
+                return;
+            }
+            
+            // Lấy email từ transaction (đã lưu từ CreateOrderRequest)
+            String email = transaction.getEmail();
+            
+            // Fallback: nếu không có email trong transaction, thử lấy từ embed_data
+            if (email == null || email.isEmpty()) {
+                email = extractEmailFromEmbedData(transaction.getEmbedData());
+            }
+            
+            if (email == null || email.isEmpty()) {
+                log.warn("No email found in transaction: {}. Skip sending notification.", 
+                        transaction.getAppTransId());
+                return;
+            }
+            
+            // Lấy title từ transaction hoặc dùng mặc định
+            String title = transaction.getTitle();
+            if (title == null || title.isEmpty()) {
+                title = "Đơn hàng #" + transaction.getAppTransId();
+            }
+            
+            // Tạo event
+            PaymentSuccessEvent event = PaymentSuccessEvent.builder()
+                    .email(email)
+                    .appUser(transaction.getAppUser())
+                    .title(title)
+                    .description(transaction.getDescription())
+                    .appTransId(transaction.getAppTransId())
+                    .amount(transaction.getAmount())
+                    .paidAt(LocalDateTime.now())
+                    .build();
+            
+            // Gửi message qua RabbitMQ
+            rabbitMQMessagePublisher.publish(MessageType.PAYMENT_SUCCESS, event);
+            
+            log.info("Payment success notification sent to RabbitMQ for transaction: {} to email: {}", 
+                    transaction.getAppTransId(), email);
+            
+        } catch (Exception e) {
+            log.error("Failed to send payment success notification for transaction: {}. Error: {}", 
+                    transaction.getAppTransId(), e.getMessage(), e);
+            // Không throw exception để không block flow chính
+        }
+    }
+    
+    /**
+     * Gửi thông báo thanh toán thất bại qua RabbitMQ
+     */
+    @Override
+    public void sendPaymentFailedNotification(ZaloPayTransaction transaction, String failureReason) {
+        try {
+            // Chỉ gửi thông báo nếu transaction đang ở trạng thái PENDING (tránh gửi trùng lặp)
+            if (transaction.getStatus() != ZaloPayTransaction.TransactionStatus.PENDING) {
+                log.info("Transaction {} not in PENDING status (current: {}). Skip sending failed notification.", 
+                        transaction.getAppTransId(), transaction.getStatus());
+                return;
+            }
+            
+            // Lấy email từ transaction
+            String email = transaction.getEmail();
+            
+            // Fallback: nếu không có email trong transaction, thử lấy từ embed_data
+            if (email == null || email.isEmpty()) {
+                email = extractEmailFromEmbedData(transaction.getEmbedData());
+            }
+            
+            if (email == null || email.isEmpty()) {
+                log.warn("No email found in transaction: {}. Skip sending failure notification.", 
+                        transaction.getAppTransId());
+                return;
+            }
+            
+            // Lấy title từ transaction hoặc dùng mặc định
+            String title = transaction.getTitle();
+            if (title == null || title.isEmpty()) {
+                title = "Đơn hàng #" + transaction.getAppTransId();
+            }
+            
+            // Tạo event
+            PaymentFailedEvent event = PaymentFailedEvent.builder()
+                    .email(email)
+                    .appUser(transaction.getAppUser())
+                    .title(title)
+                    .description(transaction.getDescription())
+                    .appTransId(transaction.getAppTransId())
+                    .amount(transaction.getAmount())
+                    .failureReason(failureReason)
+                    .failedAt(LocalDateTime.now())
+                    .build();
+            
+            // Gửi message qua RabbitMQ
+            rabbitMQMessagePublisher.publish(MessageType.PAYMENT_FAILED, event);
+            
+            log.info("Payment failed notification sent to RabbitMQ for transaction: {} to email: {}", 
+                    transaction.getAppTransId(), email);
+            
+        } catch (Exception e) {
+            log.error("Failed to send payment failed notification for transaction: {}. Error: {}", 
+                    transaction.getAppTransId(), e.getMessage(), e);
+            // Không throw exception để không block flow chính
+        }
+    }
+    
+    /**
+     * Trích xuất email từ embed_data JSON
+     */
+    private String extractEmailFromEmbedData(String embedDataJson) {
+        try {
+            if (embedDataJson == null || embedDataJson.isEmpty()) {
+                return null;
+            }
+            
+            // Parse JSON và lấy email
+            @SuppressWarnings("unchecked")
+            Map<String, Object> embedData = objectMapper.readValue(embedDataJson, Map.class);
+            return (String) embedData.get("email");
+            
+        } catch (Exception e) {
+            log.error("Failed to extract email from embed_data: {}", e.getMessage());
+            return null;
         }
     }
     
@@ -511,25 +670,62 @@ public class ZaloPayServiceImpl implements ZaloPayService {
                     .appTransId(appTransId)
                     .status("ERROR")
                     .message("Không nhận được response từ ZaloPay")
+                    .errorCategory("SYSTEM")
+                    .canRetry(true)
                     .build();
         }
         
         // Map return_code sang status
         String status;
-        switch (zaloPayResponse.getReturnCode()) {
-            case 1:
-                status = "SUCCESS";
-                break;
-            case 2:
-                status = "FAILED";
-                break;
-            case 3:
-                status = "PENDING";
-                break;
-            default:
-                status = "UNKNOWN";
-        }
+        String errorCategory = null;
+        Boolean canRetry = null;
+        String errorMessage = null;
+        String errorNote = null;
         
+        switch (zaloPayResponse.getReturnCode()) {
+            case 1 -> status = "SUCCESS";
+            case 2 -> {
+                status = "FAILED";
+                // Xử lý sub_return_code để cung cấp thông tin chi tiết về lỗi
+                if (zaloPayResponse.getSubReturnCode() != null) {
+                    ZaloPaySubReturnCode subCode = ZaloPaySubReturnCode.fromCode(
+                            zaloPayResponse.getSubReturnCode()
+                    );
+                    
+                    errorMessage = subCode.getDescription();
+                    errorNote = subCode.getNote();
+                    canRetry = subCode.shouldRetry();
+                    
+                    // Xác định error category
+                    if (subCode.isUserActionable()) {
+                        errorCategory = "USER";
+                    } else if (subCode.isMerchantError()) {
+                        errorCategory = "MERCHANT";
+                    } else if (subCode.isSystemError()) {
+                        errorCategory = "SYSTEM";
+                    } else {
+                        errorCategory = "UNKNOWN";
+                    }
+                    
+                    log.warn("Payment query failed - AppTransId: {}, SubCode: {}, Category: {}, Description: {}", 
+                            appTransId, zaloPayResponse.getSubReturnCode(), errorCategory, errorMessage);
+                }
+            }
+            case 3 -> {
+                status = "PENDING";
+                // Kiểm tra is_processing để xác định chính xác trạng thái
+                if (Boolean.TRUE.equals(zaloPayResponse.getIsProcessing())) {
+                    status = "PROCESSING";
+                }
+            }
+            default -> {
+                status = "UNKNOWN";
+                errorCategory = "SYSTEM";
+                log.error("Unknown return_code from ZaloPay: {} for AppTransId: {}", 
+                        zaloPayResponse.getReturnCode(), appTransId);
+            }
+        }
+
         return QueryOrderResponse.builder()
                 .appTransId(appTransId)
                 .zpTransId(zaloPayResponse.getZpTransId())
@@ -539,6 +735,10 @@ public class ZaloPayServiceImpl implements ZaloPayService {
                 .discountAmount(zaloPayResponse.getDiscountAmount())
                 .isProcessing(zaloPayResponse.getIsProcessing())
                 .errorCode(zaloPayResponse.getSubReturnCode())
+                .errorMessage(errorMessage != null ? errorMessage : zaloPayResponse.getSubReturnMessage())
+                .errorNote(errorNote)
+                .canRetry(canRetry)
+                .errorCategory(errorCategory)
                 .build();
     }
     
@@ -547,8 +747,8 @@ public class ZaloPayServiceImpl implements ZaloPayService {
      */
     private void updateTransactionFromQuery(String appTransId, ZaloPayQueryResponse queryResponse) {
         try {
-            if (queryResponse == null || queryResponse.getReturnCode() != 1) {
-                return; // Không update nếu không thành công
+            if (queryResponse == null) {
+                return;
             }
             
             ZaloPayTransaction transaction = transactionRepository
@@ -560,15 +760,78 @@ public class ZaloPayServiceImpl implements ZaloPayService {
                 return;
             }
             
-            // Chỉ update nếu status hiện tại là PENDING
-            if (transaction.getStatus() == ZaloPayTransaction.TransactionStatus.PENDING) {
-                transaction.setZpTransId(queryResponse.getZpTransId());
-                transaction.setStatus(ZaloPayTransaction.TransactionStatus.SUCCESS);
-                transaction.setDiscountAmount(queryResponse.getDiscountAmount());
-                transaction.setPaidAt(LocalDateTime.now());
-                
-                transactionRepository.save(transaction);
-                log.info("Updated transaction from query: {}", appTransId);
+            // Chỉ update nếu status hiện tại là PENDING (tránh ghi đè status đã xử lý)
+            if (transaction.getStatus() != ZaloPayTransaction.TransactionStatus.PENDING) {
+                log.info("Transaction {} already processed with status: {}. Skip update.", 
+                        appTransId, transaction.getStatus());
+                return;
+            }
+            
+            // Xử lý theo return_code từ ZaloPay
+            // 1 = SUCCESS, 2 = FAILED, 3 = PENDING
+            switch (queryResponse.getReturnCode()) {
+                case 1: // Thanh toán thành công
+                    // Gửi thông báo TRƯỚC KHI update status
+                    sendPaymentSuccessNotification(transaction);
+                    
+                    transaction.setZpTransId(queryResponse.getZpTransId());
+                    transaction.setStatus(ZaloPayTransaction.TransactionStatus.SUCCESS);
+                    transaction.setDiscountAmount(queryResponse.getDiscountAmount());
+                    transaction.setPaidAt(LocalDateTime.now());
+                    transactionRepository.save(transaction);
+                    
+                    log.info("Updated transaction from query to SUCCESS: {}", appTransId);
+                    break;
+                    
+                case 2: // Thanh toán thất bại
+                    // Xử lý chi tiết lỗi từ sub_return_code
+                    String failureReason = queryResponse.getReturnMessage();
+                    
+                    if (queryResponse.getSubReturnCode() != null) {
+                        ZaloPaySubReturnCode subCode = ZaloPaySubReturnCode.fromCode(
+                                queryResponse.getSubReturnCode()
+                        );
+                        
+                        // Tạo thông báo lỗi chi tiết
+                        failureReason = String.format("%s - %s", 
+                                subCode.getDescription(), 
+                                subCode.getNote());
+                        
+                        log.warn("Payment failed with detailed error - AppTransId: {}, SubCode: {} ({}), Category: {}, Retry: {}", 
+                                appTransId, 
+                                queryResponse.getSubReturnCode(),
+                                subCode.name(),
+                                subCode.isMerchantError() ? "MERCHANT" : 
+                                    (subCode.isUserActionable() ? "USER" : 
+                                        (subCode.isSystemError() ? "SYSTEM" : "UNKNOWN")),
+                                subCode.shouldRetry());
+                    }
+                    
+                    // Gửi thông báo TRƯỚC KHI update status
+                    sendPaymentFailedNotification(transaction, failureReason);
+                    
+                    transaction.setStatus(ZaloPayTransaction.TransactionStatus.FAILED);
+                    transaction.setReturnCode(queryResponse.getReturnCode());
+                    transaction.setReturnMessage(failureReason);
+                    
+                    // Lưu thêm thông tin về sub_return_code để trace
+                    if (queryResponse.getSubReturnCode() != null) {
+                        transaction.setSubReturnCode(queryResponse.getSubReturnCode());
+                        transaction.setSubReturnMessage(queryResponse.getSubReturnMessage());
+                    }
+                    
+                    transactionRepository.save(transaction);
+                    
+                    log.info("Updated transaction from query to FAILED: {}", appTransId);
+                    break;
+                    
+                case 3: // Vẫn đang xử lý
+                    log.info("Transaction {} still PENDING. No update needed.", appTransId);
+                    break;
+                    
+                default:
+                    log.warn("Unknown return code {} for transaction: {}", 
+                            queryResponse.getReturnCode(), appTransId);
             }
             
         } catch (Exception e) {
@@ -611,7 +874,7 @@ public class ZaloPayServiceImpl implements ZaloPayService {
             return response;
             
         } catch (Exception e) {
-            log.error("❌ Error getting bank list: {}", e.getMessage(), e);
+            log.error("Error getting bank list: {}", e.getMessage(), e);
             return GetBankListResponse.builder()
                     .returnCode(0)
                     .returnMessage("Lỗi lấy danh sách ngân hàng: " + e.getMessage())
@@ -657,6 +920,643 @@ public class ZaloPayServiceImpl implements ZaloPayService {
         } catch (RestClientException e) {
             log.error("Error calling ZaloPay Get Bank List API: {}", e.getMessage(), e);
             throw new RuntimeException("Failed to call ZaloPay Get Bank List API", e);
+        }
+    }
+    
+    @Override
+    @Transactional
+    public RefundResponse refundOrder(RefundRequest request) {
+        try {
+            log.info("Processing refund request - ZpTransId: {}, Amount: {}", 
+                    request.getZpTransId(), request.getAmount());
+            
+            // Tìm original transaction để lấy thông tin
+            ZaloPayTransaction originalTransaction = transactionRepository
+                    .findByZpTransId(Long.parseLong(request.getZpTransId()))
+                    .orElse(null);
+            
+            if (originalTransaction == null) {
+                log.warn("Original transaction not found for ZpTransId: {}", request.getZpTransId());
+            }
+            
+            // Generate m_refund_id theo format: yymmdd_appid_xxxx
+            String mRefundId = generateMRefundId();
+            
+            // Lấy thời gian hiện tại (milliseconds)
+            long timestamp = System.currentTimeMillis();
+            
+            // Tạo HMAC input theo documentation ZaloPay
+            String hmacInput;
+            if (request.getRefundFeeAmount() != null && request.getRefundFeeAmount() > 0) {
+                // Có phí hoàn: app_id|zp_trans_id|amount|refund_fee_amount|description|timestamp
+                hmacInput = String.format("%d|%s|%d|%d|%s|%d",
+                        zaloPayConfig.getAppId(),
+                        request.getZpTransId(),
+                        request.getAmount(),
+                        request.getRefundFeeAmount(),
+                        request.getDescription(),
+                        timestamp
+                );
+            } else {
+                // Không có phí hoàn: app_id|zp_trans_id|amount|description|timestamp
+                hmacInput = String.format("%d|%s|%d|%s|%d",
+                        zaloPayConfig.getAppId(),
+                        request.getZpTransId(),
+                        request.getAmount(),
+                        request.getDescription(),
+                        timestamp
+                );
+            }
+            
+            // Tạo MAC
+            String mac = ZaloPayHMACUtil.computeHmacSHA256(hmacInput, zaloPayConfig.getKey1());
+            
+            log.info("Refund request - MRefundId: {}, MAC Input: {}", mRefundId, hmacInput);
+            
+            // Build request gửi tới ZaloPay
+            ZaloPayRefundRequest zaloPayRequest = ZaloPayRefundRequest.builder()
+                    .appId(zaloPayConfig.getAppId())
+                    .mRefundId(mRefundId)
+                    .zpTransId(request.getZpTransId())
+                    .amount(request.getAmount())
+                    .refundFeeAmount(request.getRefundFeeAmount())
+                    .timestamp(timestamp)
+                    .description(request.getDescription())
+                    .mac(mac)
+                    .build();
+            
+            // Gọi API ZaloPay
+            ZaloPayRefundResponse zaloPayResponse = callZaloPayRefundAPI(zaloPayRequest);
+            
+            // Lưu refund transaction vào database
+            saveRefundTransaction(mRefundId, request, originalTransaction, zaloPayResponse);
+            
+            // Xử lý response
+            return buildRefundResponse(mRefundId, request, zaloPayResponse);
+            
+        } catch (Exception e) {
+            log.error("Error processing refund: {}", e.getMessage(), e);
+            return RefundResponse.builder()
+                    .status("FAILED")
+                    .message("Lỗi xử lý hoàn tiền: " + e.getMessage())
+                    .zpTransId(request.getZpTransId())
+                    .build();
+        }
+    }
+    
+    /**
+     * Generate m_refund_id theo format: yymmdd_appid_xxxx
+     */
+    private String generateMRefundId() {
+        // Lấy thời gian hiện tại theo GMT+7
+        Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("GMT+7"));
+        SimpleDateFormat sdf = new SimpleDateFormat("yyMMdd");
+        sdf.setCalendar(cal);
+        String datePrefix = sdf.format(cal.getTimeInMillis());
+
+        // Sinh số ngẫu nhiên 10 chữ số (0 -> 9999999999)
+        Random rand = new Random();
+        long randomId = Math.abs(rand.nextLong() % 1_000_000_0000L);
+        String randomStr = String.format("%010d", randomId);
+
+        // Trả về kết quả đúng format yêu cầu
+        return String.format("%s_%d_%s", datePrefix, zaloPayConfig.getAppId(), randomStr);
+    }
+    
+    /**
+     * Gọi ZaloPay Refund API
+     */
+    private ZaloPayRefundResponse callZaloPayRefundAPI(ZaloPayRefundRequest request) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            HttpEntity<ZaloPayRefundRequest> entity = new HttpEntity<>(request, headers);
+            
+            log.info("Calling ZaloPay Refund API: {}", zaloPayConfig.getRefundUrl());
+            log.debug("Request payload: appId={}, mRefundId={}, zpTransId={}, amount={}, description={}", 
+                    request.getAppId(), request.getMRefundId(), request.getZpTransId(), 
+                    request.getAmount(), request.getDescription());
+            
+            ResponseEntity<ZaloPayRefundResponse> response = restTemplate.exchange(
+                    zaloPayConfig.getRefundUrl(),
+                    HttpMethod.POST,
+                    entity,
+                    ZaloPayRefundResponse.class
+            );
+            
+            ZaloPayRefundResponse responseBody = response.getBody();
+            
+            log.info("ZaloPay Refund API response - ReturnCode: {}, SubReturnCode: {}, Message: {}", 
+                    responseBody != null ? responseBody.getReturnCode() : null,
+                    responseBody != null ? responseBody.getSubReturnCode() : null,
+                    responseBody != null ? responseBody.getReturnMessage() : null);
+            
+            return responseBody;
+            
+        } catch (RestClientException e) {
+            log.error("Error calling ZaloPay Refund API: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to call ZaloPay Refund API", e);
+        }
+    }
+    
+    /**
+     * Lưu refund transaction vào database
+     */
+    private void saveRefundTransaction(String mRefundId, RefundRequest request,
+                                       ZaloPayTransaction originalTransaction,
+                                       ZaloPayRefundResponse zaloPayResponse) {
+        try {
+            ZaloPayRefundTransaction.RefundStatus status;
+            
+            if (zaloPayResponse != null && zaloPayResponse.getReturnCode() != null) {
+                status = switch (zaloPayResponse.getReturnCode()) {
+                    case 1 -> ZaloPayRefundTransaction.RefundStatus.SUCCESS;
+                    case 2 -> ZaloPayRefundTransaction.RefundStatus.FAILED;
+                    case 3 -> ZaloPayRefundTransaction.RefundStatus.PROCESSING;
+                    default -> ZaloPayRefundTransaction.RefundStatus.FAILED;
+                };
+            } else {
+                status = ZaloPayRefundTransaction.RefundStatus.FAILED;
+            }
+            
+            ZaloPayRefundTransaction refundTransaction = ZaloPayRefundTransaction.builder()
+                    .mRefundId(mRefundId)
+                    .zpTransId(request.getZpTransId())
+                    .appTransId(originalTransaction != null ? originalTransaction.getAppTransId() : null)
+                    .amount(request.getAmount())
+                    .refundFeeAmount(request.getRefundFeeAmount())
+                    .description(request.getDescription())
+                    .status(status)
+                    .returnCode(zaloPayResponse != null ? zaloPayResponse.getReturnCode() : null)
+                    .returnMessage(zaloPayResponse != null ? zaloPayResponse.getReturnMessage() : null)
+                    .subReturnCode(zaloPayResponse != null ? zaloPayResponse.getSubReturnCode() : null)
+                    .subReturnMessage(zaloPayResponse != null ? zaloPayResponse.getSubReturnMessage() : null)
+                    .refundId(zaloPayResponse != null ? zaloPayResponse.getRefundId() : null)
+                    .refundedAt(status == ZaloPayRefundTransaction.RefundStatus.SUCCESS ? 
+                            LocalDateTime.now() : null)
+                    .build();
+            
+            refundTransactionRepository.save(refundTransaction);
+            
+            log.info("Saved refund transaction to database: {}", mRefundId);
+            
+        } catch (Exception e) {
+            log.error("Error saving refund transaction: {}", e.getMessage(), e);
+            // Không throw exception để không block flow hoàn tiền
+        }
+    }
+    
+    /**
+     * Build RefundResponse từ ZaloPay response
+     */
+    private RefundResponse buildRefundResponse(String mRefundId, RefundRequest request,
+                                               ZaloPayRefundResponse zaloPayResponse) {
+        if (zaloPayResponse == null) {
+            return RefundResponse.builder()
+                    .mRefundId(mRefundId)
+                    .zpTransId(request.getZpTransId())
+                    .amount(request.getAmount())
+                    .status("FAILED")
+                    .message("Không nhận được response từ ZaloPay")
+                    .errorCategory("SYSTEM")
+                    .canRetry(true)
+                    .build();
+        }
+        
+        // Map return_code sang status
+        String status;
+        String errorCategory = null;
+        Boolean canRetry = null;
+        String errorMessage = null;
+        String errorNote = null;
+        
+        switch (zaloPayResponse.getReturnCode()) {
+            case 1 -> status = "SUCCESS";
+            case 2 -> {
+                status = "FAILED";
+                // Xử lý sub_return_code để cung cấp thông tin chi tiết về lỗi
+                if (zaloPayResponse.getSubReturnCode() != null) {
+                    ZaloPaySubReturnCode subCode = ZaloPaySubReturnCode.fromCode(
+                            zaloPayResponse.getSubReturnCode()
+                    );
+                    
+                    errorMessage = subCode.getDescription();
+                    errorNote = subCode.getNote();
+                    canRetry = subCode.shouldRetry();
+                    
+                    // Xác định error category
+                    if (subCode.isUserActionable()) {
+                        errorCategory = "USER";
+                    } else if (subCode.isMerchantError()) {
+                        errorCategory = "MERCHANT";
+                    } else if (subCode.isSystemError()) {
+                        errorCategory = "SYSTEM";
+                    } else {
+                        errorCategory = "UNKNOWN";
+                    }
+                    
+                    log.warn("Refund failed - MRefundId: {}, SubCode: {}, Category: {}, Description: {}", 
+                            mRefundId, zaloPayResponse.getSubReturnCode(), errorCategory, errorMessage);
+                }
+            }
+            case 3 -> status = "PROCESSING";
+            default -> {
+                status = "UNKNOWN";
+                errorCategory = "SYSTEM";
+                log.error("Unknown return_code from ZaloPay Refund: {} for MRefundId: {}", 
+                        zaloPayResponse.getReturnCode(), mRefundId);
+            }
+        }
+
+        return RefundResponse.builder()
+                .mRefundId(mRefundId)
+                .zpTransId(request.getZpTransId())
+                .refundId(zaloPayResponse.getRefundId())
+                .amount(request.getAmount())
+                .status(status)
+                .message(zaloPayResponse.getReturnMessage())
+                .errorCode(zaloPayResponse.getSubReturnCode())
+                .errorMessage(errorMessage != null ? errorMessage : zaloPayResponse.getSubReturnMessage())
+                .errorNote(errorNote)
+                .canRetry(canRetry)
+                .errorCategory(errorCategory)
+                .build();
+    }
+    
+    @Override
+    public QueryRefundResponse queryRefundStatus(QueryRefundRequest request) {
+        try {
+            String mRefundId = request.getMRefundId();
+            
+            log.info("Querying refund status - MRefundId: {}", mRefundId);
+            
+            // Lấy thời gian hiện tại (milliseconds)
+            long timestamp = System.currentTimeMillis();
+            
+            // Tạo HMAC input theo format: app_id|m_refund_id|timestamp
+            String hmacInput = String.format("%d|%s|%d",
+                    zaloPayConfig.getAppId(),
+                    mRefundId,
+                    timestamp
+            );
+            
+            // Tạo MAC
+            String mac = ZaloPayHMACUtil.computeHmacSHA256(hmacInput, zaloPayConfig.getKey1());
+            
+            log.debug("Query Refund MAC Input: {}", hmacInput);
+            
+            // Build request gửi tới ZaloPay
+            ZaloPayQueryRefundRequest zaloPayRequest = ZaloPayQueryRefundRequest.builder()
+                    .appId(zaloPayConfig.getAppId())
+                    .mRefundId(mRefundId)
+                    .timestamp(timestamp)
+                    .mac(mac)
+                    .build();
+            
+            // Gọi API ZaloPay
+            ZaloPayQueryRefundResponse zaloPayResponse = callZaloPayQueryRefundAPI(zaloPayRequest);
+            
+            // Cập nhật refund transaction trong database nếu có thay đổi
+            updateRefundTransactionFromQuery(mRefundId, zaloPayResponse);
+            
+            // Xử lý response
+            return buildQueryRefundResponse(mRefundId, zaloPayResponse);
+            
+        } catch (Exception e) {
+            log.error("Error querying refund status: {}", e.getMessage(), e);
+            return QueryRefundResponse.builder()
+                    .mRefundId(request.getMRefundId())
+                    .status("ERROR")
+                    .message("Lỗi truy vấn trạng thái hoàn tiền: " + e.getMessage())
+                    .build();
+        }
+    }
+    
+    /**
+     * Gọi ZaloPay Query Refund API
+     */
+    private ZaloPayQueryRefundResponse callZaloPayQueryRefundAPI(ZaloPayQueryRefundRequest request) {
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            HttpEntity<ZaloPayQueryRefundRequest> entity = new HttpEntity<>(request, headers);
+            
+            log.info("Calling ZaloPay Query Refund API: {}", zaloPayConfig.getQueryRefundUrl());
+            
+            ResponseEntity<ZaloPayQueryRefundResponse> response = restTemplate.exchange(
+                    zaloPayConfig.getQueryRefundUrl(),
+                    HttpMethod.POST,
+                    entity,
+                    ZaloPayQueryRefundResponse.class
+            );
+            
+            ZaloPayQueryRefundResponse responseBody = response.getBody();
+            
+            log.info("ZaloPay Query Refund API response - ReturnCode: {}, Message: {}", 
+                    responseBody != null ? responseBody.getReturnCode() : null,
+                    responseBody != null ? responseBody.getReturnMessage() : null);
+            
+            return responseBody;
+            
+        } catch (RestClientException e) {
+            log.error("Error calling ZaloPay Query Refund API: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to call ZaloPay Query Refund API", e);
+        }
+    }
+    
+    /**
+     * Build QueryRefundResponse từ ZaloPay response
+     */
+    private QueryRefundResponse buildQueryRefundResponse(String mRefundId, 
+                                                         ZaloPayQueryRefundResponse zaloPayResponse) {
+        if (zaloPayResponse == null) {
+            return QueryRefundResponse.builder()
+                    .mRefundId(mRefundId)
+                    .status("ERROR")
+                    .message("Không nhận được response từ ZaloPay")
+                    .errorCategory("SYSTEM")
+                    .canRetry(true)
+                    .build();
+        }
+        
+        // Map return_code sang status
+        String status;
+        String errorCategory = null;
+        Boolean canRetry = null;
+        String errorMessage = null;
+        String errorNote = null;
+        
+        switch (zaloPayResponse.getReturnCode()) {
+            case 1 -> status = "SUCCESS";
+            case 2 -> {
+                status = "FAILED";
+                // Xử lý sub_return_code để cung cấp thông tin chi tiết về lỗi
+                if (zaloPayResponse.getSubReturnCode() != null) {
+                    ZaloPaySubReturnCode subCode = ZaloPaySubReturnCode.fromCode(
+                            zaloPayResponse.getSubReturnCode()
+                    );
+                    
+                    errorMessage = subCode.getDescription();
+                    errorNote = subCode.getNote();
+                    canRetry = subCode.shouldRetry();
+                    
+                    // Xác định error category
+                    if (subCode.isUserActionable()) {
+                        errorCategory = "USER";
+                    } else if (subCode.isMerchantError()) {
+                        errorCategory = "MERCHANT";
+                    } else if (subCode.isSystemError()) {
+                        errorCategory = "SYSTEM";
+                    } else {
+                        errorCategory = "UNKNOWN";
+                    }
+                    
+                    log.warn("Query refund failed - MRefundId: {}, SubCode: {}, Category: {}, Description: {}", 
+                            mRefundId, zaloPayResponse.getSubReturnCode(), errorCategory, errorMessage);
+                }
+            }
+            case 3 -> status = "PROCESSING";
+            default -> {
+                // Kiểm tra các trường hợp đặc biệt
+                if (zaloPayResponse.getSubReturnCode() != null && 
+                    zaloPayResponse.getSubReturnCode() == -1) {
+                    status = "PENDING";  // Hoàn tiền chờ phê duyệt
+                } else {
+                    status = "UNKNOWN";
+                    errorCategory = "SYSTEM";
+                    log.error("Unknown return_code from ZaloPay Query Refund: {} for MRefundId: {}", 
+                            zaloPayResponse.getReturnCode(), mRefundId);
+                }
+            }
+        }
+
+        return QueryRefundResponse.builder()
+                .mRefundId(mRefundId)
+                .status(status)
+                .message(zaloPayResponse.getReturnMessage())
+                .errorCode(zaloPayResponse.getSubReturnCode())
+                .errorMessage(errorMessage != null ? errorMessage : zaloPayResponse.getSubReturnMessage())
+                .errorNote(errorNote)
+                .canRetry(canRetry)
+                .errorCategory(errorCategory)
+                .build();
+    }
+    
+    /**
+     * Cập nhật refund transaction từ query response
+     */
+    private void updateRefundTransactionFromQuery(String mRefundId, 
+                                                  ZaloPayQueryRefundResponse queryResponse) {
+        try {
+            if (queryResponse == null) {
+                return;
+            }
+            
+            ZaloPayRefundTransaction refundTransaction = refundTransactionRepository
+                    .findBymRefundId(mRefundId)
+                    .orElse(null);
+            
+            if (refundTransaction == null) {
+                log.warn("Refund transaction not found for query update: {}", mRefundId);
+                return;
+            }
+            
+            // Chỉ update nếu status hiện tại là PROCESSING (tránh ghi đè status đã xử lý)
+            if (refundTransaction.getStatus() != ZaloPayRefundTransaction.RefundStatus.PROCESSING) {
+                log.info("Refund transaction {} already processed with status: {}. Skip update.", 
+                        mRefundId, refundTransaction.getStatus());
+                return;
+            }
+            
+            // Xử lý theo return_code từ ZaloPay
+            // 1 = SUCCESS, 2 = FAILED, 3 = PROCESSING
+            switch (queryResponse.getReturnCode()) {
+                case 1: // Hoàn tiền thành công
+                    refundTransaction.setStatus(ZaloPayRefundTransaction.RefundStatus.SUCCESS);
+                    refundTransaction.setRefundedAt(LocalDateTime.now());
+                    refundTransactionRepository.save(refundTransaction);
+                    
+                    log.info("Updated refund transaction from query to SUCCESS: {}", mRefundId);
+                    
+                    // Gửi thông báo thành công
+                    ZaloPayTransaction originalTransaction = transactionRepository
+                            .findByZpTransId(Long.parseLong(refundTransaction.getZpTransId()))
+                            .orElse(null);
+                    sendRefundSuccessNotification(refundTransaction, originalTransaction);
+                    break;
+                    
+                case 2: // Hoàn tiền thất bại
+                    String failureReason = queryResponse.getReturnMessage();
+                    
+                    if (queryResponse.getSubReturnCode() != null) {
+                        ZaloPaySubReturnCode subCode = ZaloPaySubReturnCode.fromCode(
+                                queryResponse.getSubReturnCode()
+                        );
+                        
+                        // Tạo thông báo lỗi chi tiết
+                        failureReason = String.format("%s - %s", 
+                                subCode.getDescription(), 
+                                subCode.getNote());
+                        
+                        log.warn("Refund failed with detailed error - MRefundId: {}, SubCode: {} ({}), Category: {}, Retry: {}", 
+                                mRefundId, 
+                                queryResponse.getSubReturnCode(),
+                                subCode.name(),
+                                subCode.isMerchantError() ? "MERCHANT" : 
+                                    (subCode.isUserActionable() ? "USER" : 
+                                        (subCode.isSystemError() ? "SYSTEM" : "UNKNOWN")),
+                                subCode.shouldRetry());
+                    }
+                    
+                    refundTransaction.setStatus(ZaloPayRefundTransaction.RefundStatus.FAILED);
+                    refundTransaction.setReturnCode(queryResponse.getReturnCode());
+                    refundTransaction.setReturnMessage(failureReason);
+                    
+                    // Lưu thêm thông tin về sub_return_code để trace
+                    if (queryResponse.getSubReturnCode() != null) {
+                        refundTransaction.setSubReturnCode(queryResponse.getSubReturnCode());
+                        refundTransaction.setSubReturnMessage(queryResponse.getSubReturnMessage());
+                    }
+                    
+                    refundTransactionRepository.save(refundTransaction);
+                    
+                    log.info("Updated refund transaction from query to FAILED: {}", mRefundId);
+                    
+                    // Gửi thông báo thất bại
+                    ZaloPayTransaction originalTxn = transactionRepository
+                            .findByZpTransId(Long.parseLong(refundTransaction.getZpTransId()))
+                            .orElse(null);
+                    sendRefundFailedNotification(refundTransaction, originalTxn, failureReason);
+                    break;
+                    
+                case 3: // Vẫn đang xử lý
+                    log.info("Refund transaction {} still PROCESSING. No update needed.", mRefundId);
+                    break;
+                    
+                default:
+                    log.warn("Unknown return code {} for refund transaction: {}", 
+                            queryResponse.getReturnCode(), mRefundId);
+            }
+            
+        } catch (Exception e) {
+            log.error("Error updating refund transaction from query: {}", e.getMessage(), e);
+            // Không throw exception để không block query response
+        }
+    }
+    
+    @Override
+    public void sendRefundSuccessNotification(ZaloPayRefundTransaction refundTransaction,
+                                              ZaloPayTransaction originalTransaction) {
+        try {
+            if (originalTransaction == null) {
+                log.warn("Original transaction not found for refund: {}. Skip sending notification.", 
+                        refundTransaction.getMRefundId());
+                return;
+            }
+            
+            // Lấy email từ original transaction
+            String email = originalTransaction.getEmail();
+            
+            if (email == null || email.isEmpty()) {
+                email = extractEmailFromEmbedData(originalTransaction.getEmbedData());
+            }
+            
+            if (email == null || email.isEmpty()) {
+                log.warn("No email found for refund: {}. Skip sending notification.", 
+                        refundTransaction.getMRefundId());
+                return;
+            }
+            
+            // Lấy title từ original transaction
+            String title = originalTransaction.getTitle();
+            if (title == null || title.isEmpty()) {
+                title = "Đơn hàng #" + originalTransaction.getAppTransId();
+            }
+            
+            // Tạo event
+            RefundSuccessEvent event = RefundSuccessEvent.builder()
+                    .email(email)
+                    .appUser(originalTransaction.getAppUser())
+                    .title(title)
+                    .description(originalTransaction.getDescription())
+                    .mRefundId(refundTransaction.getMRefundId())
+                    .zpTransId(refundTransaction.getZpTransId())
+                    .amount(refundTransaction.getAmount())
+                    .refundFeeAmount(refundTransaction.getRefundFeeAmount())
+                    .refundReason(refundTransaction.getDescription())
+                    .refundedAt(refundTransaction.getRefundedAt() != null ? 
+                            refundTransaction.getRefundedAt() : LocalDateTime.now())
+                    .build();
+            
+            // Gửi message qua RabbitMQ
+            rabbitMQMessagePublisher.publish(MessageType.REFUND_SUCCESS, event);
+            
+            log.info("Refund success notification sent to RabbitMQ for: {} to email: {}", 
+                    refundTransaction.getMRefundId(), email);
+            
+        } catch (Exception e) {
+            log.error("Failed to send refund success notification for: {}. Error: {}", 
+                    refundTransaction.getMRefundId(), e.getMessage(), e);
+            // Không throw exception để không block flow chính
+        }
+    }
+    
+    @Override
+    public void sendRefundFailedNotification(ZaloPayRefundTransaction refundTransaction,
+                                             ZaloPayTransaction originalTransaction,
+                                             String failureReason) {
+        try {
+            if (originalTransaction == null) {
+                log.warn("Original transaction not found for refund: {}. Skip sending notification.", 
+                        refundTransaction.getMRefundId());
+                return;
+            }
+            
+            // Lấy email từ original transaction
+            String email = originalTransaction.getEmail();
+            
+            if (email == null || email.isEmpty()) {
+                email = extractEmailFromEmbedData(originalTransaction.getEmbedData());
+            }
+            
+            if (email == null || email.isEmpty()) {
+                log.warn("No email found for refund: {}. Skip sending notification.", 
+                        refundTransaction.getMRefundId());
+                return;
+            }
+            
+            // Lấy title từ original transaction
+            String title = originalTransaction.getTitle();
+            if (title == null || title.isEmpty()) {
+                title = "Đơn hàng #" + originalTransaction.getAppTransId();
+            }
+            
+            // Tạo event
+            RefundFailedEvent event = RefundFailedEvent.builder()
+                    .email(email)
+                    .appUser(originalTransaction.getAppUser())
+                    .title(title)
+                    .description(originalTransaction.getDescription())
+                    .mRefundId(refundTransaction.getMRefundId())
+                    .zpTransId(refundTransaction.getZpTransId())
+                    .amount(refundTransaction.getAmount())
+                    .refundReason(refundTransaction.getDescription())
+                    .failureReason(failureReason)
+                    .failedAt(LocalDateTime.now())
+                    .build();
+            
+            // Gửi message qua RabbitMQ
+            rabbitMQMessagePublisher.publish(MessageType.REFUND_FAILED, event);
+            
+            log.info("Refund failed notification sent to RabbitMQ for: {} to email: {}", 
+                    refundTransaction.getMRefundId(), email);
+            
+        } catch (Exception e) {
+            log.error("Failed to send refund failed notification for: {}. Error: {}", 
+                    refundTransaction.getMRefundId(), e.getMessage(), e);
+            // Không throw exception để không block flow chính
         }
     }
 }

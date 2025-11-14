@@ -1,5 +1,6 @@
 package com.cnweb2025.user_service.entity;
 
+import com.cnweb2025.user_service.enums.Gender;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -26,7 +27,7 @@ public class User {
     @Column(name = "username", unique = true, nullable = false)
     String username;
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     String password;
 
     @Column(name = "first_name")
@@ -38,10 +39,14 @@ public class User {
     @Column(name = "dob")
     LocalDate dob;
 
+    @Column(name = "gender")
+    @Enumerated(EnumType.STRING)
+    Gender gender;
+
     @Column(name = "email", unique = true, nullable = false)
     String email;
 
-    @Column(name = "phone", unique = true, nullable = false)
+    @Column(name = "phone", unique = true)
     String phone;
 
     @Column(name = "avatar_name")
@@ -79,4 +84,18 @@ public class User {
     // One to many relationship with SellerProfile
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     Set<SellerProfile> sellerProfiles;
+
+    public void setFullName(String s) {
+        String[] parts = s.split(" ", 2);
+        if (parts.length == 2) {
+            this.firstName = parts[0];
+            this.lastName = parts[1];
+        } else if (parts.length == 1) {
+            this.firstName = parts[0];
+            this.lastName = "";
+        } else {
+            this.firstName = "";
+            this.lastName = "";
+        }
+    }
 }

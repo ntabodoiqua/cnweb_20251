@@ -40,6 +40,16 @@ public class ZaloPayConfig {
     private String getBankListUrl;
     
     /**
+     * Endpoint để thực hiện hoàn tiền
+     */
+    private String refundUrl;
+    
+    /**
+     * Endpoint để truy vấn trạng thái hoàn tiền
+     */
+    private String queryRefundUrl;
+    
+    /**
      * URL callback nhận kết quả thanh toán từ ZaloPay
      */
     private String callbackUrl;
