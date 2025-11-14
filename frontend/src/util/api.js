@@ -439,16 +439,16 @@ const deleteStoreApi = (storeId) => {
 
 const activateStoreApi = (storeId) => {
   const URL_API = `/api/product/stores/${storeId}/activate`;
-  return axios.patch(URL_API, null, {
+  return axios.put(URL_API, null, {
     headers: {
       "Accept-Language": "vi",
     },
   });
 };
 
-const deactivateStoreApi = (storeId) => {
-  const URL_API = `/api/product/stores/${storeId}/deactivate`;
-  return axios.patch(URL_API, null, {
+const deactivateStoreApi = (sellerProfileId) => {
+  const URL_API = `/api/product/stores/${sellerProfileId}/deactivate`;
+  return axios.put(URL_API, null, {
     headers: {
       "Accept-Language": "vi",
     },

@@ -169,7 +169,7 @@ const SellerSettingsPage = () => {
     });
   };
 
-  const handleDeactivateStore = (storeId) => {
+  const handleDeactivateStore = (sellerProfileId) => {
     Modal.confirm({
       title: "Xác nhận vô hiệu hóa cửa hàng",
       content:
@@ -179,7 +179,7 @@ const SellerSettingsPage = () => {
       okButtonProps: { danger: true },
       onOk: async () => {
         try {
-          const response = await deactivateStoreApi(storeId);
+          const response = await deactivateStoreApi(sellerProfileId);
           if (response?.code === 1000) {
             notification.success({
               message: "Vô hiệu hóa thành công",
@@ -878,7 +878,7 @@ const SellerSettingsPage = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleDeactivateStore(store.id);
+                              handleDeactivateStore(store.sellerProfileId);
                             }}
                             className={`${styles.profileBtn} ${styles.profileBtnDanger}`}
                           >
