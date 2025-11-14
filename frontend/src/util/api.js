@@ -537,7 +537,7 @@ const deleteStoreCategoryApi = (storeId, categoryId) => {
 };
 
 const uploadCategoryImageApi = (storeId, categoryId, file) => {
-  const URL_API = `/api/product/seller/stores/${storeId}/categories/${categoryId}/image`;
+  const URL_API = `/api/product/seller/stores/${storeId}/categories/${categoryId}/thumbnail`;
   const formData = new FormData();
   formData.append("file", file);
   return axios.post(URL_API, formData, {
