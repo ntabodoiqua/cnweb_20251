@@ -1,5 +1,5 @@
 /* Orders Page Container */
-.orders-page-container {
+.ordersPageContainer {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px 60px;
@@ -7,7 +7,7 @@
 }
 
 /* Hero Section - Giống HelpPage */
-.orders-page-hero {
+.ordersPageHero {
   position: relative;
   padding: 80px 20px;
   margin: 0 0 60px;
@@ -16,7 +16,7 @@
   border-radius: 0 0 32px 32px;
 }
 
-.hero-background {
+.heroBackground {
   position: absolute;
   top: 0;
   left: 0;
@@ -25,14 +25,14 @@
   overflow: hidden;
 }
 
-.hero-circle {
+.heroCircle {
   position: absolute;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   animation: float 6s ease-in-out infinite;
 }
 
-.hero-circle-1 {
+.heroCircle1 {
   width: 400px;
   height: 400px;
   top: -100px;
@@ -40,7 +40,7 @@
   animation-delay: 0s;
 }
 
-.hero-circle-2 {
+.heroCircle2 {
   width: 300px;
   height: 300px;
   top: 50%;
@@ -48,7 +48,7 @@
   animation-delay: 2s;
 }
 
-.hero-circle-3 {
+.heroCircle3 {
   width: 200px;
   height: 200px;
   bottom: -50px;
@@ -66,14 +66,14 @@
   }
 }
 
-.hero-content {
+.heroContent {
   position: relative;
   z-index: 1;
   text-align: center;
   animation: fadeInDown 1s ease;
 }
 
-.hero-logo {
+.heroLogo {
   width: 180px;
   height: auto;
   margin-bottom: 24px;
@@ -82,7 +82,7 @@
   transition: transform 0.3s ease;
 }
 
-.hero-logo:hover {
+.heroLogo:hover {
   transform: scale(1.1) rotate(5deg);
 }
 
@@ -96,7 +96,7 @@
   }
 }
 
-.hero-title {
+.heroTitle {
   font-size: 56px;
   font-weight: 900;
   color: white;
@@ -106,7 +106,7 @@
   animation: slideInUp 0.8s ease 0.3s both;
 }
 
-.hero-subtitle {
+.heroSubtitle {
   font-size: 20px;
   color: rgba(255, 255, 255, 0.95);
   font-weight: 500;
@@ -126,7 +126,7 @@
 }
 
 /* Search Section */
-.orders-search-section {
+.ordersSearchSection {
   max-width: 1200px;
   margin: -40px auto 60px;
   padding: 0 20px;
@@ -135,7 +135,7 @@
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
-.search-card {
+.searchCard {
   background: white;
   border-radius: 16px;
   padding: 40px;
@@ -146,7 +146,7 @@
   overflow: hidden;
 }
 
-.search-card::before {
+.searchCard::before {
   content: "";
   position: absolute;
   top: 0;
@@ -156,41 +156,41 @@
   background: linear-gradient(90deg, #ee4d2d 0%, #ff6b35 100%);
 }
 
-.search-card:hover {
+.searchCard:hover {
   box-shadow: 0 8px 24px rgba(238, 77, 45, 0.25);
   border-color: #ee4d2d;
 }
 
-.search-header {
+.searchHeader {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 30px;
 }
 
-.search-header-icon {
+.searchHeaderIcon {
   font-size: 32px;
   color: #ee4d2d;
   margin-right: 15px;
 }
 
-.search-header h2 {
+.searchHeader h2 {
   font-size: 28px;
   font-weight: 700;
   color: #222;
   margin: 0;
 }
 
-.order-search-form {
+.orderSearchForm {
   max-width: 600px;
   margin: 0 auto 30px;
 }
 
-.form-group {
+.formGroup {
   margin-bottom: 20px;
 }
 
-.form-group label {
+.formGroup label {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
@@ -198,7 +198,7 @@
   font-size: 16px;
 }
 
-.form-group input {
+.formGroup input {
   width: 100%;
   padding: 14px 16px;
   border: 2px solid #e0e0e0;
@@ -208,24 +208,24 @@
   box-sizing: border-box;
 }
 
-.form-group input:focus {
+.formGroup input:focus {
   outline: none;
   border-color: #ee4d2d;
   box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
 }
 
-.form-group input.error {
+.formGroup input.error {
   border-color: #f44336;
 }
 
-.error-message {
+.errorMessage {
   display: block;
   color: #f44336;
   font-size: 14px;
   margin-top: 5px;
 }
 
-.search-btn {
+.searchBtn {
   width: 100%;
   padding: 16px;
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
@@ -239,21 +239,21 @@
   box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
 }
 
-.search-btn:hover:not(:disabled) {
+.searchBtn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(238, 77, 45, 0.4);
 }
 
-.search-btn:active:not(:disabled) {
+.searchBtn:active:not(:disabled) {
   transform: translateY(0);
 }
 
-.search-btn:disabled {
+.searchBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-.help-info {
+.helpInfo {
   text-align: center;
   padding: 20px;
   background: #fff5f2;
@@ -261,33 +261,33 @@
   border-left: 4px solid #ee4d2d;
 }
 
-.help-info h3 {
+.helpInfo h3 {
   margin: 0 0 10px 0;
   color: #333;
   font-size: 18px;
   font-weight: 600;
 }
 
-.help-info p {
+.helpInfo p {
   margin: 5px 0;
   color: #666;
   font-size: 14px;
 }
 
-.help-info strong {
+.helpInfo strong {
   color: #ee4d2d;
   font-weight: 600;
 }
 
 /* Order Result Section */
-.orders-result-section {
+.ordersResultSection {
   max-width: 1200px;
   margin: 0 auto 60px;
   padding: 0 20px;
   animation: fadeInUp 0.8s ease 0.4s both;
 }
 
-.order-result-card {
+.orderResultCard {
   background: white;
   border-radius: 16px;
   overflow: hidden;
@@ -297,7 +297,7 @@
   position: relative;
 }
 
-.order-result-card::before {
+.orderResultCard::before {
   content: "";
   position: absolute;
   top: 0;
@@ -307,13 +307,13 @@
   background: linear-gradient(90deg, #ee4d2d 0%, #ff6b35 100%);
 }
 
-.order-header {
+.orderHeader {
   padding: 30px;
   background: linear-gradient(135deg, #fff5f2 0%, #ffffff 100%);
   border-bottom: 2px solid #f0f0f0;
 }
 
-.order-status-badge {
+.orderStatusBadge {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -325,27 +325,27 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.order-basic-info h2 {
+.orderBasicInfo h2 {
   font-size: 28px;
   margin: 0 0 10px 0;
   color: #222;
   font-weight: 700;
 }
 
-.order-basic-info p {
+.orderBasicInfo p {
   color: #666;
   margin: 5px 0;
   font-size: 16px;
 }
 
 /* Timeline Section */
-.order-timeline-section {
+.orderTimelineSection {
   padding: 40px;
   border-bottom: 2px solid #f0f0f0;
   background: #fafafa;
 }
 
-.order-timeline-section h3 {
+.orderTimelineSection h3 {
   font-size: 24px;
   margin-bottom: 25px;
   color: #222;
@@ -369,16 +369,16 @@
   background: #e0e0e0;
 }
 
-.timeline-item {
+.timelineItem {
   position: relative;
   padding-bottom: 30px;
 }
 
-.timeline-item:last-child {
+.timelineItem:last-child {
   padding-bottom: 0;
 }
 
-.timeline-marker {
+.timelineMarker {
   position: absolute;
   left: -33px;
   width: 16px;
@@ -390,7 +390,7 @@
   transition: all 0.3s ease;
 }
 
-.timeline-item.completed .timeline-marker {
+.timelineItem.completed .timelineMarker {
   background: #ee4d2d;
   box-shadow: 0 0 0 2px #ee4d2d, 0 0 0 4px rgba(238, 77, 45, 0.2);
   animation: pulse 2s infinite;
@@ -406,33 +406,33 @@
   }
 }
 
-.timeline-content h4 {
+.timelineContent h4 {
   font-size: 16px;
   color: #222;
   margin: 0 0 5px 0;
   font-weight: 600;
 }
 
-.timeline-content p {
+.timelineContent p {
   color: #666;
   font-size: 14px;
   margin: 0;
 }
 
 /* Order Details Section */
-.order-details-section {
+.orderDetailsSection {
   padding: 40px;
 }
 
-.detail-section {
+.detailSection {
   margin-bottom: 30px;
 }
 
-.detail-section:last-child {
+.detailSection:last-child {
   margin-bottom: 0;
 }
 
-.detail-section h3 {
+.detailSection h3 {
   font-size: 22px;
   margin-bottom: 20px;
   color: #222;
@@ -441,14 +441,14 @@
   align-items: center;
 }
 
-.products-list {
+.productsList {
   background: #f7f7f7;
   border-radius: 12px;
   padding: 20px;
   border: 2px solid #f0f0f0;
 }
 
-.product-item {
+.productItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -456,31 +456,31 @@
   border-bottom: 1px solid #e0e0e0;
 }
 
-.product-item:last-child {
+.productItem:last-child {
   border-bottom: none;
   padding-bottom: 0;
 }
 
-.product-name {
+.productName {
   flex: 1;
   color: #333;
   font-weight: 500;
   font-size: 16px;
 }
 
-.product-quantity {
+.productQuantity {
   color: #666;
   margin: 0 20px;
   font-size: 16px;
 }
 
-.product-price {
+.productPrice {
   font-weight: 600;
   color: #ee4d2d;
   font-size: 16px;
 }
 
-.order-total {
+.orderTotal {
   display: flex;
   justify-content: space-between;
   padding: 20px 0 0;
@@ -490,21 +490,21 @@
   font-weight: 700;
 }
 
-.info-box {
+.infoBox {
   background: #f7f7f7;
   border-radius: 12px;
   padding: 20px;
   border: 2px solid #f0f0f0;
 }
 
-.info-box p {
+.infoBox p {
   color: #333;
   line-height: 1.8;
   margin: 10px 0;
   font-size: 16px;
 }
 
-.info-box p strong {
+.infoBox p strong {
   color: #222;
   margin-right: 10px;
   display: inline-block;
@@ -512,14 +512,14 @@
 }
 
 /* Contact Section */
-.orders-contact-section {
+.ordersContactSection {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px 60px;
   animation: fadeInUp 0.8s ease 0.6s both;
 }
 
-.contact-card {
+.contactCard {
   background: linear-gradient(135deg, #ee4d2d 0%, #ff7337 50%, #ff9a56 100%);
   border-radius: 16px;
   padding: 60px 40px;
@@ -530,7 +530,7 @@
   overflow: hidden;
 }
 
-.contact-card::before {
+.contactCard::before {
   content: "";
   position: absolute;
   top: -50%;
@@ -554,7 +554,7 @@
   }
 }
 
-.contact-icon {
+.contactIcon {
   font-size: 60px;
   margin-bottom: 20px;
   animation: bounce 2s infinite;
@@ -572,7 +572,7 @@
   }
 }
 
-.contact-card h2 {
+.contactCard h2 {
   font-size: 32px;
   font-weight: 700;
   margin: 0 0 15px 0;
@@ -581,7 +581,7 @@
   text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.contact-card > p {
+.contactCard > p {
   font-size: 18px;
   opacity: 0.95;
   margin-bottom: 40px;
@@ -589,7 +589,7 @@
   z-index: 1;
 }
 
-.contact-methods {
+.contactMethods {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 30px;
@@ -599,7 +599,7 @@
   z-index: 1;
 }
 
-.contact-method {
+.contactMethod {
   background: rgba(255, 255, 255, 0.15);
   padding: 30px 25px;
   border-radius: 12px;
@@ -611,24 +611,24 @@
   align-items: center;
 }
 
-.contact-method:hover {
+.contactMethod:hover {
   background: rgba(255, 255, 255, 0.25);
   transform: translateY(-5px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
-.contact-method strong {
+.contactMethod strong {
   font-size: 20px;
   margin: 10px 0 8px;
   font-weight: 600;
 }
 
-.contact-method span {
+.contactMethod span {
   font-size: 16px;
   margin: 3px 0;
 }
 
-.contact-method .time {
+.contactMethod .time {
   font-size: 14px;
   opacity: 0.9;
 }
@@ -667,138 +667,138 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .orders-page-hero {
+  .ordersPageHero {
     padding: 60px 20px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 160px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 48px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 18px;
   }
 }
 
 @media (max-width: 768px) {
-  .orders-page-hero {
+  .ordersPageHero {
     padding: 48px 16px;
     margin: 0 0 48px;
     border-radius: 0 0 24px 24px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 140px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 40px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 16px;
   }
 
-  .hero-circle-1 {
+  .heroCircle1 {
     width: 300px;
     height: 300px;
   }
 
-  .hero-circle-2 {
+  .heroCircle2 {
     width: 200px;
     height: 200px;
   }
 
-  .hero-circle-3 {
+  .heroCircle3 {
     width: 150px;
     height: 150px;
   }
 
-  .orders-search-section {
+  .ordersSearchSection {
     margin: -30px auto 40px;
   }
 
-  .search-card {
+  .searchCard {
     padding: 30px 20px;
   }
 
-  .search-header h2 {
+  .searchHeader h2 {
     font-size: 24px;
   }
 
-  .search-header-icon {
+  .searchHeaderIcon {
     font-size: 28px;
   }
 
-  .order-header,
-  .order-timeline-section,
-  .order-details-section {
+  .orderHeader,
+  .orderTimelineSection,
+  .orderDetailsSection {
     padding: 25px 20px;
   }
 
-  .product-item {
+  .productItem {
     flex-wrap: wrap;
     gap: 8px;
   }
 
-  .product-name {
+  .productName {
     flex-basis: 100%;
   }
 
-  .contact-card {
+  .contactCard {
     padding: 40px 20px;
   }
 
-  .contact-methods {
+  .contactMethods {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 480px) {
-  .orders-page-hero {
+  .ordersPageHero {
     padding: 40px 16px;
     border-radius: 0 0 20px 20px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 120px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 32px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 15px;
   }
 
-  .search-header {
+  .searchHeader {
     flex-direction: column;
     gap: 10px;
   }
 
-  .search-header-icon {
+  .searchHeaderIcon {
     margin-right: 0;
   }
 
-  .order-basic-info h2 {
+  .orderBasicInfo h2 {
     font-size: 24px;
   }
 
-  .order-timeline-section h3,
-  .detail-section h3 {
+  .orderTimelineSection h3,
+  .detailSection h3 {
     font-size: 20px;
   }
 
-  .contact-card h2 {
+  .contactCard h2 {
     font-size: 26px;
   }
 
-  .contact-icon {
+  .contactIcon {
     font-size: 50px;
   }
 }
