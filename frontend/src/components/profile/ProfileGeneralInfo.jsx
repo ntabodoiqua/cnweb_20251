@@ -253,12 +253,24 @@ const ProfileGeneralInfo = ({ userData, onDataUpdated }) => {
               : userData.username}
           </h2>
 
-          <div className="profile-role-badge">
-            <CrownOutlined />
-            {userData.roles[0]?.name || "USER"}
+          <div className="profile-roles-container">
+            {userData.roles && userData.roles.length > 0 ? (
+              userData.roles.map((role, index) => (
+                <div key={index} className="profile-role-badge">
+                  <CrownOutlined />
+                  {role.name}
+                </div>
+              ))
+            ) : (
+              <div className="profile-role-badge">
+                <CrownOutlined />
+                USER
+              </div>
+            )}
           </div>
 
           <div className="profile-meta-info">
+            {/**/}
             <div className="profile-meta-item">
               <MailOutlined />
               <span>{userData.email}</span>

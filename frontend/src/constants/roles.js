@@ -71,3 +71,37 @@ export const getHighestRole = (roleString) => {
 
   return highestRole;
 };
+
+/**
+ * Lấy tất cả roles từ chuỗi scope
+ * @param {string} roleString - Chuỗi role (ví dụ: "ROLE_USER ROLE_SELLER")
+ * @returns {string[]} - Mảng các role
+ */
+export const getAllRoles = (roleString) => {
+  if (!roleString) return [];
+  return roleString.includes(" ") ? roleString.split(" ") : [roleString];
+};
+
+/**
+ * Kiểm tra xem scope có chứa role cụ thể không
+ * @param {string} roleString - Chuỗi role (ví dụ: "ROLE_USER ROLE_SELLER")
+ * @param {string} targetRole - Role cần kiểm tra
+ * @returns {boolean}
+ */
+export const hasRole = (roleString, targetRole) => {
+  if (!roleString || !targetRole) return false;
+  const roles = getAllRoles(roleString);
+  return roles.includes(targetRole);
+};
+
+/**
+ * Kiểm tra xem scope có chứa bất kỳ role nào trong danh sách không
+ * @param {string} roleString - Chuỗi role (ví dụ: "ROLE_USER ROLE_SELLER")
+ * @param {string[]} targetRoles - Mảng các role cần kiểm tra
+ * @returns {boolean}
+ */
+export const hasAnyRole = (roleString, targetRoles) => {
+  if (!roleString || !targetRoles || targetRoles.length === 0) return false;
+  const roles = getAllRoles(roleString);
+  return targetRoles.some((targetRole) => roles.includes(targetRole));
+};

@@ -39,6 +39,10 @@ export const PROTECTED_ROUTES = {
   ADMIN_DASHBOARD: "/admin",
   ADMIN_USERS: "/admin/users",
   ADMIN_PRODUCTS: "/admin/products",
+  ADMIN_ORDERS: "/admin/orders",
+  ADMIN_PAYMENTS: "/admin/payments",
+  ADMIN_REPORTS: "/admin/reports",
+  ADMIN_SETTINGS: "/admin/settings",
 
   // User routes
   USER_ORDERS: "/orders",
@@ -49,6 +53,10 @@ export const PROTECTED_ROUTES = {
   SELLER_DASHBOARD: "/seller",
   SELLER_PRODUCTS: "/seller/products",
   SELLER_ORDERS: "/seller/orders",
+  SELLER_CATEGORIES: "/seller/categories",
+  SELLER_CUSTOMERS: "/seller/customers",
+  SELLER_STATISTICS: "/seller/statistics",
+  SELLER_SETTINGS: "/seller/settings",
 };
 
 // Error routes
@@ -81,8 +89,21 @@ export const ROUTE_TITLES = {
   [PROTECTED_ROUTES.PROFILE_HISTORY]: "Lịch sử giao dịch",
   [PROTECTED_ROUTES.PROFILE_SECURITY]: "Bảo mật tài khoản",
   [PROTECTED_ROUTES.ADMIN_DASHBOARD]: "Bảng điều khiển Admin",
+  [PROTECTED_ROUTES.ADMIN_USERS]: "Quản lý người dùng",
+  [PROTECTED_ROUTES.ADMIN_PRODUCTS]: "Quản lý sản phẩm",
+  [PROTECTED_ROUTES.ADMIN_ORDERS]: "Quản lý đơn hàng",
+  [PROTECTED_ROUTES.ADMIN_PAYMENTS]: "Quản lý thanh toán",
+  [PROTECTED_ROUTES.ADMIN_REPORTS]: "Báo cáo & Thống kê",
+  [PROTECTED_ROUTES.ADMIN_SETTINGS]: "Cài đặt hệ thống",
   [PROTECTED_ROUTES.USER_ORDERS]: "Đơn hàng của tôi",
   [PROTECTED_ROUTES.USER_CART]: "Giỏ hàng",
+  [PROTECTED_ROUTES.SELLER_DASHBOARD]: "Kênh Người Bán",
+  [PROTECTED_ROUTES.SELLER_PRODUCTS]: "Quản lý sản phẩm",
+  [PROTECTED_ROUTES.SELLER_ORDERS]: "Quản lý đơn hàng",
+  [PROTECTED_ROUTES.SELLER_CATEGORIES]: "Danh mục sản phẩm",
+  [PROTECTED_ROUTES.SELLER_CUSTOMERS]: "Khách hàng",
+  [PROTECTED_ROUTES.SELLER_STATISTICS]: "Thống kê & Báo cáo",
+  [PROTECTED_ROUTES.SELLER_SETTINGS]: "Cài đặt cửa hàng",
 
   [ERROR_ROUTES.NOT_FOUND]: "Không tìm thấy trang",
   [ERROR_ROUTES.UNAUTHORIZED]: "Không có quyền truy cập",

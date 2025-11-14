@@ -70,7 +70,48 @@ const ProfileSecurityPage = lazy(() =>
 );
 
 // Admin Pages
-const AdminDashboardPage = lazy(() => import("../pages/admin-dashboard"));
+const AdminDashboardLayout = lazy(() =>
+  import("../pages/admin/AdminDashboardLayout")
+);
+const AdminOverviewPage = lazy(() =>
+  import("../pages/admin/AdminOverviewPage")
+);
+const AdminUsersPage = lazy(() => import("../pages/admin/AdminUsersPage"));
+const AdminProductsPage = lazy(() =>
+  import("../pages/admin/AdminProductsPage")
+);
+const AdminOrdersPage = lazy(() => import("../pages/admin/AdminOrdersPage"));
+const AdminPaymentsPage = lazy(() =>
+  import("../pages/admin/AdminPaymentsPage")
+);
+const AdminReportsPage = lazy(() => import("../pages/admin/AdminReportsPage"));
+const AdminSettingsPage = lazy(() =>
+  import("../pages/admin/AdminSettingsPage")
+);
+
+// Seller Pages
+const SellerDashboardLayout = lazy(() =>
+  import("../pages/seller/SellerDashboardLayout")
+);
+const SellerOverviewPage = lazy(() =>
+  import("../pages/seller/SellerOverviewPage")
+);
+const SellerProductsPage = lazy(() =>
+  import("../pages/seller/SellerProductsPage")
+);
+const SellerOrdersPage = lazy(() => import("../pages/seller/SellerOrdersPage"));
+const SellerCategoriesPage = lazy(() =>
+  import("../pages/seller/SellerCategoriesPage")
+);
+const SellerCustomersPage = lazy(() =>
+  import("../pages/seller/SellerCustomersPage")
+);
+const SellerStatisticsPage = lazy(() =>
+  import("../pages/seller/SellerStatisticsPage")
+);
+const SellerSettingsPage = lazy(() =>
+  import("../pages/seller/SellerSettingsPage")
+);
 
 // Error Pages
 const NotFoundPage = lazy(() => import("../pages/not-found"));
@@ -336,10 +377,138 @@ const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <ProtectedRoute allowedRoles={[ROLES.ADMIN]}>
-              <AdminDashboardPage />
+              <AdminDashboardLayout />
             </ProtectedRoute>
           </SuspenseWrapper>
         ),
+        children: [
+          {
+            index: true,
+            element: (
+              <SuspenseWrapper>
+                <AdminOverviewPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_USERS,
+            element: (
+              <SuspenseWrapper>
+                <AdminUsersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_PRODUCTS,
+            element: (
+              <SuspenseWrapper>
+                <AdminProductsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_ORDERS,
+            element: (
+              <SuspenseWrapper>
+                <AdminOrdersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_PAYMENTS,
+            element: (
+              <SuspenseWrapper>
+                <AdminPaymentsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_REPORTS,
+            element: (
+              <SuspenseWrapper>
+                <AdminReportsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_SETTINGS,
+            element: (
+              <SuspenseWrapper>
+                <AdminSettingsPage />
+              </SuspenseWrapper>
+            ),
+          },
+        ],
+      },
+
+      // ==================== SELLER ONLY ROUTES ====================
+      {
+        path: PROTECTED_ROUTES.SELLER_DASHBOARD,
+        element: (
+          <SuspenseWrapper>
+            <ProtectedRoute allowedRoles={[ROLES.SELLER]}>
+              <SellerDashboardLayout />
+            </ProtectedRoute>
+          </SuspenseWrapper>
+        ),
+        children: [
+          {
+            index: true,
+            element: (
+              <SuspenseWrapper>
+                <SellerOverviewPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_PRODUCTS,
+            element: (
+              <SuspenseWrapper>
+                <SellerProductsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_ORDERS,
+            element: (
+              <SuspenseWrapper>
+                <SellerOrdersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_CATEGORIES,
+            element: (
+              <SuspenseWrapper>
+                <SellerCategoriesPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_CUSTOMERS,
+            element: (
+              <SuspenseWrapper>
+                <SellerCustomersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_STATISTICS,
+            element: (
+              <SuspenseWrapper>
+                <SellerStatisticsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_SETTINGS,
+            element: (
+              <SuspenseWrapper>
+                <SellerSettingsPage />
+              </SuspenseWrapper>
+            ),
+          },
+        ],
       },
 
       // ==================== ERROR ROUTES ====================
