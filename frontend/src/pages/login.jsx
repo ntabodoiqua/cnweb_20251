@@ -1,13 +1,18 @@
 import React, { useState, useContext } from "react";
 import { Button, Form, Input, notification } from "antd";
-import { loginApi, resendOtpApi, loginWithGoogleApi } from "../util/api";
+import {
+  loginApi,
+  resendOtpApi,
+  loginWithGoogleApi,
+  getMyInfoApi,
+} from "../util/api";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/context/auth.context";
 import { UserOutlined, LockOutlined, GoogleOutlined } from "@ant-design/icons";
 import { getTokenInfo } from "../util/jwt";
 import { GoogleLogin } from "@react-oauth/google";
 import useScrollToTop from "../hooks/useScrollToTop";
-import "./login.css";
+import styles from "./Login.module.css";
 import logo from "../assets/logo.png";
 
 const LoginPage = () => {
@@ -37,26 +42,84 @@ const LoginPage = () => {
           // Decode token để lấy thông tin user
           const tokenInfo = getTokenInfo(token);
 
-          notification.success({
-            message: "Đăng nhập thành công!",
-            description: `Chào mừng ${
-              tokenInfo?.username || username
-            } quay trở lại.`,
-            placement: "topRight",
-            duration: 3,
-          });
+          // Gọi API để lấy đầy đủ thông tin user
+          try {
+            const userInfoRes = await getMyInfoApi();
+            if (userInfoRes && userInfoRes.code === 1000) {
+              const userInfo = userInfoRes.result;
 
-          // Cập nhật auth context với đầy đủ thông tin
-          setAuth({
-            isAuthenticated: true,
-            user: {
-              username: tokenInfo?.username || username,
-              role: tokenInfo?.role || "",
-            },
-          });
+              notification.success({
+                message: "Đăng nhập thành công!",
+                description: `Chào mừng ${
+                  userInfo.firstName || userInfo.username || username
+                } quay trở lại.`,
+                placement: "topRight",
+                duration: 3,
+              });
 
-          // Chuyển hướng về trang chủ
-          navigate("/");
+              // Cập nhật auth context với đầy đủ thông tin
+              setAuth({
+                isAuthenticated: true,
+                user: {
+                  username:
+                    userInfo.username || tokenInfo?.username || username,
+                  role: tokenInfo?.role || "",
+                  firstName: userInfo.firstName || "",
+                  lastName: userInfo.lastName || "",
+                  avatarUrl: userInfo.avatarUrl || userInfo.avatarName || "",
+                  email: userInfo.email || "",
+                },
+              });
+            } else {
+              // Nếu không lấy được thông tin chi tiết, dùng thông tin từ token
+              notification.success({
+                message: "Đăng nhập thành công!",
+                description: `Chào mừng ${
+                  tokenInfo?.username || username
+                } quay trở lại.`,
+                placement: "topRight",
+                duration: 3,
+              });
+
+              setAuth({
+                isAuthenticated: true,
+                user: {
+                  username: tokenInfo?.username || username,
+                  role: tokenInfo?.role || "",
+                  firstName: "",
+                  lastName: "",
+                  avatarUrl: "",
+                  email: "",
+                },
+              });
+            }
+          } catch (userInfoError) {
+            console.error("Error fetching user info:", userInfoError);
+            // Nếu có lỗi, vẫn đăng nhập với thông tin từ token
+            notification.success({
+              message: "Đăng nhập thành công!",
+              description: `Chào mừng ${
+                tokenInfo?.username || username
+              } quay trở lại.`,
+              placement: "topRight",
+              duration: 3,
+            });
+
+            setAuth({
+              isAuthenticated: true,
+              user: {
+                username: tokenInfo?.username || username,
+                role: tokenInfo?.role || "",
+                firstName: "",
+                lastName: "",
+                avatarUrl: "",
+                email: "",
+              },
+            });
+          }
+
+          // Chuyển hướng đến trang profile
+          navigate("/profile");
         }
       } else if (res && res.code === 1214) {
         // Email chưa được xác thực
@@ -156,26 +219,81 @@ const LoginPage = () => {
           // Decode token để lấy thông tin user
           const tokenInfo = getTokenInfo(token);
 
-          notification.success({
-            message: "Đăng nhập thành công!",
-            description: `Chào mừng ${
-              tokenInfo?.username || "bạn"
-            } quay trở lại.`,
-            placement: "topRight",
-            duration: 3,
-          });
+          // Gọi API để lấy đầy đủ thông tin user
+          try {
+            const userInfoRes = await getMyInfoApi();
+            if (userInfoRes && userInfoRes.code === 1000) {
+              const userInfo = userInfoRes.result;
 
-          // Cập nhật auth context
-          setAuth({
-            isAuthenticated: true,
-            user: {
-              username: tokenInfo?.username || "",
-              role: tokenInfo?.role || "",
-            },
-          });
+              notification.success({
+                message: "Đăng nhập thành công!",
+                description: `Chào mừng ${
+                  userInfo.firstName || userInfo.username || "bạn"
+                } quay trở lại.`,
+                placement: "topRight",
+                duration: 3,
+              });
 
-          // Chuyển hướng về trang chủ
-          navigate("/");
+              // Cập nhật auth context
+              setAuth({
+                isAuthenticated: true,
+                user: {
+                  username: userInfo.username || tokenInfo?.username || "",
+                  role: tokenInfo?.role || "",
+                  firstName: userInfo.firstName || "",
+                  lastName: userInfo.lastName || "",
+                  avatarUrl: userInfo.avatarUrl || userInfo.avatarName || "",
+                  email: userInfo.email || "",
+                },
+              });
+            } else {
+              notification.success({
+                message: "Đăng nhập thành công!",
+                description: `Chào mừng ${
+                  tokenInfo?.username || "bạn"
+                } quay trở lại.`,
+                placement: "topRight",
+                duration: 3,
+              });
+
+              setAuth({
+                isAuthenticated: true,
+                user: {
+                  username: tokenInfo?.username || "",
+                  role: tokenInfo?.role || "",
+                  firstName: "",
+                  lastName: "",
+                  avatarUrl: "",
+                  email: "",
+                },
+              });
+            }
+          } catch (userInfoError) {
+            console.error("Error fetching user info:", userInfoError);
+            notification.success({
+              message: "Đăng nhập thành công!",
+              description: `Chào mừng ${
+                tokenInfo?.username || "bạn"
+              } quay trở lại.`,
+              placement: "topRight",
+              duration: 3,
+            });
+
+            setAuth({
+              isAuthenticated: true,
+              user: {
+                username: tokenInfo?.username || "",
+                role: tokenInfo?.role || "",
+                firstName: "",
+                lastName: "",
+                avatarUrl: "",
+                email: "",
+              },
+            });
+          }
+
+          // Chuyển hướng đến trang profile
+          navigate("/profile");
         }
       } else {
         notification.error({
@@ -213,36 +331,36 @@ const LoginPage = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-left">
-        <div className="login-left-content">
-          <img src={logo} alt="Logo" className="login-logo" />
-          <h1 className="login-welcome">Chào mừng trở lại!</h1>
-          <p className="login-description">
+    <div className={styles.loginContainer}>
+      <div className={styles.loginLeft}>
+        <div className={styles.loginLeftContent}>
+          <img src={logo} alt="Logo" className={styles.loginLogo} />
+          <h1 className={styles.loginWelcome}>Chào mừng trở lại!</h1>
+          <p className={styles.loginDescription}>
             Đăng nhập để tiếp tục trải nghiệm mua sắm tuyệt vời với hàng triệu
             sản phẩm chất lượng và nhiều ưu đãi hấp dẫn.
           </p>
-          <div className="login-features">
-            <div className="feature-item">
-              <div className="feature-icon">✓</div>
-              <div className="feature-text">Theo dõi đơn hàng</div>
+          <div className={styles.loginFeatures}>
+            <div className={styles.featureItem}>
+              <div className={styles.featureIcon}>✓</div>
+              <div className={styles.featureText}>Theo dõi đơn hàng</div>
             </div>
-            <div className="feature-item">
-              <div className="feature-icon">✓</div>
-              <div className="feature-text">Quản lý tài khoản</div>
+            <div className={styles.featureItem}>
+              <div className={styles.featureIcon}>✓</div>
+              <div className={styles.featureText}>Quản lý tài khoản</div>
             </div>
-            <div className="feature-item">
-              <div className="feature-icon">✓</div>
-              <div className="feature-text">Ưu đãi độc quyền</div>
+            <div className={styles.featureItem}>
+              <div className={styles.featureIcon}>✓</div>
+              <div className={styles.featureText}>Ưu đãi độc quyền</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="login-right">
-        <div className="login-form-container">
-          <h2 className="login-title">Đăng nhập</h2>
-          <p className="login-subtitle">
+      <div className={styles.loginRight}>
+        <div className={styles.loginFormContainer}>
+          <h2 className={styles.loginTitle}>Đăng nhập</h2>
+          <p className={styles.loginSubtitle}>
             Đăng nhập để truy cập vào tài khoản của bạn
           </p>
 
@@ -252,7 +370,7 @@ const LoginPage = () => {
             onFinish={onFinish}
             autoComplete="off"
             layout="vertical"
-            className="login-form"
+            className={styles.loginForm}
             requiredMark={false}
           >
             <Form.Item
@@ -280,7 +398,10 @@ const LoginPage = () => {
                   }}
                 >
                   <span>Mật khẩu</span>
-                  <Link to="/forgot-password" className="forgot-password-link">
+                  <Link
+                    to="/forgot-password"
+                    className={styles.forgotPasswordLink}
+                  >
                     Quên mật khẩu?
                   </Link>
                 </div>
@@ -303,18 +424,18 @@ const LoginPage = () => {
                 size="large"
                 block
                 loading={loading}
-                className="login-button"
+                className={styles.loginButton}
               >
                 Đăng nhập
               </Button>
             </Form.Item>
           </Form>
 
-          <div className="login-divider">
+          <div className={styles.loginDivider}>
             <span>hoặc</span>
           </div>
 
-          <div className="google-login-wrapper">
+          <div className={styles.googleLoginWrapper}>
             <GoogleLogin
               onSuccess={handleGoogleLoginSuccess}
               onError={handleGoogleLoginError}
@@ -330,14 +451,14 @@ const LoginPage = () => {
             />
           </div>
 
-          <div className="login-footer">
+          <div className={styles.loginFooter}>
             <span>Chưa có tài khoản? </span>
-            <Link to="/register" className="register-link">
+            <Link to="/register" className={styles.registerLink}>
               Đăng ký ngay
             </Link>
           </div>
 
-          <div className="login-home-link">
+          <div className={styles.loginHomeLink}>
             <Link to="/">← Quay về trang chủ</Link>
           </div>
         </div>
