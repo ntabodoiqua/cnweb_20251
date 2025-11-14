@@ -23,7 +23,7 @@ import {
   PictureOutlined,
 } from "@ant-design/icons";
 import { useState, useEffect, useRef } from "react";
-import { Modal, Spin, Tooltip, notification } from "antd";
+import { Modal, Tooltip, notification } from "antd";
 import {
   getMyStoresApi,
   updateStoreApi,
@@ -33,6 +33,7 @@ import {
   uploadStoreLogoApi,
   uploadStoreBannerApi,
 } from "../../util/api";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
@@ -421,10 +422,10 @@ const SellerSettingsPage = () => {
   if (loading) {
     return (
       <div className="seller-settings">
-        <div className="loading-container">
-          <Spin size="large" />
-          <p className="loading-text">Đang tải danh sách cửa hàng...</p>
-        </div>
+        <LoadingSpinner
+          tip="Đang tải danh sách cửa hàng..."
+          fullScreen={false}
+        />
       </div>
     );
   }

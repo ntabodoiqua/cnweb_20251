@@ -499,6 +499,55 @@ const getWardInfoApi = (wardId) => {
   });
 };
 
+// Store Categories APIs
+const getStoreCategoriesApi = (storeId) => {
+  const URL_API = `/api/product/seller/stores/${storeId}/categories`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const createStoreCategoryApi = (storeId, categoryData) => {
+  const URL_API = `/api/product/seller/stores/${storeId}/categories`;
+  return axios.post(URL_API, categoryData, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const updateStoreCategoryApi = (storeId, categoryId, categoryData) => {
+  const URL_API = `/api/product/seller/stores/${storeId}/categories/${categoryId}`;
+  return axios.put(URL_API, categoryData, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const deleteStoreCategoryApi = (storeId, categoryId) => {
+  const URL_API = `/api/product/seller/stores/${storeId}/categories/${categoryId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const uploadCategoryImageApi = (storeId, categoryId, file) => {
+  const URL_API = `/api/product/seller/stores/${storeId}/categories/${categoryId}/image`;
+  const formData = new FormData();
+  formData.append("file", file);
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -536,4 +585,9 @@ export {
   uploadStoreLogoApi,
   uploadStoreBannerApi,
   getWardInfoApi,
+  getStoreCategoriesApi,
+  createStoreCategoryApi,
+  updateStoreCategoryApi,
+  deleteStoreCategoryApi,
+  uploadCategoryImageApi,
 };
