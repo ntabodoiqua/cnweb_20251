@@ -27,3 +27,8 @@ dist-ssr
 certbot/
 nginx-certonly.conf
 
+# logs
+logs
+*.log
+
+node_modules

@@ -33,8 +33,23 @@ public class SecurityConfig {
             "/webjars/**"
     };
 
+    private static final String[] HEALTH_ENDPOINTS = {
+        "/actuator/health",
+        "/actuator/health/**",
+        "/actuator/info",
+        "/actuator/info/**"
+}; 
+
     private static final String[] PUBLIC_POST_ENDPOINTS = {
-            "/users"
+            "/users",
+            "/public/**"
+    };
+
+    private static final String[] PUBLIC_GET_ENDPOINTS = {
+            "/products/public/**",
+            "/categories/public/**",
+            "/brands/public/**",
+            "/public/**"
     };
 
     CustomJwtDecoder customJwtDecoder;
@@ -51,10 +66,13 @@ public class SecurityConfig {
                         request
                                 // Allow Swagger endpoints (highest priority)
                                 .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
+                                .requestMatchers(HEALTH_ENDPOINTS).permitAll()
                                 // Allow auth endpoints
                                 .requestMatchers(AUTH_ENDPOINTS).permitAll()
                                 // Allow POST to create users
                                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                                // Allow GET requests to public endpoints
+                                .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                                 // All other requests need authentication
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 ->

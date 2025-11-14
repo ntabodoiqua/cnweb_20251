@@ -172,7 +172,7 @@ public class SellerProfileServiceImp implements SellerProfileService{
             // Tạo event để gửi sang product-service
             SellerProfileApprovedEvent event = SellerProfileApprovedEvent.builder()
                     .sellerProfileId(savedProfile.getId())
-                    .userId(savedProfile.getUser().getId())
+                    .userName(savedProfile.getUser().getUsername())
                     .storeName(savedProfile.getStoreName())
                     .storeDescription(savedProfile.getStoreDescription())
                     .logoName(savedProfile.getLogoName())

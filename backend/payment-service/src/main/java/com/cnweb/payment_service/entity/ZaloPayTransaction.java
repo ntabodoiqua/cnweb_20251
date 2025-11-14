@@ -115,6 +115,18 @@ public class ZaloPayTransaction {
     private String returnMessage;
     
     /**
+     * Sub return code từ ZaloPay (mã lỗi chi tiết)
+     */
+    @Column(name = "sub_return_code")
+    private Integer subReturnCode;
+    
+    /**
+     * Sub return message từ ZaloPay (thông báo lỗi chi tiết)
+     */
+    @Column(name = "sub_return_message", length = 500)
+    private String subReturnMessage;
+    
+    /**
      * Channel thanh toán (từ callback)
      */
     @Column(name = "channel")
@@ -151,6 +163,18 @@ public class ZaloPayTransaction {
      */
     @Column(name = "paid_at")
     private LocalDateTime paidAt;
+    
+    /**
+     * Email người dùng (để gửi thông báo)
+     */
+    @Column(name = "email", length = 100)
+    private String email;
+    
+    /**
+     * Tiêu đề đơn hàng
+     */
+    @Column(name = "title", length = 256)
+    private String title;
     
     /**
      * Enum trạng thái giao dịch
