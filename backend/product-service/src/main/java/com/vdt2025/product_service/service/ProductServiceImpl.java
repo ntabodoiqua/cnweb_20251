@@ -62,6 +62,7 @@ public class ProductServiceImpl implements ProductService {
     FileServiceClient fileServiceClient;
     ProductImageRepository productImageRepository;
     AttributeValueRepository attributeValueRepository;
+    ProductAttributeRepository productAttributeRepository;
     private final CategoryMapper categoryMapper;
     private final StoreMapper storeMapper;
     private final BrandMapper brandMapper;
@@ -863,8 +864,7 @@ public class ProductServiceImpl implements ProductService {
                 .store(storeMapper.toStoreResponse(product.getStore()))
                 .brand(product.getBrand() != null ? brandMapper.toBrandResponse(product.getBrand()) : null)
                 .variants(variants.stream().map(this::mapToVariantResponse).collect(Collectors.toList()))
-                .images(new ArrayList<>()) // TODO: implement images
-                .attributes(new ArrayList<>()) // TODO: implement attributes
+                .images(getProductImages(product.getId()))
                 .createdBy(product.getCreatedBy())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
@@ -945,6 +945,15 @@ public class ProductServiceImpl implements ProductService {
                 .attributeName(value.getAttribute().getName())
                 .build();
     }
+
+    // Lấy list ảnh của product
+    private List<ProductImageResponse> getProductImages(String productId) {
+        List<ProductImage> images = productImageRepository.findAllByProductIdOrderByDisplayOrderAsc(productId);
+        return images.stream()
+                .map(productImageMapper::toProductImageResponse)
+                .collect(Collectors.toList());
+    }
+
     
     // ========== Variant Selection Implementation ==========
     

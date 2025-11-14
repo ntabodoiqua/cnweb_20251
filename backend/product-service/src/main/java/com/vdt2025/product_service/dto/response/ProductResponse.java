@@ -49,9 +49,6 @@ public class ProductResponse {
     // Danh sách ảnh
     List<ProductImageResponse> images;
 
-    // Thuộc tính sản phẩm (specifications)
-    List<ProductAttributeResponse> attributes;
-
     // Thông tin tạo/cập nhật
     String createdBy;
 
