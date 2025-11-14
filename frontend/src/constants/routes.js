@@ -53,6 +53,10 @@ export const PROTECTED_ROUTES = {
   SELLER_DASHBOARD: "/seller",
   SELLER_PRODUCTS: "/seller/products",
   SELLER_ORDERS: "/seller/orders",
+  SELLER_CATEGORIES: "/seller/categories",
+  SELLER_CUSTOMERS: "/seller/customers",
+  SELLER_STATISTICS: "/seller/statistics",
+  SELLER_SETTINGS: "/seller/settings",
 };
 
 // Error routes
@@ -93,6 +97,13 @@ export const ROUTE_TITLES = {
   [PROTECTED_ROUTES.ADMIN_SETTINGS]: "Cài đặt hệ thống",
   [PROTECTED_ROUTES.USER_ORDERS]: "Đơn hàng của tôi",
   [PROTECTED_ROUTES.USER_CART]: "Giỏ hàng",
+  [PROTECTED_ROUTES.SELLER_DASHBOARD]: "Kênh Người Bán",
+  [PROTECTED_ROUTES.SELLER_PRODUCTS]: "Quản lý sản phẩm",
+  [PROTECTED_ROUTES.SELLER_ORDERS]: "Quản lý đơn hàng",
+  [PROTECTED_ROUTES.SELLER_CATEGORIES]: "Danh mục sản phẩm",
+  [PROTECTED_ROUTES.SELLER_CUSTOMERS]: "Khách hàng",
+  [PROTECTED_ROUTES.SELLER_STATISTICS]: "Thống kê & Báo cáo",
+  [PROTECTED_ROUTES.SELLER_SETTINGS]: "Cài đặt cửa hàng",
 
   [ERROR_ROUTES.NOT_FOUND]: "Không tìm thấy trang",
   [ERROR_ROUTES.UNAUTHORIZED]: "Không có quyền truy cập",

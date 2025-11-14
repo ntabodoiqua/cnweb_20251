@@ -244,6 +244,11 @@
   color: #ff4d4f;
 }
 
+.header-user-role.seller {
+  background: #fff;
+  color: #ee4d2d;
+}
+
 .header-user-role.user {
   background: #fff;
   color: #1890ff;

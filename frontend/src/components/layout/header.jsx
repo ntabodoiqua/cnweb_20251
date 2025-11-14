@@ -246,6 +246,23 @@ const Header = () => {
           },
         ]
       : []),
+    // Thêm menu Seller nếu user là SELLER
+    ...(getHighestRole(auth.user.role) === ROLES.SELLER
+      ? [
+          {
+            key: "seller",
+            label: (
+              <Link
+                to="/seller"
+                style={{ display: "flex", alignItems: "center", gap: "12px" }}
+              >
+                <ShoppingOutlined />
+                <span>Kênh Người Bán</span>
+              </Link>
+            ),
+          },
+        ]
+      : []),
     {
       key: "settings",
       label: (
@@ -287,6 +304,26 @@ const Header = () => {
             icon: <ProfileOutlined />,
             label: <Link to="/profile">Hồ sơ</Link>,
           },
+          // Thêm link Admin cho ADMIN
+          ...(getHighestRole(auth.user.role) === ROLES.ADMIN
+            ? [
+                {
+                  key: "admin",
+                  icon: <SettingOutlined />,
+                  label: <Link to="/admin">Quản trị Admin</Link>,
+                },
+              ]
+            : []),
+          // Thêm link Seller cho SELLER
+          ...(getHighestRole(auth.user.role) === ROLES.SELLER
+            ? [
+                {
+                  key: "seller",
+                  icon: <ShoppingOutlined />,
+                  label: <Link to="/seller">Kênh Người Bán</Link>,
+                },
+              ]
+            : []),
           {
             type: "divider",
           },
@@ -381,6 +418,8 @@ const Header = () => {
                       className={`header-user-role ${
                         getHighestRole(auth.user.role) === ROLES.ADMIN
                           ? "admin"
+                          : getHighestRole(auth.user.role) === ROLES.SELLER
+                          ? "seller"
                           : "user"
                       }`}
                     >

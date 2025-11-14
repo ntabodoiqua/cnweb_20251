@@ -89,6 +89,30 @@ const AdminSettingsPage = lazy(() =>
   import("../pages/admin/AdminSettingsPage")
 );
 
+// Seller Pages
+const SellerDashboardLayout = lazy(() =>
+  import("../pages/seller/SellerDashboardLayout")
+);
+const SellerOverviewPage = lazy(() =>
+  import("../pages/seller/SellerOverviewPage")
+);
+const SellerProductsPage = lazy(() =>
+  import("../pages/seller/SellerProductsPage")
+);
+const SellerOrdersPage = lazy(() => import("../pages/seller/SellerOrdersPage"));
+const SellerCategoriesPage = lazy(() =>
+  import("../pages/seller/SellerCategoriesPage")
+);
+const SellerCustomersPage = lazy(() =>
+  import("../pages/seller/SellerCustomersPage")
+);
+const SellerStatisticsPage = lazy(() =>
+  import("../pages/seller/SellerStatisticsPage")
+);
+const SellerSettingsPage = lazy(() =>
+  import("../pages/seller/SellerSettingsPage")
+);
+
 // Error Pages
 const NotFoundPage = lazy(() => import("../pages/not-found"));
 
@@ -411,6 +435,76 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <AdminSettingsPage />
+              </SuspenseWrapper>
+            ),
+          },
+        ],
+      },
+
+      // ==================== SELLER ONLY ROUTES ====================
+      {
+        path: PROTECTED_ROUTES.SELLER_DASHBOARD,
+        element: (
+          <SuspenseWrapper>
+            <ProtectedRoute allowedRoles={[ROLES.SELLER]}>
+              <SellerDashboardLayout />
+            </ProtectedRoute>
+          </SuspenseWrapper>
+        ),
+        children: [
+          {
+            index: true,
+            element: (
+              <SuspenseWrapper>
+                <SellerOverviewPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_PRODUCTS,
+            element: (
+              <SuspenseWrapper>
+                <SellerProductsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_ORDERS,
+            element: (
+              <SuspenseWrapper>
+                <SellerOrdersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_CATEGORIES,
+            element: (
+              <SuspenseWrapper>
+                <SellerCategoriesPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_CUSTOMERS,
+            element: (
+              <SuspenseWrapper>
+                <SellerCustomersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_STATISTICS,
+            element: (
+              <SuspenseWrapper>
+                <SellerStatisticsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_SETTINGS,
+            element: (
+              <SuspenseWrapper>
+                <SellerSettingsPage />
               </SuspenseWrapper>
             ),
           },
