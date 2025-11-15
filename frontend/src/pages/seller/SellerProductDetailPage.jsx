@@ -14,6 +14,7 @@ import {
 } from "@ant-design/icons";
 import { message, Modal } from "antd";
 import { getProductDetailApi } from "../../util/api";
+import NoImages from "../../assets/NoImages.webp";
 import styles from "./SellerProductDetailPage.module.css";
 
 /**
@@ -120,7 +121,7 @@ const SellerProductDetailPage = () => {
         <div className={styles.imageSection}>
           <div className={styles.mainImageContainer}>
             <img
-              src={selectedImage || "https://via.placeholder.com/500"}
+              src={selectedImage || NoImages}
               alt={product.name}
               className={styles.mainImage}
             />

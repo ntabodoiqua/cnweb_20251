@@ -10,6 +10,7 @@ import {
   FilterOutlined,
 } from "@ant-design/icons";
 import PropTypes from "prop-types";
+import NoImages from "../../assets/NoImages.webp";
 import styles from "../../pages/Profile.module.css";
 
 const ProfileOrders = ({ orders }) => {
@@ -362,7 +363,7 @@ const ProfileOrders = ({ orders }) => {
                     }}
                   >
                     <img
-                      src={product.image}
+                      src={product.image || NoImages}
                       alt={product.name}
                       style={{
                         width: "80px",

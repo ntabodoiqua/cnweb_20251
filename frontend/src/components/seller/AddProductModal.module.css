@@ -99,7 +99,11 @@
 }
 
 .addProductModal :global(.ant-form-item) {
-  margin-bottom: 20px;
+  margin-bottom: 32px;
+}
+
+.addProductModal :global(.ant-form-item-control-input) {
+  min-height: 44px;
 }
 
 .addProductModal :global(.ant-form-item-label) > label {
@@ -483,6 +487,9 @@
 .addProductModal :global(.ant-input-number-handler) {
   border: none;
   height: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .addProductModal :global(.ant-input-number-handler:hover) {
@@ -492,6 +499,9 @@
 .addProductModal :global(.ant-input-number-handler-up-inner),
 .addProductModal :global(.ant-input-number-handler-down-inner) {
   color: rgba(238, 77, 45, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ==================== Select Dropdown ==================== */
@@ -500,40 +510,112 @@
   font-size: 14px;
 }
 
+.addProductModal :global(.ant-select-suffix) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .addProductModal :global(.ant-select-selector) {
   padding: 8px 12px !important;
   height: auto !important;
   min-height: 44px;
   border: 2px solid #e8e8e8 !important;
   border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Select Multiple Mode */
+.addProductModal :global(.ant-select-multiple .ant-select-selector) {
+  padding: 4px 8px !important;
+}
+
+.addProductModal :global(.ant-select-multiple .ant-select-selection-search) {
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0 !important;
+}
+
+.addProductModal
+  :global(.ant-select-multiple .ant-select-selection-search-input) {
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 28px !important;
+}
+
+.addProductModal
+  :global(.ant-select-multiple .ant-select-selection-placeholder) {
+  padding-inline-start: 0 !important;
+  padding-inline-end: 0 !important;
+  margin-inline-start: 0 !important;
+}
+
+.addProductModal :global(.ant-select-multiple .ant-select-selection-item) {
+  background: rgba(238, 77, 45, 0.1);
+  border: 1px solid rgba(238, 77, 45, 0.3);
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin: 2px 4px 2px 0;
+  font-size: 13px;
+  height: auto;
+  line-height: 20px;
+}
+
+.addProductModal
+  :global(.ant-select-multiple .ant-select-selection-item-remove) {
+  color: rgba(238, 77, 45, 0.7);
+  font-size: 12px;
+}
+
+.addProductModal
+  :global(.ant-select-multiple .ant-select-selection-item-remove:hover) {
+  color: #ee4d2d;
+}
+
+.addProductModal :global(.ant-select-selection-search) {
+  display: flex !important;
+  align-items: center !important;
 }
 
 .addProductModal :global(.ant-select-selection-search-input) {
-  height: auto !important;
+  height: 28px !important;
   font-weight: 500;
+  margin: 0 !important;
 }
 
 .addProductModal :global(.ant-select-selection-placeholder) {
   color: #bbb;
   font-weight: 400;
   line-height: 28px;
+  display: flex !important;
+  align-items: center !important;
 }
 
 .addProductModal :global(.ant-select-selection-item) {
   line-height: 28px;
   font-weight: 500;
   color: #333;
+  display: flex !important;
+  align-items: center !important;
 }
 
 .addProductModal :global(.ant-select-arrow) {
   color: rgba(238, 77, 45, 0.6);
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-top: 0;
+  inset-inline-end: 11px;
 }
 
 .addProductModal :global(.ant-select-dropdown) {
   border-radius: 8px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   border: 1px solid #f0f0f0;
+  z-index: 1050 !important;
 }
 
 .addProductModal :global(.ant-select-item) {
@@ -561,16 +643,26 @@
 .addProductModal :global(.ant-form-item-explain-error) {
   font-size: 12px;
   color: #ff4d4f;
-  margin-top: 4px;
+  margin-top: 8px;
+  padding-top: 2px;
   display: flex;
   align-items: center;
   gap: 4px;
+  line-height: 1.5;
+  min-height: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.addProductModal :global(.ant-form-item-has-error) {
+  margin-bottom: 36px;
 }
 
 .addProductModal :global(.ant-form-item-has-error .ant-input),
 .addProductModal :global(.ant-form-item-has-error .ant-input-number),
 .addProductModal :global(.ant-form-item-has-error .ant-select-selector) {
   border-color: #ff4d4f;
+  margin-bottom: 0;
 }
 
 .addProductModal :global(.ant-form-item-has-error .ant-input:focus),

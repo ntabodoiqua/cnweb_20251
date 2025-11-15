@@ -601,8 +601,26 @@ const getCategoriesApi = () => {
   });
 };
 
+const getPlatformCategoriesApi = () => {
+  const URL_API = "/api/product/admin/categories";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const getPlatformCategoryDetailApi = (categoryId) => {
+  const URL_API = `/api/product/admin/categories/${categoryId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 const getBrandsApi = () => {
-  const URL_API = "/api/product/brands";
+  const URL_API = "/api/product/brands/public";
   return axios.get(URL_API, {
     headers: {
       "Accept-Language": "vi",
@@ -657,5 +675,7 @@ export {
   getProductsByStoreApi,
   getProductDetailApi,
   getCategoriesApi,
+  getPlatformCategoriesApi,
+  getPlatformCategoryDetailApi,
   getBrandsApi,
 };

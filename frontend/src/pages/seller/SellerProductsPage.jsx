@@ -10,6 +10,7 @@ import {
 import { message } from "antd";
 import AddProductModal from "../../components/seller/AddProductModal";
 import { getProductsByStoreApi } from "../../util/api";
+import NoImages from "../../assets/NoImages.webp";
 import styles from "./SellerProductsPage.module.css";
 
 /**
@@ -67,7 +68,7 @@ const SellerProductsPage = () => {
           stock: 0, // API doesn't provide stock info
           sold: product.soldCount,
           status: product.active ? "active" : "inactive",
-          image: product.thumbnailImage || "https://via.placeholder.com/60",
+          image: product.thumbnailImage || NoImages,
           brandName: product.brandName,
           rating: product.averageRating,
           ratingCount: product.ratingCount,
@@ -101,7 +102,7 @@ const SellerProductsPage = () => {
       stock: 23,
       sold: 45,
       status: "active",
-      image: "https://via.placeholder.com/60",
+      image: NoImages,
     },
     {
       id: 2,
@@ -112,7 +113,7 @@ const SellerProductsPage = () => {
       stock: 15,
       sold: 38,
       status: "active",
-      image: "https://via.placeholder.com/60",
+      image: NoImages,
     },
     {
       id: 3,
@@ -123,7 +124,7 @@ const SellerProductsPage = () => {
       stock: 8,
       sold: 27,
       status: "active",
-      image: "https://via.placeholder.com/60",
+      image: NoImages,
     },
     {
       id: 4,
@@ -134,7 +135,7 @@ const SellerProductsPage = () => {
       stock: 12,
       sold: 22,
       status: "active",
-      image: "https://via.placeholder.com/60",
+      image: NoImages,
     },
     {
       id: 5,
@@ -145,7 +146,7 @@ const SellerProductsPage = () => {
       stock: 45,
       sold: 156,
       status: "active",
-      image: "https://via.placeholder.com/60",
+      image: NoImages,
     },
     {
       id: 6,
@@ -156,7 +157,7 @@ const SellerProductsPage = () => {
       stock: 0,
       sold: 34,
       status: "out_of_stock",
-      image: "https://via.placeholder.com/60",
+      image: NoImages,
     },
   ];
 
