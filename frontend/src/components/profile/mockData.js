@@ -50,7 +50,7 @@ export const mockOrders = [
     products: [
       {
         name: "iPhone 15 Pro Max 256GB",
-        image: "https://via.placeholder.com/80",
+        image: null,
         quantity: 1,
         price: 15990000,
       },
@@ -64,7 +64,7 @@ export const mockOrders = [
     products: [
       {
         name: "Samsung Galaxy S24 Ultra",
-        image: "https://via.placeholder.com/80",
+        image: null,
         quantity: 1,
         price: 8990000,
       },
@@ -78,7 +78,7 @@ export const mockOrders = [
     products: [
       {
         name: "MacBook Air M2 2024",
-        image: "https://via.placeholder.com/80",
+        image: null,
         quantity: 1,
         price: 12500000,
       },
@@ -92,7 +92,7 @@ export const mockOrders = [
     products: [
       {
         name: "iPad Air 5th Gen",
-        image: "https://via.placeholder.com/80",
+        image: null,
         quantity: 1,
         price: 5990000,
       },
@@ -106,7 +106,7 @@ export const mockOrders = [
     products: [
       {
         name: "AirPods Pro 2nd Gen",
-        image: "https://via.placeholder.com/80",
+        image: null,
         quantity: 2,
         price: 1745000,
       },

@@ -117,7 +117,7 @@
 
 .contentWrapper {
   display: grid;
-  grid-template-columns: 500px 1fr;
+  grid-template-columns: 400px 1fr;
   gap: 32px;
   margin-bottom: 32px;
 }
@@ -127,18 +127,20 @@
 .imageSection {
   background: white;
   border-radius: 12px;
-  padding: 24px;
+  padding: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   border: 1px solid #f0f0f0;
+  max-height: fit-content;
 }
 
 .mainImageContainer {
   width: 100%;
   aspect-ratio: 1;
+  max-height: 360px;
   border-radius: 12px;
   overflow: hidden;
   border: 2px solid #f0f0f0;
-  margin-bottom: 16px;
+  margin-bottom: 12px;
   background: #fafafa;
   display: flex;
   align-items: center;
@@ -199,6 +201,28 @@
   box-shadow: 0 0 0 2px rgba(238, 77, 45, 0.2);
 }
 
+/* Drag and Drop States */
+.thumbnail.dragging {
+  opacity: 0.5;
+  transform: scale(0.95);
+  cursor: grabbing;
+}
+
+.thumbnail.dragOver {
+  border-color: #52c41a;
+  background: rgba(82, 196, 26, 0.1);
+  transform: scale(1.05);
+  box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.3);
+}
+
+.thumbnail[draggable="true"] {
+  cursor: grab;
+}
+
+.thumbnail[draggable="true"]:active {
+  cursor: grabbing;
+}
+
 .thumbnail img {
   width: 100%;
   height: 100%;
@@ -215,6 +239,139 @@
   font-weight: 600;
   padding: 2px 6px;
   border-radius: 4px;
+  z-index: 2;
+}
+
+/* Drag Handle */
+.dragHandle {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 2px 4px;
+  border-radius: 4px;
+  cursor: grab;
+  z-index: 3;
+  user-select: none;
+  line-height: 1;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+/* Image Actions (Edit Mode) */
+.imageActions {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.thumbnail:hover .imageActions {
+  opacity: 1;
+}
+
+.setPrimaryBtn,
+.deleteImageBtn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border: none;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.setPrimaryBtn {
+  color: #faad14;
+}
+
+.setPrimaryBtn:hover {
+  background: #faad14;
+  color: white;
+  transform: scale(1.1);
+}
+
+.deleteImageBtn {
+  color: #ff4d4f;
+}
+
+.deleteImageBtn:hover {
+  background: #ff4d4f;
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Upload Thumbnail */
+.uploadThumbnail {
+  width: 80px;
+  height: 80px;
+  border: 2px dashed #d9d9d9;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #fafafa;
+  flex-shrink: 0;
+}
+
+.uploadThumbnail:hover {
+  border-color: #ee4d2d;
+  background: rgba(238, 77, 45, 0.05);
+}
+
+.uploadThumbnail .anticon {
+  font-size: 20px;
+  color: #999;
+}
+
+.uploadThumbnail:hover .anticon {
+  color: #ee4d2d;
+}
+
+.uploadText {
+  font-size: 11px;
+  color: #999;
+  text-align: center;
+  margin-top: 4px;
+  line-height: 1.2;
+}
+
+.uploadSubtext {
+  font-size: 10px;
+  color: #bbb;
+}
+
+.uploadBtn {
+  width: 100%;
+  margin-top: 12px;
+  border-radius: 8px;
+  height: 40px;
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+}
+
+.uploadBtn:hover {
+  background: rgba(238, 77, 45, 0.1);
+  border-color: #ee4d2d;
+  color: #ee4d2d;
 }
 
 .noImages {
@@ -736,4 +893,157 @@
     width: 60px;
     height: 60px;
   }
+}
+
+/* ==================== Edit Mode / Form Styles ==================== */
+
+.editForm {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+}
+
+.editForm :global(.ant-form-item-label > label) {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.editForm :global(.ant-input),
+.editForm :global(.ant-input-textarea),
+.editForm :global(.ant-select-selector) {
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  transition: all 0.3s ease;
+}
+
+.editForm :global(.ant-input:focus),
+.editForm :global(.ant-input-textarea:focus),
+.editForm :global(.ant-select-focused .ant-select-selector) {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 2px rgba(238, 77, 45, 0.1);
+}
+
+.editForm :global(.ant-input:hover),
+.editForm :global(.ant-input-textarea:hover),
+.editForm :global(.ant-select-selector:hover) {
+  border-color: #ee4d2d;
+}
+
+.editForm :global(.ant-form-item-has-error .ant-input),
+.editForm :global(.ant-form-item-has-error .ant-input-textarea),
+.editForm :global(.ant-form-item-has-error .ant-select-selector) {
+  border-color: #ff4d4f;
+}
+
+.editForm :global(.ant-form-item-explain-error) {
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+/* Select dropdown styling */
+.editForm :global(.ant-select-selection-placeholder) {
+  color: #999;
+}
+
+.editForm :global(.ant-select-selection-item) {
+  color: #333;
+  font-weight: 500;
+}
+
+/* Multiple select tags */
+.editForm :global(.ant-select-multiple .ant-select-selection-item) {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.1) 0%,
+    rgba(255, 107, 53, 0.1) 100%
+  );
+  border: 1px solid rgba(238, 77, 45, 0.3);
+  border-radius: 6px;
+  padding: 2px 8px;
+  color: #ee4d2d;
+  font-weight: 600;
+}
+
+.editForm :global(.ant-select-multiple .ant-select-selection-item-remove) {
+  color: #ee4d2d;
+}
+
+.editForm
+  :global(.ant-select-multiple .ant-select-selection-item-remove:hover) {
+  color: #ff4d4f;
+}
+
+/* Character count */
+.editForm :global(.ant-input-textarea-show-count::after) {
+  color: #999;
+  font-size: 12px;
+}
+
+/* Disabled state */
+.editForm :global(.ant-select-disabled .ant-select-selector) {
+  background: #f5f5f5;
+  cursor: not-allowed;
+}
+
+/* Form item margins */
+.editForm :global(.ant-form-item) {
+  margin-bottom: 20px;
+}
+
+.editForm :global(.ant-form-item:last-child) {
+  margin-bottom: 0;
+}
+
+/* Save and Cancel buttons in edit mode */
+.saveBtn,
+.cancelBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.saveBtn {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3da80e 0%, #5fb82b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.4);
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cancelBtn {
+  background: linear-gradient(135deg, #999 0%, #bbb 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #888 0%, #aaa 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.cancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }

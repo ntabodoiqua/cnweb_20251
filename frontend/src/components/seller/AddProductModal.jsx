@@ -21,7 +21,8 @@ import {
 } from "@ant-design/icons";
 import {
   createProductApi,
-  getCategoriesApi,
+  getPlatformCategoriesApi,
+  getPlatformCategoryDetailApi,
   getBrandsApi,
   getStoreCategoriesApi,
 } from "../../util/api";
@@ -36,7 +37,8 @@ const { Option } = Select;
 const AddProductModal = ({ visible, onClose, onSuccess, storeId }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
+  const [parentCategories, setParentCategories] = useState([]); // Danh mục cấp 0
+  const [subCategories, setSubCategories] = useState([]); // Danh mục cấp 1
   const [storeCategories, setStoreCategories] = useState([]);
   const [brands, setBrands] = useState([]);
 
@@ -49,19 +51,57 @@ const AddProductModal = ({ visible, onClose, onSuccess, storeId }) => {
   const fetchData = async () => {
     try {
       const [categoriesRes, brandsRes, storeCategoriesRes] = await Promise.all([
-        getCategoriesApi(),
+        getPlatformCategoriesApi(),
         getBrandsApi(),
         storeId
           ? getStoreCategoriesApi(storeId)
-          : Promise.resolve({ data: { result: [] } }),
+          : Promise.resolve({ result: [] }),
       ]);
 
-      setCategories(categoriesRes.data?.result || []);
-      setBrands(brandsRes.data?.result || []);
-      setStoreCategories(storeCategoriesRes.data?.result || []);
+      // Response trả về trực tiếp {code, result}
+      const platformCategories = categoriesRes?.result || [];
+
+      // Lấy danh mục cấp 0 (level = 0)
+      const level0Categories = platformCategories.filter(
+        (cat) => cat.level === 0 && cat.active
+      );
+
+      // Brands API trả về pagination format
+      const brandsData = brandsRes?.result?.content || [];
+      // Lọc chỉ lấy brands đang active
+      const activeBrands = brandsData.filter((brand) => brand.isActive);
+
+      setParentCategories(level0Categories);
+      setBrands(activeBrands);
+      setStoreCategories(storeCategoriesRes?.result || []);
     } catch (error) {
       console.error("Error fetching data:", error);
       message.error("Không thể tải dữ liệu danh mục và thương hiệu");
+    }
+  };
+
+  // Load danh mục cấp 1 khi chọn danh mục cấp 0
+  const handleParentCategoryChange = async (parentCategoryId) => {
+    try {
+      // Reset danh mục cấp 1
+      form.setFieldsValue({ categoryId: undefined });
+      setSubCategories([]);
+
+      if (!parentCategoryId) return;
+
+      // Gọi API lấy chi tiết danh mục cấp 0 để lấy subCategories
+      const response = await getPlatformCategoryDetailApi(parentCategoryId);
+      const categoryDetail = response?.result;
+
+      if (categoryDetail?.subCategories) {
+        const level1Categories = categoryDetail.subCategories.filter(
+          (subCat) => subCat.level === 1 && subCat.active
+        );
+        setSubCategories(level1Categories);
+      }
+    } catch (error) {
+      console.error("Error fetching subcategories:", error);
+      message.error("Không thể tải danh mục con");
     }
   };
 
@@ -190,19 +230,44 @@ const AddProductModal = ({ visible, onClose, onSuccess, storeId }) => {
           </div>
 
           <Form.Item
-            label="Danh mục chính"
-            name="categoryId"
-            rules={[{ required: true, message: "Vui lòng chọn danh mục" }]}
+            label="Danh mục sàn (Cấp 0)"
+            name="parentCategoryId"
+            rules={[{ required: true, message: "Vui lòng chọn danh mục sàn" }]}
           >
             <Select
-              placeholder="Chọn danh mục sản phẩm"
+              placeholder="Chọn danh mục sàn (VD: Thời trang, Điện tử...)"
               showSearch
               suffixIcon={<AppstoreOutlined />}
+              onChange={handleParentCategoryChange}
               filterOption={(input, option) =>
                 option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
               }
             >
-              {categories.map((cat) => (
+              {parentCategories.map((cat) => (
+                <Option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+
+          <Form.Item
+            label="Danh mục chi tiết (Cấp 1)"
+            name="categoryId"
+            rules={[
+              { required: true, message: "Vui lòng chọn danh mục chi tiết" },
+            ]}
+          >
+            <Select
+              placeholder="Chọn danh mục chi tiết (VD: Thời trang nam, Thời trang nữ...)"
+              showSearch
+              suffixIcon={<AppstoreOutlined />}
+              disabled={subCategories.length === 0}
+              filterOption={(input, option) =>
+                option.children.toLowerCase().indexOf(input.toLowerCase()) >= 0
+              }
+            >
+              {subCategories.map((cat) => (
                 <Option key={cat.id} value={cat.id}>
                   {cat.name}
                 </Option>
@@ -217,6 +282,10 @@ const AddProductModal = ({ visible, onClose, onSuccess, storeId }) => {
                 placeholder="Chọn danh mục cửa hàng (không bắt buộc)"
                 suffixIcon={<TagsOutlined />}
                 allowClear
+                filterOption={(input, option) =>
+                  option.children.toLowerCase().indexOf(input.toLowerCase()) >=
+                  0
+                }
               >
                 {storeCategories.map((cat) => (
                   <Option key={cat.id} value={cat.id}>

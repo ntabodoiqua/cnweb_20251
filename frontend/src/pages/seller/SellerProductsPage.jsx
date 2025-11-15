@@ -10,6 +10,7 @@ import {
 import { message } from "antd";
 import AddProductModal from "../../components/seller/AddProductModal";
 import { getProductsByStoreApi } from "../../util/api";
+import NoImages from "../../assets/NoImages.webp";
 import styles from "./SellerProductsPage.module.css";
 
 /**
@@ -56,7 +57,7 @@ const SellerProductsPage = () => {
           name: product.name,
           sku: `SKU-${product.id.substring(0, 8).toUpperCase()}`,
           category: product.platformCategoryName || "Chưa phân loại",
-          storeCategory: product.storeCategoryName,
+          storeCategories: product.storeCategoryName || [], // Mảng các danh mục shop
           price: `₫${product.minPrice.toLocaleString("vi-VN")}${
             product.maxPrice > product.minPrice
               ? ` - ₫${product.maxPrice.toLocaleString("vi-VN")}`
@@ -67,7 +68,7 @@ const SellerProductsPage = () => {
           stock: 0, // API doesn't provide stock info
           sold: product.soldCount,
           status: product.active ? "active" : "inactive",
-          image: product.thumbnailImage || "https://via.placeholder.com/60",
+          image: product.thumbnailImage || NoImages,
           brandName: product.brandName,
           rating: product.averageRating,
           ratingCount: product.ratingCount,
@@ -101,7 +102,7 @@ const SellerProductsPage = () => {
       stock: 23,
       sold: 45,
       status: "active",
-      image: "https://via.placeholder.com/60",
+      image: NoImages,
     },
     {
       id: 2,
@@ -112,7 +113,7 @@ const SellerProductsPage = () => {
       stock: 15,
       sold: 38,
       status: "active",
-      image: "https://via.placeholder.com/60",
+      image: NoImages,
     },
     {
       id: 3,
@@ -123,7 +124,7 @@ const SellerProductsPage = () => {
       stock: 8,
       sold: 27,
       status: "active",
-      image: "https://via.placeholder.com/60",
+      image: NoImages,
     },
     {
       id: 4,
@@ -134,7 +135,7 @@ const SellerProductsPage = () => {
       stock: 12,
       sold: 22,
       status: "active",
-      image: "https://via.placeholder.com/60",
+      image: NoImages,
     },
     {
       id: 5,
@@ -145,7 +146,7 @@ const SellerProductsPage = () => {
       stock: 45,
       sold: 156,
       status: "active",
-      image: "https://via.placeholder.com/60",
+      image: NoImages,
     },
     {
       id: 6,
@@ -156,7 +157,7 @@ const SellerProductsPage = () => {
       stock: 0,
       sold: 34,
       status: "out_of_stock",
-      image: "https://via.placeholder.com/60",
+      image: NoImages,
     },
   ];
 
@@ -293,7 +294,37 @@ const SellerProductsPage = () => {
                       </div>
                     </div>
                   </td>
-                  <td>{product.storeCategory || "-"}</td>
+                  <td>
+                    {product.storeCategories &&
+                    product.storeCategories.length > 0 ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: "4px",
+                        }}
+                      >
+                        {product.storeCategories.map((cat, idx) => (
+                          <span
+                            key={idx}
+                            style={{
+                              display: "inline-block",
+                              padding: "2px 8px",
+                              backgroundColor: "rgba(238, 77, 45, 0.1)",
+                              color: "#ee4d2d",
+                              borderRadius: "4px",
+                              fontSize: "12px",
+                              fontWeight: "500",
+                            }}
+                          >
+                            {cat}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
                   <td>{product.category}</td>
                   <td>{product.brandName || "-"}</td>
                   <td>
