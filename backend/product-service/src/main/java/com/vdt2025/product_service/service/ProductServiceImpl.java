@@ -457,6 +457,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @CacheEvict(value = "products", key = "#productId")
     public ProductImageResponse updateProductImage(String productId, MultipartFile file, Integer displayOrder) {
         log.info("Updating image for product {}", productId);
         Product product = productRepository.findById(productId)
@@ -500,7 +501,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
-    public void deleteProductImage(String imageId) {
+    @CacheEvict(value = "products", key = "#productId")
+    public void deleteProductImage(String productId, String imageId) {
         log.info("Deleting product image {}", imageId);
         ProductImage productImage = productImageRepository.findById(imageId)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_IMAGE_NOT_FOUND));
@@ -512,6 +514,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
     @Transactional
+    @CacheEvict(value = "products", key = "#productId")
     public List<ProductImageResponse> updateProductImageOrder(String productId, List<ImageOrderUpdateRequest> imageOrders) {
         log.info("Updating image order for product {}", productId);
 

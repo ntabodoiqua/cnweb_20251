@@ -43,7 +43,7 @@ public interface ProductService {
      * Xóa ảnh sản phẩm theo ID ảnh
      * @return void
      */
-    void deleteProductImage(String imageId);
+    void deleteProductImage(String productId, String imageId);
 
     /**
      * Cập nhật thứ tự hiển thị ảnh sản phẩm

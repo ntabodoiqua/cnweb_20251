@@ -122,16 +122,33 @@ public class ProductManagementController {
 
     /**
      * Xóa ảnh sản phẩm
-     * DELETE /products/images/{imageId}
+     * DELETE /products/{productId}/images/{imageId}
      * Required: SELLER (owner) hoặc ADMIN role
      */
-    @DeleteMapping("/images/{imageId}")
-    public ApiResponse<String> deleteProductImage(@PathVariable String imageId) {
+    @DeleteMapping("/{productId}/images/{imageId}")
+    public ApiResponse<String> deleteProductImage(@PathVariable String productId, @PathVariable String imageId) {
         log.info("Deleting product image with ID: {}", imageId);
-        productService.deleteProductImage(imageId);
+        productService.deleteProductImage(productId, imageId);
         return ApiResponse.<String>builder()
                 .message("Product image deleted successfully")
                 .result("Image with ID " + imageId + " has been removed")
+                .build();
+    }
+
+    /**
+     * Cập nhật thứ tự hiển thị ảnh sản phẩm
+     * PUT /products/{productId}/images/order
+     * Required: SELLER (owner) hoặc ADMIN role
+     */
+    @PutMapping("/{productId}/images/order")
+    public ApiResponse<List<ProductImageResponse>> updateProductImageOrder(
+            @PathVariable String productId,
+            @Valid @RequestBody List<ImageOrderUpdateRequest> imageOrders) {
+        log.info("Updating image order for product ID: {}", productId);
+        List<ProductImageResponse> response = productService.updateProductImageOrder(productId, imageOrders);
+        return ApiResponse.<List<ProductImageResponse>>builder()
+                .message("Product image order updated successfully")
+                .result(response)
                 .build();
     }
 
