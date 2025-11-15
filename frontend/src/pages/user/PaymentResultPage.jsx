@@ -32,13 +32,15 @@ const PaymentResultPage = () => {
 
     // Giả lập xử lý kết quả thanh toán
     setTimeout(() => {
-      if (status === "1" || apptransid) {
+      // Chỉ thành công khi status = "1"
+      if (status === "1") {
         setPaymentStatus("success");
         // Xóa pending order sau khi thành công
         sessionStorage.removeItem("pendingOrder");
 
         // TODO: Gọi API để cập nhật trạng thái đơn hàng
       } else {
+        // Thất bại khi status != "1" hoặc không có status
         setPaymentStatus("failed");
       }
     }, 2000);

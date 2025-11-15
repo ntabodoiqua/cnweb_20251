@@ -18,6 +18,7 @@ import {
   ShoppingCartOutlined,
   DownOutlined,
   AppstoreOutlined,
+  BellOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Space, Drawer, Menu, Input, message } from "antd";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -33,6 +34,7 @@ const Header = () => {
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [notificationCount, setNotificationCount] = useState(0); // State cho số lượng thông báo
 
   const handleLogout = async () => {
     // Ngăn chặn click nhiều lần
@@ -386,6 +388,23 @@ const Header = () => {
               <ShoppingCartOutlined />
               <span className={styles.cartBadge}>0</span>
             </div>
+
+            {/* Notification Icon with Badge */}
+            {auth.isAuthenticated && (
+              <div
+                className={styles.notificationIcon}
+                onClick={() =>
+                  message.info("Tính năng thông báo đang phát triển")
+                }
+              >
+                <BellOutlined />
+                {notificationCount > 0 && (
+                  <span className={styles.notificationBadge}>
+                    {notificationCount > 99 ? "99+" : notificationCount}
+                  </span>
+                )}
+              </div>
+            )}
 
             {/* Mobile Menu Trigger */}
             <MenuOutlined

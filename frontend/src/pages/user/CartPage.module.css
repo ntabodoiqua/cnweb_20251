@@ -7,12 +7,15 @@
   min-height: calc(100vh - 70px - 200px);
   background: linear-gradient(135deg, #f5f7fa 0%, #fef5f1 100%);
   padding: 40px 0;
+  overflow-x: hidden;
 }
 
 .container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px;
+  box-sizing: border-box;
+  width: 100%;
 }
 
 /* ==================== Page Header ==================== */
@@ -139,6 +142,9 @@
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(238, 77, 45, 0.08);
   padding: 24px;
+  box-sizing: border-box;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .cartHeader {
@@ -209,6 +215,9 @@
   margin-bottom: 16px;
   transition: all 0.3s ease;
   animation: slideInFromLeft 0.5s ease-out;
+  box-sizing: border-box;
+  width: 100%;
+  overflow: hidden;
 }
 
 .cartItem:hover {
@@ -308,6 +317,8 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .itemName {
@@ -316,6 +327,8 @@
   color: #333;
   margin: 0;
   line-height: 1.4;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 .itemSeller {
@@ -420,6 +433,9 @@
   position: sticky;
   top: 120px;
   animation: slideInFromRight 0.5s ease-out;
+  box-sizing: border-box;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .summaryTitle {
@@ -572,6 +588,255 @@
   font-weight: 600 !important;
 }
 
+/* ==================== Voucher System ==================== */
+
+.voucherSection {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.05) 0%,
+    rgba(255, 107, 53, 0.05) 100%
+  );
+  border: 2px dashed rgba(238, 77, 45, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.voucherHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.voucherIcon {
+  font-size: 20px;
+  color: #ee4d2d;
+}
+
+.voucherLabel {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+}
+
+.voucherInputWrapper {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.voucherInput {
+  flex: 1;
+  padding: 10px 12px;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+
+.voucherInput:focus {
+  outline: none;
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+}
+
+.applyButton {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.applyButton:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+}
+
+.applyButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.appliedVoucher {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border: 2px solid #52c41a;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.voucherInfo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.voucherTag {
+  font-size: 24px;
+  color: #52c41a;
+}
+
+.voucherCode {
+  font-size: 14px;
+  font-weight: 700;
+  color: #ee4d2d;
+  margin-bottom: 2px;
+}
+
+.voucherDesc {
+  font-size: 12px;
+  color: #666;
+}
+
+.removeVoucherButton {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: rgba(255, 77, 79, 0.1);
+  color: #ff4d4f;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+.removeVoucherButton:hover {
+  background: #ff4d4f;
+  color: white;
+  transform: scale(1.1);
+}
+
+.availableVouchers {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.voucherCard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: white;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.voucherCard:hover {
+  border-color: #ee4d2d;
+  background: rgba(238, 77, 45, 0.05);
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.15);
+}
+
+.voucherCardIcon {
+  font-size: 20px;
+  color: #ee4d2d;
+  flex-shrink: 0;
+}
+
+.voucherCardContent {
+  flex: 1;
+}
+
+.voucherCardCode {
+  font-size: 13px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+.voucherCardDesc {
+  font-size: 11px;
+  color: #888;
+}
+
+.voucherCardCheck {
+  font-size: 18px;
+  color: #52c41a;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.voucherCard:hover .voucherCardCheck {
+  opacity: 1;
+}
+
+.shopVoucherItem {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(238, 77, 45, 0.1);
+}
+
+.shopVoucherItem:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.shopName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.discountLabel {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #52c41a !important;
+  font-weight: 700 !important;
+}
+
+.discountAmount {
+  color: #52c41a !important;
+  font-weight: 700 !important;
+}
+
+.savingsBadge {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
 /* ==================== Animations ==================== */
 
 @keyframes fadeInDown {
@@ -660,7 +925,7 @@
   }
 
   .container {
-    padding: 0 16px;
+    padding: 0 12px;
   }
 
   .pageTitle {
@@ -673,7 +938,7 @@
 
   .cartItems,
   .orderSummary {
-    padding: 20px;
+    padding: 16px;
   }
 
   .cartHeader {
@@ -690,6 +955,7 @@
   .cartItem {
     flex-direction: column;
     gap: 16px;
+    padding: 16px;
   }
 
   .itemCheckbox {
@@ -719,6 +985,10 @@
 }
 
 @media (max-width: 576px) {
+  .container {
+    padding: 0 8px;
+  }
+
   .pageTitle {
     font-size: 20px;
   }
@@ -738,7 +1008,11 @@
 
   .cartItems,
   .orderSummary {
-    padding: 16px;
+    padding: 12px;
+  }
+
+  .cartItem {
+    padding: 12px;
   }
 
   .sectionTitle,
@@ -770,6 +1044,35 @@
   .continueShoppingButton {
     padding: 12px;
     font-size: 14px;
+  }
+
+  .voucherSection {
+    padding: 12px;
+  }
+
+  .voucherInputWrapper {
+    flex-direction: column;
+  }
+
+  .applyButton {
+    width: 100%;
+  }
+
+  .voucherCard {
+    padding: 8px 10px;
+  }
+
+  .voucherCardCode {
+    font-size: 12px;
+  }
+
+  .voucherCardDesc {
+    font-size: 10px;
+  }
+
+  .savingsBadge {
+    font-size: 13px;
+    padding: 10px 12px;
   }
 }
 
