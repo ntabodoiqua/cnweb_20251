@@ -25,8 +25,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -871,6 +869,15 @@ public class ProductServiceImpl implements ProductService {
                 .minPrice(minPrice)
                 .maxPrice(maxPrice)
                 .totalStock(totalStock)
+                .storeCategories(
+                        Optional.ofNullable(product.getStoreCategories())
+                                .filter(list -> !list.isEmpty())
+                                .map(list -> list.stream()
+                                        .map(categoryMapper::toCategoryResponse)
+                                        .toList()
+                                )
+                                .orElse(null)
+                )
                 .build();
     }
 
@@ -909,7 +916,10 @@ public class ProductServiceImpl implements ProductService {
                 .storeCategoryName(
                         Optional.ofNullable(product.getStoreCategories())
                                 .filter(list -> !list.isEmpty())
-                                .map(list -> list.getFirst().getName())
+                                .map(list -> list.stream()
+                                        .map(Category::getName)
+                                        .toList()
+                                )
                                 .orElse(null)
                 )
                 .brandName(product.getBrand() != null ? product.getBrand().getName() : null)

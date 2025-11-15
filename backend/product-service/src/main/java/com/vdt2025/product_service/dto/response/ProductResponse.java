@@ -62,4 +62,6 @@ public class ProductResponse {
     BigDecimal maxPrice;
 
     Integer totalStock;
+
+    List<CategoryResponse> storeCategories;
 }

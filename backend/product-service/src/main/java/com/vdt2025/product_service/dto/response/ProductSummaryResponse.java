@@ -5,6 +5,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Response đơn giản cho danh sách sản phẩm (list/grid view)
@@ -41,7 +42,7 @@ public class ProductSummaryResponse {
 
     String storeId;
 
-    String storeCategoryName;
+    List<String> storeCategoryName;
 
     String platformCategoryName;
 
