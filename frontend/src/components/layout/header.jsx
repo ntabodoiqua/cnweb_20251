@@ -23,7 +23,7 @@ import { Dropdown, Space, Drawer, Menu, Input, message } from "antd";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
 import { getRoleName, ROLES, getHighestRole } from "../../constants/roles";
-import "./header.css";
+import styles from "./header.module.css";
 import logo from "../../assets/logo.png";
 
 const Header = () => {
@@ -351,18 +351,18 @@ const Header = () => {
   ];
 
   return (
-    <header className="custom-header">
+    <header className={styles.customHeader}>
       {/* Top Header - Logo, Search, Actions */}
-      <div className="header-top">
-        <div className="header-container">
+      <div className={styles.headerTop}>
+        <div className={styles.headerContainer}>
           {/* Logo */}
-          <div className="header-logo" onClick={() => navigate("/")}>
-            <img src={logo} alt="Logo" className="header-logo-image" />
-            <h1 className="header-logo-text">HUSTBuy</h1>
+          <div className={styles.headerLogo} onClick={() => navigate("/")}>
+            <img src={logo} alt="Logo" className={styles.headerLogoImage} />
+            <h1 className={styles.headerLogoText}>HUSTBuy</h1>
           </div>
 
           {/* Search Bar */}
-          <div className="header-search">
+          <div className={styles.headerSearch}>
             <Input.Search
               placeholder="Tìm kiếm sản phẩm, danh mục..."
               size="large"
@@ -370,20 +370,26 @@ const Header = () => {
               onChange={(e) => setSearchValue(e.target.value)}
               onSearch={handleSearch}
               enterButton={
-                <button className="search-button">
+                <button className={styles.searchButton}>
                   <SearchOutlined />
                   Tìm kiếm
                 </button>
               }
-              className="search-input"
+              className={styles.searchInput}
             />
           </div>
 
           {/* Actions */}
-          <div className="header-actions">
+          <div className={styles.headerActions}>
+            {/* Cart Icon with Badge */}
+            <div className={styles.cartIcon} onClick={() => navigate("/cart")}>
+              <ShoppingCartOutlined />
+              <span className={styles.cartBadge}>0</span>
+            </div>
+
             {/* Mobile Menu Trigger */}
             <MenuOutlined
-              className="header-mobile-trigger"
+              className={styles.headerMobileTrigger}
               onClick={() => setMobileMenuVisible(true)}
             />
 
@@ -393,10 +399,10 @@ const Header = () => {
                 menu={{ items: userMenuItems }}
                 trigger={["click"]}
                 placement="bottomRight"
-                overlayClassName="header-dropdown-menu"
+                overlayClassName={styles.headerDropdownMenu}
               >
-                <div className="header-user-info">
-                  <div className="header-user-avatar">
+                <div className={styles.headerUserInfo}>
+                  <div className={styles.headerUserAvatar}>
                     {auth.user?.avatarUrl ? (
                       <img
                         src={auth.user.avatarUrl}
@@ -412,15 +418,17 @@ const Header = () => {
                       getAvatarInitials()
                     )}
                   </div>
-                  <span className="header-user-name">{getDisplayName()}</span>
+                  <span className={styles.headerUserName}>
+                    {getDisplayName()}
+                  </span>
                   {auth.user?.role && (
                     <span
-                      className={`header-user-role ${
+                      className={`${styles.headerUserRole} ${
                         getHighestRole(auth.user.role) === ROLES.ADMIN
-                          ? "admin"
+                          ? styles.admin
                           : getHighestRole(auth.user.role) === ROLES.SELLER
-                          ? "seller"
-                          : "user"
+                          ? styles.seller
+                          : styles.user
                       }`}
                     >
                       {getDisplayRole()}
@@ -431,14 +439,14 @@ const Header = () => {
             ) : (
               <Space size="small">
                 <button
-                  className="header-login-btn"
+                  className={styles.headerLoginBtn}
                   onClick={() => navigate("/login")}
                 >
                   <LoginOutlined />
                   Đăng nhập
                 </button>
                 <button
-                  className="header-register-btn"
+                  className={styles.headerRegisterBtn}
                   onClick={() => navigate("/register")}
                 >
                   <UserAddOutlined />
@@ -451,12 +459,14 @@ const Header = () => {
       </div>
 
       {/* Navigation Bar */}
-      <div className="header-bottom">
-        <div className="header-container">
-          <nav className="header-nav">
+      <div className={styles.headerBottom}>
+        <div className={styles.headerContainer}>
+          <nav className={styles.headerNav}>
             <Link
               to="/"
-              className={`nav-link ${isActive("/") ? "active" : ""}`}
+              className={`${styles.navLink} ${
+                isActive("/") ? styles.active : ""
+              }`}
             >
               <HomeOutlined />
               <span>Trang chủ</span>
@@ -466,11 +476,11 @@ const Header = () => {
               menu={{ items: categoryMenuItems }}
               trigger={["hover"]}
               placement="bottomLeft"
-              overlayClassName="category-dropdown-menu"
+              overlayClassName={styles.categoryDropdownMenu}
             >
               <div
-                className={`nav-link ${
-                  location.pathname.startsWith("/category") ? "active" : ""
+                className={`${styles.navLink} ${
+                  location.pathname.startsWith("/category") ? styles.active : ""
                 }`}
               >
                 <AppstoreOutlined />
@@ -483,7 +493,9 @@ const Header = () => {
               <>
                 <Link
                   to="/profile"
-                  className={`nav-link ${isActive("/profile") ? "active" : ""}`}
+                  className={`${styles.navLink} ${
+                    isActive("/profile") ? styles.active : ""
+                  }`}
                 >
                   <ProfileOutlined />
                   <span>Hồ sơ</span>

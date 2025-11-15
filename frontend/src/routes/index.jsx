@@ -49,6 +49,10 @@ const WarrantyPage = lazy(() =>
 // Protected Pages
 const ProfileLayout = lazy(() => import("../pages/ProfileLayout"));
 
+// User Pages
+const CartPage = lazy(() => import("../pages/user/CartPage"));
+const PaymentResultPage = lazy(() => import("../pages/user/PaymentResultPage"));
+
 // Profile sub-pages
 const ProfileGeneralPage = lazy(() =>
   import("../pages/profile/ProfileGeneralPage")
@@ -305,6 +309,24 @@ const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <ContactPage />
+          </SuspenseWrapper>
+        ),
+      },
+
+      // ==================== USER ROUTES ====================
+      {
+        path: PROTECTED_ROUTES.USER_CART,
+        element: (
+          <SuspenseWrapper>
+            <CartPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: "/payment-result",
+        element: (
+          <SuspenseWrapper>
+            <PaymentResultPage />
           </SuspenseWrapper>
         ),
       },

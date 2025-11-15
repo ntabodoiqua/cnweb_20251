@@ -57,7 +57,7 @@ const SellerProductsPage = () => {
           name: product.name,
           sku: `SKU-${product.id.substring(0, 8).toUpperCase()}`,
           category: product.platformCategoryName || "Chưa phân loại",
-          storeCategory: product.storeCategoryName,
+          storeCategories: product.storeCategoryName || [], // Mảng các danh mục shop
           price: `₫${product.minPrice.toLocaleString("vi-VN")}${
             product.maxPrice > product.minPrice
               ? ` - ₫${product.maxPrice.toLocaleString("vi-VN")}`
@@ -294,7 +294,37 @@ const SellerProductsPage = () => {
                       </div>
                     </div>
                   </td>
-                  <td>{product.storeCategory || "-"}</td>
+                  <td>
+                    {product.storeCategories &&
+                    product.storeCategories.length > 0 ? (
+                      <div
+                        style={{
+                          display: "flex",
+                          flexWrap: "wrap",
+                          gap: "4px",
+                        }}
+                      >
+                        {product.storeCategories.map((cat, idx) => (
+                          <span
+                            key={idx}
+                            style={{
+                              display: "inline-block",
+                              padding: "2px 8px",
+                              backgroundColor: "rgba(238, 77, 45, 0.1)",
+                              color: "#ee4d2d",
+                              borderRadius: "4px",
+                              fontSize: "12px",
+                              fontWeight: "500",
+                            }}
+                          >
+                            {cat}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      "-"
+                    )}
+                  </td>
                   <td>{product.category}</td>
                   <td>{product.brandName || "-"}</td>
                   <td>

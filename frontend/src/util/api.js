@@ -592,6 +592,76 @@ const getProductDetailApi = (productId) => {
   });
 };
 
+const updateProductApi = (productId, productData) => {
+  const URL_API = `/api/product/products/${productId}`;
+  return axios.put(URL_API, productData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const uploadProductImageApi = (productId, file, displayOrder = 1) => {
+  const URL_API = `/api/product/products/${productId}/images`;
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("displayOrder", displayOrder.toString());
+
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const deleteProductImageApi = (productId, imageId) => {
+  const URL_API = `/api/product/products/${productId}/images/${imageId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const updateProductImageOrderApi = (productId, imageId, displayOrder) => {
+  const URL_API = `/api/product/products/${productId}/images/${imageId}/display-order`;
+  return axios.put(
+    URL_API,
+    { displayOrder },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const updateProductImagesOrderApi = (productId, imagesOrder) => {
+  const URL_API = `/api/product/products/${productId}/images/order`;
+  return axios.put(URL_API, imagesOrder, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const setProductImagePrimaryApi = (productId, imageId) => {
+  const URL_API = `/api/product/products/${productId}/images/${imageId}/primary`;
+  return axios.put(
+    URL_API,
+    {},
+    {
+      headers: {
+        "Accept-Language": "vi",
+      },
+    }
+  );
+};
+
 const getCategoriesApi = () => {
   const URL_API = "/api/product/categories";
   return axios.get(URL_API, {
@@ -622,6 +692,68 @@ const getPlatformCategoryDetailApi = (categoryId) => {
 const getBrandsApi = () => {
   const URL_API = "/api/product/brands/public";
   return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Payment APIs
+const createZaloPayOrderApi = (paymentData) => {
+  const URL_API = "/api/payment/v1/payments/zalopay/create-order";
+  return axios.post(URL_API, paymentData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Cart APIs - TODO: Replace with real backend endpoints
+const getCartItemsApi = () => {
+  // Tạm thời trả về mock data, sẽ thay bằng API thật sau
+  return Promise.resolve({
+    data: {
+      code: 1000,
+      result: {
+        items: [],
+        total: 0,
+      },
+    },
+  });
+};
+
+const addToCartApi = (productId, quantity) => {
+  const URL_API = "/api/order/cart/add";
+  return axios.post(
+    URL_API,
+    { productId, quantity },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const updateCartItemApi = (itemId, quantity) => {
+  const URL_API = `/api/order/cart/items/${itemId}`;
+  return axios.put(
+    URL_API,
+    { quantity },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const removeCartItemApi = (itemId) => {
+  const URL_API = `/api/order/cart/items/${itemId}`;
+  return axios.delete(URL_API, {
     headers: {
       "Accept-Language": "vi",
     },
@@ -674,8 +806,21 @@ export {
   getProductsApi,
   getProductsByStoreApi,
   getProductDetailApi,
+  updateProductApi,
+  uploadProductImageApi,
+  deleteProductImageApi,
+  updateProductImageOrderApi,
+  updateProductImagesOrderApi,
+  setProductImagePrimaryApi,
   getCategoriesApi,
   getPlatformCategoriesApi,
   getPlatformCategoryDetailApi,
   getBrandsApi,
+  // Payment APIs
+  createZaloPayOrderApi,
+  // Cart APIs
+  getCartItemsApi,
+  addToCartApi,
+  updateCartItemApi,
+  removeCartItemApi,
 };
