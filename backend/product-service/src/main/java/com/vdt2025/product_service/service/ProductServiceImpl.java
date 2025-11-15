@@ -131,7 +131,7 @@ public class ProductServiceImpl implements ProductService {
             // Map sang entity
             newStoreCategories = requestedIds.stream()
                     .map(categoryMap::get)
-                    .toList();
+                    .collect(Collectors.toCollection(ArrayList::new));
         }
         
         // Validate brand if provided
@@ -253,7 +253,7 @@ public class ProductServiceImpl implements ProductService {
             // Map sang entity
             List<Category> newStoreCategories = requestedIds.stream()
                     .map(categoryMap::get)
-                    .toList();
+                    .collect(Collectors.toCollection(ArrayList::new));
 
             // Cập nhật product
             product.setStoreCategories(newStoreCategories);
