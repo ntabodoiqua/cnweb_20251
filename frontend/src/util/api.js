@@ -760,6 +760,104 @@ const removeCartItemApi = (itemId) => {
   });
 };
 
+// Product Attributes APIs
+const createProductAttributeApi = (attributeData) => {
+  const URL_API = "/api/product/product-attributes";
+  return axios.post(URL_API, attributeData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const getProductAttributesByCategoryApi = (categoryId) => {
+  const URL_API = `/api/product/product-attributes/by-category/${categoryId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const getProductAttributeByIdApi = (attributeId) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const updateProductAttributeApi = (attributeId, attributeData) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}`;
+  return axios.put(URL_API, attributeData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const deleteProductAttributeApi = (attributeId) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const addCategoriesToAttributeApi = (attributeId, categoryIds) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}/categories`;
+  return axios.post(
+    URL_API,
+    { categoryIds },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const deleteCategoriesFromAttributeApi = (attributeId, categoryIds) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}/categories`;
+  return axios.delete(URL_API, {
+    data: { categoryIds },
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const addValueToAttributeApi = (attributeId, value) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}/values`;
+  return axios.post(
+    URL_API,
+    { value },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const deleteValueFromAttributeApi = (attributeId, value) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}/values`;
+  return axios.delete(URL_API, {
+    data: { value },
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -823,4 +921,14 @@ export {
   addToCartApi,
   updateCartItemApi,
   removeCartItemApi,
+  // Product Attributes APIs
+  createProductAttributeApi,
+  getProductAttributesByCategoryApi,
+  getProductAttributeByIdApi,
+  updateProductAttributeApi,
+  deleteProductAttributeApi,
+  addCategoriesToAttributeApi,
+  deleteCategoriesFromAttributeApi,
+  addValueToAttributeApi,
+  deleteValueFromAttributeApi,
 };
