@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import "../../../styles/about-us.css";
+import React from "react";
+import styles from "../../../styles/about-us.module.css";
 import useScrollToTop from "../../../hooks/useScrollToTop";
 import {
   EyeOutlined,
@@ -20,7 +20,7 @@ const AboutUs = () => {
   useScrollToTop();
 
   // Xử lý cuộn khi click vào section
-  const handleSectionClick = (e) => {
+  const handleSectionClick = () => {
     window.scrollTo({
       top: 0,
       behavior: "smooth",
@@ -28,24 +28,24 @@ const AboutUs = () => {
   };
 
   return (
-    <div className="about-us-container">
+    <div className={styles.container}>
       {/* Hero Section với Logo */}
-      <div className="about-us-hero">
-        <div className="hero-background">
-          <div className="hero-circle hero-circle-1"></div>
-          <div className="hero-circle hero-circle-2"></div>
-          <div className="hero-circle hero-circle-3"></div>
+      <div className={styles.hero}>
+        <div className={styles.heroBackground}>
+          <div className={`${styles.heroCircle} ${styles.heroCircle1}`}></div>
+          <div className={`${styles.heroCircle} ${styles.heroCircle2}`}></div>
+          <div className={`${styles.heroCircle} ${styles.heroCircle3}`}></div>
         </div>
-        <div className="hero-content">
-          <img src={logo} alt="HUSTBuy Logo" className="hero-logo" />
-          <h1 className="hero-title">HUSTBuy</h1>
-          <div className="hero-subtitle">
+        <div className={styles.heroContent}>
+          <img src={logo} alt="HUSTBuy Logo" className={styles.heroLogo} />
+          <h1 className={styles.heroTitle}>HUSTBuy</h1>
+          <div className={styles.heroSubtitle}>
             Nền tảng thương mại điện tử hàng đầu
           </div>
         </div>
       </div>
 
-      <div className="about-us-header">
+      <div className={styles.header}>
         <h1>Về Chúng Tôi</h1>
         <p>
           Chào mừng bạn đến với HUSTBuy - nền tảng thương mại điện tử hàng đầu,
@@ -55,9 +55,9 @@ const AboutUs = () => {
         </p>
       </div>
 
-      <div className="about-us-content">
-        <div className="about-us-section" onClick={handleSectionClick}>
-          <div className="section-icon">
+      <div className={styles.content}>
+        <div className={styles.section} onClick={handleSectionClick}>
+          <div className={styles.sectionIcon}>
             <EyeOutlined />
           </div>
           <h2>Tầm nhìn</h2>
@@ -70,8 +70,8 @@ const AboutUs = () => {
           </p>
         </div>
 
-        <div className="about-us-section" onClick={handleSectionClick}>
-          <div className="section-icon">
+        <div className={styles.section} onClick={handleSectionClick}>
+          <div className={styles.sectionIcon}>
             <RocketOutlined />
           </div>
           <h2>Sứ mệnh</h2>
@@ -83,8 +83,8 @@ const AboutUs = () => {
           </p>
         </div>
 
-        <div className="about-us-section" onClick={handleSectionClick}>
-          <div className="section-icon">
+        <div className={styles.section} onClick={handleSectionClick}>
+          <div className={styles.sectionIcon}>
             <HeartOutlined />
           </div>
           <h2>Giá trị cốt lõi</h2>
@@ -97,28 +97,28 @@ const AboutUs = () => {
         </div>
       </div>
 
-      <div className="team-section">
+      <div className={styles.teamSection}>
         <h2>
           <TeamOutlined style={{ marginRight: "12px" }} />
           Đội Ngũ Phát Triển
         </h2>
-        <div className="team-grid">
-          <div className="team-member">
+        <div className={styles.teamGrid}>
+          <div className={styles.teamMember}>
             <img src={tomImg} alt="Nguyễn Thế Anh" />
             <h3>Nguyễn Thế Anh</h3>
             <p>Nhóm Trưởng</p>
           </div>
-          <div className="team-member">
+          <div className={styles.teamMember}>
             <img src={lightningImg} alt="Bùi Khắc Anh" />
             <h3>Bùi Khắc Anh</h3>
             <p>Backend Developer</p>
           </div>
-          <div className="team-member">
+          <div className={styles.teamMember}>
             <img src={meatheadImg} alt="Lê Đinh Hùng Anh" />
             <h3>Lê Đinh Hùng Anh</h3>
             <p>Frontend Developer</p>
           </div>
-          <div className="team-member">
+          <div className={styles.teamMember}>
             <img src={butchImg} alt="Hồ Lương An" />
             <h3>Hồ Lương An</h3>
             <p>Frontend Developer</p>

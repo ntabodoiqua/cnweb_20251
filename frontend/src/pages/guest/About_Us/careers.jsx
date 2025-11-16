@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../../../styles/careers.css";
+import styles from "../../../styles/careers.module.css";
 import useScrollToTop from "../../../hooks/useScrollToTop";
 import {
   RocketOutlined,
@@ -260,49 +260,48 @@ const Careers = () => {
   };
 
   const handleApply = (jobTitle) => {
-    // Trong thực tế, sẽ mở form ứng tuyển hoặc chuyển đến trang ứng tuyển
     alert(`Cảm ơn bạn đã quan tâm đến vị trí: ${jobTitle}\nTính năng ứng tuyển đang được phát triển.`);
   };
 
   return (
-    <div className="careers-container">
+    <div className={styles.container}>
       {/* Hero Section */}
-      <div className="careers-hero">
-        <div className="hero-background">
-          <div className="hero-circle hero-circle-1"></div>
-          <div className="hero-circle hero-circle-2"></div>
-          <div className="hero-circle hero-circle-3"></div>
+      <div className={styles.hero}>
+        <div className={styles.heroBackground}>
+          <div className={`${styles.heroCircle} ${styles.heroCircle1}`}></div>
+          <div className={`${styles.heroCircle} ${styles.heroCircle2}`}></div>
+          <div className={`${styles.heroCircle} ${styles.heroCircle3}`}></div>
         </div>
-        <div className="hero-content">
-          <img src={logo} alt="HUSTBuy Logo" className="hero-logo" />
-          <h1 className="hero-title">Cơ Hội Nghề Nghiệp</h1>
-          <div className="hero-subtitle">
+        <div className={styles.heroContent}>
+          <img src={logo} alt="HUSTBuy Logo" className={styles.heroLogo} />
+          <h1 className={styles.heroTitle}>Cơ Hội Nghề Nghiệp</h1>
+          <div className={styles.heroSubtitle}>
             Tham gia cùng chúng tôi để xây dựng tương lai của thương mại điện tử
           </div>
-          <div className="hero-stats">
-            <div className="stat-item">
-              <div className="stat-number">50+</div>
-              <div className="stat-label">Nhân viên</div>
+          <div className={styles.heroStats}>
+            <div className={styles.statItem}>
+              <div className={styles.statNumber}>50+</div>
+              <div className={styles.statLabel}>Nhân viên</div>
             </div>
-            <div className="stat-item">
-              <div className="stat-number">6</div>
-              <div className="stat-label">Vị trí mở</div>
+            <div className={styles.statItem}>
+              <div className={styles.statNumber}>6</div>
+              <div className={styles.statLabel}>Vị trí mở</div>
             </div>
-            <div className="stat-item">
-              <div className="stat-number">4.8</div>
-              <div className="stat-label">Rating</div>
+            <div className={styles.statItem}>
+              <div className={styles.statNumber}>4.8</div>
+              <div className={styles.statLabel}>Rating</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* Why Join Us Section */}
-      <div className="why-join-section">
-        <h2 className="section-title">Tại Sao Nên Tham Gia HUSTBuy?</h2>
-        <div className="culture-grid">
+      <div className={styles.whyJoinSection}>
+        <h2 className={styles.sectionTitle}>Tại Sao Nên Tham Gia HUSTBuy?</h2>
+        <div className={styles.cultureGrid}>
           {cultureValues.map((value, index) => (
-            <div key={index} className="culture-card">
-              <div className="culture-icon">{value.icon}</div>
+            <div key={index} className={styles.cultureCard}>
+              <div className={styles.cultureIcon}>{value.icon}</div>
               <h3>{value.title}</h3>
               <p>{value.description}</p>
             </div>
@@ -311,101 +310,103 @@ const Careers = () => {
       </div>
 
       {/* Benefits Section */}
-      <div className="benefits-section">
-        <h2 className="section-title">Phúc Lợi & Đãi Ngộ</h2>
-        <div className="benefits-grid">
+      <div className={styles.benefitsSection}>
+        <h2 className={styles.sectionTitle}>Phúc Lợi & Đãi Ngộ</h2>
+        <div className={styles.benefitsGrid}>
           {benefits.map((benefit, index) => (
-            <div key={index} className="benefit-card">
-              <div className="benefit-icon" style={{ color: benefit.color }}>
+            <div key={index} className={styles.benefitCard}>
+              <div className={styles.benefitIcon} style={{ color: benefit.color }}>
                 {benefit.icon}
               </div>
-              <h3>{benefit.title}</h3>
-              <p>{benefit.description}</p>
+              <div>
+                <h3>{benefit.title}</h3>
+                <p>{benefit.description}</p>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
       {/* Job Openings Section */}
-      <div className="jobs-section">
-        <h2 className="section-title">
+      <div className={styles.jobsSection}>
+        <h2 className={styles.sectionTitle}>
           <FireOutlined style={{ marginRight: "12px" }} />
           Vị Trí Đang Tuyển Dụng
         </h2>
-        <div className="jobs-list">
+        <div className={styles.jobsList}>
           {jobPositions.map((job) => (
             <div
               key={job.id}
-              className={`job-card ${selectedJob?.id === job.id ? "expanded" : ""}`}
+              className={`${styles.jobCard} ${selectedJob?.id === job.id ? styles.expanded : ""}`}
             >
-              <div className="job-header" onClick={() => handleJobClick(job)}>
-                <div className="job-header-left">
-                  <div className="job-title-row">
-                    <h3 className="job-title">{job.title}</h3>
-                    {job.hot && <span className="hot-badge">🔥 HOT</span>}
+              <div className={styles.jobHeader} onClick={() => handleJobClick(job)}>
+                <div className={styles.jobHeaderLeft}>
+                  <div className={styles.jobTitleRow}>
+                    <h3 className={styles.jobTitle}>{job.title}</h3>
+                    {job.hot && <span className={styles.hotBadge}>🔥 HOT</span>}
                   </div>
-                  <div className="job-meta">
-                    <span className="job-meta-item">
+                  <div className={styles.jobMeta}>
+                    <span className={styles.jobMetaItem}>
                       <TeamOutlined /> {job.department}
                     </span>
-                    <span className="job-meta-item">
+                    <span className={styles.jobMetaItem}>
                       <EnvironmentOutlined /> {job.location}
                     </span>
-                    <span className="job-meta-item">
+                    <span className={styles.jobMetaItem}>
                       <ClockCircleOutlined /> {job.type}
                     </span>
-                    <span className="job-meta-item salary">
+                    <span className={`${styles.jobMetaItem} ${styles.salary}`}>
                       <DollarOutlined /> {job.salary}
                     </span>
                   </div>
                 </div>
-                <div className="job-header-right">
-                  <span className="job-level">{job.level}</span>
+                <div className={styles.jobHeaderRight}>
+                  <span className={styles.jobLevel}>{job.level}</span>
                   <RightOutlined
-                    className={`expand-icon ${selectedJob?.id === job.id ? "rotated" : ""}`}
+                    className={`${styles.expandIcon} ${selectedJob?.id === job.id ? styles.rotated : ""}`}
                   />
                 </div>
               </div>
 
               {selectedJob?.id === job.id && (
-                <div className="job-details">
-                  <div className="job-description">
+                <div className={styles.jobDetails}>
+                  <div className={styles.jobDescription}>
                     <h4>Mô tả công việc</h4>
                     <p>{job.description}</p>
                   </div>
 
-                  <div className="job-requirements">
+                  <div className={styles.jobRequirements}>
                     <h4>Yêu cầu</h4>
                     <ul>
                       {job.requirements.map((req, index) => (
                         <li key={index}>
-                          <CheckCircleOutlined className="check-icon" />
+                          <CheckCircleOutlined className={styles.checkIcon} />
                           {req}
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="job-responsibilities">
+                  <div className={styles.jobResponsibilities}>
                     <h4>Trách nhiệm</h4>
                     <ul>
                       {job.responsibilities.map((resp, index) => (
                         <li key={index}>
-                          <CheckCircleOutlined className="check-icon" />
+                          <CheckCircleOutlined className={styles.checkIcon} />
                           {resp}
                         </li>
                       ))}
                     </ul>
                   </div>
 
-                  <div className="job-actions">
+                  <div className={styles.jobActions}>
                     <button
-                      className="apply-btn"
+                      className={styles.applyBtn}
                       onClick={() => handleApply(job.title)}
                     >
                       Ứng tuyển ngay
                     </button>
-                    <button className="share-btn">Chia sẻ</button>
+                    <button className={styles.shareBtn}>Chia sẻ</button>
                   </div>
                 </div>
               )}
@@ -415,13 +416,12 @@ const Careers = () => {
       </div>
 
       {/* Call to Action */}
-      <div className="cta-section">
+      <div className={styles.ctaSection}>
         <h2>Không tìm thấy vị trí phù hợp?</h2>
         <p>
-          Gửi CV của bạn đến chúng tôi, chúng tôi sẽ liên hệ khi có cơ hội phù
-          hợp!
+          Gửi CV của bạn đến chúng tôi, chúng tôi sẽ liên hệ khi có cơ hội phù hợp!
         </p>
-        <button className="cta-btn" onClick={() => handleApply("Ứng tuyển chung")}>
+        <button className={styles.ctaBtn} onClick={() => handleApply("Ứng tuyển chung")}>
           Gửi CV của bạn
         </button>
       </div>
