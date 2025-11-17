@@ -41,6 +41,7 @@ public class ProductAttributeServiceImpl implements ProductAttributeService {
     AttributeValueMapper attributeValueMapper;
     private final ProductAttributeMapper productAttributeMapper;
     AttributeValueRepository attributeValueRepository;
+    private final CacheEvictService cacheEvictService;
 
     @Transactional
     @Override

@@ -64,6 +64,8 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryMapper categoryMapper;
     private final StoreMapper storeMapper;
     private final BrandMapper brandMapper;
+    CategoryManagementService categoryManagementService;
+    private final CacheEvictService cacheEvictService;
 
     @Value("${product-images.max-per-product:5}")
     @NonFinal
@@ -410,6 +412,7 @@ public class ProductServiceImpl implements ProductService {
             product.setMaxPrice(variant.getPrice());
         }
         productRepository.save(product);
+        cacheEvictService.evictProductDetails(productId);
         log.info("Variant {} added successfully", variant.getSku());
         return mapToVariantResponse(variant);
     }
@@ -450,7 +453,7 @@ public class ProductServiceImpl implements ProductService {
         
         variant = variantRepository.save(variant);
         log.info("Variant {} updated successfully", variant.getSku());
-        
+        cacheEvictService.evictProductDetails(productId);
         return mapToVariantResponse(variant);
     }
 
@@ -647,6 +650,7 @@ public class ProductServiceImpl implements ProductService {
             variant.setActive(true);
             log.info("Variant {} was inactive, setting to active after adding attribute", variantId);
         }
+        cacheEvictService.evictProductDetails(productId);
         return mapToVariantResponse(variantRepository.save(variant));
     }
 
@@ -684,6 +688,7 @@ public class ProductServiceImpl implements ProductService {
             variant.setActive(false);
             log.info("Variant {} has no attributes left, setting to inactive", variantId);
         }
+        cacheEvictService.evictProductDetails(productId);
         return mapToVariantResponse(variantRepository.save(variant));
     }
 
@@ -861,7 +866,7 @@ public class ProductServiceImpl implements ProductService {
                 .averageRating(product.getAverageRating())
                 .ratingCount(product.getRatingCount())
                 .isActive(product.isActive())
-                .category(categoryMapper.toCategoryResponse(product.getCategory()))
+                .category(CategoryResponse.fromEntityWithSubCategories(product.getCategory()))
                 .store(storeMapper.toStoreResponse(product.getStore()))
                 .brand(product.getBrand() != null ? brandMapper.toBrandResponse(product.getBrand()) : null)
                 .variants(variants.stream().map(this::mapToVariantResponse).collect(Collectors.toList()))
