@@ -73,6 +73,7 @@ public class AdminController {
 
     @GetMapping("/statistic/users")
     public ApiResponse<UserStatisticResponse> getUserStatistic() {
+
         return ApiResponse.<UserStatisticResponse>builder()
                 .result(adminService.getUserStatistic())
                 .build();
