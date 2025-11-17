@@ -858,6 +858,74 @@ const deleteValueFromAttributeApi = (attributeId, value) => {
   });
 };
 
+// Product Variants APIs
+const getProductVariantsApi = (productId) => {
+  const URL_API = `/api/product/products/${productId}/variants`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const createVariantApi = (productId, variantData) => {
+  const URL_API = `/api/product/products/${productId}/variants`;
+  return axios.post(URL_API, variantData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const updateVariantApi = (productId, variantId, variantData) => {
+  const URL_API = `/api/product/products/${productId}/variants/${variantId}`;
+  return axios.put(URL_API, variantData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const deleteVariantApi = (productId, variantId) => {
+  const URL_API = `/api/product/products/${productId}/variants/${variantId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const addAttributeToVariantApi = (productId, variantId, attributeData) => {
+  const URL_API = `/api/product/products/${productId}/variants/${variantId}/attributes`;
+  return axios.post(URL_API, attributeData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const removeAttributeFromVariantApi = (
+  productId,
+  variantId,
+  attributeId,
+  value
+) => {
+  const URL_API = `/api/product/products/${productId}/variants/${variantId}/attributes`;
+  return axios.delete(URL_API, {
+    data: {
+      attributeId: attributeId,
+      value: value,
+    },
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -931,4 +999,11 @@ export {
   deleteCategoriesFromAttributeApi,
   addValueToAttributeApi,
   deleteValueFromAttributeApi,
+  // Product Variants APIs
+  getProductVariantsApi,
+  createVariantApi,
+  updateVariantApi,
+  deleteVariantApi,
+  addAttributeToVariantApi,
+  removeAttributeFromVariantApi,
 };

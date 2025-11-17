@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeftOutlined,
@@ -17,6 +17,7 @@ import {
   StarOutlined,
   StarFilled,
   UploadOutlined,
+  BranchesOutlined,
 } from "@ant-design/icons";
 import { notification, Form, Input, Select, Button, Upload, Modal } from "antd";
 import {
@@ -30,8 +31,10 @@ import {
   deleteProductImageApi,
   updateProductImagesOrderApi,
   setProductImagePrimaryApi,
+  getProductVariantsApi,
 } from "../../util/api";
 import NoImages from "../../assets/NoImages.webp";
+import ProductVariantsSection from "../../components/seller/ProductVariantsSection";
 import styles from "./SellerProductDetailPage.module.css";
 
 const { TextArea } = Input;
@@ -63,7 +66,21 @@ const SellerProductDetailPage = () => {
     }
   }, [productId]);
 
-  const fetchProductDetail = async () => {
+  const fetchVariants = useCallback(async () => {
+    try {
+      const response = await getProductVariantsApi(productId);
+      if (response && response.result) {
+        setProduct((prev) => ({
+          ...prev,
+          variants: response.result,
+        }));
+      }
+    } catch (error) {
+      console.error("Error fetching variants:", error);
+    }
+  }, [productId]);
+
+  const fetchProductDetail = useCallback(async () => {
     try {
       setLoading(true);
       const response = await getProductDetailApi(productId);
@@ -99,7 +116,7 @@ const SellerProductDetailPage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [productId, form]);
 
   const fetchFormData = async () => {
     try {
@@ -889,59 +906,12 @@ const SellerProductDetailPage = () => {
       </div>
 
       {/* Variants Section */}
-      {product.variants && product.variants.length > 0 ? (
-        <div className={styles.variantsSection}>
-          <h3 className={styles.sectionTitle}>
-            Biến thể sản phẩm ({product.variants.length})
-          </h3>
-          <div className={styles.variantsTable}>
-            <table>
-              <thead>
-                <tr>
-                  <th>SKU</th>
-                  <th>Tên biến thể</th>
-                  <th>Giá bán</th>
-                  <th>Giá gốc</th>
-                  <th>Tồn kho</th>
-                  <th>Đã bán</th>
-                </tr>
-              </thead>
-              <tbody>
-                {product.variants.map((variant) => (
-                  <tr key={variant.id}>
-                    <td>
-                      <span className={styles.sku}>{variant.sku}</span>
-                    </td>
-                    <td>{variant.variantName}</td>
-                    <td>
-                      <span className={styles.price}>
-                        ₫{variant.price?.toLocaleString("vi-VN")}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={styles.originalPrice}>
-                        ₫{variant.originalPrice?.toLocaleString("vi-VN")}
-                      </span>
-                    </td>
-                    <td>
-                      <span
-                        className={
-                          variant.stockQuantity < 10
-                            ? styles.lowStock
-                            : styles.inStock
-                        }
-                      >
-                        {variant.stockQuantity}
-                      </span>
-                    </td>
-                    <td>{variant.soldQuantity}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      ) : null}
+      <ProductVariantsSection
+        variants={product.variants || []}
+        productId={productId}
+        categoryId={product?.category?.parentId}
+        onUpdate={fetchVariants}
+      />
     </div>
   );
 };

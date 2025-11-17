@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   PlusOutlined,
   EditOutlined,
@@ -11,6 +11,7 @@ import {
   LoadingOutlined,
   CheckCircleOutlined,
   ExclamationCircleOutlined,
+  EyeOutlined,
 } from "@ant-design/icons";
 import { notification, Modal } from "antd";
 import {
@@ -23,10 +24,15 @@ import {
   deleteValueFromAttributeApi,
   getPlatformCategoriesApi,
 } from "../../util/api";
+import { AuthContext } from "../../components/context/auth.context";
+import { ROLES } from "../../constants/roles";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import styles from "./SellerProductAttributesPage.module.css";
 
 const SellerProductAttributesPage = () => {
+  const { auth } = useContext(AuthContext);
+  const isAdmin = auth?.user?.role === ROLES.ADMIN;
+
   const [categories, setCategories] = useState([]);
   const [attributes, setAttributes] = useState([]);
   const [attributeDetails, setAttributeDetails] = useState({}); // Store detailed attributes with values
@@ -502,11 +508,15 @@ const SellerProductAttributesPage = () => {
       <div className={styles.infoBanner}>
         <InfoCircleOutlined />
         <div className={styles.infoContent}>
-          <div className={styles.infoTitle}>Quản lý thuộc tính sản phẩm</div>
+          <div className={styles.infoTitle}>
+            {isAdmin
+              ? "Quản lý thuộc tính sản phẩm"
+              : "Xem thuộc tính sản phẩm"}
+          </div>
           <div className={styles.infoText}>
-            Tạo và quản lý các thuộc tính sản phẩm như kích cỡ, màu sắc, chất
-            liệu,... cho từng danh mục. Thuộc tính giúp mô tả sản phẩm chi tiết
-            hơn.
+            {isAdmin
+              ? "Tạo và quản lý các thuộc tính sản phẩm như kích cỡ, màu sắc, chất liệu,... cho từng danh mục. Thuộc tính giúp mô tả sản phẩm chi tiết hơn."
+              : "Xem các thuộc tính sản phẩm đã được cấu hình cho từng danh mục. Chỉ Quản trị viên mới có thể chỉnh sửa thuộc tính."}
           </div>
         </div>
       </div>
@@ -541,7 +551,7 @@ const SellerProductAttributesPage = () => {
       </div>
 
       {/* Create Attribute Button */}
-      {!showCreateForm && (
+      {isAdmin && !showCreateForm && (
         <div className={styles.createAttributeSection}>
           <button
             onClick={handleShowCreateForm}
@@ -553,7 +563,7 @@ const SellerProductAttributesPage = () => {
       )}
 
       {/* Create Form */}
-      {showCreateForm && (
+      {isAdmin && showCreateForm && (
         <div className={styles.attributeCreateForm}>
           <form onSubmit={handleCreateAttribute} className={styles.form}>
             <div className={styles.formSectionTitle}>
@@ -896,16 +906,18 @@ const SellerProductAttributesPage = () => {
                                         }}
                                       />
                                     )}
-                                    <CloseOutlined
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        handleDeleteValueFromAttribute(
-                                          attribute.id,
-                                          valueObj.value,
-                                          attribute.name
-                                        );
-                                      }}
-                                    />
+                                    {isAdmin && (
+                                      <CloseOutlined
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteValueFromAttribute(
+                                            attribute.id,
+                                            valueObj.value,
+                                            attribute.name
+                                          );
+                                        }}
+                                      />
+                                    )}
                                   </span>
                                 ))}
                                 {(!attributeDetails[attribute.id]?.values ||
@@ -918,48 +930,59 @@ const SellerProductAttributesPage = () => {
                                   </p>
                                 )}
                               </div>
-                              <div className={styles.addValueSection}>
-                                <input
-                                  type="text"
-                                  placeholder="Thêm giá trị mới..."
-                                  className={styles.addValueInput}
-                                  onKeyPress={(e) => {
-                                    if (e.key === "Enter") {
-                                      handleAddValueToAttribute(
-                                        attribute.id,
-                                        e.target.value
-                                      );
-                                      e.target.value = "";
-                                    }
-                                  }}
-                                />
-                              </div>
+                              {isAdmin && (
+                                <div className={styles.addValueSection}>
+                                  <input
+                                    type="text"
+                                    placeholder="Thêm giá trị mới..."
+                                    className={styles.addValueInput}
+                                    onKeyPress={(e) => {
+                                      if (e.key === "Enter") {
+                                        handleAddValueToAttribute(
+                                          attribute.id,
+                                          e.target.value
+                                        );
+                                        e.target.value = "";
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              )}
                             </div>
                           </div>
 
                           {/* Action Buttons */}
                           <div className={styles.attributeActions}>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleEditAttribute(attribute);
-                              }}
-                              className={`${styles.profileBtn} ${styles.profileBtnSecondary}`}
-                            >
-                              <EditOutlined /> Chỉnh sửa
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteAttribute(
-                                  attribute.id,
-                                  attribute.name
-                                );
-                              }}
-                              className={`${styles.profileBtn} ${styles.profileBtnDanger}`}
-                            >
-                              <DeleteOutlined /> Xóa
-                            </button>
+                            {isAdmin ? (
+                              <>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleEditAttribute(attribute);
+                                  }}
+                                  className={`${styles.profileBtn} ${styles.profileBtnSecondary}`}
+                                >
+                                  <EditOutlined /> Chỉnh sửa
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteAttribute(
+                                      attribute.id,
+                                      attribute.name
+                                    );
+                                  }}
+                                  className={`${styles.profileBtn} ${styles.profileBtnDanger}`}
+                                >
+                                  <DeleteOutlined /> Xóa
+                                </button>
+                              </>
+                            ) : (
+                              <div className={styles.viewOnlyNote}>
+                                <EyeOutlined /> Chỉ Quản trị viên mới có thể
+                                chỉnh sửa
+                              </div>
+                            )}
                           </div>
                         </>
                       )}

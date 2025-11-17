@@ -545,6 +545,26 @@
   border-top: 2px solid rgba(238, 77, 45, 0.1);
 }
 
+.viewOnlyNote {
+  flex: 1;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #f0f0f0 0%, #e8e8e8 100%);
+  color: #666;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 2px dashed #d9d9d9;
+}
+
+.viewOnlyNote :global(.anticon) {
+  font-size: 16px;
+  color: #999;
+}
+
 .profileBtn {
   flex: 1;
   min-width: 140px;
