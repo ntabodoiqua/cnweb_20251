@@ -28,5 +28,4 @@ public class VariantUpdateRequest {
 
     String imageName;
 
-    Boolean isActive;
 }

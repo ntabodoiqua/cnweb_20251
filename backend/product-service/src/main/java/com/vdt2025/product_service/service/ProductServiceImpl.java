@@ -287,9 +287,15 @@ public class ProductServiceImpl implements ProductService {
         
         checkProductAccess(product);
         
-        // Soft delete: set isActive = false
-        product.setActive(false);
+        // Soft delete: set isDeleted = true
+        product.setDeleted(true);
         productRepository.save(product);
+
+        // Soft delete tất cả variants
+        List<ProductVariant> variants = variantRepository.findByProductId(id);
+        for (ProductVariant variant : variants) {
+            variant.setDeleted(false);
+        }
         
         log.info("Product {} soft deleted successfully", product.getName());
     }
@@ -303,6 +309,11 @@ public class ProductServiceImpl implements ProductService {
         
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        if (product.getVariants() != null && !product.getVariants().isEmpty()) {
+            log.warn("Cannot permanently delete product {} with existing variants", product.getName());
+            throw new AppException(ErrorCode.CANNOT_DELETE_PRODUCT_WITH_VARIANTS);
+        }
         
         productRepository.delete(product);
         log.info("Product {} permanently deleted", product.getName());
@@ -345,7 +356,7 @@ public class ProductServiceImpl implements ProductService {
             throw new AppException(ErrorCode.STORE_NOT_FOUND);
         }
         
-        Page<Product> productPage = productRepository.findByStoreIdAndIsActiveTrue(storeId, pageable);
+        Page<Product> productPage = productRepository.findByStoreIdAndIsDeletedFalse(storeId, pageable);
         return productPage.map(this::mapToProductSummaryResponse);
     }
 
@@ -446,9 +457,6 @@ public class ProductServiceImpl implements ProductService {
         }
         if (request.getImageName() != null) {
             variant.setImageName(request.getImageName());
-        }
-        if (request.getIsActive() != null) {
-            variant.setActive(request.getIsActive());
         }
         
         variant = variantRepository.save(variant);
@@ -708,7 +716,15 @@ public class ProductServiceImpl implements ProductService {
         
         product.setActive(isActive);
         product = productRepository.save(product);
-        
+        // Vô hiệu hóa toàn bộ variant nếu product inactive
+        if (!isActive) {
+            List<ProductVariant> variants = variantRepository.findByProductId(product.getId());
+            for (ProductVariant variant : variants) {
+                variant.setActive(false);
+            }
+            variantRepository.saveAll(variants);
+            log.info("All variants of product {} have been deactivated", product.getName());
+        }
         log.info("Product {} status updated to {}", product.getName(), isActive);
         return mapToProductResponse(product);
     }
@@ -716,22 +732,81 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
     @Transactional
-    public List<ProductResponse> bulkUpdateStatus(BulkStatusUpdateRequest request) {
+    public void bulkUpdateStatus(BulkStatusUpdateRequest request) {
         log.info("Bulk updating status for {} products", request.getProductIds().size());
-        
-        List<Product> products = productRepository.findAllById(request.getProductIds());
-        
-        // Check access for all products
-        for (Product product : products) {
-            checkProductAccess(product);
-            product.setActive(request.getIsActive());
+
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        boolean isAdmin = username.equals("admin"); // Simplified admin check
+
+        List<String> productIds = request.getProductIds();
+
+        if (!isAdmin) {
+            // Check bằng 1 query duy nhất
+            List<String> allowed = productRepository.findAccessibleProductIdsNative(productIds, username);
+            log.info("User {} has access to {} out of {} products for bulk update",
+                    username, allowed.size(), productIds.size());
+            log.info("Allowed product IDs: {}", allowed);
+            if (allowed.size() != productIds.size()) {
+                throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
         }
-        
-        products = productRepository.saveAll(products);
-        log.info("Bulk status update completed for {} products", products.size());
-        
-        return products.stream()
-                .map(this::mapToProductResponse)
+
+        // Bulk update
+        productRepository.bulkUpdateStatusNative(productIds, request.getIsActive());
+        variantRepository.bulkUpdateVariantStatusNative(productIds, request.getIsActive());
+        log.info("Bulk status update completed for {} products", request.getProductIds().size());
+        for (String productId : productIds) {
+            cacheEvictService.evictProductDetails(productId);
+        }
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @Transactional
+    public VariantResponse updateVariantStatus(String productId, String variantId, boolean isActive) {
+        log.info("Updating variant {} status to {}", variantId, isActive);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        checkProductAccess(product);
+        ProductVariant variant = variantRepository.findByProductIdAndId(productId, variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+        if (isActive && !product.isActive()) {
+            log.warn("Cannot activate variant {} because parent product {} is inactive",
+                    variantId, productId);
+            throw new AppException(ErrorCode.CANNOT_ACTIVATE_VARIANT_OF_INACTIVE_PRODUCT);
+        }
+        variant.setActive(isActive);
+        variant = variantRepository.save(variant);
+        log.info("Variant {} status updated to {}", variant.getSku(), isActive);
+        cacheEvictService.evictProductDetails(productId);
+        return mapToVariantResponse(variant);
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @Transactional
+    public List<VariantResponse> bulkUpdateVariantStatus(String productId, BulkVariantStatusUpdateRequest request) {
+        log.info("Bulk updating status for {} variants of product {}",
+                request.getVariantIds().size(), productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        checkProductAccess(product);
+        List<ProductVariant> variants = variantRepository.findByProductIdAndIdIn(
+                productId, request.getVariantIds());
+        if (request.getIsActive() && !product.isActive()) {
+            log.warn("Cannot activate variants of product {} because it is inactive", productId);
+            throw new AppException(ErrorCode.CANNOT_ACTIVATE_VARIANT_OF_INACTIVE_PRODUCT);
+        }
+        for (ProductVariant variant : variants) {
+            variant.setActive(request.getIsActive());
+        }
+        variants = variantRepository.saveAll(variants);
+        log.info("Bulk status update completed for {} variants", variants.size());
+        cacheEvictService.evictProductDetails(productId);
+        return variants.stream()
+                .map(this::mapToVariantResponse)
                 .collect(Collectors.toList());
     }
 

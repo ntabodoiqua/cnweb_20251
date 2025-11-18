@@ -126,8 +126,17 @@ public interface ProductService {
     /**
      * Cập nhật trạng thái nhiều sản phẩm cùng lúc
      */
-    List<ProductResponse> bulkUpdateStatus(BulkStatusUpdateRequest request);
+    void bulkUpdateStatus(BulkStatusUpdateRequest request);
 
+    /**
+     * Cập nhật trạng thái variant (active/inactive)
+     */
+    VariantResponse updateVariantStatus(String productId, String variantId, boolean isActive);
+
+    /**
+     * Cập nhật trạng thái nhiều variant cùng lúc
+     */
+    List<VariantResponse> bulkUpdateVariantStatus(String productId, BulkVariantStatusUpdateRequest request);
     // ========== Inventory Management ==========
 
     /**

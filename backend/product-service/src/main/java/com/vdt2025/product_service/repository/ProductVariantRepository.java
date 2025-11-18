@@ -104,4 +104,19 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
         ORDER BY v.createdAt DESC
     """)
     List<ProductVariant> findByProductIdWithAttributeValues(@Param("productId") String productId);
+
+    List<ProductVariant> findByProductIdAndIdIn(String productId, List<String> variantIds);
+
+    @Modifying
+    @Query(
+            value = """
+            UPDATE product_variants
+            SET is_active = :status
+            WHERE product_id IN (:productIds)
+        """,
+            nativeQuery = true
+    )
+    int bulkUpdateVariantStatusNative(
+            @Param("productIds") List<String> productIds,
+            @Param("status") boolean status);
 }

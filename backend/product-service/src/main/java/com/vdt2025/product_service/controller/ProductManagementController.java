@@ -385,14 +385,48 @@ public class ProductManagementController {
      * Required: SELLER (owner) hoặc ADMIN role
      */
     @PatchMapping("/bulk-status")
-    public ApiResponse<List<ProductResponse>> bulkUpdateStatus(
+    public ApiResponse<Void> bulkUpdateStatus(
             @Valid @RequestBody BulkStatusUpdateRequest request) {
         log.info("Bulk updating status for {} products", request.getProductIds().size());
 
-        List<ProductResponse> response = productService.bulkUpdateStatus(request);
+        productService.bulkUpdateStatus(request);
 
-        return ApiResponse.<List<ProductResponse>>builder()
+        return ApiResponse.<Void>builder()
                 .message("Bulk status update completed")
+                .build();
+    }
+
+    /**
+     * Cập nhật trạng thái variant
+     * PATCH /products/{productId}/variants/{variantId}/status
+     * Required: SELLER (owner) hoặc ADMIN role
+     */
+    @PatchMapping("/{productId}/variants/{variantId}/status")
+    public ApiResponse<VariantResponse> updateVariantStatus(
+            @PathVariable String productId,
+            @PathVariable String variantId,
+            @RequestParam boolean isActive) {
+        log.info("Updating variant {} of product {} status to {}", variantId, productId, isActive);
+        VariantResponse response = productService.updateVariantStatus(productId, variantId, isActive);
+        return ApiResponse.<VariantResponse>builder()
+                .message("Variant status updated successfully")
+                .result(response)
+                .build();
+    }
+
+    /**
+     * Cập nhật trạng thái nhiều variant cùng lúc
+     * PATCH /products/{productId}/variants/bulk-status
+     * Required: SELLER (owner) hoặc ADMIN role
+     */
+    @PatchMapping("/{productId}/variants/bulk-status")
+    public ApiResponse<List<VariantResponse>> bulkUpdateVariantStatus(
+            @PathVariable String productId,
+            @Valid @RequestBody BulkVariantStatusUpdateRequest request) {
+        log.info("Bulk updating status for {} variants of product {}", request.getVariantIds().size(), productId);
+        List<VariantResponse> response = productService.bulkUpdateVariantStatus(productId, request);
+        return ApiResponse.<List<VariantResponse>>builder()
+                .message("Bulk variant status update completed")
                 .result(response)
                 .build();
     }
