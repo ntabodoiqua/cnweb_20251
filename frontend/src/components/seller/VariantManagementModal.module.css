@@ -1,0 +1,299 @@
+/* Variant Management Modal Styles */
+
+.variantModal :global(.ant-modal-content) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.variantModal :global(.ant-modal-header) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-bottom: none;
+  padding: 20px 24px;
+}
+
+.variantModal :global(.ant-modal-title) {
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.variantModal :global(.ant-modal-close) {
+  color: white;
+}
+
+.variantModal :global(.ant-modal-close:hover) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: white;
+}
+
+.modalHeader span {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.modalContent {
+  padding: 24px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+}
+
+.addBtn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  height: 40px;
+  padding: 0 24px;
+  font-weight: 500;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+  transition: all 0.3s ease;
+}
+
+.addBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+/* Form Container */
+.formContainer {
+  background: #f9fafb;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.formTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #1f2937;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.variantForm {
+  background: white;
+  padding: 24px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* Attributes Section */
+.attributesSection {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 2px dashed #e5e7eb;
+}
+
+.attributesTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.attributesCollapse {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
+.attributesCollapse :global(.ant-collapse-header) {
+  font-weight: 500;
+  color: #374151;
+}
+
+.attributesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  padding: 16px;
+  background: white;
+  border-radius: 6px;
+}
+
+.attributeItem {
+  margin-bottom: 0;
+}
+
+.attributeItem :global(.ant-form-item-label > label) {
+  font-weight: 500;
+  color: #4b5563;
+}
+
+/* Form Actions */
+.formActions {
+  margin-top: 24px;
+  margin-bottom: 0;
+  text-align: right;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* Table Customization */
+.variantModal :global(.ant-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.variantModal :global(.ant-table-thead > tr > th) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  font-weight: 600;
+  border: none;
+}
+
+.variantModal :global(.ant-table-tbody > tr:hover > td) {
+  background: #f3f4f6;
+}
+
+.variantModal :global(.ant-table-tbody > tr > td) {
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .variantModal {
+    width: 95vw !important;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .attributesGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .modalContent {
+    padding: 16px;
+  }
+
+  .formContainer {
+    padding: 16px;
+  }
+
+  .variantForm {
+    padding: 16px;
+  }
+
+  .tableHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .addBtn {
+    width: 100%;
+  }
+}
+
+/* Custom Scrollbar */
+.modalContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modalContent::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.modalContent::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+}
+
+.modalContent::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+}
+
+/* Tag Styling */
+.variantModal :global(.ant-tag) {
+  margin-bottom: 4px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+/* Button Styling */
+.variantModal :global(.ant-btn-link) {
+  padding: 4px 8px;
+  height: auto;
+  font-weight: 500;
+}
+
+.variantModal :global(.ant-btn-link:hover) {
+  text-decoration: underline;
+}
+
+/* Input Number Styling */
+.variantForm :global(.ant-input-number) {
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+.variantForm :global(.ant-input-number:hover) {
+  border-color: #667eea;
+}
+
+.variantForm :global(.ant-input-number-focused) {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+/* Select Styling */
+.variantForm :global(.ant-select-selector) {
+  border-radius: 6px;
+  border: 1px solid #d1d5db !important;
+}
+
+.variantForm :global(.ant-select-focused .ant-select-selector) {
+  border-color: #667eea !important;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1) !important;
+}
+
+/* Input Styling */
+.variantForm :global(.ant-input) {
+  border-radius: 6px;
+  border: 1px solid #d1d5db;
+}
+
+.variantForm :global(.ant-input:hover) {
+  border-color: #667eea;
+}
+
+.variantForm :global(.ant-input:focus) {
+  border-color: #667eea;
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+/* Loading State */
+.variantModal :global(.ant-spin) {
+  color: #667eea;
+}
+
+.variantModal :global(.ant-spin-dot-item) {
+  background-color: #667eea;
+}

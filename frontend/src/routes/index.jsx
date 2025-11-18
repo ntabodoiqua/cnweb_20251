@@ -110,6 +110,9 @@ const SellerOrdersPage = lazy(() => import("../pages/seller/SellerOrdersPage"));
 const SellerCategoriesPage = lazy(() =>
   import("../pages/seller/SellerCategoriesPage")
 );
+const SellerProductAttributesPage = lazy(() =>
+  import("../pages/seller/SellerProductAttributesPage")
+);
 const SellerCustomersPage = lazy(() =>
   import("../pages/seller/SellerCustomersPage")
 );
@@ -514,6 +517,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <SellerCategoriesPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_PRODUCT_ATTRIBUTES,
+            element: (
+              <SuspenseWrapper>
+                <SellerProductAttributesPage />
               </SuspenseWrapper>
             ),
           },

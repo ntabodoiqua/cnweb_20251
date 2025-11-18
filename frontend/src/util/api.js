@@ -760,6 +760,218 @@ const removeCartItemApi = (itemId) => {
   });
 };
 
+// Product Attributes APIs
+const createProductAttributeApi = (attributeData) => {
+  const URL_API = "/api/product/product-attributes";
+  return axios.post(URL_API, attributeData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const getProductAttributesByCategoryApi = (categoryId) => {
+  const URL_API = `/api/product/product-attributes/by-category/${categoryId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const getProductAttributeByIdApi = (attributeId) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const updateProductAttributeApi = (attributeId, attributeData) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}`;
+  return axios.put(URL_API, attributeData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const deleteProductAttributeApi = (attributeId) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const addCategoriesToAttributeApi = (attributeId, categoryIds) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}/categories`;
+  return axios.post(
+    URL_API,
+    { categoryIds },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const deleteCategoriesFromAttributeApi = (attributeId, categoryIds) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}/categories`;
+  return axios.delete(URL_API, {
+    data: { categoryIds },
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const addValueToAttributeApi = (attributeId, value) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}/values`;
+  return axios.post(
+    URL_API,
+    { value },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const deleteValueFromAttributeApi = (attributeId, value) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}/values`;
+  return axios.delete(URL_API, {
+    data: { value },
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Product Variants APIs
+const getProductVariantsApi = (productId) => {
+  const URL_API = `/api/product/products/${productId}/variants`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const createVariantApi = (productId, variantData) => {
+  const URL_API = `/api/product/products/${productId}/variants`;
+  return axios.post(URL_API, variantData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const updateVariantApi = (productId, variantId, variantData) => {
+  const URL_API = `/api/product/products/${productId}/variants/${variantId}`;
+  return axios.put(URL_API, variantData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const deleteVariantApi = (productId, variantId) => {
+  const URL_API = `/api/product/products/${productId}/variants/${variantId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const addAttributeToVariantApi = (productId, variantId, attributeData) => {
+  const URL_API = `/api/product/products/${productId}/variants/${variantId}/attributes`;
+  return axios.post(URL_API, attributeData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const removeAttributeFromVariantApi = (
+  productId,
+  variantId,
+  attributeId,
+  value
+) => {
+  const URL_API = `/api/product/products/${productId}/variants/${variantId}/attributes`;
+  return axios.delete(URL_API, {
+    data: {
+      attributeId: attributeId,
+      value: value,
+    },
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const updateVariantStatusApi = (productId, variantId, isActive) => {
+  const URL_API = `/api/product/products/${productId}/variants/${variantId}/status`;
+  return axios.patch(URL_API, null, {
+    params: {
+      isActive,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const bulkUpdateVariantStatusApi = (productId, variantIds, isActive) => {
+  const URL_API = `/api/product/products/${productId}/variants/bulk-status`;
+  return axios.patch(
+    URL_API,
+    {
+      variantIds,
+      isActive: isActive.toString(),
+    },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const bulkUpdateProductStatusApi = (productIds, isActive) => {
+  const URL_API = `/api/product/products/bulk-status`;
+  return axios.patch(
+    URL_API,
+    {
+      productIds,
+      isActive: isActive.toString(),
+    },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
 export {
   createUserApi,
   loginApi,
@@ -823,4 +1035,24 @@ export {
   addToCartApi,
   updateCartItemApi,
   removeCartItemApi,
+  // Product Attributes APIs
+  createProductAttributeApi,
+  getProductAttributesByCategoryApi,
+  getProductAttributeByIdApi,
+  updateProductAttributeApi,
+  deleteProductAttributeApi,
+  addCategoriesToAttributeApi,
+  deleteCategoriesFromAttributeApi,
+  addValueToAttributeApi,
+  deleteValueFromAttributeApi,
+  // Product Variants APIs
+  getProductVariantsApi,
+  createVariantApi,
+  updateVariantApi,
+  deleteVariantApi,
+  addAttributeToVariantApi,
+  removeAttributeFromVariantApi,
+  updateVariantStatusApi,
+  bulkUpdateVariantStatusApi,
+  bulkUpdateProductStatusApi,
 };

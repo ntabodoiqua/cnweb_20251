@@ -10,6 +10,7 @@ import {
   MenuUnfoldOutlined,
   TagsOutlined,
   TeamOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../../constants/routes";
 import styles from "./seller-dashboard.module.css";
@@ -47,6 +48,12 @@ const SellerDashboardLayout = () => {
       icon: <TagsOutlined />,
       label: "Danh mục sản phẩm",
       path: PROTECTED_ROUTES.SELLER_CATEGORIES,
+    },
+    {
+      key: "product-attributes",
+      icon: <AppstoreOutlined />,
+      label: "Thuộc tính sản phẩm",
+      path: PROTECTED_ROUTES.SELLER_PRODUCT_ATTRIBUTES,
     },
     {
       key: "customers",

@@ -7,9 +7,12 @@ import {
   ShopOutlined,
   LoadingOutlined,
 } from "@ant-design/icons";
-import { message } from "antd";
+import { message, Modal, Switch } from "antd";
 import AddProductModal from "../../components/seller/AddProductModal";
-import { getProductsByStoreApi } from "../../util/api";
+import {
+  getProductsByStoreApi,
+  bulkUpdateProductStatusApi,
+} from "../../util/api";
 import NoImages from "../../assets/NoImages.webp";
 import styles from "./SellerProductsPage.module.css";
 
@@ -20,12 +23,14 @@ const SellerProductsPage = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterCategory, setFilterCategory] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedStoreId, setSelectedStoreId] = useState(
     "61127fcd-8c22-4e3e-9419-93c7c05d9f83"
   );
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [selectedProducts, setSelectedProducts] = useState([]);
   const [pagination, setPagination] = useState({
     page: 0,
     size: 20,
@@ -175,10 +180,19 @@ const SellerProductsPage = () => {
       product.sku.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory =
       filterCategory === "all" || product.category === filterCategory;
-    return matchesSearch && matchesCategory;
+    const matchesStatus =
+      filterStatus === "all" || product.status === filterStatus;
+    return matchesSearch && matchesCategory && matchesStatus;
   });
 
   const getStatusBadge = (status, stock) => {
+    if (status === "inactive") {
+      return (
+        <span className={`${styles.statusBadge} ${styles.statusInactive}`}>
+          Ngừng bán
+        </span>
+      );
+    }
     if (status === "out_of_stock" || stock === 0) {
       return (
         <span className={`${styles.statusBadge} ${styles.statusOutOfStock}`}>
@@ -217,6 +231,144 @@ const SellerProductsPage = () => {
     navigate(`/seller/products/${productId}`);
   };
 
+  const handleSelectProduct = (productId, checked) => {
+    setSelectedProducts((prev) =>
+      checked ? [...prev, productId] : prev.filter((id) => id !== productId)
+    );
+  };
+
+  const handleSelectAll = (checked) => {
+    setSelectedProducts(checked ? filteredProducts.map((p) => p.id) : []);
+  };
+
+  const handleBulkUpdateStatus = async (isActive) => {
+    if (selectedProducts.length === 0) {
+      message.warning("Vui lòng chọn ít nhất một sản phẩm");
+      return;
+    }
+
+    // Show warning when deactivating products
+    if (!isActive) {
+      Modal.confirm({
+        title: "Xác nhận vô hiệu hóa sản phẩm",
+        content: (
+          <div>
+            <p style={{ marginBottom: "12px" }}>
+              Bạn đang chuẩn bị vô hiệu hóa{" "}
+              <strong>{selectedProducts.length}</strong> sản phẩm.
+            </p>
+            <div
+              style={{
+                padding: "12px",
+                backgroundColor: "#fff7e6",
+                border: "1px solid #ffd591",
+                borderRadius: "8px",
+              }}
+            >
+              <p style={{ margin: 0, color: "#d46b08", fontWeight: 600 }}>
+                ⚠️ Lưu ý quan trọng:
+              </p>
+              <p style={{ margin: "8px 0 0 0", color: "#595959" }}>
+                Khi vô hiệu hóa sản phẩm, <strong>toàn bộ biến thể</strong> của
+                sản phẩm cũng sẽ bị vô hiệu hóa. Khách hàng sẽ không thể xem và
+                mua các sản phẩm này nữa.
+              </p>
+            </div>
+          </div>
+        ),
+        okText: "Xác nhận vô hiệu hóa",
+        cancelText: "Hủy",
+        okButtonProps: { danger: true },
+        width: 500,
+        onOk: async () => {
+          try {
+            await bulkUpdateProductStatusApi(selectedProducts, isActive);
+            message.success(
+              `Vô hiệu hóa ${selectedProducts.length} sản phẩm thành công`
+            );
+            setSelectedProducts([]);
+            fetchProducts();
+          } catch (error) {
+            console.error("Error bulk updating product status:", error);
+            message.error("Không thể cập nhật trạng thái sản phẩm");
+          }
+        },
+      });
+    } else {
+      // No warning for activation
+      try {
+        await bulkUpdateProductStatusApi(selectedProducts, isActive);
+        message.success(
+          `Kích hoạt ${selectedProducts.length} sản phẩm thành công`
+        );
+        setSelectedProducts([]);
+        fetchProducts();
+      } catch (error) {
+        console.error("Error bulk updating product status:", error);
+        message.error("Không thể cập nhật trạng thái sản phẩm");
+      }
+    }
+  };
+
+  const handleToggleProductStatus = async (productId, currentStatus) => {
+    const isActive = currentStatus !== "active";
+
+    // Show warning when deactivating a product
+    if (!isActive) {
+      Modal.confirm({
+        title: "Xác nhận vô hiệu hóa sản phẩm",
+        content: (
+          <div>
+            <p style={{ marginBottom: "12px" }}>
+              Bạn đang chuẩn bị vô hiệu hóa sản phẩm này.
+            </p>
+            <div
+              style={{
+                padding: "12px",
+                backgroundColor: "#fff7e6",
+                border: "1px solid #ffd591",
+                borderRadius: "8px",
+              }}
+            >
+              <p style={{ margin: 0, color: "#d46b08", fontWeight: 600 }}>
+                ⚠️ Lưu ý quan trọng:
+              </p>
+              <p style={{ margin: "8px 0 0 0", color: "#595959" }}>
+                Khi vô hiệu hóa sản phẩm, <strong>toàn bộ biến thể</strong> của
+                sản phẩm cũng sẽ bị vô hiệu hóa. Khách hàng sẽ không thể xem và
+                mua sản phẩm này nữa.
+              </p>
+            </div>
+          </div>
+        ),
+        okText: "Xác nhận vô hiệu hóa",
+        cancelText: "Hủy",
+        okButtonProps: { danger: true },
+        width: 500,
+        onOk: async () => {
+          try {
+            await bulkUpdateProductStatusApi([productId], isActive);
+            message.success("Vô hiệu hóa sản phẩm thành công");
+            fetchProducts();
+          } catch (error) {
+            console.error("Error updating product status:", error);
+            message.error("Không thể cập nhật trạng thái sản phẩm");
+          }
+        },
+      });
+    } else {
+      // No warning for activation
+      try {
+        await bulkUpdateProductStatusApi([productId], isActive);
+        message.success("Kích hoạt sản phẩm thành công");
+        fetchProducts();
+      } catch (error) {
+        console.error("Error updating product status:", error);
+        message.error("Không thể cập nhật trạng thái sản phẩm");
+      }
+    }
+  };
+
   return (
     <div className={styles.sellerProducts}>
       {/* Header Actions */}
@@ -243,6 +395,15 @@ const SellerProductsPage = () => {
               </option>
             ))}
           </select>
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value)}
+            className={styles.filterSelect}
+          >
+            <option value="all">Tất cả trạng thái</option>
+            <option value="active">Đang bán</option>
+            <option value="inactive">Ngừng bán</option>
+          </select>
           <button
             className={`${styles.sellerBtn} ${styles.sellerBtnPrimary}`}
             onClick={handleAddProduct}
@@ -252,6 +413,37 @@ const SellerProductsPage = () => {
           </button>
         </div>
       </div>
+
+      {/* Bulk Actions Bar */}
+      {selectedProducts.length > 0 && (
+        <div className={styles.bulkActionsBar}>
+          <div className={styles.bulkActionsInfo}>
+            <span>
+              Đã chọn <strong>{selectedProducts.length}</strong> sản phẩm
+            </span>
+          </div>
+          <div className={styles.bulkActionsButtons}>
+            <button
+              className={`${styles.sellerBtn} ${styles.sellerBtnSuccess}`}
+              onClick={() => handleBulkUpdateStatus(true)}
+            >
+              Kích hoạt ({selectedProducts.length})
+            </button>
+            <button
+              className={`${styles.sellerBtn} ${styles.sellerBtnDanger}`}
+              onClick={() => handleBulkUpdateStatus(false)}
+            >
+              Vô hiệu hóa ({selectedProducts.length})
+            </button>
+            <button
+              className={`${styles.sellerBtn} ${styles.sellerBtnDefault}`}
+              onClick={() => setSelectedProducts([])}
+            >
+              Bỏ chọn
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Products Table */}
       <div className={styles.sellerTableContainer}>
@@ -264,6 +456,17 @@ const SellerProductsPage = () => {
         <table className={styles.sellerTable}>
           <thead>
             <tr>
+              <th style={{ width: "50px" }}>
+                <input
+                  type="checkbox"
+                  checked={
+                    filteredProducts.length > 0 &&
+                    selectedProducts.length === filteredProducts.length
+                  }
+                  onChange={(e) => handleSelectAll(e.target.checked)}
+                  style={{ cursor: "pointer" }}
+                />
+              </th>
               <th>Sản phẩm</th>
               <th>Danh mục Shop</th>
               <th>Danh mục Platform</th>
@@ -279,6 +482,17 @@ const SellerProductsPage = () => {
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (
                 <tr key={product.id}>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedProducts.includes(product.id)}
+                      onChange={(e) =>
+                        handleSelectProduct(product.id, e.target.checked)
+                      }
+                      onClick={(e) => e.stopPropagation()}
+                      style={{ cursor: "pointer" }}
+                    />
+                  </td>
                   <td>
                     <div className={styles.productInfo}>
                       <img
@@ -346,6 +560,24 @@ const SellerProductsPage = () => {
                   <td>{getStatusBadge(product.status, product.stock)}</td>
                   <td>
                     <div className={styles.actionButtons}>
+                      <div className={styles.statusToggle}>
+                        <span className={styles.toggleLabel}>
+                          {product.status === "active"
+                            ? "Đang bán"
+                            : "Ngừng bán"}
+                        </span>
+                        <Switch
+                          checked={product.status === "active"}
+                          onChange={() =>
+                            handleToggleProductStatus(
+                              product.id,
+                              product.status
+                            )
+                          }
+                          checkedChildren="ON"
+                          unCheckedChildren="OFF"
+                        />
+                      </div>
                       <button
                         className={`${styles.actionBtn} ${styles.viewBtn}`}
                         title="Xem chi tiết"
@@ -359,7 +591,7 @@ const SellerProductsPage = () => {
               ))
             ) : (
               <tr>
-                <td colSpan="9" className={styles.noData}>
+                <td colSpan="10" className={styles.noData}>
                   <ShopOutlined style={{ fontSize: "48px", color: "#ccc" }} />
                   <p>Không tìm thấy sản phẩm nào</p>
                 </td>
@@ -378,11 +610,13 @@ const SellerProductsPage = () => {
         <div className={styles.summaryItem}>
           <span className={styles.summaryLabel}>Đang bán:</span>
           <span className={styles.summaryValue}>
-            {
-              filteredProducts.filter(
-                (p) => p.status === "active" && p.stock > 0
-              ).length
-            }
+            {filteredProducts.filter((p) => p.status === "active").length}
+          </span>
+        </div>
+        <div className={styles.summaryItem}>
+          <span className={styles.summaryLabel}>Ngừng bán:</span>
+          <span className={styles.summaryValue}>
+            {filteredProducts.filter((p) => p.status === "inactive").length}
           </span>
         </div>
         <div className={styles.summaryItem}>

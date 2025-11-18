@@ -1,0 +1,699 @@
+/* ========================================
+   Variants Manager Styles
+   Đồng bộ với design pattern của Categories và Attributes
+   ======================================== */
+
+.variantsManager {
+  animation: fadeInUp 0.5s ease-out;
+  padding: 0;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== Header Section ==================== */
+
+.header {
+  background: white;
+  border: 2px solid rgba(238, 77, 45, 0.15);
+  border-radius: 12px;
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+.title :global(.anticon) {
+  color: #ee4d2d;
+  font-size: 20px;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ==================== Bulk Actions Section ==================== */
+
+.bulkActions {
+  background: white;
+  border: 2px solid rgba(24, 144, 255, 0.15);
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.bulkActionsButtons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.bulkActionsButtons :global(.ant-btn) {
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+/* ==================== Action Button ==================== */
+
+.addBtn {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  border: none;
+  height: 40px;
+  padding: 0 24px;
+  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.addBtn:hover {
+  background: linear-gradient(135deg, #3da80e 0%, #5fb82b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.4);
+}
+
+/* ==================== Create Form Section ==================== */
+
+.createForm {
+  background: white;
+  border: 2px solid rgba(82, 196, 26, 0.2);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.formTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.1);
+}
+
+.formTitle :global(.anticon) {
+  color: #52c41a;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formGroup label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #555;
+}
+
+.attributesSection {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.attributesSection h5 {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.attributesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e5e7eb;
+}
+
+/* ==================== Variants List Container ==================== */
+
+.variantsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ==================== Variant Card (Compact & Expanded) ==================== */
+
+.variantCard {
+  background: white;
+  border: 2px solid #f0f0f0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.variantCard:hover {
+  border-color: rgba(238, 77, 45, 0.3);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Inactive Variant Style */
+.inactiveVariant {
+  opacity: 0.6;
+  background: #fafafa;
+  border-color: #d9d9d9 !important;
+}
+
+.inactiveVariant:hover {
+  opacity: 0.75;
+  border-color: #bfbfbf !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.inactiveVariant .variantName {
+  color: #999;
+}
+
+.inactiveVariant .price {
+  color: #999;
+}
+
+/* ==================== Compact View ==================== */
+
+.variantRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 24px;
+  background: white;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.variantRow:hover {
+  background-color: rgba(238, 77, 45, 0.02);
+}
+
+.variantRow :global(.ant-checkbox-wrapper) {
+  margin-right: 4px;
+}
+
+.expandBtn {
+  width: 36px;
+  height: 36px;
+  border: 2px solid rgba(238, 77, 45, 0.2);
+  background: white;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+  color: #ee4d2d;
+}
+
+.expandBtn:hover {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  border-color: #ee4d2d;
+  color: white;
+  transform: scale(1.1);
+}
+
+.variantInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.variantName {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  line-height: 1.4;
+}
+
+.variantMeta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.sku {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.05) 0%,
+    rgba(255, 107, 53, 0.05) 100%
+  );
+  border: 1px solid rgba(238, 77, 45, 0.15);
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-family: "Courier New", monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #ee4d2d;
+}
+
+.price {
+  color: #ee4d2d;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.originalPrice {
+  color: #999;
+  text-decoration: line-through;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.inStock {
+  color: #52c41a;
+  font-weight: 600;
+  font-size: 13px;
+  background: rgba(82, 196, 26, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(82, 196, 26, 0.2);
+}
+
+.lowStock {
+  color: #ff4d4f;
+  font-weight: 600;
+  font-size: 13px;
+  background: rgba(255, 77, 79, 0.1);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 77, 79, 0.2);
+}
+
+.sold {
+  color: #666;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* ==================== Action Buttons ==================== */
+
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.statusSwitch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(238, 77, 45, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(238, 77, 45, 0.15);
+}
+
+.statusSwitch span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+}
+
+.actions :global(.ant-btn) {
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.actions :global(.ant-btn-primary) {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  border: none;
+  box-shadow: 0 2px 8px rgba(82, 196, 26, 0.3);
+}
+
+.actions :global(.ant-btn-primary:hover) {
+  background: linear-gradient(135deg, #3da80e 0%, #5fb82b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.4);
+}
+
+.actions :global(.ant-btn-default) {
+  border: 2px solid #e8e8e8;
+}
+
+.actions :global(.ant-btn-default:hover) {
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+}
+
+.actions :global(.ant-btn-dangerous) {
+  border: 2px solid rgba(255, 77, 79, 0.3);
+  color: #ff4d4f;
+}
+
+.actions :global(.ant-btn-dangerous:hover) {
+  background: #ff4d4f;
+  color: white;
+  border-color: #ff4d4f;
+}
+
+/* ==================== Expanded Content ==================== */
+
+.expandedContent {
+  padding: 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.02) 0%,
+    rgba(255, 107, 53, 0.02) 100%
+  );
+  border-top: 2px solid rgba(238, 77, 45, 0.1);
+  animation: expandDown 0.3s ease;
+}
+
+@keyframes expandDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 1000px;
+  }
+}
+
+.attributesHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.1);
+}
+
+.attributesHeader h5 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.attributesHeader h5 :global(.anticon) {
+  color: #ee4d2d;
+}
+
+.attributesList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.attributeItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid rgba(238, 77, 45, 0.15);
+  transition: all 0.3s ease;
+}
+
+.attributeItem:hover {
+  border-color: rgba(238, 77, 45, 0.4);
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.1);
+  transform: translateX(4px);
+}
+
+.attributeTag {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 6px 14px;
+  margin: 0;
+  border-radius: 8px;
+}
+
+.emptyAttributes {
+  text-align: center;
+  padding: 32px 20px;
+  color: #999;
+  font-size: 14px;
+  background: white;
+  border-radius: 10px;
+  border: 2px dashed #e8e8e8;
+}
+
+.addAttributeForm {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  border: 2px solid rgba(82, 196, 26, 0.2);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+/* ==================== Edit Mode Fields ==================== */
+
+.editFormContainer {
+  width: 100%;
+  padding: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.03) 0%,
+    rgba(255, 107, 53, 0.03) 100%
+  );
+  border-radius: 12px;
+  border: 2px solid rgba(238, 77, 45, 0.15);
+}
+
+.editFormGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.editFormGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.editFormGroup label {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.editFormGroup :global(.ant-input),
+.editFormGroup :global(.ant-input-number) {
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.editFormGroup :global(.ant-input:focus),
+.editFormGroup :global(.ant-input-number:focus),
+.editFormGroup :global(.ant-input-number-focused) {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 2px rgba(238, 77, 45, 0.1);
+}
+
+.editAttributesSection {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid rgba(238, 77, 45, 0.1);
+}
+
+.editAttributesSection h5 {
+  font-size: 15px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.currentAttributes {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.editField {
+  margin-bottom: 10px;
+}
+
+.editField:last-child {
+  margin-bottom: 0;
+}
+
+.editField :global(.ant-input),
+.editField :global(.ant-input-number) {
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  font-weight: 500;
+}
+
+.editField :global(.ant-input:focus),
+.editField :global(.ant-input-number:focus),
+.editField :global(.ant-input-number-focused) {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 2px rgba(238, 77, 45, 0.1);
+}
+
+/* Empty State */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  text-align: center;
+  gap: 20px;
+  background: white;
+  border-radius: 12px;
+  border: 2px dashed #e8e8e8;
+}
+
+.emptyState :global(.anticon) {
+  font-size: 56px;
+  color: #d9d9d9;
+}
+
+.emptyState p {
+  font-size: 16px;
+  color: #999;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .variantsManager {
+    padding: 16px;
+  }
+
+  .header {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .addBtn {
+    width: 100%;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .editFormGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .attributesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .variantRow {
+    flex-wrap: wrap;
+  }
+
+  .variantMeta {
+    font-size: 12px;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .addAttributeForm {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .addAttributeForm > * {
+    width: 100% !important;
+    margin: 0 !important;
+    margin-bottom: 8px !important;
+  }
+}
+
+/* Smooth transitions */
+* {
+  transition: background-color 0.2s ease, color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+button {
+  transition: all 0.2s ease;
+}
