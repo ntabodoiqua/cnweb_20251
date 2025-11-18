@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useCallback, memo } from "react";
-import { PlusOutlined, TagsOutlined } from "@ant-design/icons";
-import { notification, Input, InputNumber, Select, Button } from "antd";
+import { PlusOutlined, TagsOutlined, SaveOutlined } from "@ant-design/icons";
+import {
+  notification,
+  Input,
+  InputNumber,
+  Select,
+  Button,
+  Checkbox,
+} from "antd";
 import {
   createVariantApi,
   updateVariantApi,
@@ -9,6 +16,8 @@ import {
   removeAttributeFromVariantApi,
   getProductAttributesByCategoryApi,
   getProductAttributeByIdApi,
+  updateVariantStatusApi,
+  bulkUpdateVariantStatusApi,
 } from "../../util/api";
 import VariantCard from "./VariantCard";
 import styles from "./VariantsManager.module.css";
@@ -26,6 +35,7 @@ const VariantsManager = memo(
     const [attributeDetails, setAttributeDetails] = useState({});
     const [editingAttributes, setEditingAttributes] = useState({});
     const [addingAttribute, setAddingAttribute] = useState({});
+    const [selectedVariants, setSelectedVariants] = useState([]);
 
     useEffect(() => {
       if (categoryId) {
@@ -250,21 +260,131 @@ const VariantsManager = memo(
       }
     }, [createFormData, editingAttributes, productId, onUpdate]);
 
+    const handleToggleVariantStatus = useCallback(
+      async (variantId, isActive) => {
+        try {
+          await updateVariantStatusApi(productId, variantId, isActive);
+          notification.success({
+            message: "Thành công",
+            description: `${
+              isActive ? "Kích hoạt" : "Vô hiệu hóa"
+            } biến thể thành công`,
+            placement: "topRight",
+          });
+          onUpdate?.();
+        } catch (error) {
+          console.error("Error updating variant status:", error);
+          notification.error({
+            message: "Lỗi",
+            description: "Không thể cập nhật trạng thái biến thể",
+            placement: "topRight",
+          });
+        }
+      },
+      [productId, onUpdate]
+    );
+
+    const handleBulkUpdateStatus = useCallback(
+      async (isActive) => {
+        if (selectedVariants.length === 0) {
+          notification.warning({
+            message: "Cảnh báo",
+            description: "Vui lòng chọn ít nhất một biến thể",
+            placement: "topRight",
+          });
+          return;
+        }
+
+        try {
+          await bulkUpdateVariantStatusApi(
+            productId,
+            selectedVariants,
+            isActive
+          );
+          notification.success({
+            message: "Thành công",
+            description: `${isActive ? "Kích hoạt" : "Vô hiệu hóa"} ${
+              selectedVariants.length
+            } biến thể thành công`,
+            placement: "topRight",
+          });
+          setSelectedVariants([]);
+          onUpdate?.();
+        } catch (error) {
+          console.error("Error bulk updating variant status:", error);
+          notification.error({
+            message: "Lỗi",
+            description: "Không thể cập nhật trạng thái hàng loạt",
+            placement: "topRight",
+          });
+        }
+      },
+      [productId, selectedVariants, onUpdate]
+    );
+
+    const handleSelectVariant = useCallback((variantId, checked) => {
+      setSelectedVariants((prev) =>
+        checked ? [...prev, variantId] : prev.filter((id) => id !== variantId)
+      );
+    }, []);
+
+    const handleSelectAll = useCallback(
+      (checked) => {
+        setSelectedVariants(checked ? variants.map((v) => v.id) : []);
+      },
+      [variants]
+    );
+
     return (
       <div className={styles.variantsManager}>
         <div className={styles.header}>
           <h3 className={styles.title}>
             <TagsOutlined /> Biến thể sản phẩm ({variants?.length || 0})
           </h3>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setShowCreateForm(!showCreateForm)}
-            className={styles.addBtn}
-          >
-            {showCreateForm ? "Hủy" : "Thêm biến thể"}
-          </Button>
+          <div className={styles.headerActions}>
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              onClick={() => setShowCreateForm(!showCreateForm)}
+              className={styles.addBtn}
+            >
+              {showCreateForm ? "Hủy" : "Thêm biến thể"}
+            </Button>
+          </div>
         </div>
+
+        {/* Bulk Actions */}
+        {variants && variants.length > 0 && (
+          <div className={styles.bulkActions}>
+            <Checkbox
+              checked={selectedVariants.length === variants.length}
+              indeterminate={
+                selectedVariants.length > 0 &&
+                selectedVariants.length < variants.length
+              }
+              onChange={(e) => handleSelectAll(e.target.checked)}
+            >
+              Chọn tất cả ({selectedVariants.length}/{variants.length})
+            </Checkbox>
+            {selectedVariants.length > 0 && (
+              <div className={styles.bulkActionsButtons}>
+                <Button
+                  type="primary"
+                  size="small"
+                  onClick={() => handleBulkUpdateStatus(true)}
+                >
+                  Kích hoạt ({selectedVariants.length})
+                </Button>
+                <Button
+                  size="small"
+                  onClick={() => handleBulkUpdateStatus(false)}
+                >
+                  Vô hiệu hóa ({selectedVariants.length})
+                </Button>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Create Form */}
         {showCreateForm && (
@@ -417,6 +537,7 @@ const VariantsManager = memo(
                 addingAttribute={addingAttribute}
                 attributes={attributes}
                 attributeDetails={attributeDetails}
+                isSelected={selectedVariants.includes(variant.id)}
                 onToggleExpand={toggleExpand}
                 onEdit={handleEdit}
                 onCancelEdit={handleCancelEdit}
@@ -426,6 +547,8 @@ const VariantsManager = memo(
                 onAddAttribute={handleAddAttribute}
                 onRemoveAttribute={handleRemoveAttribute}
                 onAddingAttributeChange={setAddingAttribute}
+                onToggleStatus={handleToggleVariantStatus}
+                onSelect={handleSelectVariant}
               />
             ))}
           </div>

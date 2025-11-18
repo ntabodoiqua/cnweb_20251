@@ -168,6 +168,94 @@
   box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
 }
 
+.sellerBtnSuccess {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+}
+
+.sellerBtnSuccess:hover {
+  background: linear-gradient(135deg, #3da80e 0%, #5fb82b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.4);
+}
+
+.sellerBtnDanger {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3);
+}
+
+.sellerBtnDanger:hover {
+  background: linear-gradient(135deg, #d9363e 0%, #ff5b5d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 77, 79, 0.4);
+}
+
+.sellerBtnDefault {
+  background: white;
+  color: #666;
+  border: 2px solid #e8e8e8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sellerBtnDefault:hover {
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ==================== Bulk Actions Bar ==================== */
+
+.bulkActionsBar {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 2px solid #91d5ff;
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bulkActionsInfo {
+  font-size: 14px;
+  color: #0958d9;
+  font-weight: 600;
+}
+
+.bulkActionsInfo strong {
+  color: #003eb3;
+  font-size: 16px;
+}
+
+.bulkActionsButtons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bulkActionsButtons .sellerBtn {
+  padding: 10px 20px;
+  font-size: 13px;
+}
+
 /* ==================== Table Container ==================== */
 
 .sellerTableContainer {
@@ -366,6 +454,12 @@
   box-shadow: 0 2px 6px rgba(82, 196, 26, 0.3);
 }
 
+.statusInactive {
+  background: linear-gradient(135deg, #8c8c8c 0%, #bfbfbf 100%);
+  color: white;
+  box-shadow: 0 2px 6px rgba(140, 140, 140, 0.3);
+}
+
 .statusLowStock {
   background: linear-gradient(135deg, #faad14 0%, #ffc53d 100%);
   color: white;
@@ -382,9 +476,27 @@
 
 .actionButtons {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
+}
+
+.statusToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(238, 77, 45, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(238, 77, 45, 0.15);
+}
+
+.toggleLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
 }
 
 .actionBtn {

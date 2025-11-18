@@ -9,7 +9,16 @@ import {
   MinusCircleOutlined,
   PlusOutlined,
 } from "@ant-design/icons";
-import { Input, InputNumber, Popconfirm, Select, Button, Tag } from "antd";
+import {
+  Input,
+  InputNumber,
+  Popconfirm,
+  Select,
+  Button,
+  Tag,
+  Checkbox,
+  Switch,
+} from "antd";
 import styles from "./VariantsManager.module.css";
 
 const { Option } = Select;
@@ -23,6 +32,7 @@ const VariantCard = memo(
     addingAttribute,
     attributes,
     attributeDetails,
+    isSelected,
     onToggleExpand,
     onEdit,
     onCancelEdit,
@@ -32,6 +42,8 @@ const VariantCard = memo(
     onAddAttribute,
     onRemoveAttribute,
     onAddingAttributeChange,
+    onToggleStatus,
+    onSelect,
   }) => {
     const handleToggle = useCallback(() => {
       onToggleExpand(variant.id);
@@ -49,6 +61,20 @@ const VariantCard = memo(
       onDelete(variant.id);
     }, [variant.id, onDelete]);
 
+    const handleStatusToggle = useCallback(
+      (checked) => {
+        onToggleStatus(variant.id, checked);
+      },
+      [variant.id, onToggleStatus]
+    );
+
+    const handleSelect = useCallback(
+      (e) => {
+        onSelect(variant.id, e.target.checked);
+      },
+      [variant.id, onSelect]
+    );
+
     return (
       <div
         className={`${styles.variantCard} ${
@@ -57,6 +83,11 @@ const VariantCard = memo(
       >
         {/* Main Row */}
         <div className={styles.variantRow}>
+          <Checkbox
+            checked={isSelected}
+            onChange={handleSelect}
+            onClick={(e) => e.stopPropagation()}
+          />
           <button className={styles.expandBtn} onClick={handleToggle}>
             {isExpanded ? <DownOutlined /> : <RightOutlined />}
           </button>
@@ -321,6 +352,15 @@ const VariantCard = memo(
               </>
             ) : (
               <>
+                <div className={styles.statusSwitch}>
+                  <span>{variant.active ? "Đang bán" : "Ngừng bán"}</span>
+                  <Switch
+                    checked={variant.active}
+                    onChange={handleStatusToggle}
+                    checkedChildren="ON"
+                    unCheckedChildren="OFF"
+                  />
+                </div>
                 <Button
                   size="small"
                   icon={<EditOutlined />}

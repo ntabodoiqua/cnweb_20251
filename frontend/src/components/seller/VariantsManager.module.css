@@ -50,6 +50,39 @@
   font-size: 20px;
 }
 
+.headerActions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ==================== Bulk Actions Section ==================== */
+
+.bulkActions {
+  background: white;
+  border: 2px solid rgba(24, 144, 255, 0.15);
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.bulkActionsButtons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.bulkActionsButtons :global(.ant-btn) {
+  border-radius: 8px;
+  font-weight: 600;
+}
+
 /* ==================== Action Button ==================== */
 
 .addBtn {
@@ -209,7 +242,7 @@
 .variantRow {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   padding: 20px 24px;
   background: white;
   cursor: pointer;
@@ -218,6 +251,10 @@
 
 .variantRow:hover {
   background-color: rgba(238, 77, 45, 0.02);
+}
+
+.variantRow :global(.ant-checkbox-wrapper) {
+  margin-right: 4px;
 }
 
 .expandBtn {
@@ -323,6 +360,23 @@
   display: flex;
   gap: 10px;
   flex-shrink: 0;
+  align-items: center;
+}
+
+.statusSwitch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(238, 77, 45, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(238, 77, 45, 0.15);
+}
+
+.statusSwitch span {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
 }
 
 .actions :global(.ant-btn) {

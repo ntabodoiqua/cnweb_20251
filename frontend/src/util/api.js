@@ -926,6 +926,52 @@ const removeAttributeFromVariantApi = (
   });
 };
 
+const updateVariantStatusApi = (productId, variantId, isActive) => {
+  const URL_API = `/api/product/products/${productId}/variants/${variantId}/status`;
+  return axios.patch(URL_API, null, {
+    params: {
+      isActive,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const bulkUpdateVariantStatusApi = (productId, variantIds, isActive) => {
+  const URL_API = `/api/product/products/${productId}/variants/bulk-status`;
+  return axios.patch(
+    URL_API,
+    {
+      variantIds,
+      isActive: isActive.toString(),
+    },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const bulkUpdateProductStatusApi = (productIds, isActive) => {
+  const URL_API = `/api/product/products/bulk-status`;
+  return axios.patch(
+    URL_API,
+    {
+      productIds,
+      isActive: isActive.toString(),
+    },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
 export {
   createUserApi,
   loginApi,
@@ -1006,4 +1052,7 @@ export {
   deleteVariantApi,
   addAttributeToVariantApi,
   removeAttributeFromVariantApi,
+  updateVariantStatusApi,
+  bulkUpdateVariantStatusApi,
+  bulkUpdateProductStatusApi,
 };
