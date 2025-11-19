@@ -45,7 +45,7 @@ public class Order {
     String orderNumber; // Mã đơn hàng hiển thị cho user (ORD-2025-001)
 
     @Column(name = "user_id", nullable = false)
-    String userId;
+    String username;
 
     @Column(name = "store_id", nullable = false)
     String storeId;
@@ -69,9 +69,6 @@ public class Order {
     @Column(name = "shipping_province", length = 100)
     String shippingProvince;
 
-    @Column(name = "shipping_district", length = 100)
-    String shippingDistrict;
-
     @Column(name = "shipping_ward", length = 100)
     String shippingWard;
 
@@ -79,16 +76,12 @@ public class Order {
     @Column(name = "subtotal", nullable = false, precision = 19, scale = 2)
     BigDecimal subtotal; // Tổng tiền sản phẩm (chưa tính phí ship, giảm giá)
 
-    @Column(name = "shipping_fee", nullable = false, precision = 19, scale = 2)
-    @Builder.Default
-    BigDecimal shippingFee = BigDecimal.ZERO;
-
     @Column(name = "discount_amount", precision = 19, scale = 2)
     @Builder.Default
     BigDecimal discountAmount = BigDecimal.ZERO; // Số tiền được giảm
 
     @Column(name = "total_amount", nullable = false, precision = 19, scale = 2)
-    BigDecimal totalAmount; // Tổng tiền cuối cùng = subtotal + shippingFee - discountAmount
+    BigDecimal totalAmount; // Tổng tiền cuối cùng = subtotal - discountAmount
 
     // Mã giảm giá
     @Column(name = "coupon_code", length = 50)
@@ -125,7 +118,7 @@ public class Order {
     String cancelReason;
 
     @Column(name = "cancelled_by")
-    String cancelledBy; // User ID người hủy đơn
+    String cancelledBy; // Username người hủy đơn
 
     // Thời gian
     @CreationTimestamp
@@ -138,12 +131,6 @@ public class Order {
 
     @Column(name = "confirmed_at")
     LocalDateTime confirmedAt;
-
-    @Column(name = "shipped_at")
-    LocalDateTime shippedAt;
-
-    @Column(name = "delivered_at")
-    LocalDateTime deliveredAt;
 
     @Column(name = "cancelled_at")
     LocalDateTime cancelledAt;
@@ -173,7 +160,6 @@ public class Order {
             .reduce(BigDecimal.ZERO, BigDecimal::add);
         
         this.totalAmount = this.subtotal
-            .add(this.shippingFee != null ? this.shippingFee : BigDecimal.ZERO)
             .subtract(this.discountAmount != null ? this.discountAmount : BigDecimal.ZERO);
     }
 

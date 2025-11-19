@@ -104,6 +104,9 @@ public enum ErrorCode {
     INVALID_CATEGORY_TYPE(1807, "error.1807", HttpStatus.BAD_REQUEST),
     ATTRIBUTE_NOT_APPLICABLE_TO_PRODUCT_CATEGORY(1808, "error.1808", HttpStatus.BAD_REQUEST),
 
+    // Lỗi tồn kho (19xx)
+    INVENTORY_STOCK_NOT_FOUND(1901, "error.1901", HttpStatus.NOT_FOUND),
+
     // Lỗi khác (99xx)
     UNCATEGORIZED_EXCEPTION(9999, "error.9999", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(9998, "error.9998", HttpStatus.BAD_REQUEST),

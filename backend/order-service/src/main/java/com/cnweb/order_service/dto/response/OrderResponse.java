@@ -22,7 +22,7 @@ public class OrderResponse {
 
     String id;
     String orderNumber;
-    String userId;
+    String username;
     String storeId;
     String storeName;
 
@@ -32,12 +32,10 @@ public class OrderResponse {
     String receiverEmail;
     String shippingAddress;
     String shippingProvince;
-    String shippingDistrict;
     String shippingWard;
 
     // Thông tin giá cả
     BigDecimal subtotal;
-    BigDecimal shippingFee;
     BigDecimal discountAmount;
     BigDecimal totalAmount;
 
@@ -60,8 +58,6 @@ public class OrderResponse {
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
     LocalDateTime confirmedAt;
-    LocalDateTime shippedAt;
-    LocalDateTime deliveredAt;
     LocalDateTime cancelledAt;
 
     // Items

@@ -63,6 +63,7 @@ public class ProductServiceImpl implements ProductService {
     ProductImageRepository productImageRepository;
     AttributeValueRepository attributeValueRepository;
     ProductAttributeRepository productAttributeRepository;
+    InventoryStockRepository inventoryStockRepository;
     private final CategoryMapper categoryMapper;
     private final StoreMapper storeMapper;
     private final BrandMapper brandMapper;
@@ -166,7 +167,8 @@ public class ProductServiceImpl implements ProductService {
             BigDecimal minPrice = null;
             BigDecimal maxPrice = null;
             for (VariantCreationRequest variantReq : request.getVariants()) {
-                createVariantForProduct(product, variantReq);
+                var variant = createVariantForProduct(product, variantReq);
+                createInventoryStockForVariant(variant);
                 // Update min/max price
                 if (minPrice == null || variantReq.getPrice().compareTo(minPrice) < 0) {
                     minPrice = variantReq.getPrice();
@@ -428,6 +430,7 @@ public class ProductServiceImpl implements ProductService {
         }
         
         ProductVariant variant = createVariantForProduct(product, request);
+        createInventoryStockForVariant(variant);
         if (product.getMinPrice() == null || variant.getPrice().compareTo(product.getMinPrice()) < 0) {
             product.setMinPrice(variant.getPrice());
         }
@@ -466,12 +469,17 @@ public class ProductServiceImpl implements ProductService {
         }
         if (request.getStockQuantity() != null) {
             variant.setStockQuantity(request.getStockQuantity());
+
         }
         if (request.getImageName() != null) {
             variant.setImageName(request.getImageName());
         }
         
         variant = variantRepository.save(variant);
+
+        InventoryStock inventoryStock = inventoryStockRepository.findByProductVariantId(variant.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND));
+        inventoryStock.setQuantityOnHand(request.getStockQuantity());
         log.info("Variant {} updated successfully", variant.getSku());
         cacheEvictService.evictProductDetails(productId);
         return mapToVariantResponse(variant);
@@ -919,6 +927,16 @@ public class ProductServiceImpl implements ProductService {
                 .build();
         
         return variantRepository.save(variant);
+    }
+
+    private InventoryStock createInventoryStockForVariant(ProductVariant variant) {
+        InventoryStock stock = InventoryStock.builder()
+                .productVariant(variant)
+                .quantityOnHand(variant.getStockQuantity())
+                .quantityReserved(0)
+                .build();
+
+        return inventoryStockRepository.save(stock);
     }
 
     private String generateSKU(Product product) {

@@ -38,8 +38,9 @@ public class OrderCreationRequest {
     @NotBlank(message = "Shipping address is required")
     String shippingAddress;
 
+    @NotBlank(message = "Shipping city is required")
     String shippingProvince;
-    String shippingDistrict;
+    @NotBlank(message = "Shipping ward is required")
     String shippingWard;
 
     // Phương thức thanh toán
