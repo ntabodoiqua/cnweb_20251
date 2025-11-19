@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   UserOutlined,
   SearchOutlined,
@@ -6,92 +6,149 @@ import {
   DeleteOutlined,
   LockOutlined,
   UnlockOutlined,
+  FilterOutlined,
+  ReloadOutlined,
+  EyeOutlined,
+  ManOutlined,
+  WomanOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  CheckOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
+import { getUsersAdminApi } from "../../util/api";
+import styles from "./AdminUsersPage.module.css";
 
 /**
  * AdminUsersPage - Trang quản lý người dùng
  * Hiển thị danh sách người dùng và các thao tác quản lý
  */
 const AdminUsersPage = () => {
-  // Mock data - sẽ thay thế bằng API sau
-  const [users, setUsers] = useState([
-    {
-      id: 1,
-      username: "nguyenvana",
-      email: "nguyenvana@example.com",
-      fullName: "Nguyễn Văn A",
-      role: "USER",
-      status: "active",
-      createdAt: "2024-01-15",
-      lastLogin: "2024-11-14 09:30",
-    },
-    {
-      id: 2,
-      username: "tranthib",
-      email: "tranthib@example.com",
-      fullName: "Trần Thị B",
-      role: "SELLER",
-      status: "active",
-      createdAt: "2024-02-20",
-      lastLogin: "2024-11-14 08:15",
-    },
-    {
-      id: 3,
-      username: "levanc",
-      email: "levanc@example.com",
-      fullName: "Lê Văn C",
-      role: "USER",
-      status: "inactive",
-      createdAt: "2024-03-10",
-      lastLogin: "2024-11-10 15:20",
-    },
-    {
-      id: 4,
-      username: "phamthid",
-      email: "phamthid@example.com",
-      fullName: "Phạm Thị D",
-      role: "SELLER",
-      status: "active",
-      createdAt: "2024-04-05",
-      lastLogin: "2024-11-14 10:45",
-    },
-    {
-      id: 5,
-      username: "hoangvane",
-      email: "hoangvane@example.com",
-      fullName: "Hoàng Văn E",
-      role: "USER",
-      status: "active",
-      createdAt: "2024-05-12",
-      lastLogin: "2024-11-13 16:30",
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const [searchTerm, setSearchTerm] = useState("");
+  // Filter states
+  const [filters, setFilters] = useState({
+    username: "",
+    firstName: "",
+    lastName: "",
+    enabled: "",
+    createdFrom: "",
+    createdTo: "",
+    role: "",
+    gender: "",
+    page: 0,
+    size: 10,
+    sort: "createdAt,desc",
+  });
 
-  const getRoleBadgeClass = (role) => {
-    switch (role) {
-      case "ADMIN":
-        return "role-admin";
-      case "SELLER":
-        return "role-seller";
-      case "USER":
-        return "role-user";
-      default:
-        return "";
+  const [showFilters, setShowFilters] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [showUserDetail, setShowUserDetail] = useState(false);
+
+  // Fetch users from API
+  useEffect(() => {
+    fetchUsers();
+  }, [filters.page, filters.size, filters.sort]);
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const params = {
+        ...filters,
+        enabled:
+          filters.enabled === "" ? undefined : filters.enabled === "true",
+      };
+
+      // Remove empty params
+      Object.keys(params).forEach((key) => {
+        if (params[key] === "" || params[key] === undefined) {
+          delete params[key];
+        }
+      });
+
+      const response = await getUsersAdminApi(params);
+
+      if (response && response.code === 1000) {
+        setUsers(response.result.content || []);
+        setTotalElements(response.result.totalElements || 0);
+        setTotalPages(response.result.totalPages || 0);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  const getStatusBadgeClass = (status) => {
-    return status === "active" ? "status-active" : "status-inactive";
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+      page: 0, // Reset to first page when filter changes
+    }));
   };
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.fullName.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const handleSearch = () => {
+    fetchUsers();
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      username: "",
+      firstName: "",
+      lastName: "",
+      enabled: "",
+      createdFrom: "",
+      createdTo: "",
+      role: "",
+      gender: "",
+      page: 0,
+      size: 10,
+      sort: "createdAt,desc",
+    });
+    setTimeout(() => fetchUsers(), 0);
+  };
+
+  const handlePageChange = (newPage) => {
+    setFilters((prev) => ({ ...prev, page: newPage }));
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getRoleBadgeClass = (roles) => {
+    if (!roles || roles.length === 0) return styles.roleUser;
+    const roleNames = roles.map((r) => r.name);
+    if (roleNames.includes("ADMIN")) return styles.roleAdmin;
+    if (roleNames.includes("SELLER")) return styles.roleSeller;
+    return styles.roleUser;
+  };
+
+  const getRoleDisplay = (roles) => {
+    if (!roles || roles.length === 0) return "USER";
+    return roles.map((r) => r.name).join(", ");
+  };
+
+  const getStatusBadgeClass = (enabled) => {
+    return enabled ? styles.statusActive : styles.statusInactive;
+  };
+
+  const handleViewUser = (user) => {
+    setSelectedUser(user);
+    setShowUserDetail(true);
+  };
 
   const handleDeleteUser = (userId) => {
     if (confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
@@ -100,314 +157,505 @@ const AdminUsersPage = () => {
     }
   };
 
-  const handleToggleStatus = (userId) => {
-    // TODO: Call API to toggle user status
-    setUsers(
-      users.map((user) =>
-        user.id === userId
-          ? {
-              ...user,
-              status: user.status === "active" ? "inactive" : "active",
-            }
-          : user
+  const handleToggleStatus = (userId, currentStatus) => {
+    if (
+      confirm(
+        `Bạn có chắc chắn muốn ${
+          currentStatus ? "khóa" : "mở khóa"
+        } tài khoản này?`
       )
-    );
+    ) {
+      // TODO: Call API to toggle user status
+      console.log("Toggle status for user:", userId);
+    }
   };
 
   return (
-    <div className="admin-users">
-      {/* Search and Filter */}
-      <div className="admin-section">
-        <div className="admin-toolbar">
-          <div className="admin-search-box">
-            <SearchOutlined className="search-icon" />
+    <div className={styles.adminUsers}>
+      {/* Filter Section */}
+      <div className={styles.adminSection}>
+        <div className={styles.adminToolbar}>
+          <div className={styles.adminSearchBox}>
+            <SearchOutlined className={styles.searchIcon} />
             <input
               type="text"
-              placeholder="Tìm kiếm theo tên, email, username..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="admin-search-input"
+              placeholder="Tìm kiếm theo username..."
+              value={filters.username}
+              onChange={(e) => handleFilterChange("username", e.target.value)}
+              className={styles.adminSearchInput}
             />
           </div>
-          <button className="admin-btn admin-btn-primary">
-            <UserOutlined />
-            Thêm người dùng mới
-          </button>
+          <div className={styles.toolbarActions}>
+            <button
+              className={`admin-btn ${
+                showFilters ? "admin-btn-primary" : "admin-btn-secondary"
+              }`}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <FilterOutlined />
+              {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
+            </button>
+            <button
+              className="admin-btn admin-btn-secondary"
+              onClick={handleResetFilters}
+            >
+              <ReloadOutlined />
+              Đặt lại
+            </button>
+            <button
+              className="admin-btn admin-btn-primary"
+              onClick={handleSearch}
+            >
+              <SearchOutlined />
+              Tìm kiếm
+            </button>
+          </div>
         </div>
+
+        {/* Advanced Filters */}
+        {showFilters && (
+          <div className={styles.adminFilters}>
+            <div className={styles.filterGrid}>
+              <div className={styles.filterItem}>
+                <label>Họ</label>
+                <input
+                  type="text"
+                  placeholder="Nhập họ..."
+                  value={filters.firstName}
+                  onChange={(e) =>
+                    handleFilterChange("firstName", e.target.value)
+                  }
+                />
+              </div>
+              <div className={styles.filterItem}>
+                <label>Tên</label>
+                <input
+                  type="text"
+                  placeholder="Nhập tên..."
+                  value={filters.lastName}
+                  onChange={(e) =>
+                    handleFilterChange("lastName", e.target.value)
+                  }
+                />
+              </div>
+              <div className={styles.filterItem}>
+                <label>Trạng thái</label>
+                <select
+                  value={filters.enabled}
+                  onChange={(e) =>
+                    handleFilterChange("enabled", e.target.value)
+                  }
+                >
+                  <option value="">Tất cả</option>
+                  <option value="true">Hoạt động</option>
+                  <option value="false">Khóa</option>
+                </select>
+              </div>
+              <div className={styles.filterItem}>
+                <label>Vai trò</label>
+                <select
+                  value={filters.role}
+                  onChange={(e) => handleFilterChange("role", e.target.value)}
+                >
+                  <option value="">Tất cả</option>
+                  <option value="ADMIN">ADMIN</option>
+                  <option value="SELLER">SELLER</option>
+                  <option value="USER">USER</option>
+                </select>
+              </div>
+              <div className={styles.filterItem}>
+                <label>Giới tính</label>
+                <select
+                  value={filters.gender}
+                  onChange={(e) => handleFilterChange("gender", e.target.value)}
+                >
+                  <option value="">Tất cả</option>
+                  <option value="MALE">Nam</option>
+                  <option value="FEMALE">Nữ</option>
+                  <option value="OTHER">Khác</option>
+                </select>
+              </div>
+              <div className={styles.filterItem}>
+                <label>Từ ngày</label>
+                <input
+                  type="datetime-local"
+                  value={filters.createdFrom}
+                  onChange={(e) =>
+                    handleFilterChange("createdFrom", e.target.value)
+                  }
+                />
+              </div>
+              <div className={styles.filterItem}>
+                <label>Đến ngày</label>
+                <input
+                  type="datetime-local"
+                  value={filters.createdTo}
+                  onChange={(e) =>
+                    handleFilterChange("createdTo", e.target.value)
+                  }
+                />
+              </div>
+              <div className={styles.filterItem}>
+                <label>Số kết quả/trang</label>
+                <select
+                  value={filters.size}
+                  onChange={(e) =>
+                    handleFilterChange("size", parseInt(e.target.value))
+                  }
+                >
+                  <option value="5">5</option>
+                  <option value="10">10</option>
+                  <option value="20">20</option>
+                  <option value="50">50</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Users Table */}
-      <div className="admin-section">
-        <h2 className="admin-section-title">
-          Danh sách người dùng ({filteredUsers.length})
+      <div className={styles.adminSection}>
+        <h2 className={styles.adminSectionTitle}>
+          Danh sách người dùng ({totalElements})
         </h2>
-        <div className="admin-table-container">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Họ và tên</th>
-                <th>Email</th>
-                <th>Vai trò</th>
-                <th>Trạng thái</th>
-                <th>Ngày tạo</th>
-                <th>Đăng nhập lần cuối</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredUsers.length > 0 ? (
-                filteredUsers.map((user) => (
-                  <tr key={user.id}>
-                    <td>
-                      <strong>#{user.id}</strong>
-                    </td>
-                    <td>{user.username}</td>
-                    <td>{user.fullName}</td>
-                    <td>{user.email}</td>
-                    <td>
-                      <span
-                        className={`role-badge ${getRoleBadgeClass(user.role)}`}
-                      >
-                        {user.role}
-                      </span>
-                    </td>
-                    <td>
-                      <span
-                        className={`status-badge ${getStatusBadgeClass(
-                          user.status
-                        )}`}
-                      >
-                        {user.status === "active"
-                          ? "Hoạt động"
-                          : "Không hoạt động"}
-                      </span>
-                    </td>
-                    <td>{user.createdAt}</td>
-                    <td>{user.lastLogin}</td>
-                    <td>
-                      <div className="admin-action-buttons">
-                        <button
-                          className="admin-action-btn edit"
-                          title="Chỉnh sửa"
-                        >
-                          <EditOutlined />
-                        </button>
-                        <button
-                          className="admin-action-btn lock"
-                          title={
-                            user.status === "active"
-                              ? "Khóa tài khoản"
-                              : "Mở khóa tài khoản"
-                          }
-                          onClick={() => handleToggleStatus(user.id)}
-                        >
-                          {user.status === "active" ? (
-                            <LockOutlined />
+        <div className={styles.adminTableContainer}>
+          {loading ? (
+            <div className={styles.loadingContainer}>
+              <ReloadOutlined
+                spin
+                style={{ fontSize: "48px", color: "#ee4d2d" }}
+              />
+              <p>Đang tải dữ liệu...</p>
+            </div>
+          ) : (
+            <table className={`admin-table ${styles.adminTable}`}>
+              <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Họ và tên</th>
+                  <th>Email</th>
+                  <th>Điện thoại</th>
+                  <th>Giới tính</th>
+                  <th>Vai trò</th>
+                  <th>Trạng thái</th>
+                  <th>Xác thực</th>
+                  <th>Ngày tạo</th>
+                  <th className={styles.stickyColumn}>Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.length > 0 ? (
+                  users.map((user) => (
+                    <tr key={user.id}>
+                      <td>
+                        <div className={styles.userInfo}>
+                          {user.avatarUrl ? (
+                            <img
+                              src={user.avatarUrl}
+                              alt={user.username}
+                              className={styles.userAvatar}
+                            />
                           ) : (
-                            <UnlockOutlined />
+                            <div className={styles.userAvatarPlaceholder}>
+                              <UserOutlined />
+                            </div>
                           )}
-                        </button>
-                        <button
-                          className="admin-action-btn delete"
-                          title="Xóa"
-                          onClick={() => handleDeleteUser(user.id)}
+                          <strong>{user.username}</strong>
+                        </div>
+                      </td>
+                      <td>{`${user.firstName} ${user.lastName}`}</td>
+                      <td>{user.email}</td>
+                      <td>{user.phone || "N/A"}</td>
+                      <td>
+                        <span className={styles.genderBadge}>
+                          {user.gender === "MALE" && (
+                            <ManOutlined style={{ color: "#1890ff" }} />
+                          )}
+                          {user.gender === "FEMALE" && (
+                            <WomanOutlined style={{ color: "#ff4d4f" }} />
+                          )}
+                          {user.gender === "MALE"
+                            ? " Nam"
+                            : user.gender === "FEMALE"
+                            ? " Nữ"
+                            : " Khác"}
+                        </span>
+                      </td>
+                      <td>
+                        <div className={styles.rolesContainer}>
+                          {user.roles &&
+                            user.roles.map((role) => (
+                              <span
+                                key={role.name}
+                                className={`${
+                                  styles.roleBadge
+                                } ${getRoleBadgeClass([role])}`}
+                              >
+                                {role.name}
+                              </span>
+                            ))}
+                        </div>
+                      </td>
+                      <td>
+                        <span
+                          className={`${
+                            styles.statusBadge
+                          } ${getStatusBadgeClass(user.enabled)}`}
+                          title={user.enabled ? "Hoạt động" : "Khóa"}
                         >
-                          <DeleteOutlined />
-                        </button>
+                          {user.enabled ? (
+                            <CheckCircleOutlined />
+                          ) : (
+                            <CloseCircleOutlined />
+                          )}
+                        </span>
+                      </td>
+                      <td>
+                        <span
+                          className={`${styles.verifyBadge} ${
+                            user.isVerified
+                              ? styles.verified
+                              : styles.unverified
+                          }`}
+                          title={
+                            user.isVerified
+                              ? "Đã xác thực email"
+                              : "Chưa xác thực email"
+                          }
+                        >
+                          {user.isVerified ? (
+                            <CheckOutlined />
+                          ) : (
+                            <CloseOutlined />
+                          )}
+                        </span>
+                      </td>
+                      <td>{formatDate(user.createdAt)}</td>
+                      <td className={styles.stickyColumn}>
+                        <div className={styles.adminActionButtons}>
+                          <button
+                            className={`${styles.adminActionBtn} ${styles.view}`}
+                            title="Xem chi tiết"
+                            onClick={() => handleViewUser(user)}
+                          >
+                            <EyeOutlined />
+                          </button>
+                          <button
+                            className={`${styles.adminActionBtn} ${styles.edit}`}
+                            title="Chỉnh sửa"
+                          >
+                            <EditOutlined />
+                          </button>
+                          <button
+                            className={`${styles.adminActionBtn} ${styles.lock}`}
+                            title={
+                              user.enabled
+                                ? "Khóa tài khoản"
+                                : "Mở khóa tài khoản"
+                            }
+                            onClick={() =>
+                              handleToggleStatus(user.id, user.enabled)
+                            }
+                          >
+                            {user.enabled ? (
+                              <LockOutlined />
+                            ) : (
+                              <UnlockOutlined />
+                            )}
+                          </button>
+                          <button
+                            className={`${styles.adminActionBtn} ${styles.delete}`}
+                            title="Xóa"
+                            onClick={() => handleDeleteUser(user.id)}
+                          >
+                            <DeleteOutlined />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan="10"
+                      style={{ textAlign: "center", padding: "40px" }}
+                    >
+                      <div className={styles.adminEmptyState}>
+                        <UserOutlined
+                          style={{ fontSize: "64px", color: "#ddd" }}
+                        />
+                        <p>Không tìm thấy người dùng nào</p>
                       </div>
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="9"
-                    style={{ textAlign: "center", padding: "40px" }}
-                  >
-                    <div className="admin-empty-state">
-                      <UserOutlined
-                        style={{ fontSize: "64px", color: "#ddd" }}
-                      />
-                      <p>Không tìm thấy người dùng nào</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 0 && (
+          <div className={styles.adminPagination}>
+            <button
+              className="admin-btn admin-btn-secondary"
+              disabled={filters.page === 0}
+              onClick={() => handlePageChange(filters.page - 1)}
+            >
+              ← Trước
+            </button>
+            <span className={styles.paginationInfo}>
+              Trang {filters.page + 1} / {totalPages}
+            </span>
+            <button
+              className="admin-btn admin-btn-secondary"
+              disabled={filters.page >= totalPages - 1}
+              onClick={() => handlePageChange(filters.page + 1)}
+            >
+              Sau →
+            </button>
+
+            <div className={styles.pageSizeSelector}>
+              <label>Hiển thị:</label>
+              <select
+                value={filters.size}
+                onChange={(e) =>
+                  handleFilterChange("size", parseInt(e.target.value))
+                }
+                className={styles.pageSizeSelect}
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+              </select>
+              <span>kết quả/trang</span>
+            </div>
+          </div>
+        )}
       </div>
 
-      <style jsx>{`
-        .admin-users {
-          animation: fadeIn 0.5s ease-out;
-        }
+      {/* User Detail Modal */}
+      {showUserDetail && selectedUser && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setShowUserDetail(false)}
+        >
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h3>Chi tiết người dùng</h3>
+              <button
+                className={styles.modalClose}
+                onClick={() => setShowUserDetail(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.userDetail}>
+                <div className={styles.userDetailAvatar}>
+                  {selectedUser.avatarUrl ? (
+                    <img
+                      src={selectedUser.avatarUrl}
+                      alt={selectedUser.username}
+                    />
+                  ) : (
+                    <div className={styles.avatarPlaceholderLarge}>
+                      <UserOutlined />
+                    </div>
+                  )}
+                </div>
+                <div className={styles.userDetailInfo}>
+                  <div className={styles.infoRow}>
+                    <label>Username:</label>
+                    <span>{selectedUser.username}</span>
+                  </div>
+                  <div className={styles.infoRow}>
+                    <label>Họ và tên:</label>
+                    <span>{`${selectedUser.firstName} ${selectedUser.lastName}`}</span>
+                  </div>
+                  <div className={styles.infoRow}>
+                    <label>Email:</label>
+                    <span>{selectedUser.email}</span>
+                  </div>
+                  <div className={styles.infoRow}>
+                    <label>Điện thoại:</label>
+                    <span>{selectedUser.phone || "N/A"}</span>
+                  </div>
+                  <div className={styles.infoRow}>
+                    <label>Ngày sinh:</label>
+                    <span>{selectedUser.dob || "N/A"}</span>
+                  </div>
+                  <div className={styles.infoRow}>
+                    <label>Giới tính:</label>
+                    <span>
+                      {selectedUser.gender === "MALE"
+                        ? "Nam"
+                        : selectedUser.gender === "FEMALE"
+                        ? "Nữ"
+                        : "Khác"}
+                    </span>
+                  </div>
+                  <div className={styles.infoRow}>
+                    <label>Vai trò:</label>
+                    <span>{getRoleDisplay(selectedUser.roles)}</span>
+                  </div>
+                  <div className={styles.infoRow}>
+                    <label>Trạng thái:</label>
+                    <span>{selectedUser.enabled ? "Hoạt động" : "Khóa"}</span>
+                  </div>
+                  <div className={styles.infoRow}>
+                    <label>Xác thực email:</label>
+                    <span>
+                      {selectedUser.isVerified
+                        ? "Đã xác thực"
+                        : "Chưa xác thực"}
+                    </span>
+                  </div>
+                  <div className={styles.infoRow}>
+                    <label>Ngày tạo:</label>
+                    <span>{formatDate(selectedUser.createdAt)}</span>
+                  </div>
+                  <div className={styles.infoRow}>
+                    <label>Cập nhật lần cuối:</label>
+                    <span>{formatDate(selectedUser.updatedAt)}</span>
+                  </div>
 
-        .admin-section {
-          margin-bottom: 24px;
-        }
-
-        .admin-section-title {
-          font-size: 20px;
-          font-weight: 700;
-          color: #333;
-          margin-bottom: 20px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .admin-section-title::before {
-          content: "";
-          width: 4px;
-          height: 24px;
-          background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
-          border-radius: 2px;
-        }
-
-        .admin-toolbar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 16px;
-          flex-wrap: wrap;
-        }
-
-        .admin-search-box {
-          position: relative;
-          flex: 1;
-          max-width: 400px;
-        }
-
-        .search-icon {
-          position: absolute;
-          left: 16px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #999;
-          font-size: 16px;
-        }
-
-        .admin-search-input {
-          width: 100%;
-          padding: 12px 16px 12px 44px;
-          border: 2px solid #e8e8e8;
-          border-radius: 8px;
-          font-size: 14px;
-          transition: all 0.3s ease;
-          outline: none;
-        }
-
-        .admin-search-input:focus {
-          border-color: #ee4d2d;
-          box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
-        }
-
-        .role-badge,
-        .status-badge {
-          padding: 6px 12px;
-          border-radius: 6px;
-          font-size: 12px;
-          font-weight: 600;
-          display: inline-block;
-          text-transform: uppercase;
-        }
-
-        .role-admin {
-          background: rgba(255, 77, 79, 0.1);
-          color: #ff4d4f;
-        }
-
-        .role-seller {
-          background: rgba(250, 173, 20, 0.1);
-          color: #faad14;
-        }
-
-        .role-user {
-          background: rgba(24, 144, 255, 0.1);
-          color: #1890ff;
-        }
-
-        .status-active {
-          background: rgba(82, 196, 26, 0.1);
-          color: #52c41a;
-        }
-
-        .status-inactive {
-          background: rgba(0, 0, 0, 0.1);
-          color: #666;
-        }
-
-        .admin-action-buttons {
-          display: flex;
-          gap: 8px;
-          justify-content: center;
-        }
-
-        .admin-action-btn {
-          width: 32px;
-          height: 32px;
-          border-radius: 6px;
-          border: none;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.3s ease;
-          font-size: 14px;
-        }
-
-        .admin-action-btn.edit {
-          background: rgba(24, 144, 255, 0.1);
-          color: #1890ff;
-        }
-
-        .admin-action-btn.edit:hover {
-          background: #1890ff;
-          color: white;
-          transform: scale(1.1);
-        }
-
-        .admin-action-btn.lock {
-          background: rgba(250, 173, 20, 0.1);
-          color: #faad14;
-        }
-
-        .admin-action-btn.lock:hover {
-          background: #faad14;
-          color: white;
-          transform: scale(1.1);
-        }
-
-        .admin-action-btn.delete {
-          background: rgba(255, 77, 79, 0.1);
-          color: #ff4d4f;
-        }
-
-        .admin-action-btn.delete:hover {
-          background: #ff4d4f;
-          color: white;
-          transform: scale(1.1);
-        }
-
-        @media (max-width: 768px) {
-          .admin-toolbar {
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .admin-search-box {
-            max-width: 100%;
-          }
-
-          .admin-toolbar .admin-btn {
-            width: 100%;
-            justify-content: center;
-          }
-        }
-      `}</style>
+                  {selectedUser.addresses &&
+                    selectedUser.addresses.length > 0 && (
+                      <div className={styles.infoRow}>
+                        <label>Địa chỉ:</label>
+                        <div className={styles.addressesList}>
+                          {selectedUser.addresses.map((addr) => (
+                            <div key={addr.id} className={styles.addressItem}>
+                              <div>
+                                <strong>{addr.receiverName}</strong> -{" "}
+                                {addr.receiverPhone}
+                              </div>
+                              <div>
+                                {addr.street}, {addr.ward.nameWithType}
+                              </div>
+                              {addr.isDefault && (
+                                <span className={styles.defaultBadge}>
+                                  Mặc định
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

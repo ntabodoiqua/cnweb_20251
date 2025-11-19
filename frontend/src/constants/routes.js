@@ -38,6 +38,8 @@ export const PROTECTED_ROUTES = {
   // Admin routes
   ADMIN_DASHBOARD: "/admin",
   ADMIN_USERS: "/admin/users",
+  ADMIN_BRANDS: "/admin/brands",
+  ADMIN_CATEGORIES: "/admin/categories",
   ADMIN_PRODUCTS: "/admin/products",
   ADMIN_ORDERS: "/admin/orders",
   ADMIN_PAYMENTS: "/admin/payments",
@@ -91,6 +93,8 @@ export const ROUTE_TITLES = {
   [PROTECTED_ROUTES.PROFILE_SECURITY]: "Bảo mật tài khoản",
   [PROTECTED_ROUTES.ADMIN_DASHBOARD]: "Bảng điều khiển Admin",
   [PROTECTED_ROUTES.ADMIN_USERS]: "Quản lý người dùng",
+  [PROTECTED_ROUTES.ADMIN_BRANDS]: "Quản lý thương hiệu",
+  [PROTECTED_ROUTES.ADMIN_CATEGORIES]: "Quản lý danh mục sàn",
   [PROTECTED_ROUTES.ADMIN_PRODUCTS]: "Quản lý sản phẩm",
   [PROTECTED_ROUTES.ADMIN_ORDERS]: "Quản lý đơn hàng",
   [PROTECTED_ROUTES.ADMIN_PAYMENTS]: "Quản lý thanh toán",

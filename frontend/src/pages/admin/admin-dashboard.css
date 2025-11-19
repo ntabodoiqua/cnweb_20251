@@ -231,6 +231,10 @@
   min-height: 600px;
   margin-left: 30px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .admin-main.sidebar-collapsed {
@@ -238,6 +242,13 @@
 }
 
 /* Animation for content transitions */
+.admin-main-content {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
 .admin-main-content > * {
   animation: fadeInUp 0.4s ease-out;
 }
@@ -415,13 +426,16 @@
 .admin-table-container {
   background: white;
   border-radius: 12px;
-  overflow: hidden;
+  overflow-x: auto;
+  overflow-y: visible;
   border: 1px solid rgba(238, 77, 45, 0.1);
   margin-bottom: 24px;
+  max-width: 100%;
 }
 
 .admin-table {
   width: 100%;
+  min-width: 1200px;
   border-collapse: collapse;
 }
 
