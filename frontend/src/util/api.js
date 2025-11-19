@@ -985,6 +985,15 @@ const getUsersAdminApi = (params) => {
   });
 };
 
+const getUserStatisticsApi = () => {
+  const URL_API = "/api/user/admin/statistic/users";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // ============================================
 // Brand Management APIs (Admin)
 // ============================================
@@ -1205,6 +1214,7 @@ export {
   bulkUpdateProductStatusApi,
   // Admin APIs
   getUsersAdminApi,
+  getUserStatisticsApi,
   // Brand Management APIs
   getBrandsAdminApi,
   createBrandApi,

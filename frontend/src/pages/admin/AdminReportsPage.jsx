@@ -1,251 +1,337 @@
+import { useState, useEffect } from "react";
+import { notification } from "antd";
 import {
   BarChartOutlined,
-  LineChartOutlined,
-  PieChartOutlined,
+  UserOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  TeamOutlined,
+  CalendarOutlined,
 } from "@ant-design/icons";
+import { getUserStatisticsApi } from "../../util/api";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import styles from "./AdminReportsPage.module.css";
 
 /**
  * AdminReportsPage - Trang báo cáo và thống kê
  */
 const AdminReportsPage = () => {
-  return (
-    <div className="admin-reports">
-      {/* Report Cards */}
-      <div className="admin-stats-grid">
-        <div className="admin-stat-card">
-          <div className="admin-stat-header">
-            <span className="admin-stat-title">Doanh thu tháng này</span>
-            <div className="admin-stat-icon">
-              <BarChartOutlined />
-            </div>
-          </div>
-          <h2 className="admin-stat-value">₫245,231,890</h2>
-          <div className="admin-stat-label">
-            <span className="admin-stat-trend up">+23.5%</span>
-            <span>So với tháng trước</span>
-          </div>
-        </div>
-        <div className="admin-stat-card">
-          <div className="admin-stat-header">
-            <span className="admin-stat-title">Đơn hàng tháng này</span>
-            <div
-              className="admin-stat-icon"
-              style={{
-                background: "linear-gradient(135deg, #52c41a 0%, #73d13d 100%)",
-              }}
-            >
-              <LineChartOutlined />
-            </div>
-          </div>
-          <h2 className="admin-stat-value">1,234</h2>
-          <div className="admin-stat-label">
-            <span className="admin-stat-trend up">+15.2%</span>
-            <span>So với tháng trước</span>
-          </div>
-        </div>
-        <div className="admin-stat-card">
-          <div className="admin-stat-header">
-            <span className="admin-stat-title">Người dùng mới</span>
-            <div
-              className="admin-stat-icon"
-              style={{
-                background: "linear-gradient(135deg, #1890ff 0%, #40a9ff 100%)",
-              }}
-            >
-              <PieChartOutlined />
-            </div>
-          </div>
-          <h2 className="admin-stat-value">456</h2>
-          <div className="admin-stat-label">
-            <span className="admin-stat-trend up">+8.7%</span>
-            <span>So với tháng trước</span>
-          </div>
-        </div>
-        <div className="admin-stat-card">
-          <div className="admin-stat-header">
-            <span className="admin-stat-title">Tỷ lệ chuyển đổi</span>
-            <div
-              className="admin-stat-icon"
-              style={{
-                background: "linear-gradient(135deg, #faad14 0%, #ffc53d 100%)",
-              }}
-            >
-              <BarChartOutlined />
-            </div>
-          </div>
-          <h2 className="admin-stat-value">3.24%</h2>
-          <div className="admin-stat-label">
-            <span className="admin-stat-trend down">-1.2%</span>
-            <span>So với tháng trước</span>
-          </div>
-        </div>
-      </div>
+  const [loading, setLoading] = useState(false);
+  const [statistics, setStatistics] = useState(null);
 
-      {/* Top Selling Products */}
-      <div className="admin-section">
-        <h2 className="admin-section-title">Top sản phẩm bán chạy</h2>
-        <div className="admin-table-container">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Sản phẩm</th>
-                <th>Danh mục</th>
-                <th>Đã bán</th>
-                <th>Doanh thu</th>
-                <th>Xu hướng</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <strong>1</strong>
-                </td>
-                <td>iPhone 15 Pro Max</td>
-                <td>Smartphone</td>
-                <td>120</td>
-                <td>
-                  <strong style={{ color: "#ee4d2d" }}>₫4,200,000,000</strong>
-                </td>
-                <td>
-                  <span className="trend-badge up">↑ 15%</span>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>2</strong>
-                </td>
-                <td>MacBook Pro M3</td>
-                <td>Laptop</td>
-                <td>85</td>
-                <td>
-                  <strong style={{ color: "#ee4d2d" }}>₫3,825,000,000</strong>
-                </td>
-                <td>
-                  <span className="trend-badge up">↑ 23%</span>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>3</strong>
-                </td>
-                <td>Samsung Galaxy S24</td>
-                <td>Smartphone</td>
-                <td>67</td>
-                <td>
-                  <strong style={{ color: "#ee4d2d" }}>₫1,474,000,000</strong>
-                </td>
-                <td>
-                  <span className="trend-badge down">↓ 5%</span>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>4</strong>
-                </td>
-                <td>Laptop Dell XPS 13</td>
-                <td>Laptop</td>
-                <td>45</td>
-                <td>
-                  <strong style={{ color: "#ee4d2d" }}>₫1,125,000,000</strong>
-                </td>
-                <td>
-                  <span className="trend-badge up">↑ 8%</span>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <strong>5</strong>
-                </td>
-                <td>AirPods Pro 2</td>
-                <td>Accessory</td>
-                <td>200</td>
-                <td>
-                  <strong style={{ color: "#ee4d2d" }}>₫1,300,000,000</strong>
-                </td>
-                <td>
-                  <span className="trend-badge up">↑ 12%</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+  useEffect(() => {
+    fetchStatistics();
+  }, []);
 
-      {/* Charts Placeholder */}
-      <div className="admin-section">
-        <h2 className="admin-section-title">
-          Biểu đồ doanh thu theo thời gian
-        </h2>
-        <div className="chart-placeholder">
+  const fetchStatistics = async () => {
+    try {
+      setLoading(true);
+      const response = await getUserStatisticsApi();
+      if (response && response.code === 1000) {
+        setStatistics(response.result);
+      }
+    } catch (error) {
+      console.error("Error fetching statistics:", error);
+      notification.error({
+        message: "Lỗi tải dữ liệu",
+        description: "Không thể tải thống kê người dùng",
+        placement: "topRight",
+        duration: 3,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getRoleColor = (role) => {
+    const colors = {
+      ADMIN: "#722ed1", // Tím cho Quản trị viên
+      SELLER: "#ee4d2d", // Cam-đỏ cho Người bán (màu chủ đạo)
+      USER: "#52c41a", // Xanh lá cho Người dùng
+    };
+    return colors[role] || "#999";
+  };
+
+  const getRoleLabel = (role) => {
+    const labels = {
+      ADMIN: "Quản trị viên",
+      SELLER: "Người bán",
+      USER: "Người dùng",
+    };
+    return labels[role] || role;
+  };
+
+  if (loading) {
+    return <LoadingSpinner tip="Đang tải thống kê..." fullScreen={false} />;
+  }
+
+  if (!statistics) {
+    return (
+      <div className={styles.adminReports}>
+        <div className={styles.emptyState}>
           <BarChartOutlined style={{ fontSize: "64px", color: "#ddd" }} />
-          <p>Biểu đồ sẽ được tích hợp sau khi có API</p>
+          <p>Không có dữ liệu thống kê</p>
         </div>
       </div>
+    );
+  }
 
-      <style jsx>{`
-        .admin-reports {
-          animation: fadeIn 0.5s ease-out;
-        }
+  // Prepare data for charts
+  const roleData = Object.entries(statistics.usersByRole || {}).map(
+    ([role, count]) => ({
+      role,
+      count,
+      color: getRoleColor(role),
+      label: getRoleLabel(role),
+    })
+  );
 
-        .admin-section {
-          margin-bottom: 32px;
-        }
+  const monthData = Object.entries(statistics.usersByMonth || {}).map(
+    ([month, count]) => ({
+      month,
+      count,
+    })
+  );
 
-        .admin-section-title {
-          font-size: 20px;
-          font-weight: 700;
-          color: #333;
-          margin-bottom: 20px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
+  const maxRoleCount = Math.max(...roleData.map((d) => d.count));
+  const maxMonthCount = Math.max(...monthData.map((d) => d.count));
 
-        .admin-section-title::before {
-          content: "";
-          width: 4px;
-          height: 24px;
-          background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
-          border-radius: 2px;
-        }
+  return (
+    <div className={styles.adminReports}>
+      {/* User Statistics Section */}
+      <div className={styles.statisticsSection}>
+        <div className={styles.sectionHeader}>
+          <h2>
+            <UserOutlined /> Thống kê người dùng
+          </h2>
+          <p className={styles.sectionDescription}>
+            Tổng quan về người dùng trên hệ thống
+          </p>
+        </div>
 
-        .trend-badge {
-          padding: 6px 12px;
-          border-radius: 6px;
-          font-size: 12px;
-          font-weight: 600;
-          display: inline-block;
-        }
+        {/* Statistics Cards */}
+        <div className={styles.statsGrid}>
+          <div className={styles.statCard}>
+            <div className={styles.statIcon} style={{ background: "#ee4d2d" }}>
+              <UserOutlined />
+            </div>
+            <div className={styles.statContent}>
+              <div className={styles.statLabel}>Tổng người dùng</div>
+              <div className={styles.statValue}>{statistics.totalUsers}</div>
+            </div>
+          </div>
 
-        .trend-badge.up {
-          background: rgba(82, 196, 26, 0.1);
-          color: #52c41a;
-        }
+          <div className={styles.statCard}>
+            <div className={styles.statIcon} style={{ background: "#52c41a" }}>
+              <CheckCircleOutlined />
+            </div>
+            <div className={styles.statContent}>
+              <div className={styles.statLabel}>Đang hoạt động</div>
+              <div className={styles.statValue}>{statistics.activeUsers}</div>
+            </div>
+          </div>
 
-        .trend-badge.down {
-          background: rgba(255, 77, 79, 0.1);
-          color: #ff4d4f;
-        }
+          <div className={styles.statCard}>
+            <div className={styles.statIcon} style={{ background: "#ff4d4f" }}>
+              <CloseCircleOutlined />
+            </div>
+            <div className={styles.statContent}>
+              <div className={styles.statLabel}>Bị vô hiệu hóa</div>
+              <div className={styles.statValue}>{statistics.disabledUsers}</div>
+            </div>
+          </div>
 
-        .chart-placeholder {
-          background: linear-gradient(
-            135deg,
-            rgba(238, 77, 45, 0.03) 0%,
-            rgba(255, 107, 53, 0.03) 100%
-          );
-          border: 2px dashed rgba(238, 77, 45, 0.2);
-          border-radius: 12px;
-          padding: 80px 20px;
-          text-align: center;
-          color: #999;
-        }
+          <div className={styles.statCard}>
+            <div className={styles.statIcon} style={{ background: "#faad14" }}>
+              <TeamOutlined />
+            </div>
+            <div className={styles.statContent}>
+              <div className={styles.statLabel}>Tỷ lệ hoạt động</div>
+              <div className={styles.statValue}>
+                {statistics.totalUsers > 0
+                  ? (
+                      (statistics.activeUsers / statistics.totalUsers) *
+                      100
+                    ).toFixed(1)
+                  : 0}
+                %
+              </div>
+            </div>
+          </div>
+        </div>
 
-        .chart-placeholder p {
-          margin-top: 16px;
-          font-size: 16px;
-        }
-      `}</style>
+        {/* Charts Section */}
+        <div className={styles.chartsContainer}>
+          {/* Users by Role Chart */}
+          <div className={styles.chartCard}>
+            <div className={styles.chartHeader}>
+              <h3>
+                <TeamOutlined /> Người dùng theo vai trò
+              </h3>
+            </div>
+            <div className={styles.chartBody}>
+              <div className={styles.barChart}>
+                {roleData.map((item, index) => (
+                  <div key={item.role} className={styles.barItem}>
+                    <div className={styles.barLabel}>{item.label}</div>
+                    <div className={styles.barWrapper}>
+                      <div
+                        className={styles.bar}
+                        style={{
+                          width: `${(item.count / maxRoleCount) * 100}%`,
+                          backgroundColor: item.color,
+                        }}
+                      >
+                        <span className={styles.barValue}>{item.count}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Users by Month Chart */}
+          <div className={styles.chartCard}>
+            <div className={styles.chartHeader}>
+              <h3>
+                <CalendarOutlined /> Người dùng theo tháng
+              </h3>
+            </div>
+            <div className={styles.chartBody}>
+              <div className={styles.barChart}>
+                {monthData.map((item, index) => (
+                  <div key={item.month} className={styles.barItem}>
+                    <div className={styles.barLabel}>{item.month}</div>
+                    <div className={styles.barWrapper}>
+                      <div
+                        className={styles.bar}
+                        style={{
+                          width: `${(item.count / maxMonthCount) * 100}%`,
+                          backgroundColor: "#ee4d2d",
+                        }}
+                      >
+                        <span className={styles.barValue}>{item.count}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Role Distribution Pie Chart */}
+        <div className={styles.chartCard}>
+          <div className={styles.chartHeader}>
+            <h3>
+              <BarChartOutlined /> Phân bố vai trò người dùng
+            </h3>
+          </div>
+          <div className={styles.chartBody}>
+            <div className={styles.pieChartContainer}>
+              <svg className={styles.pieChart} viewBox="0 0 200 200">
+                {(() => {
+                  let currentAngle = 0;
+                  const total = statistics.totalUsers;
+                  return roleData.map((item, index) => {
+                    const percentage = (item.count / total) * 100;
+                    const angle = (percentage / 100) * 360;
+                    const startAngle = currentAngle;
+                    const endAngle = currentAngle + angle;
+
+                    // Calculate path for pie slice
+                    const startRad = (startAngle - 90) * (Math.PI / 180);
+                    const endRad = (endAngle - 90) * (Math.PI / 180);
+                    const radius = 80;
+                    const centerX = 100;
+                    const centerY = 100;
+
+                    const x1 = centerX + radius * Math.cos(startRad);
+                    const y1 = centerY + radius * Math.sin(startRad);
+                    const x2 = centerX + radius * Math.cos(endRad);
+                    const y2 = centerY + radius * Math.sin(endRad);
+
+                    const largeArc = angle > 180 ? 1 : 0;
+                    const path = `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} Z`;
+
+                    currentAngle = endAngle;
+
+                    return (
+                      <path
+                        key={item.role}
+                        d={path}
+                        fill={item.color}
+                        stroke="#fff"
+                        strokeWidth="2"
+                      />
+                    );
+                  });
+                })()}
+              </svg>
+              <div className={styles.pieLegend}>
+                {roleData.map((item) => (
+                  <div key={item.role} className={styles.legendItem}>
+                    <div
+                      className={styles.legendColor}
+                      style={{ backgroundColor: item.color }}
+                    />
+                    <div className={styles.legendText}>
+                      <span className={styles.legendLabel}>{item.label}</span>
+                      <span className={styles.legendValue}>
+                        {item.count} (
+                        {((item.count / statistics.totalUsers) * 100).toFixed(
+                          1
+                        )}
+                        %)
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Summary Table */}
+        <div className={styles.summaryCard}>
+          <div className={styles.chartHeader}>
+            <h3>
+              <BarChartOutlined /> Tổng quan thống kê
+            </h3>
+          </div>
+          <div className={styles.summaryTable}>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>Tổng số người dùng:</div>
+              <div className={styles.summaryValue}>{statistics.totalUsers}</div>
+            </div>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>Người dùng hoạt động:</div>
+              <div className={styles.summaryValue} style={{ color: "#52c41a" }}>
+                {statistics.activeUsers}
+              </div>
+            </div>
+            <div className={styles.summaryRow}>
+              <div className={styles.summaryLabel}>Người dùng bị khóa:</div>
+              <div className={styles.summaryValue} style={{ color: "#ff4d4f" }}>
+                {statistics.disabledUsers}
+              </div>
+            </div>
+            <div className={styles.summaryDivider} />
+            {roleData.map((item) => (
+              <div key={item.role} className={styles.summaryRow}>
+                <div className={styles.summaryLabel}>{item.label}:</div>
+                <div
+                  className={styles.summaryValue}
+                  style={{ color: item.color }}
+                >
+                  {item.count}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
