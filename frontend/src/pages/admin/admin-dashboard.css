@@ -10,9 +10,12 @@
 }
 
 .admin-dashboard-container {
-  max-width: 1600px;
+  max-width: 100%;
+  width: 100%;
   margin: 0 auto;
   padding: 0 20px;
+  box-sizing: border-box;
+  overflow-x: hidden;
 }
 
 .admin-dashboard-content {
@@ -231,6 +234,10 @@
   min-height: 600px;
   margin-left: 30px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .admin-main.sidebar-collapsed {
@@ -238,6 +245,13 @@
 }
 
 /* Animation for content transitions */
+.admin-main-content {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
 .admin-main-content > * {
   animation: fadeInUp 0.4s ease-out;
 }
@@ -271,6 +285,10 @@
 }
 
 .admin-main-content {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
   animation: fadeIn 0.6s ease-out;
 }
 

@@ -972,6 +972,58 @@ const bulkUpdateProductStatusApi = (productIds, isActive) => {
   );
 };
 
+// ==================== Seller Management APIs (Admin) ====================
+
+const getAllSellerProfilesApi = (status = null, page = 0, size = 10) => {
+  const params = { page, size };
+  if (status) {
+    params.status = status;
+  }
+  const URL_API = "/api/user/seller-profiles";
+  return axios.get(URL_API, {
+    params,
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const getSellerProfileByIdApi = (id) => {
+  const URL_API = `/api/user/seller-profiles/${id}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const approveSellerProfileApi = (id) => {
+  const URL_API = `/api/user/seller-profiles/${id}/approve`;
+  return axios.patch(
+    URL_API,
+    {},
+    {
+      headers: {
+        "Accept-Language": "vi",
+      },
+    }
+  );
+};
+
+const rejectSellerProfileApi = (id, reason = "") => {
+  const URL_API = `/api/user/seller-profiles/${id}/reject`;
+  return axios.patch(
+    URL_API,
+    { rejectionReason: reason },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
 export {
   createUserApi,
   loginApi,
@@ -1055,4 +1107,9 @@ export {
   updateVariantStatusApi,
   bulkUpdateVariantStatusApi,
   bulkUpdateProductStatusApi,
+  // Seller Management APIs (Admin)
+  getAllSellerProfilesApi,
+  getSellerProfileByIdApi,
+  approveSellerProfileApi,
+  rejectSellerProfileApi,
 };
