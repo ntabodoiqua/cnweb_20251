@@ -17,6 +17,7 @@ import {
   CloseOutlined,
 } from "@ant-design/icons";
 import { getUsersAdminApi } from "../../util/api";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import styles from "./AdminUsersPage.module.css";
 
 /**
@@ -321,13 +322,10 @@ const AdminUsersPage = () => {
         </h2>
         <div className={styles.adminTableContainer}>
           {loading ? (
-            <div className={styles.loadingContainer}>
-              <ReloadOutlined
-                spin
-                style={{ fontSize: "48px", color: "#ee4d2d" }}
-              />
-              <p>Đang tải dữ liệu...</p>
-            </div>
+            <LoadingSpinner
+              tip="Đang tải danh sách người dùng..."
+              fullScreen={false}
+            />
           ) : (
             <table className={`admin-table ${styles.adminTable}`}>
               <thead>

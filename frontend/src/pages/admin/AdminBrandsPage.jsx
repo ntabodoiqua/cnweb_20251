@@ -20,6 +20,7 @@ import {
   uploadBrandLogoApi,
   toggleBrandStatusApi,
 } from "../../util/api";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import styles from "./AdminBrandsPage.module.css";
 
 /**
@@ -365,13 +366,10 @@ const AdminBrandsPage = () => {
         </h2>
         <div className={styles.adminTableContainer}>
           {loading ? (
-            <div className={styles.loadingContainer}>
-              <ReloadOutlined
-                spin
-                style={{ fontSize: "48px", color: "#ee4d2d" }}
-              />
-              <p>Đang tải dữ liệu...</p>
-            </div>
+            <LoadingSpinner
+              tip="Đang tải danh sách thương hiệu..."
+              fullScreen={false}
+            />
           ) : (
             <table className={`admin-table ${styles.adminTable}`}>
               <thead>

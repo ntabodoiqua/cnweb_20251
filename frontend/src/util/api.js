@@ -985,6 +985,15 @@ const getUsersAdminApi = (params) => {
   });
 };
 
+const getUserStatisticsApi = () => {
+  const URL_API = "/api/user/admin/statistic/users";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // ============================================
 // Brand Management APIs (Admin)
 // ============================================
@@ -1023,6 +1032,35 @@ const uploadBrandLogoApi = (brandId, file) => {
 const toggleBrandStatusApi = (brandId) => {
   const URL_API = `/api/product/brands/${brandId}/toggle-status`;
   return axios.patch(URL_API);
+};
+
+// ============================================
+// Store Management APIs (Admin)
+// ============================================
+
+const getStoresAdminApi = (params) => {
+  const URL_API = "/api/product/stores";
+  return axios.get(URL_API, {
+    params: {
+      ...params,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const toggleStoreStatusApi = (storeId) => {
+  const URL_API = `/api/product/stores/${storeId}/toggle-status`;
+  return axios.patch(
+    URL_API,
+    {},
+    {
+      headers: {
+        "Accept-Language": "vi",
+      },
+    }
+  );
 };
 
 // ============================================
@@ -1176,6 +1214,7 @@ export {
   bulkUpdateProductStatusApi,
   // Admin APIs
   getUsersAdminApi,
+  getUserStatisticsApi,
   // Brand Management APIs
   getBrandsAdminApi,
   createBrandApi,
@@ -1183,6 +1222,9 @@ export {
   deleteBrandApi,
   uploadBrandLogoApi,
   toggleBrandStatusApi,
+  // Store Management APIs
+  getStoresAdminApi,
+  toggleStoreStatusApi,
   // Category Management APIs
   getCategoriesAdminApi,
   createCategoryAdminApi,
