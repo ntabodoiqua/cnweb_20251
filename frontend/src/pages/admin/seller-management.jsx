@@ -33,6 +33,9 @@ import {
   CalendarOutlined,
   DownloadOutlined,
   LinkOutlined,
+  FilterOutlined,
+  ReloadOutlined,
+  SearchOutlined,
 } from "@ant-design/icons";
 import useScrollToTop from "../../hooks/useScrollToTop";
 import {
@@ -42,6 +45,7 @@ import {
   getSellerDocumentApi,
 } from "../../util/api";
 import "./seller-management.css";
+import "./admin-dashboard.css";
 
 const { Search } = Input;
 const { Option } = Select;
@@ -56,6 +60,7 @@ const SellerManagement = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [filterStatus, setFilterStatus] = useState("all");
   const [searchText, setSearchText] = useState("");
+  const [showFilters, setShowFilters] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 10,
@@ -261,6 +266,15 @@ const SellerManagement = () => {
     return matchStatus && matchSearch;
   });
 
+  const handleResetFilters = () => {
+    setFilterStatus("all");
+    setSearchText("");
+  };
+
+  const handleSearch = () => {
+    fetchSellers();
+  };
+
   // Table columns
   const columns = [
     {
@@ -313,12 +327,13 @@ const SellerManagement = () => {
       align: "center",
       width: 90,
       render: (_, record) => (
-        <Button
-          type="primary"
-          icon={<EyeOutlined />}
+        <button
+          className="adminActionBtn view"
+          title="Xem chi tiết"
           onClick={() => handleViewDetails(record)}
         >
-        </Button>
+          <EyeOutlined />
+        </button>
       ),
     },
   ];
@@ -329,73 +344,119 @@ const SellerManagement = () => {
         {/* Statistics */}
         <Row gutter={16} className="statistics-row">
         <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Tổng số đăng ký"
-              value={statistics.total}
-              prefix={<ShoppingOutlined />}
-              valueStyle={{ color: "#1890ff" }}
-            />
-          </Card>
+          <div className="admin-stat-card">
+            <div className="admin-stat-header">
+              <span className="admin-stat-title">Tổng số đăng ký</span>
+              <div className="admin-stat-icon">
+                <ShoppingOutlined />
+              </div>
+            </div>
+            <h2 className="admin-stat-value">{statistics.total}</h2>
+          </div>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Chờ duyệt"
-              value={statistics.pending}
-              prefix={<ClockCircleOutlined />}
-              valueStyle={{ color: "#faad14" }}
-            />
-          </Card>
+          <div className="admin-stat-card">
+            <div className="admin-stat-header">
+              <span className="admin-stat-title">Chờ duyệt</span>
+              <div className="admin-stat-icon">
+                <ClockCircleOutlined />
+              </div>
+            </div>
+            <h2 className="admin-stat-value" style={{ color: "#faad14" }}>{statistics.pending}</h2>
+          </div>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Đã duyệt"
-              value={statistics.approved}
-              prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: "#52c41a" }}
-            />
-          </Card>
+          <div className="admin-stat-card">
+            <div className="admin-stat-header">
+              <span className="admin-stat-title">Đã duyệt</span>
+              <div className="admin-stat-icon">
+                <CheckCircleOutlined />
+              </div>
+            </div>
+            <h2 className="admin-stat-value" style={{ color: "#52c41a" }}>{statistics.approved}</h2>
+          </div>
         </Col>
         <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="Từ chối"
-              value={statistics.rejected}
-              prefix={<CloseCircleOutlined />}
-              valueStyle={{ color: "#ff4d4f" }}
-            />
-          </Card>
+          <div className="admin-stat-card">
+            <div className="admin-stat-header">
+              <span className="admin-stat-title">Từ chối</span>
+              <div className="admin-stat-icon">
+                <CloseCircleOutlined />
+              </div>
+            </div>
+            <h2 className="admin-stat-value" style={{ color: "#ff4d4f" }}>{statistics.rejected}</h2>
+          </div>
         </Col>
       </Row>
 
       {/* Filters */}
       <Card className="filter-card">
-        <Space size="middle" wrap className="filter-space">
-          <Search
-            placeholder="Tìm theo tên, shop, email, SĐT..."
-            allowClear
-            style={{ width: 300 }}
-            onChange={(e) => setSearchText(e.target.value)}
-          />
-          <Select
-            value={filterStatus}
-            onChange={setFilterStatus}
-            style={{ width: 150 }}
-          >
-            <Option value="all">Tất cả</Option>
-            <Option value="pending">
-              <Badge status="processing" text="Chờ duyệt" />
-            </Option>
-            <Option value="approved">
-              <Badge status="success" text="Đã duyệt" />
-            </Option>
-            <Option value="rejected">
-              <Badge status="error" text="Từ chối" />
-            </Option>
-          </Select>
-        </Space>
+        <div className="adminToolbar">
+          <div className="adminSearchBox">
+            <SearchOutlined className="searchIcon" />
+            <input
+              type="text"
+              placeholder="Tìm theo tên, shop, email, SĐT..."
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              className="adminSearchInput"
+            />
+          </div>
+          <div className="toolbarActions">
+            <button
+              className={`admin-btn ${
+                showFilters ? "admin-btn-primary" : "admin-btn-secondary"
+              }`}
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <FilterOutlined />
+              {showFilters ? "Ẩn bộ lọc" : "Hiện bộ lọc"}
+            </button>
+            <button
+              className="admin-btn admin-btn-secondary"
+              onClick={handleResetFilters}
+            >
+              <ReloadOutlined />
+              Đặt lại
+            </button>
+            <button
+              className="admin-btn admin-btn-primary"
+              onClick={handleSearch}
+            >
+              <SearchOutlined />
+              Tìm kiếm
+            </button>
+          </div>
+        </div>
+
+        {/* Advanced Filters */}
+        {showFilters && (
+          <div className="adminFilters">
+            <Row gutter={16}>
+              <Col xs={24} sm={12} md={8}>
+                <div className="filterItem">
+                  <label>Trạng thái</label>
+                  <Select
+                    value={filterStatus}
+                    onChange={setFilterStatus}
+                    style={{ width: "100%" }}
+                  >
+                    <Option value="all">Tất cả</Option>
+                    <Option value="pending">
+                      <Badge status="processing" text="Chờ duyệt" />
+                    </Option>
+                    <Option value="approved">
+                      <Badge status="success" text="Đã duyệt" />
+                    </Option>
+                    <Option value="rejected">
+                      <Badge status="error" text="Từ chối" />
+                    </Option>
+                  </Select>
+                </div>
+              </Col>
+            </Row>
+          </div>
+        )}
       </Card>
 
       {/* Table */}
@@ -434,57 +495,66 @@ const SellerManagement = () => {
         open={isModalVisible}
         onCancel={() => setIsModalVisible(false)}
         footer={
-          selectedSeller?.status === "pending"
-            ? [
-                <Button key="cancel" onClick={() => setIsModalVisible(false)}>
-                  Đóng
-                </Button>,
-                <Popconfirm
-                  key="reject"
-                  title="Từ chối người bán"
-                  description="Bạn có chắc muốn từ chối người bán này?"
-                  onConfirm={() => handleReject(selectedSeller.id)}
-                  okText="Đồng ý"
-                  cancelText="Hủy"
+          selectedSeller?.status === "pending" ? (
+            <div className="modalFooter">
+              <button 
+                key="cancel" 
+                className="adminActionBtn close"
+                onClick={() => setIsModalVisible(false)}
+              >
+                Đóng
+              </button>
+              <Popconfirm
+                key="reject"
+                title="Từ chối người bán"
+                description="Bạn có chắc muốn từ chối người bán này?"
+                onConfirm={() => handleReject(selectedSeller.id)}
+                okText="Đồng ý"
+                cancelText="Hủy"
+              >
+                <button 
+                  className="adminActionBtn reject"
                 >
-                  <Button type="primary" danger icon={<CloseCircleOutlined />}>
-                    Từ chối
-                  </Button>
-                </Popconfirm>,
-                <Popconfirm
-                  key="approve"
-                  title="Phê duyệt người bán"
-                  description="Bạn có chắc muốn phê duyệt người bán này?"
-                  onConfirm={() => handleApprove(selectedSeller.id)}
-                  okText="Đồng ý"
-                  cancelText="Hủy"
+                  <CloseCircleOutlined />
+                  Từ chối
+                </button>
+              </Popconfirm>
+              <Popconfirm
+                key="approve"
+                title="Phê duyệt người bán"
+                description="Bạn có chắc muốn phê duyệt người bán này?"
+                onConfirm={() => handleApprove(selectedSeller.id)}
+                okText="Đồng ý"
+                cancelText="Hủy"
+              >
+                <button
+                  className="adminActionBtn approve"
                 >
-                  <Button
-                    type="primary"
-                    style={{ background: "#52c41a" }}
-                    icon={<CheckCircleOutlined />}
-                  >
-                    Phê duyệt
-                  </Button>
-                </Popconfirm>,
-              ]
-            : [
-                <Button
-                  key="store"
-                  icon={<LinkOutlined />}
-                  onClick={() => handleOpenStore(selectedSeller)}
-                  disabled={selectedSeller?.status !== 'approved'}
-                >
-                  Mở cửa hàng
-                </Button>,
-                <Button
-                  key="close"
-                  type="primary"
-                  onClick={() => setIsModalVisible(false)}
-                >
-                  Đóng
-                </Button>,
-              ]
+                  <CheckCircleOutlined />
+                  Phê duyệt
+                </button>
+              </Popconfirm>
+            </div>
+          ) : (
+            <div className="modalFooter">
+              <button
+                key="close"
+                className="adminActionBtn close"
+                onClick={() => setIsModalVisible(false)}
+              >
+                Đóng
+              </button>
+              <button
+                key="store"
+                className="adminActionBtn link"
+                onClick={() => handleOpenStore(selectedSeller)}
+                disabled={selectedSeller?.status !== 'approved'}
+              >
+                <LinkOutlined />
+                Mở cửa hàng
+              </button>
+            </div>
+          )
         }
         width={800}
       >
