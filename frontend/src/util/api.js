@@ -972,6 +972,19 @@ const bulkUpdateProductStatusApi = (productIds, isActive) => {
   );
 };
 
+// Admin APIs
+const getUsersAdminApi = (params) => {
+  const URL_API = "/api/user/admin";
+  return axios.get(URL_API, {
+    params: {
+      ...params,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -1055,4 +1068,6 @@ export {
   updateVariantStatusApi,
   bulkUpdateVariantStatusApi,
   bulkUpdateProductStatusApi,
+  // Admin APIs
+  getUsersAdminApi,
 };
