@@ -972,6 +972,163 @@ const bulkUpdateProductStatusApi = (productIds, isActive) => {
   );
 };
 
+// Admin APIs
+const getUsersAdminApi = (params) => {
+  const URL_API = "/api/user/admin";
+  return axios.get(URL_API, {
+    params: {
+      ...params,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const getUserStatisticsApi = () => {
+  const URL_API = "/api/user/admin/statistic/users";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// ============================================
+// Brand Management APIs (Admin)
+// ============================================
+
+const getBrandsAdminApi = (params) => {
+  const URL_API = "/api/product/brands/public";
+  return axios.get(URL_API, { params });
+};
+
+const createBrandApi = (brandData) => {
+  const URL_API = "/api/product/brands";
+  return axios.post(URL_API, brandData);
+};
+
+const updateBrandApi = (brandId, brandData) => {
+  const URL_API = `/api/product/brands/${brandId}`;
+  return axios.put(URL_API, brandData);
+};
+
+const deleteBrandApi = (brandId) => {
+  const URL_API = `/api/product/brands/${brandId}`;
+  return axios.delete(URL_API);
+};
+
+const uploadBrandLogoApi = (brandId, file) => {
+  const URL_API = `/api/product/brands/${brandId}/thumbnail`;
+  const formData = new FormData();
+  formData.append("file", file);
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+const toggleBrandStatusApi = (brandId) => {
+  const URL_API = `/api/product/brands/${brandId}/toggle-status`;
+  return axios.patch(URL_API);
+};
+
+// ============================================
+// Store Management APIs (Admin)
+// ============================================
+
+const getStoresAdminApi = (params) => {
+  const URL_API = "/api/product/stores";
+  return axios.get(URL_API, {
+    params: {
+      ...params,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const toggleStoreStatusApi = (storeId) => {
+  const URL_API = `/api/product/stores/${storeId}/toggle-status`;
+  return axios.patch(
+    URL_API,
+    {},
+    {
+      headers: {
+        "Accept-Language": "vi",
+      },
+    }
+  );
+};
+
+// ============================================
+// Category Management APIs (Admin)
+// ============================================
+
+const getCategoriesAdminApi = (params) => {
+  const URL_API = "/api/product/admin/categories";
+  return axios.get(URL_API, {
+    params: {
+      ...params,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const createCategoryAdminApi = (categoryData) => {
+  const URL_API = "/api/product/admin/categories";
+  return axios.post(URL_API, categoryData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const updateCategoryAdminApi = (categoryId, categoryData) => {
+  const URL_API = `/api/product/admin/categories/${categoryId}`;
+  return axios.put(URL_API, categoryData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const deleteCategoryAdminApi = (categoryId) => {
+  const URL_API = `/api/product/admin/categories/${categoryId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const toggleCategoryStatusApi = (categoryId) => {
+  const URL_API = `/api/product/admin/categories/${categoryId}/toggle-status`;
+  return axios.put(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const uploadCategoryImageAdminApi = (categoryId, file) => {
+  const URL_API = `/api/product/admin/categories/${categoryId}/image`;
+  const formData = new FormData();
+  formData.append("file", file);
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // ==================== Seller Management APIs (Admin) ====================
 
 const getAllSellerProfilesApi = (status = null, page = 0, size = 10) => {
@@ -1107,6 +1264,26 @@ export {
   updateVariantStatusApi,
   bulkUpdateVariantStatusApi,
   bulkUpdateProductStatusApi,
+  // Admin APIs
+  getUsersAdminApi,
+  getUserStatisticsApi,
+  // Brand Management APIs
+  getBrandsAdminApi,
+  createBrandApi,
+  updateBrandApi,
+  deleteBrandApi,
+  uploadBrandLogoApi,
+  toggleBrandStatusApi,
+  // Store Management APIs
+  getStoresAdminApi,
+  toggleStoreStatusApi,
+  // Category Management APIs
+  getCategoriesAdminApi,
+  createCategoryAdminApi,
+  updateCategoryAdminApi,
+  deleteCategoryAdminApi,
+  toggleCategoryStatusApi,
+  uploadCategoryImageAdminApi,
   // Seller Management APIs (Admin)
   getAllSellerProfilesApi,
   getSellerProfileByIdApi,

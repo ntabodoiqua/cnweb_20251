@@ -1,488 +1,690 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ShopOutlined,
   SearchOutlined,
-  EditOutlined,
   DeleteOutlined,
   EyeOutlined,
-  PlusOutlined,
+  LoadingOutlined,
+  ExclamationCircleOutlined,
+  FilterOutlined,
+  ReloadOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
 } from "@ant-design/icons";
+import axios from "../../util/axios.customize";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import styles from "./AdminProductsPage.module.css";
 
 /**
- * AdminProductsPage - Trang quản lý sản phẩm
+ * AdminProductsPage - Trang quản lý sản phẩm (Admin chỉ có quyền xem và xóa)
  */
 const AdminProductsPage = () => {
-  const [products, setProducts] = useState([
-    {
-      id: 1,
-      name: "Laptop Dell XPS 13",
-      category: "Laptop",
-      price: "25,000,000",
-      stock: 15,
-      sold: 45,
-      status: "active",
-      seller: "TechStore",
-      createdAt: "2024-10-01",
-    },
-    {
-      id: 2,
-      name: "iPhone 15 Pro Max",
-      category: "Smartphone",
-      price: "35,000,000",
-      stock: 8,
-      sold: 120,
-      status: "active",
-      seller: "MobileShop",
-      createdAt: "2024-10-15",
-    },
-    {
-      id: 3,
-      name: "Samsung Galaxy S24",
-      category: "Smartphone",
-      price: "22,000,000",
-      stock: 0,
-      sold: 67,
-      status: "out_of_stock",
-      seller: "MobileShop",
-      createdAt: "2024-09-20",
-    },
-    {
-      id: 4,
-      name: "MacBook Pro M3",
-      category: "Laptop",
-      price: "45,000,000",
-      stock: 5,
-      sold: 23,
-      status: "active",
-      seller: "AppleStore",
-      createdAt: "2024-11-01",
-    },
-    {
-      id: 5,
-      name: "AirPods Pro 2",
-      category: "Accessory",
-      price: "6,500,000",
-      stock: 30,
-      sold: 200,
-      status: "active",
-      seller: "AppleStore",
-      createdAt: "2024-08-12",
-    },
-  ]);
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("all");
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+  const [totalElements, setTotalElements] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
 
-  const categories = ["all", "Laptop", "Smartphone", "Accessory", "Tablet"];
-
-  const getStatusBadgeClass = (status) => {
-    switch (status) {
-      case "active":
-        return "status-active";
-      case "out_of_stock":
-        return "status-out-stock";
-      case "inactive":
-        return "status-inactive";
-      default:
-        return "";
-    }
-  };
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case "active":
-        return "Đang bán";
-      case "out_of_stock":
-        return "Hết hàng";
-      case "inactive":
-        return "Ngừng bán";
-      default:
-        return status;
-    }
-  };
-
-  const filteredProducts = products.filter((product) => {
-    const matchesSearch =
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.seller.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategory === "all" || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+  // Filter state
+  const [filters, setFilters] = useState({
+    keyword: "",
+    name: "",
+    categoryId: "",
+    storeId: "",
+    brandId: "",
+    createdBy: "",
+    isActive: "",
+    priceFrom: "",
+    priceTo: "",
+    stockFrom: "",
+    stockTo: "",
+    ratingFrom: "",
+    ratingTo: "",
+    createdFrom: "",
+    createdTo: "",
+    sortBy: "createdAt",
+    sortDirection: "desc",
   });
 
-  const handleDeleteProduct = (productId) => {
-    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-      console.log("Delete product:", productId);
+  // Fetch products from API
+  const fetchProducts = async (page = 0) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Build query params
+      const params = new URLSearchParams();
+      params.append("page", page);
+      params.append("size", pageSize);
+      params.append("sortBy", filters.sortBy);
+      params.append("sortDirection", filters.sortDirection);
+
+      // Add filters if they have values
+      Object.keys(filters).forEach((key) => {
+        if (
+          filters[key] !== "" &&
+          filters[key] !== null &&
+          key !== "sortBy" &&
+          key !== "sortDirection"
+        ) {
+          params.append(key, filters[key]);
+        }
+      });
+
+      const response = await axios.get(
+        `/api/product/products?${params.toString()}`,
+        {
+          headers: {
+            "Accept-Language": "vi",
+          },
+        }
+      );
+
+      if (response.code === 1000 && response.result) {
+        setProducts(response.result.content || []);
+        setTotalElements(response.result.totalElements || 0);
+        setTotalPages(response.result.totalPages || 0);
+        setCurrentPage(response.result.number || 0);
+      }
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      setError("Không thể tải danh sách sản phẩm. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
     }
+  };
+
+  // Initial load
+  useEffect(() => {
+    fetchProducts(currentPage);
+  }, []);
+
+  const getStatusBadgeClass = (isActive) => {
+    return isActive ? styles.statusActive : styles.statusInactive;
+  };
+
+  const getStatusText = (isActive) => {
+    return isActive ? "Đang hoạt động" : "Ngừng hoạt động";
+  };
+
+  const handleDeleteProduct = async (productId) => {
+    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
+      try {
+        await axios.delete(`/api/product/products/${productId}`);
+        alert("Xóa sản phẩm thành công!");
+        fetchProducts(currentPage);
+      } catch (err) {
+        console.error("Error deleting product:", err);
+        alert("Không thể xóa sản phẩm. Vui lòng thử lại.");
+      }
+    }
+  };
+
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({
+      ...prev,
+      [key]: value,
+    }));
+  };
+
+  const handleSearch = () => {
+    setCurrentPage(0);
+    fetchProducts(0);
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      keyword: "",
+      name: "",
+      categoryId: "",
+      storeId: "",
+      brandId: "",
+      createdBy: "",
+      isActive: "",
+      priceFrom: "",
+      priceTo: "",
+      stockFrom: "",
+      stockTo: "",
+      ratingFrom: "",
+      ratingTo: "",
+      createdFrom: "",
+      createdTo: "",
+      sortBy: "createdAt",
+      sortDirection: "desc",
+    });
+    setCurrentPage(0);
+    setTimeout(() => fetchProducts(0), 100);
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setCurrentPage(newPage);
+      fetchProducts(newPage);
+    }
+  };
+
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(price);
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("vi-VN");
   };
 
   return (
-    <div className="admin-products">
-      {/* Stats */}
-      <div
-        className="admin-stats-grid"
-        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}
-      >
-        <div className="admin-stat-card">
-          <div className="admin-stat-header">
-            <span className="admin-stat-title">Tổng sản phẩm</span>
-            <div className="admin-stat-icon">
-              <ShopOutlined />
-            </div>
-          </div>
-          <h2 className="admin-stat-value">{products.length}</h2>
-        </div>
-        <div className="admin-stat-card">
-          <div className="admin-stat-header">
-            <span className="admin-stat-title">Đang bán</span>
-            <div
-              className="admin-stat-icon"
-              style={{
-                background: "linear-gradient(135deg, #52c41a 0%, #73d13d 100%)",
-              }}
-            >
-              <ShopOutlined />
-            </div>
-          </div>
-          <h2 className="admin-stat-value">
-            {products.filter((p) => p.status === "active").length}
-          </h2>
-        </div>
-        <div className="admin-stat-card">
-          <div className="admin-stat-header">
-            <span className="admin-stat-title">Hết hàng</span>
-            <div
-              className="admin-stat-icon"
-              style={{
-                background: "linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%)",
-              }}
-            >
-              <ShopOutlined />
-            </div>
-          </div>
-          <h2 className="admin-stat-value">
-            {products.filter((p) => p.status === "out_of_stock").length}
-          </h2>
-        </div>
-      </div>
-
+    <div className={styles.adminProducts}>
       {/* Toolbar */}
-      <div className="admin-section">
-        <div className="admin-toolbar">
-          <div className="admin-filters">
-            <div className="admin-search-box">
-              <SearchOutlined className="search-icon" />
+      <div className={styles.adminSection}>
+        <div className={styles.adminToolbar}>
+          <div className={styles.adminFilters}>
+            <div className={styles.adminSearchBox}>
+              <SearchOutlined className={styles.searchIcon} />
               <input
                 type="text"
-                placeholder="Tìm kiếm sản phẩm, người bán..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="admin-search-input"
+                placeholder="Tìm kiếm theo từ khóa..."
+                value={filters.keyword}
+                onChange={(e) => handleFilterChange("keyword", e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                className={styles.adminSearchInput}
               />
             </div>
             <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="admin-select"
+              value={filters.isActive}
+              onChange={(e) => handleFilterChange("isActive", e.target.value)}
+              className={styles.adminSelect}
             >
-              <option value="all">Tất cả danh mục</option>
-              {categories
-                .filter((c) => c !== "all")
-                .map((cat) => (
-                  <option key={cat} value={cat}>
-                    {cat}
-                  </option>
-                ))}
+              <option value="">Tất cả trạng thái</option>
+              <option value="true">Đang hoạt động</option>
+              <option value="false">Ngừng hoạt động</option>
             </select>
+            <button
+              className="admin-btn admin-btn-secondary"
+              onClick={() => setShowFilters(!showFilters)}
+            >
+              <FilterOutlined /> {showFilters ? "Ẩn bộ lọc" : "Bộ lọc nâng cao"}
+            </button>
+            <button
+              className="admin-btn admin-btn-primary"
+              onClick={handleSearch}
+            >
+              <SearchOutlined /> Tìm kiếm
+            </button>
+            <button
+              className="admin-btn admin-btn-secondary"
+              onClick={handleResetFilters}
+            >
+              <ReloadOutlined /> Đặt lại
+            </button>
           </div>
-          <button className="admin-btn admin-btn-primary">
-            <PlusOutlined />
-            Thêm sản phẩm mới
-          </button>
         </div>
+
+        {/* Advanced Filters */}
+        {showFilters && (
+          <>
+            <div className={styles.filterRow}>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Tên sản phẩm</label>
+                <input
+                  type="text"
+                  placeholder="Nhập tên..."
+                  value={filters.name}
+                  onChange={(e) => handleFilterChange("name", e.target.value)}
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>ID danh mục</label>
+                <input
+                  type="text"
+                  placeholder="ID danh mục..."
+                  value={filters.categoryId}
+                  onChange={(e) =>
+                    handleFilterChange("categoryId", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>ID cửa hàng</label>
+                <input
+                  type="text"
+                  placeholder="ID cửa hàng..."
+                  value={filters.storeId}
+                  onChange={(e) =>
+                    handleFilterChange("storeId", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>ID thương hiệu</label>
+                <input
+                  type="text"
+                  placeholder="ID thương hiệu..."
+                  value={filters.brandId}
+                  onChange={(e) =>
+                    handleFilterChange("brandId", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Người tạo</label>
+                <input
+                  type="text"
+                  placeholder="Username..."
+                  value={filters.createdBy}
+                  onChange={(e) =>
+                    handleFilterChange("createdBy", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+            </div>
+
+            <div className={styles.filterRow}>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Giá từ</label>
+                <input
+                  type="number"
+                  placeholder="0"
+                  value={filters.priceFrom}
+                  onChange={(e) =>
+                    handleFilterChange("priceFrom", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Giá đến</label>
+                <input
+                  type="number"
+                  placeholder="50000000"
+                  value={filters.priceTo}
+                  onChange={(e) =>
+                    handleFilterChange("priceTo", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Tồn kho từ</label>
+                <input
+                  type="number"
+                  placeholder="0"
+                  value={filters.stockFrom}
+                  onChange={(e) =>
+                    handleFilterChange("stockFrom", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Tồn kho đến</label>
+                <input
+                  type="number"
+                  placeholder="9999"
+                  value={filters.stockTo}
+                  onChange={(e) =>
+                    handleFilterChange("stockTo", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Đánh giá từ</label>
+                <input
+                  type="number"
+                  placeholder="0"
+                  min="0"
+                  max="5"
+                  step="0.1"
+                  value={filters.ratingFrom}
+                  onChange={(e) =>
+                    handleFilterChange("ratingFrom", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Đánh giá đến</label>
+                <input
+                  type="number"
+                  placeholder="5"
+                  min="0"
+                  max="5"
+                  step="0.1"
+                  value={filters.ratingTo}
+                  onChange={(e) =>
+                    handleFilterChange("ratingTo", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+            </div>
+
+            <div className={styles.filterRow}>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Ngày tạo từ</label>
+                <input
+                  type="datetime-local"
+                  value={filters.createdFrom}
+                  onChange={(e) =>
+                    handleFilterChange("createdFrom", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Ngày tạo đến</label>
+                <input
+                  type="datetime-local"
+                  value={filters.createdTo}
+                  onChange={(e) =>
+                    handleFilterChange("createdTo", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Sắp xếp theo</label>
+                <select
+                  value={filters.sortBy}
+                  onChange={(e) => handleFilterChange("sortBy", e.target.value)}
+                  className={styles.filterInput}
+                >
+                  <option value="createdAt">Ngày tạo</option>
+                  <option value="price">Giá</option>
+                  <option value="name">Tên</option>
+                  <option value="soldCount">Đã bán</option>
+                  <option value="averageRating">Đánh giá</option>
+                </select>
+              </div>
+              <div className={styles.filterGroup}>
+                <label className={styles.filterLabel}>Thứ tự</label>
+                <select
+                  value={filters.sortDirection}
+                  onChange={(e) =>
+                    handleFilterChange("sortDirection", e.target.value)
+                  }
+                  className={styles.filterInput}
+                >
+                  <option value="asc">Tăng dần</option>
+                  <option value="desc">Giảm dần</option>
+                </select>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Products Table */}
-      <div className="admin-section">
-        <h2 className="admin-section-title">
-          Danh sách sản phẩm ({filteredProducts.length})
+      <div className={styles.adminSection}>
+        <h2 className={styles.adminSectionTitle}>
+          Danh sách sản phẩm ({totalElements})
         </h2>
-        <div className="admin-table-container">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Tên sản phẩm</th>
-                <th>Danh mục</th>
-                <th>Giá</th>
-                <th>Tồn kho</th>
-                <th>Đã bán</th>
-                <th>Người bán</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProducts.length > 0 ? (
-                filteredProducts.map((product) => (
-                  <tr key={product.id}>
-                    <td>
-                      <strong>#{product.id}</strong>
-                    </td>
-                    <td>
-                      <strong>{product.name}</strong>
-                    </td>
-                    <td>{product.category}</td>
-                    <td>
-                      <strong style={{ color: "#ee4d2d" }}>
-                        ₫{product.price}
-                      </strong>
-                    </td>
-                    <td>
-                      <span
-                        style={{
-                          color: product.stock > 0 ? "#52c41a" : "#ff4d4f",
-                        }}
-                      >
-                        {product.stock}
-                      </span>
-                    </td>
-                    <td>{product.sold}</td>
-                    <td>{product.seller}</td>
-                    <td>
-                      <span
-                        className={`status-badge ${getStatusBadgeClass(
-                          product.status
-                        )}`}
-                      >
-                        {getStatusText(product.status)}
-                      </span>
-                    </td>
-                    <td>
-                      <div className="admin-action-buttons">
-                        <button
-                          className="admin-action-btn view"
-                          title="Xem chi tiết"
-                        >
-                          <EyeOutlined />
-                        </button>
-                        <button
-                          className="admin-action-btn edit"
-                          title="Chỉnh sửa"
-                        >
-                          <EditOutlined />
-                        </button>
-                        <button
-                          className="admin-action-btn delete"
-                          title="Xóa"
-                          onClick={() => handleDeleteProduct(product.id)}
-                        >
-                          <DeleteOutlined />
-                        </button>
-                      </div>
-                    </td>
+
+        {loading ? (
+          <LoadingSpinner
+            tip="Đang tải danh sách sản phẩm..."
+            fullScreen={false}
+          />
+        ) : error ? (
+          <div className={styles.error}>
+            <div className={styles.errorIcon}>
+              <ExclamationCircleOutlined />
+            </div>
+            <p>{error}</p>
+          </div>
+        ) : (
+          <>
+            <div className="admin-table-container">
+              <table className="admin-table">
+                <thead>
+                  <tr>
+                    <th>Hình ảnh</th>
+                    <th>Tên sản phẩm</th>
+                    <th>Cửa hàng</th>
+                    <th>Danh mục</th>
+                    <th>Thương hiệu</th>
+                    <th>Giá</th>
+                    <th>Đã bán</th>
+                    <th>Đánh giá</th>
+                    <th>Ngày tạo</th>
+                    <th>Trạng thái</th>
+                    <th className={styles.stickyColumn}>Thao tác</th>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="9"
-                    style={{ textAlign: "center", padding: "40px" }}
+                </thead>
+                <tbody>
+                  {products.length > 0 ? (
+                    products.map((product) => (
+                      <tr key={product.id}>
+                        <td>
+                          {product.thumbnailImage ? (
+                            <img
+                              src={product.thumbnailImage}
+                              alt={product.name}
+                              loading="lazy"
+                              style={{
+                                width: "50px",
+                                height: "50px",
+                                objectFit: "cover",
+                                borderRadius: "4px",
+                                backgroundColor: "#f0f0f0",
+                              }}
+                              onError={(e) => {
+                                e.target.style.display = "none";
+                                e.target.parentElement.innerHTML =
+                                  '<div style="width:50px;height:50px;background:#f0f0f0;border-radius:4px;display:flex;align-items:center;justify-content:center;color:#999;font-size:10px;">No Image</div>';
+                              }}
+                            />
+                          ) : (
+                            <div
+                              style={{
+                                width: "50px",
+                                height: "50px",
+                                background: "#f0f0f0",
+                                borderRadius: "4px",
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                color: "#999",
+                                fontSize: "10px",
+                              }}
+                            >
+                              No Image
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          <strong>{product.name}</strong>
+                          {product.shortDescription && (
+                            <div
+                              style={{
+                                fontSize: "12px",
+                                color: "#666",
+                                marginTop: "4px",
+                              }}
+                            >
+                              {product.shortDescription.substring(0, 50)}...
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          <div>{product.storeName || "N/A"}</div>
+                          {product.storeId && (
+                            <div style={{ fontSize: "11px", color: "#999" }}>
+                              ID: {product.storeId.substring(0, 8)}
+                            </div>
+                          )}
+                        </td>
+                        <td>
+                          <div>{product.platformCategoryName || "N/A"}</div>
+                          {product.storeCategoryName &&
+                            product.storeCategoryName.length > 0 && (
+                              <div style={{ fontSize: "11px", color: "#666" }}>
+                                {product.storeCategoryName.join(", ")}
+                              </div>
+                            )}
+                        </td>
+                        <td>{product.brandName || "N/A"}</td>
+                        <td>
+                          <div style={{ color: "#ee4d2d", fontWeight: "bold" }}>
+                            {formatPrice(product.minPrice)}
+                          </div>
+                          {product.minPrice !== product.maxPrice && (
+                            <div style={{ fontSize: "12px", color: "#666" }}>
+                              - {formatPrice(product.maxPrice)}
+                            </div>
+                          )}
+                        </td>
+                        <td>{product.soldCount || 0}</td>
+                        <td>
+                          {product.averageRating ? (
+                            <div>
+                              <span style={{ color: "#faad14" }}>
+                                ⭐ {product.averageRating.toFixed(1)}
+                              </span>
+                              <div style={{ fontSize: "11px", color: "#999" }}>
+                                ({product.ratingCount || 0} đánh giá)
+                              </div>
+                            </div>
+                          ) : (
+                            <span style={{ color: "#999" }}>Chưa có</span>
+                          )}
+                        </td>
+                        <td>{formatDate(product.createdAt)}</td>
+                        <td>
+                          <span
+                            className={`status-badge ${getStatusBadgeClass(
+                              product.active
+                            )}`}
+                            title={getStatusText(product.active)}
+                          >
+                            {product.active ? (
+                              <CheckCircleOutlined />
+                            ) : (
+                              <CloseCircleOutlined />
+                            )}
+                          </span>
+                        </td>
+                        <td className={styles.stickyColumn}>
+                          <div className={styles.adminActionButtons}>
+                            <button
+                              className={`${styles.adminActionBtn} ${styles.view}`}
+                              title="Xem chi tiết"
+                              onClick={() =>
+                                window.open(`/products/${product.id}`, "_blank")
+                              }
+                            >
+                              <EyeOutlined />
+                            </button>
+                            <button
+                              className={`${styles.adminActionBtn} ${styles.delete}`}
+                              title="Xóa"
+                              onClick={() => handleDeleteProduct(product.id)}
+                            >
+                              <DeleteOutlined />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="11"
+                        style={{ textAlign: "center", padding: "40px" }}
+                      >
+                        <div className="admin-empty-state">
+                          <ShopOutlined
+                            style={{ fontSize: "64px", color: "#ddd" }}
+                          />
+                          <p>Không tìm thấy sản phẩm nào</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 0 && (
+              <div className={styles.pagination}>
+                <div className={styles.paginationInfo}>
+                  Trang {currentPage + 1} / {totalPages} - Tổng {totalElements}{" "}
+                  sản phẩm
+                </div>
+                <div className={styles.paginationControls}>
+                  <button
+                    className={styles.pageButton}
+                    onClick={() => handlePageChange(0)}
+                    disabled={currentPage === 0}
                   >
-                    <div className="admin-empty-state">
-                      <ShopOutlined
-                        style={{ fontSize: "64px", color: "#ddd" }}
-                      />
-                      <p>Không tìm thấy sản phẩm nào</p>
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                    Đầu
+                  </button>
+                  <button
+                    className={styles.pageButton}
+                    onClick={() => handlePageChange(currentPage - 1)}
+                    disabled={currentPage === 0}
+                  >
+                    Trước
+                  </button>
+
+                  {[...Array(Math.min(5, totalPages))].map((_, idx) => {
+                    let pageNum;
+                    if (totalPages <= 5) {
+                      pageNum = idx;
+                    } else if (currentPage < 3) {
+                      pageNum = idx;
+                    } else if (currentPage >= totalPages - 3) {
+                      pageNum = totalPages - 5 + idx;
+                    } else {
+                      pageNum = currentPage - 2 + idx;
+                    }
+
+                    return (
+                      <button
+                        key={pageNum}
+                        className={`${styles.pageButton} ${
+                          currentPage === pageNum ? styles.active : ""
+                        }`}
+                        onClick={() => handlePageChange(pageNum)}
+                      >
+                        {pageNum + 1}
+                      </button>
+                    );
+                  })}
+
+                  <button
+                    className={styles.pageButton}
+                    onClick={() => handlePageChange(currentPage + 1)}
+                    disabled={currentPage >= totalPages - 1}
+                  >
+                    Sau
+                  </button>
+                  <button
+                    className={styles.pageButton}
+                    onClick={() => handlePageChange(totalPages - 1)}
+                    disabled={currentPage >= totalPages - 1}
+                  >
+                    Cuối
+                  </button>
+                </div>
+              </div>
+            )}
+          </>
+        )}
       </div>
-
-      <style jsx>{`
-        .admin-products {
-          animation: fadeIn 0.5s ease-out;
-        }
-
-        .admin-section {
-          margin-bottom: 24px;
-        }
-
-        .admin-section-title {
-          font-size: 20px;
-          font-weight: 700;
-          color: #333;
-          margin-bottom: 20px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .admin-section-title::before {
-          content: "";
-          width: 4px;
-          height: 24px;
-          background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
-          border-radius: 2px;
-        }
-
-        .admin-toolbar {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          gap: 16px;
-          flex-wrap: wrap;
-        }
-
-        .admin-filters {
-          display: flex;
-          gap: 12px;
-          flex: 1;
-          flex-wrap: wrap;
-        }
-
-        .admin-search-box {
-          position: relative;
-          flex: 1;
-          min-width: 250px;
-        }
-
-        .search-icon {
-          position: absolute;
-          left: 16px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #999;
-          font-size: 16px;
-        }
-
-        .admin-search-input {
-          width: 100%;
-          padding: 12px 16px 12px 44px;
-          border: 2px solid #e8e8e8;
-          border-radius: 8px;
-          font-size: 14px;
-          transition: all 0.3s ease;
-          outline: none;
-        }
-
-        .admin-search-input:focus {
-          border-color: #ee4d2d;
-          box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
-        }
-
-        .admin-select {
-          padding: 12px 16px;
-          border: 2px solid #e8e8e8;
-          border-radius: 8px;
-          font-size: 14px;
-          transition: all 0.3s ease;
-          outline: none;
-          background: white;
-          cursor: pointer;
-          min-width: 180px;
-        }
-
-        .admin-select:focus {
-          border-color: #ee4d2d;
-          box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
-        }
-
-        .status-active {
-          background: rgba(82, 196, 26, 0.1);
-          color: #52c41a;
-        }
-
-        .status-out-stock {
-          background: rgba(255, 77, 79, 0.1);
-          color: #ff4d4f;
-        }
-
-        .status-inactive {
-          background: rgba(0, 0, 0, 0.1);
-          color: #666;
-        }
-
-        .admin-action-buttons {
-          display: flex;
-          gap: 8px;
-          justify-content: center;
-        }
-
-        .admin-action-btn {
-          width: 32px;
-          height: 32px;
-          border-radius: 6px;
-          border: none;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.3s ease;
-          font-size: 14px;
-        }
-
-        .admin-action-btn.view {
-          background: rgba(82, 196, 26, 0.1);
-          color: #52c41a;
-        }
-
-        .admin-action-btn.view:hover {
-          background: #52c41a;
-          color: white;
-          transform: scale(1.1);
-        }
-
-        .admin-action-btn.edit {
-          background: rgba(24, 144, 255, 0.1);
-          color: #1890ff;
-        }
-
-        .admin-action-btn.edit:hover {
-          background: #1890ff;
-          color: white;
-          transform: scale(1.1);
-        }
-
-        .admin-action-btn.delete {
-          background: rgba(255, 77, 79, 0.1);
-          color: #ff4d4f;
-        }
-
-        .admin-action-btn.delete:hover {
-          background: #ff4d4f;
-          color: white;
-          transform: scale(1.1);
-        }
-
-        @media (max-width: 768px) {
-          .admin-toolbar {
-            flex-direction: column;
-            align-items: stretch;
-          }
-
-          .admin-filters {
-            flex-direction: column;
-          }
-
-          .admin-search-box {
-            min-width: 100%;
-          }
-
-          .admin-select {
-            width: 100%;
-          }
-
-          .admin-toolbar .admin-btn {
-            width: 100%;
-            justify-content: center;
-          }
-        }
-      `}</style>
     </div>
   );
 };
