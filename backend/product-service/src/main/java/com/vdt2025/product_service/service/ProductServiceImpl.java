@@ -25,7 +25,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -326,6 +328,16 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public PageCacheDTO<ProductSummaryResponse> searchProductsCacheable(ProductFilterRequest filter, Pageable pageable) {
         log.info("Searching products with filter: {}", filter);
+
+        if (filter.getSortBy() != null && !filter.getSortBy().isBlank()) {
+            Sort.Direction direction =
+                    "asc".equalsIgnoreCase(filter.getSortDirection()) ? Sort.Direction.ASC : Sort.Direction.DESC;
+            pageable = PageRequest.of(
+                    pageable.getPageNumber(),
+                    pageable.getPageSize(),
+                    Sort.by(direction, filter.getSortBy())
+            );
+        }
 
         Page<Product> productPage = productRepository.findAll(
                 ProductSpecification.withFilter(filter),
