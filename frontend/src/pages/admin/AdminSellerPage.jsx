@@ -44,10 +44,9 @@ import {
   rejectSellerProfileApi,
   getSellerDocumentApi,
 } from "../../util/api";
-import "./seller-management.css";
+import styles from "./AdminSellerPage.module.css";
 import "./admin-dashboard.css";
 
-const { Search } = Input;
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
@@ -328,7 +327,7 @@ const SellerManagement = () => {
       width: 90,
       render: (_, record) => (
         <button
-          className="adminActionBtn view"
+          className={styles.adminActionBtn + ' ' + styles.view}
           title="Xem chi tiết"
           onClick={() => handleViewDetails(record)}
         >
@@ -339,10 +338,10 @@ const SellerManagement = () => {
   ];
 
   return (
-    <div className="seller-management-container">
+    <div className={styles.sellerManagementContainer}>
       <Spin spinning={loading} tip="Đang tải dữ liệu...">
         {/* Statistics */}
-        <Row gutter={16} className="statistics-row">
+        <Row gutter={16} className={styles.statisticsRow}>
         <Col xs={24} sm={12} lg={6}>
           <div className="admin-stat-card">
             <div className="admin-stat-header">
@@ -390,19 +389,19 @@ const SellerManagement = () => {
       </Row>
 
       {/* Filters */}
-      <Card className="filter-card">
-        <div className="adminToolbar">
-          <div className="adminSearchBox">
-            <SearchOutlined className="searchIcon" />
+      <Card className={styles.filterCard}>
+        <div className={styles.adminToolbar}>
+          <div className={styles.adminSearchBox}>
+            <SearchOutlined className={styles.searchIcon} />
             <input
               type="text"
               placeholder="Tìm theo tên, shop, email, SĐT..."
               value={searchText}
               onChange={(e) => setSearchText(e.target.value)}
-              className="adminSearchInput"
+              className={styles.adminSearchInput}
             />
           </div>
-          <div className="toolbarActions">
+          <div className={styles.toolbarActions}>
             <button
               className={`admin-btn ${
                 showFilters ? "admin-btn-primary" : "admin-btn-secondary"
@@ -431,10 +430,10 @@ const SellerManagement = () => {
 
         {/* Advanced Filters */}
         {showFilters && (
-          <div className="adminFilters">
+          <div className={styles.adminFilters}>
             <Row gutter={16}>
               <Col xs={24} sm={12} md={8}>
-                <div className="filterItem">
+                <div className={styles.filterItem}>
                   <label>Trạng thái</label>
                   <Select
                     value={filterStatus}
@@ -496,14 +495,13 @@ const SellerManagement = () => {
         onCancel={() => setIsModalVisible(false)}
         footer={
           selectedSeller?.status === "pending" ? (
-            <div className="modalFooter">
-              <button 
+            [
+              <Button 
                 key="cancel" 
-                className="adminActionBtn close"
                 onClick={() => setIsModalVisible(false)}
               >
                 Đóng
-              </button>
+              </Button>,
               <Popconfirm
                 key="reject"
                 title="Từ chối người bán"
@@ -512,13 +510,10 @@ const SellerManagement = () => {
                 okText="Đồng ý"
                 cancelText="Hủy"
               >
-                <button 
-                  className="adminActionBtn reject"
-                >
-                  <CloseCircleOutlined />
+                <Button danger>
                   Từ chối
-                </button>
-              </Popconfirm>
+                </Button>
+              </Popconfirm>,
               <Popconfirm
                 key="approve"
                 title="Phê duyệt người bán"
@@ -527,33 +522,28 @@ const SellerManagement = () => {
                 okText="Đồng ý"
                 cancelText="Hủy"
               >
-                <button
-                  className="adminActionBtn approve"
-                >
-                  <CheckCircleOutlined />
+                <Button type="primary">
                   Phê duyệt
-                </button>
+                </Button>
               </Popconfirm>
-            </div>
+            ]
           ) : (
-            <div className="modalFooter">
-              <button
+            [
+              <Button
                 key="close"
-                className="adminActionBtn close"
                 onClick={() => setIsModalVisible(false)}
               >
                 Đóng
-              </button>
-              <button
+              </Button>,
+              <Button
                 key="store"
-                className="adminActionBtn link"
+                type="primary"
                 onClick={() => handleOpenStore(selectedSeller)}
                 disabled={selectedSeller?.status !== 'approved'}
               >
-                <LinkOutlined />
                 Mở cửa hàng
-              </button>
-            </div>
+              </Button>
+            ]
           )
         }
         width={800}

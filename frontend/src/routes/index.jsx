@@ -98,7 +98,7 @@ const AdminSettingsPage = lazy(() =>
   import("../pages/admin/AdminSettingsPage")
 );
 const SellerManagementPage = lazy(() =>
-  import("../pages/admin/seller-management")
+  import("../pages/admin/AdminSellerPage")
 );
 
 // Seller Pages

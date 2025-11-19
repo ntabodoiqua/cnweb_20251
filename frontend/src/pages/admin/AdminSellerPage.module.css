@@ -1,4 +1,4 @@
-.seller-management-container {
+.sellerManagementContainer {
   max-width: 100%;
   width: 100%;
   margin: 0;
@@ -9,38 +9,38 @@
 }
 
 /* Statistics Row */
-.statistics-row {
+.statisticsRow {
   margin-bottom: 24px;
   width: 100%;
   max-width: 100%;
 }
 
-.statistics-row .ant-card {
+.statisticsRow .ant-card {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   max-width: 100%;
 }
 
-.statistics-row .ant-card:hover {
+.statisticsRow .ant-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
-.statistics-row .ant-statistic-title {
+.statisticsRow .ant-statistic-title {
   font-size: 14px;
   font-weight: 600;
   color: #666;
   margin-bottom: 8px;
 }
 
-.statistics-row .ant-statistic-content {
+.statisticsRow .ant-statistic-content {
   font-size: 28px;
   font-weight: 800;
 }
 
 /* Filter Card */
-.filter-card {
+.filterCard {
   margin-bottom: 24px;
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -49,7 +49,7 @@
   box-sizing: border-box;
 }
 
-.filter-space {
+.filterSpace {
   width: 100%;
   display: flex;
   gap: 12px;
@@ -136,34 +136,34 @@
 }
 
 /* Table Card */
-.seller-management-container .ant-card {
+.sellerManagementContainer .ant-card {
   border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   overflow-x: auto;
 }
 
-.seller-management-container .ant-table {
+.sellerManagementContainer .ant-table {
   font-size: 14px;
   width: 100%;
 }
 
-.seller-management-container .ant-table-thead > tr > th {
+.sellerManagementContainer .ant-table-thead > tr > th {
   background: #fafafa;
   font-weight: 700;
   color: #333;
   border-bottom: 2px solid #f0f0f0;
 }
 
-.seller-management-container .ant-table-tbody > tr:hover {
+.sellerManagementContainer .ant-table-tbody > tr:hover {
   background: #fff5f5;
 }
 
-.seller-management-container .ant-table-tbody > tr > td {
+.sellerManagementContainer .ant-table-tbody > tr > td {
   padding: 16px;
 }
 
 /* Buttons */
-.seller-management-container .ant-btn {
+.sellerManagementContainer .ant-btn {
   border-radius: 6px;
   font-weight: 600;
   transition: all 0.3s ease;
@@ -272,33 +272,33 @@
   width: 100%;
 }
 
-.seller-management-container .ant-btn-primary {
+.sellerManagementContainer .ant-btn-primary {
   box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
 }
 
-.seller-management-container .ant-btn-primary:hover {
+.sellerManagementContainer .ant-btn-primary:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
 }
 
-.seller-management-container .ant-btn-primary[style*="background: #52c41a"] {
+.sellerManagementContainer .ant-btn-primary[style*="background: #52c41a"] {
   box-shadow: 0 2px 8px rgba(82, 196, 26, 0.3);
 }
 
-.seller-management-container .ant-btn-primary[style*="background: #52c41a"]:hover {
+.sellerManagementContainer .ant-btn-primary[style*="background: #52c41a"]:hover {
   box-shadow: 0 4px 12px rgba(82, 196, 26, 0.4);
 }
 
-.seller-management-container .ant-btn-primary[danger] {
+.sellerManagementContainer .ant-btn-primary[danger] {
   box-shadow: 0 2px 8px rgba(255, 77, 79, 0.3);
 }
 
-.seller-management-container .ant-btn-primary[danger]:hover {
+.sellerManagementContainer .ant-btn-primary[danger]:hover {
   box-shadow: 0 4px 12px rgba(255, 77, 79, 0.4);
 }
 
 /* Tags */
-.seller-management-container .ant-tag {
+.sellerManagementContainer .ant-tag {
   font-weight: 600;
   padding: 4px 12px;
   border-radius: 6px;
@@ -306,28 +306,28 @@
 }
 
 /* Modal */
-.seller-management-container .ant-modal-header {
+.sellerManagementContainer .ant-modal-header {
   border-bottom: 2px solid #f0f0f0;
   padding: 20px 24px;
 }
 
-.seller-management-container .ant-modal-body {
+.sellerManagementContainer .ant-modal-body {
   padding: 24px;
 }
 
-.seller-management-container .ant-modal-footer {
+.sellerManagementContainer .ant-modal-footer {
   border-top: 2px solid #f0f0f0;
   padding: 16px 24px;
 }
 
-.seller-management-container .ant-descriptions-bordered .ant-descriptions-item-label {
+.sellerManagementContainer .ant-descriptions-bordered .ant-descriptions-item-label {
   background: #fafafa;
   font-weight: 700;
   color: #333;
   width: 180px;
 }
 
-.seller-management-container .ant-descriptions-bordered .ant-descriptions-item-content {
+.sellerManagementContainer .ant-descriptions-bordered .ant-descriptions-item-content {
   background: white;
 }
 
@@ -345,37 +345,37 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .seller-management-container {
+  .sellerManagementContainer {
     padding: 20px;
   }
 }
 
 @media (max-width: 768px) {
-  .seller-management-container {
+  .sellerManagementContainer {
     padding: 16px;
   }
 
-  .filter-space {
+  .filterSpace {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .filter-space .ant-input-search,
-  .filter-space .ant-select {
+  .filterSpace .ant-input-search,
+  .filterSpace .ant-select {
     width: 100% !important;
   }
 
-  .statistics-row .ant-statistic-content {
+  .statisticsRow .ant-statistic-content {
     font-size: 24px;
   }
 }
 
 @media (max-width: 480px) {
-  .seller-management-container .ant-table-tbody > tr > td {
+  .sellerManagementContainer .ant-table-tbody > tr > td {
     padding: 12px 8px;
   }
 
-  .seller-management-container .ant-btn {
+  .sellerManagementContainer .ant-btn {
     padding: 4px 8px;
     font-size: 13px;
   }
