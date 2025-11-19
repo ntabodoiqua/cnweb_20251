@@ -1026,6 +1026,35 @@ const toggleBrandStatusApi = (brandId) => {
 };
 
 // ============================================
+// Store Management APIs (Admin)
+// ============================================
+
+const getStoresAdminApi = (params) => {
+  const URL_API = "/api/product/stores";
+  return axios.get(URL_API, {
+    params: {
+      ...params,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const toggleStoreStatusApi = (storeId) => {
+  const URL_API = `/api/product/stores/${storeId}/toggle-status`;
+  return axios.patch(
+    URL_API,
+    {},
+    {
+      headers: {
+        "Accept-Language": "vi",
+      },
+    }
+  );
+};
+
+// ============================================
 // Category Management APIs (Admin)
 // ============================================
 
@@ -1183,6 +1212,9 @@ export {
   deleteBrandApi,
   uploadBrandLogoApi,
   toggleBrandStatusApi,
+  // Store Management APIs
+  getStoresAdminApi,
+  toggleStoreStatusApi,
   // Category Management APIs
   getCategoriesAdminApi,
   createCategoryAdminApi,

@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from "react-router-dom";
 import {
   DashboardOutlined,
   UserOutlined,
+  ShoppingCartOutlined,
   ShoppingOutlined,
   ShopOutlined,
   TagsOutlined,
@@ -45,6 +46,12 @@ const AdminDashboardLayout = () => {
       path: PROTECTED_ROUTES.ADMIN_BRANDS,
     },
     {
+      key: "stores",
+      icon: <ShopOutlined />,
+      label: "Quản lý cửa hàng",
+      path: PROTECTED_ROUTES.ADMIN_STORES,
+    },
+    {
       key: "categories",
       icon: <AppstoreOutlined />,
       label: "Quản lý danh mục sàn",
@@ -52,13 +59,13 @@ const AdminDashboardLayout = () => {
     },
     {
       key: "products",
-      icon: <ShopOutlined />,
+      icon: <ShoppingOutlined />,
       label: "Quản lý sản phẩm",
       path: PROTECTED_ROUTES.ADMIN_PRODUCTS,
     },
     {
       key: "orders",
-      icon: <ShoppingOutlined />,
+      icon: <ShoppingCartOutlined />,
       label: "Quản lý đơn hàng",
       path: PROTECTED_ROUTES.ADMIN_ORDERS,
     },

@@ -82,6 +82,7 @@ const AdminOverviewPage = lazy(() =>
 );
 const AdminUsersPage = lazy(() => import("../pages/admin/AdminUsersPage"));
 const AdminBrandsPage = lazy(() => import("../pages/admin/AdminBrandsPage"));
+const AdminStoresPage = lazy(() => import("../pages/admin/AdminStoresPage"));
 const AdminCategoriesPage = lazy(() =>
   import("../pages/admin/AdminCategoriesPage")
 );
@@ -435,6 +436,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <AdminBrandsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_STORES,
+            element: (
+              <SuspenseWrapper>
+                <AdminStoresPage />
               </SuspenseWrapper>
             ),
           },
