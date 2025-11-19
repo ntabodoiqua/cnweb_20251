@@ -5,6 +5,8 @@ import {
   UserOutlined,
   ShoppingOutlined,
   ShopOutlined,
+  TagsOutlined,
+  AppstoreOutlined,
   DollarOutlined,
   BarChartOutlined,
   SettingOutlined,
@@ -35,6 +37,18 @@ const AdminDashboardLayout = () => {
       icon: <UserOutlined />,
       label: "Quản lý người dùng",
       path: PROTECTED_ROUTES.ADMIN_USERS,
+    },
+    {
+      key: "brands",
+      icon: <TagsOutlined />,
+      label: "Quản lý thương hiệu",
+      path: PROTECTED_ROUTES.ADMIN_BRANDS,
+    },
+    {
+      key: "categories",
+      icon: <AppstoreOutlined />,
+      label: "Quản lý danh mục sàn",
+      path: PROTECTED_ROUTES.ADMIN_CATEGORIES,
     },
     {
       key: "products",
