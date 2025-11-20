@@ -97,6 +97,9 @@ const AdminReportsPage = lazy(() => import("../pages/admin/AdminReportsPage"));
 const AdminSettingsPage = lazy(() =>
   import("../pages/admin/AdminSettingsPage")
 );
+const SellerManagementPage = lazy(() =>
+  import("../pages/admin/AdminSellerPage")
+);
 
 // Seller Pages
 const SellerDashboardLayout = lazy(() =>
@@ -484,6 +487,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <AdminReportsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_SELLERS,
+            element: (
+              <SuspenseWrapper>
+                <SellerManagementPage />
               </SuspenseWrapper>
             ),
           },

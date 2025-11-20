@@ -13,6 +13,7 @@ import {
   SettingOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../../constants/routes";
 import "./admin-dashboard.css";
@@ -80,6 +81,12 @@ const AdminDashboardLayout = () => {
       icon: <BarChartOutlined />,
       label: "Báo cáo & Thống kê",
       path: PROTECTED_ROUTES.ADMIN_REPORTS,
+    },
+    {
+      key: "sellers",
+      icon: <TeamOutlined />,
+      label: "Quản lý người bán",
+      path: PROTECTED_ROUTES.ADMIN_SELLERS,
     },
     {
       key: "settings",
