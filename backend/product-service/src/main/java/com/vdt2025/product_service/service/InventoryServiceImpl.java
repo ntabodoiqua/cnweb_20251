@@ -1,0 +1,482 @@
+package com.vdt2025.product_service.service;
+
+import com.vdt2025.product_service.dto.response.InventoryStockResponse;
+import com.vdt2025.product_service.entity.InventoryStock;
+import com.vdt2025.product_service.entity.InventoryTransaction;
+import com.vdt2025.product_service.entity.ProductVariant;
+import com.vdt2025.product_service.exception.AppException;
+import com.vdt2025.product_service.exception.ErrorCode;
+import com.vdt2025.product_service.repository.InventoryStockRepository;
+import com.vdt2025.product_service.repository.InventoryTransactionRepository;
+import com.vdt2025.product_service.repository.ProductVariantRepository;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Isolation;
+import org.springframework.transaction.annotation.Transactional;
+
+/**
+ * Service implementation cho quản lý tồn kho
+ * 
+ * Best Practices được áp dụng:
+ * 
+ * 1. Transaction Management:
+ *    - Tất cả write operations đều wrapped trong @Transactional
+ *    - Isolation level REPEATABLE_READ cho critical operations (reserve, confirm)
+ *    - Read operations dùng readOnly=true để optimize
+ * 
+ * 2. Concurrency Control:
+ *    - Pessimistic Locking: Dùng SELECT FOR UPDATE cho reserve/confirm/release
+ *    - Optimistic Locking: Entity có @Version field để detect concurrent modifications
+ *    - Double-check validation sau khi lock để đảm bảo business rules
+ * 
+ * 3. Audit Trail:
+ *    - Log tất cả inventory changes vào InventoryTransaction
+ *    - Track before/after state, reason, user, reference
+ * 
+ * 4. Error Handling:
+ *    - Throw specific AppException với ErrorCode rõ ràng
+ *    - Log tất cả critical operations và errors
+ * 
+ * 5. Performance:
+ *    - Minimize database roundtrips bằng cách load + check + update trong 1 transaction
+ *    - Cache-friendly: không cache inventory data vì realtime critical
+ * 
+ * 6. Data Integrity:
+ *    - Validate business rules trước khi persist
+ *    - Đảm bảo invariant: reserved <= onHand, onHand >= 0, reserved >= 0
+ */
+@Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
+public class InventoryServiceImpl implements InventoryService {
+
+    InventoryStockRepository inventoryStockRepository;
+    ProductVariantRepository productVariantRepository;
+    InventoryTransactionRepository transactionRepository;
+
+    @Override
+    @Transactional(readOnly = true)
+    public InventoryStockResponse getInventoryStock(String variantId) {
+        log.debug("Getting inventory stock for variant: {}", variantId);
+        
+        InventoryStock stock = inventoryStockRepository.findByProductVariantId(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND));
+        
+        return mapToResponse(stock);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void reserveStock(String variantId, Integer quantity) {
+        log.info("Reserving {} units of stock for variant: {}", quantity, variantId);
+        
+        // Validate input
+        validateQuantity(quantity);
+        
+        // Lock inventory row for update (Pessimistic Locking)
+        InventoryStock stock = inventoryStockRepository.findByProductVariantIdWithLock(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND));
+        
+        // Business validation: check available stock
+        if (!stock.canReserve(quantity)) {
+            log.warn("Insufficient stock for variant {}: available={}, requested={}", 
+                    variantId, stock.getAvailableQuantity(), quantity);
+            throw new AppException(ErrorCode.OUT_OF_STOCK);
+        }
+        
+        // Capture before state
+        Integer reservedBefore = stock.getQuantityReserved();
+        Integer onHandBefore = stock.getQuantityOnHand();
+        
+        // Update reserved quantity
+        stock.setQuantityReserved(stock.getQuantityReserved() + quantity);
+        
+        // Validate invariant before save
+        if (!stock.isValid()) {
+            log.error("Invalid inventory state after reserve: variantId={}, onHand={}, reserved={}", 
+                    variantId, stock.getQuantityOnHand(), stock.getQuantityReserved());
+            throw new AppException(ErrorCode.INVALID_INVENTORY_STATE);
+        }
+        
+        inventoryStockRepository.save(stock);
+        
+        // Log transaction
+        logTransaction(
+            stock,
+            InventoryTransaction.TransactionType.RESERVE,
+            0, // quantityChange (onHand không đổi)
+            onHandBefore,
+            stock.getQuantityOnHand(),
+            reservedBefore,
+            stock.getQuantityReserved(),
+            "Reserved stock for order",
+            null,
+            null
+        );
+        
+        log.info("Successfully reserved {} units for variant {}: onHand={}, reserved={}, available={}", 
+                quantity, variantId, stock.getQuantityOnHand(), stock.getQuantityReserved(), 
+                stock.getAvailableQuantity());
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void confirmSale(String variantId, Integer quantity) {
+        log.info("Confirming sale of {} units for variant: {}", quantity, variantId);
+        
+        validateQuantity(quantity);
+        
+        // Lock inventory row
+        InventoryStock stock = inventoryStockRepository.findByProductVariantIdWithLock(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND));
+        
+        // Validate: must have reserved this quantity before
+        if (!stock.canReleaseReserved(quantity)) {
+            log.error("Cannot confirm sale: reserved={} < quantity={} for variant {}", 
+                    stock.getQuantityReserved(), quantity, variantId);
+            throw new AppException(ErrorCode.INVALID_INVENTORY_OPERATION);
+        }
+        
+        // Capture before state
+        Integer onHandBefore = stock.getQuantityOnHand();
+        Integer reservedBefore = stock.getQuantityReserved();
+        
+        // Deduct from both onHand and reserved
+        stock.setQuantityOnHand(stock.getQuantityOnHand() - quantity);
+        stock.setQuantityReserved(stock.getQuantityReserved() - quantity);
+        
+        // Validate final state
+        if (!stock.isValid()) {
+            log.error("Invalid inventory state after confirm: variantId={}, onHand={}, reserved={}", 
+                    variantId, stock.getQuantityOnHand(), stock.getQuantityReserved());
+            throw new AppException(ErrorCode.INVALID_INVENTORY_STATE);
+        }
+        
+        inventoryStockRepository.save(stock);
+        
+        // Log transaction
+        logTransaction(
+            stock,
+            InventoryTransaction.TransactionType.CONFIRM_SALE,
+            -quantity,
+            onHandBefore,
+            stock.getQuantityOnHand(),
+            reservedBefore,
+            stock.getQuantityReserved(),
+            "Confirmed sale after payment success",
+            "ORDER",
+            null // referenceId should be passed from caller
+        );
+        
+        log.info("Successfully confirmed sale for variant {}: onHand={}, reserved={}, available={}", 
+                variantId, stock.getQuantityOnHand(), stock.getQuantityReserved(), 
+                stock.getAvailableQuantity());
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.REPEATABLE_READ)
+    public void releaseReservation(String variantId, Integer quantity) {
+        log.info("Releasing {} units of reserved stock for variant: {}", quantity, variantId);
+        
+        validateQuantity(quantity);
+        
+        // Lock inventory row
+        InventoryStock stock = inventoryStockRepository.findByProductVariantIdWithLock(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND));
+        
+        // Validate: must have this much reserved
+        if (!stock.canReleaseReserved(quantity)) {
+            log.warn("Cannot release: reserved={} < quantity={} for variant {}", 
+                    stock.getQuantityReserved(), quantity, variantId);
+            throw new AppException(ErrorCode.INVALID_INVENTORY_OPERATION);
+        }
+        
+        // Capture before state
+        Integer onHandBefore = stock.getQuantityOnHand();
+        Integer reservedBefore = stock.getQuantityReserved();
+        
+        // Only decrease reserved, keep onHand unchanged
+        stock.setQuantityReserved(stock.getQuantityReserved() - quantity);
+        
+        if (!stock.isValid()) {
+            log.error("Invalid inventory state after release: variantId={}, onHand={}, reserved={}", 
+                    variantId, stock.getQuantityOnHand(), stock.getQuantityReserved());
+            throw new AppException(ErrorCode.INVALID_INVENTORY_STATE);
+        }
+        
+        inventoryStockRepository.save(stock);
+        
+        // Log transaction
+        logTransaction(
+            stock,
+            InventoryTransaction.TransactionType.RELEASE_RESERVATION,
+            0, // onHand không đổi
+            onHandBefore,
+            stock.getQuantityOnHand(),
+            reservedBefore,
+            stock.getQuantityReserved(),
+            "Released reservation after order cancellation",
+            "ORDER",
+            null
+        );
+        
+        log.info("Successfully released {} units for variant {}: onHand={}, reserved={}, available={}", 
+                quantity, variantId, stock.getQuantityOnHand(), stock.getQuantityReserved(), 
+                stock.getAvailableQuantity());
+    }
+
+    @Override
+    @Transactional
+    public void adjustStock(String variantId, Integer newQuantity) {
+        log.info("Adjusting stock to {} units for variant: {}", newQuantity, variantId);
+        
+        if (newQuantity == null || newQuantity < 0) {
+            throw new AppException(ErrorCode.INVALID_STOCK_QUANTITY);
+        }
+        
+        // Lock inventory row
+        InventoryStock stock = inventoryStockRepository.findByProductVariantIdWithLock(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND));
+        
+        // Business rule: cannot set stock below reserved quantity
+        if (newQuantity < stock.getQuantityReserved()) {
+            log.error("Cannot adjust stock: newQuantity={} < reserved={} for variant {}", 
+                    newQuantity, stock.getQuantityReserved(), variantId);
+            throw new AppException(ErrorCode.INSUFFICIENT_STOCK_FOR_RESERVED);
+        }
+        
+        Integer oldQuantity = stock.getQuantityOnHand();
+        Integer reservedBefore = stock.getQuantityReserved();
+        
+        stock.setQuantityOnHand(newQuantity);
+        
+        inventoryStockRepository.save(stock);
+        
+        // Log transaction
+        logTransaction(
+            stock,
+            InventoryTransaction.TransactionType.STOCK_ADJUSTMENT,
+            newQuantity - oldQuantity,
+            oldQuantity,
+            newQuantity,
+            reservedBefore,
+            stock.getQuantityReserved(),
+            "Manual stock adjustment",
+            "ADJUSTMENT",
+            null
+        );
+        
+        log.info("Successfully adjusted stock for variant {}: {} -> {}, reserved={}, available={}", 
+                variantId, oldQuantity, newQuantity, stock.getQuantityReserved(), 
+                stock.getAvailableQuantity());
+    }
+
+    @Override
+    @Transactional
+    public void increaseStock(String variantId, Integer quantity) {
+        log.info("Increasing stock by {} units for variant: {}", quantity, variantId);
+        
+        validateQuantity(quantity);
+        
+        // Lock and update
+        InventoryStock stock = inventoryStockRepository.findByProductVariantIdWithLock(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND));
+        
+        Integer onHandBefore = stock.getQuantityOnHand();
+        Integer reservedBefore = stock.getQuantityReserved();
+        
+        stock.setQuantityOnHand(stock.getQuantityOnHand() + quantity);
+        inventoryStockRepository.save(stock);
+        
+        // Log transaction
+        logTransaction(
+            stock,
+            InventoryTransaction.TransactionType.STOCK_IN,
+            quantity,
+            onHandBefore,
+            stock.getQuantityOnHand(),
+            reservedBefore,
+            stock.getQuantityReserved(),
+            "Stock increased (purchase/return)",
+            null,
+            null
+        );
+        
+        log.info("Successfully increased stock by {} units for variant {}", quantity, variantId);
+    }
+
+    @Override
+    @Transactional
+    public void decreaseStock(String variantId, Integer quantity) {
+        log.info("Decreasing stock by {} units for variant: {}", quantity, variantId);
+        
+        validateQuantity(quantity);
+        
+        // Lock and check
+        InventoryStock stock = inventoryStockRepository.findByProductVariantIdWithLock(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND));
+        
+        // Validate available stock
+        if (stock.getAvailableQuantity() < quantity) {
+            log.error("Insufficient available stock for variant {}: available={}, requested={}", 
+                    variantId, stock.getAvailableQuantity(), quantity);
+            throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
+        }
+        
+        Integer onHandBefore = stock.getQuantityOnHand();
+        Integer reservedBefore = stock.getQuantityReserved();
+        
+        stock.setQuantityOnHand(stock.getQuantityOnHand() - quantity);
+        inventoryStockRepository.save(stock);
+        
+        // Log transaction
+        logTransaction(
+            stock,
+            InventoryTransaction.TransactionType.STOCK_OUT,
+            -quantity,
+            onHandBefore,
+            stock.getQuantityOnHand(),
+            reservedBefore,
+            stock.getQuantityReserved(),
+            "Stock decreased (damage/loss/offline sale)",
+            null,
+            null
+        );
+        
+        log.info("Successfully decreased stock by {} units for variant {}", quantity, variantId);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean hasAvailableStock(String variantId, Integer quantity) {
+        if (quantity == null || quantity <= 0) {
+            return false;
+        }
+        
+        return inventoryStockRepository.hasAvailableStock(variantId, quantity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Integer getAvailableStock(String variantId) {
+        return inventoryStockRepository.getAvailableStock(variantId)
+                .orElse(0);
+    }
+
+    @Override
+    @Transactional
+    public InventoryStockResponse createInventoryStock(String variantId, Integer initialQuantity) {
+        log.info("Creating inventory stock for variant {} with initial quantity {}", 
+                variantId, initialQuantity);
+        
+        if (initialQuantity == null || initialQuantity < 0) {
+            throw new AppException(ErrorCode.INVALID_STOCK_QUANTITY);
+        }
+        
+        // Check if inventory already exists
+        if (inventoryStockRepository.findByProductVariantId(variantId).isPresent()) {
+            log.warn("Inventory stock already exists for variant: {}", variantId);
+            throw new AppException(ErrorCode.INVENTORY_STOCK_ALREADY_EXISTS);
+        }
+        
+        // Get variant
+        ProductVariant variant = productVariantRepository.findById(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+        
+        // Create inventory
+        InventoryStock stock = InventoryStock.builder()
+                .productVariant(variant)
+                .quantityOnHand(initialQuantity)
+                .quantityReserved(0)
+                .build();
+        
+        stock = inventoryStockRepository.save(stock);
+        
+        // Log transaction
+        logTransaction(
+            stock,
+            InventoryTransaction.TransactionType.INITIAL_STOCK,
+            initialQuantity,
+            0,
+            initialQuantity,
+            0,
+            0,
+            "Initial stock creation",
+            null,
+            null
+        );
+        
+        log.info("Successfully created inventory stock for variant {}: onHand={}", 
+                variantId, initialQuantity);
+        
+        return mapToResponse(stock);
+    }
+
+    // ========== Helper Methods ==========
+
+    private void validateQuantity(Integer quantity) {
+        if (quantity == null || quantity <= 0) {
+            throw new AppException(ErrorCode.INVALID_STOCK_QUANTITY);
+        }
+    }
+
+    private InventoryStockResponse mapToResponse(InventoryStock stock) {
+        return InventoryStockResponse.builder()
+                .id(stock.getId())
+                .variantId(stock.getProductVariant().getId())
+                .variantSku(stock.getProductVariant().getSku())
+                .quantityOnHand(stock.getQuantityOnHand())
+                .quantityReserved(stock.getQuantityReserved())
+                .availableQuantity(stock.getAvailableQuantity())
+                .inStock(stock.isInStock())
+                .createdAt(stock.getCreatedAt())
+                .updatedAt(stock.getUpdatedAt())
+                .build();
+    }
+
+    /**
+     * Log inventory transaction for audit trail
+     */
+    private void logTransaction(
+            InventoryStock stock,
+            InventoryTransaction.TransactionType type,
+            Integer quantityChange,
+            Integer quantityBefore,
+            Integer quantityAfter,
+            Integer reservedBefore,
+            Integer reservedAfter,
+            String reason,
+            String referenceType,
+            String referenceId) {
+        
+        String performedBy;
+        try {
+            performedBy = SecurityContextHolder.getContext().getAuthentication().getName();
+        } catch (Exception e) {
+            performedBy = "SYSTEM";
+        }
+        
+        InventoryTransaction transaction = InventoryTransaction.builder()
+                .variant(stock.getProductVariant())
+                .transactionType(type)
+                .quantityChange(quantityChange)
+                .quantityBefore(quantityBefore)
+                .quantityAfter(quantityAfter)
+                .reservedBefore(reservedBefore)
+                .reservedAfter(reservedAfter)
+                .reason(reason)
+                .performedBy(performedBy)
+                .referenceType(referenceType)
+                .referenceId(referenceId)
+                .build();
+        
+        transactionRepository.save(transaction);
+        log.debug("Logged inventory transaction: type={}, variant={}, change={}", 
+                type, stock.getProductVariant().getId(), quantityChange);
+    }
+}
