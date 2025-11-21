@@ -86,4 +86,6 @@ public class ProductVariant {
     // Được map bởi productVariant field trong InventoryStock entity
     @OneToOne(mappedBy = "productVariant", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     InventoryStock inventoryStock;
+
+
 }

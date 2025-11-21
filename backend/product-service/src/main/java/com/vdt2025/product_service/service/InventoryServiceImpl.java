@@ -3,6 +3,7 @@ package com.vdt2025.product_service.service;
 import com.vdt2025.product_service.dto.response.InventoryStockResponse;
 import com.vdt2025.product_service.entity.InventoryStock;
 import com.vdt2025.product_service.entity.InventoryTransaction;
+import com.vdt2025.product_service.entity.Product;
 import com.vdt2025.product_service.entity.ProductVariant;
 import com.vdt2025.product_service.exception.AppException;
 import com.vdt2025.product_service.exception.ErrorCode;
@@ -13,6 +14,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -20,34 +22,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service implementation cho quản lý tồn kho
- * 
- * Best Practices được áp dụng:
- * 
- * 1. Transaction Management:
- *    - Tất cả write operations đều wrapped trong @Transactional
- *    - Isolation level REPEATABLE_READ cho critical operations (reserve, confirm)
- *    - Read operations dùng readOnly=true để optimize
- * 
- * 2. Concurrency Control:
- *    - Pessimistic Locking: Dùng SELECT FOR UPDATE cho reserve/confirm/release
- *    - Optimistic Locking: Entity có @Version field để detect concurrent modifications
- *    - Double-check validation sau khi lock để đảm bảo business rules
- * 
- * 3. Audit Trail:
- *    - Log tất cả inventory changes vào InventoryTransaction
- *    - Track before/after state, reason, user, reference
- * 
- * 4. Error Handling:
- *    - Throw specific AppException với ErrorCode rõ ràng
- *    - Log tất cả critical operations và errors
- * 
- * 5. Performance:
- *    - Minimize database roundtrips bằng cách load + check + update trong 1 transaction
- *    - Cache-friendly: không cache inventory data vì realtime critical
- * 
- * 6. Data Integrity:
- *    - Validate business rules trước khi persist
- *    - Đảm bảo invariant: reserved <= onHand, onHand >= 0, reserved >= 0
  */
 @Service
 @RequiredArgsConstructor
@@ -115,7 +89,6 @@ public class InventoryServiceImpl implements InventoryService {
             reservedBefore,
             stock.getQuantityReserved(),
             "Reserved stock for order",
-            null,
             null
         );
         
@@ -169,8 +142,8 @@ public class InventoryServiceImpl implements InventoryService {
             reservedBefore,
             stock.getQuantityReserved(),
             "Confirmed sale after payment success",
-            "ORDER",
-            null // referenceId should be passed from caller
+            "ORDER"
+                // referenceId should be passed from caller
         );
         
         log.info("Successfully confirmed sale for variant {}: onHand={}, reserved={}, available={}", 
@@ -221,8 +194,7 @@ public class InventoryServiceImpl implements InventoryService {
             reservedBefore,
             stock.getQuantityReserved(),
             "Released reservation after order cancellation",
-            "ORDER",
-            null
+            "ORDER"
         );
         
         log.info("Successfully released {} units for variant {}: onHand={}, reserved={}, available={}", 
@@ -232,16 +204,20 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     @Transactional
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
     public void adjustStock(String variantId, Integer newQuantity) {
         log.info("Adjusting stock to {} units for variant: {}", newQuantity, variantId);
         
         if (newQuantity == null || newQuantity < 0) {
             throw new AppException(ErrorCode.INVALID_STOCK_QUANTITY);
         }
-        
+
         // Lock inventory row
         InventoryStock stock = inventoryStockRepository.findByProductVariantIdWithLock(variantId)
                 .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND));
+
+        // Kiểm tra quyền
+        checkProductAccess(stock.getProductVariant());
         
         // Business rule: cannot set stock below reserved quantity
         if (newQuantity < stock.getQuantityReserved()) {
@@ -267,8 +243,7 @@ public class InventoryServiceImpl implements InventoryService {
             reservedBefore,
             stock.getQuantityReserved(),
             "Manual stock adjustment",
-            "ADJUSTMENT",
-            null
+            "ADJUSTMENT"
         );
         
         log.info("Successfully adjusted stock for variant {}: {} -> {}, reserved={}, available={}", 
@@ -303,7 +278,6 @@ public class InventoryServiceImpl implements InventoryService {
             reservedBefore,
             stock.getQuantityReserved(),
             "Stock increased (purchase/return)",
-            null,
             null
         );
         
@@ -344,7 +318,6 @@ public class InventoryServiceImpl implements InventoryService {
             reservedBefore,
             stock.getQuantityReserved(),
             "Stock decreased (damage/loss/offline sale)",
-            null,
             null
         );
         
@@ -366,6 +339,19 @@ public class InventoryServiceImpl implements InventoryService {
     public Integer getAvailableStock(String variantId) {
         return inventoryStockRepository.getAvailableStock(variantId)
                 .orElse(0);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public boolean isLowStock(String variantId) {
+        InventoryStock stock = inventoryStockRepository.findByProductVariantId(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND));
+
+        // Low stock if available <= 10% of onHand
+        Integer onHand = stock.getQuantityOnHand();
+        Integer available = stock.getAvailableQuantity();
+        double threshold = onHand * 0.1;
+        return available <= threshold;
     }
 
     @Override
@@ -407,17 +393,27 @@ public class InventoryServiceImpl implements InventoryService {
             0,
             0,
             "Initial stock creation",
-            null,
             null
         );
         
         log.info("Successfully created inventory stock for variant {}: onHand={}", 
                 variantId, initialQuantity);
-        
+
         return mapToResponse(stock);
     }
 
     // ========== Helper Methods ==========
+
+    private void checkProductAccess(ProductVariant variant) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        boolean isAdmin = username.equals("admin"); // Simplified admin check
+        boolean isStoreOwner = variant.getProduct().getStore().getUserName().equals(username);
+
+        if (!isAdmin && !isStoreOwner) {
+            log.warn("User {} is not authorized to access product {}", username, variant.getSku());
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+    }
 
     private void validateQuantity(Integer quantity) {
         if (quantity == null || quantity <= 0) {
@@ -451,8 +447,7 @@ public class InventoryServiceImpl implements InventoryService {
             Integer reservedBefore,
             Integer reservedAfter,
             String reason,
-            String referenceType,
-            String referenceId) {
+            String referenceType) {
         
         String performedBy;
         try {
@@ -472,7 +467,7 @@ public class InventoryServiceImpl implements InventoryService {
                 .reason(reason)
                 .performedBy(performedBy)
                 .referenceType(referenceType)
-                .referenceId(referenceId)
+                .referenceId(null)
                 .build();
         
         transactionRepository.save(transaction);

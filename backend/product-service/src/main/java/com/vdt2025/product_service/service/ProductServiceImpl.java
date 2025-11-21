@@ -1,6 +1,5 @@
 package com.vdt2025.product_service.service;
 
-import com.vdt2025.common_dto.dto.StockUpdateRequest;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import com.vdt2025.common_dto.dto.response.FileInfoResponse;
 import com.vdt2025.common_dto.service.FileServiceClient;
@@ -70,6 +69,7 @@ public class ProductServiceImpl implements ProductService {
     private final BrandMapper brandMapper;
     CategoryManagementService categoryManagementService;
     private final CacheEvictService cacheEvictService;
+    private final InventoryService inventoryService;
 
     @Value("${product-images.max-per-product:5}")
     @NonFinal
@@ -168,8 +168,7 @@ public class ProductServiceImpl implements ProductService {
             BigDecimal minPrice = null;
             BigDecimal maxPrice = null;
             for (VariantCreationRequest variantReq : request.getVariants()) {
-                var variant = createVariantForProduct(product, variantReq);
-                createInventoryStockForVariant(variant, variantReq.getStockQuantity());
+                createVariantForProduct(product, variantReq);
                 // Update min/max price
                 if (minPrice == null || variantReq.getPrice().compareTo(minPrice) < 0) {
                     minPrice = variantReq.getPrice();
@@ -431,7 +430,6 @@ public class ProductServiceImpl implements ProductService {
         }
         
         ProductVariant variant = createVariantForProduct(product, request);
-        createInventoryStockForVariant(variant, request.getStockQuantity());
         if (product.getMinPrice() == null || variant.getPrice().compareTo(product.getMinPrice()) < 0) {
             product.setMinPrice(variant.getPrice());
         }
@@ -457,8 +455,6 @@ public class ProductServiceImpl implements ProductService {
         
         ProductVariant variant = variantRepository.findByProductIdAndId(productId, variantId)
                 .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
-        InventoryStock inventoryStock = inventoryStockRepository.findByProductVariantId(variant.getId())
-                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND));
         
         // Update fields
         if (request.getVariantName() != null) {
@@ -470,15 +466,11 @@ public class ProductServiceImpl implements ProductService {
         if (request.getOriginalPrice() != null) {
             variant.setOriginalPrice(request.getOriginalPrice());
         }
-        if (request.getStockQuantity() != null) {
-            inventoryStock.setQuantityOnHand(request.getStockQuantity());
-        }
         if (request.getImageName() != null) {
             variant.setImageName(request.getImageName());
         }
         
         variant = variantRepository.save(variant);
-        inventoryStockRepository.save(inventoryStock);
         log.info("Variant {} updated successfully", variant.getSku());
         cacheEvictService.evictProductDetails(productId);
         return mapToVariantResponse(variant);
@@ -867,17 +859,10 @@ public class ProductServiceImpl implements ProductService {
                 .soldQuantity(0)
                 .build();
         
-        return variantRepository.save(variant);
-    }
-
-    private InventoryStock createInventoryStockForVariant(ProductVariant variant, Integer stockQuantity) {
-        InventoryStock stock = InventoryStock.builder()
-                .productVariant(variant)
-                .quantityOnHand(stockQuantity)
-                .quantityReserved(0)
-                .build();
-
-        return inventoryStockRepository.save(stock);
+        var res =  variantRepository.save(variant);
+        // Khởi tạo inventory cho variant
+        inventoryService.createInventoryStock(res.getId(), request.getStockQuantity());
+        return res;
     }
 
     private String generateSKU(Product product) {
@@ -897,11 +882,11 @@ public class ProductServiceImpl implements ProductService {
                 .map(ProductVariant::getPrice)
                 .max(BigDecimal::compareTo)
                 .orElse(BigDecimal.ZERO);
-        
-        Integer totalStock = variants.stream()
-                .mapToInt(ProductVariant::getStockQuantity)
-                .sum();
-        
+
+//        Integer totalStock = variants.stream()
+//                .mapToInt(ProductVariant::getStockQuantity)
+//                .sum();
+
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -922,7 +907,7 @@ public class ProductServiceImpl implements ProductService {
                 .updatedAt(product.getUpdatedAt())
                 .minPrice(minPrice)
                 .maxPrice(maxPrice)
-                .totalStock(totalStock)
+//                .totalStock(totalStock)
                 .storeCategories(
                         Optional.ofNullable(product.getStoreCategories())
                                 .filter(list -> !list.isEmpty())
@@ -1179,10 +1164,10 @@ public class ProductServiceImpl implements ProductService {
                 .orElse(null);
 
         // Calculate total stock
-        Integer totalStock = product.getVariants().stream()
-                .filter(v -> !v.isDeleted() && v.isActive())
-                .mapToInt(ProductVariant::getStockQuantity)
-                .sum();
+//        Integer totalStock = product.getVariants().stream()
+//                .filter(v -> !v.isDeleted() && v.isActive())
+//                .mapToInt(ProductVariant::getStockQuantity)
+//                .sum();
 
         return ProductInternalDTO.builder()
                 .id(product.getId())
@@ -1193,7 +1178,7 @@ public class ProductServiceImpl implements ProductService {
                 .maxPrice(product.getMaxPrice())
                 .isActive(product.isActive())
                 .isDeleted(product.isDeleted())
-                .totalStock(totalStock)
+//                .totalStock(totalStock)
                 .storeId(product.getStore().getId())
                 .storeName(product.getStore().getStoreName())
                 .build();
@@ -1213,7 +1198,7 @@ public class ProductServiceImpl implements ProductService {
                 .productName(variant.getProduct().getName())
                 .price(variant.getPrice())
                 .originalPrice(variant.getOriginalPrice())
-                .stockQuantity(variant.getStockQuantity())
+//                .stockQuantity(variant.getStockQuantity())
                 .imageUrl(variant.getImageUrl())
                 .isActive(variant.isActive())
                 .isDeleted(variant.isDeleted())
@@ -1246,17 +1231,17 @@ public class ProductServiceImpl implements ProductService {
                 ProductVariant variant = variantOpt.get();
                 boolean isValid = variant.isActive() && !variant.isDeleted() 
                         && variant.getProduct().isActive() && !variant.getProduct().isDeleted();
-                boolean inStock = variant.getStockQuantity() > 0;
+//                boolean inStock = variant.getStockQuantity() > 0;
 
                 validations.add(ProductValidationDTO.builder()
                         .productId(variant.getProduct().getId())
                         .variantId(variant.getId())
                         .isValid(isValid)
                         .isActive(variant.isActive())
-                        .inStock(inStock)
-                        .availableStock(variant.getStockQuantity())
+//                        .inStock(inStock)
+//                        .availableStock(variant.getStockQuantity())
                         .currentPrice(variant.getPrice())
-                        .message(isValid ? (inStock ? "Valid" : "Out of stock") : "Product or variant is inactive")
+//                        .message(isValid ? (inStock ? "Valid" : "Out of stock") : "Product or variant is inactive")
                         .build());
             }
         } else {
@@ -1276,21 +1261,21 @@ public class ProductServiceImpl implements ProductService {
                 Product product = productOpt.get();
                 boolean isValid = product.isActive() && !product.isDeleted();
                 
-                Integer totalStock = product.getVariants().stream()
-                        .filter(v -> !v.isDeleted() && v.isActive())
-                        .mapToInt(ProductVariant::getStockQuantity)
-                        .sum();
+//                Integer totalStock = product.getVariants().stream()
+//                        .filter(v -> !v.isDeleted() && v.isActive())
+//                        .mapToInt(ProductVariant::getStockQuantity)
+//                        .sum();
                 
-                boolean inStock = totalStock > 0;
+//                boolean inStock = totalStock > 0;
 
                 validations.add(ProductValidationDTO.builder()
                         .productId(product.getId())
                         .isValid(isValid)
                         .isActive(product.isActive())
-                        .inStock(inStock)
-                        .availableStock(totalStock)
+//                        .inStock(inStock)
+//                        .availableStock(totalStock)
                         .currentPrice(product.getMinPrice())
-                        .message(isValid ? (inStock ? "Valid" : "Out of stock") : "Product is inactive")
+//                        .message(isValid ? (inStock ? "Valid" : "Out of stock") : "Product is inactive")
                         .build());
             }
         }
@@ -1298,7 +1283,7 @@ public class ProductServiceImpl implements ProductService {
         return validations;
     }
 
-    @Override
+//    @Override
     @Transactional
     public void updateStock(String productId, String variantId, Integer quantity) {
         if (variantId != null && !variantId.isEmpty()) {
@@ -1306,15 +1291,15 @@ public class ProductServiceImpl implements ProductService {
             ProductVariant variant = variantRepository.findById(variantId)
                     .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
             
-            int newStock = variant.getStockQuantity() + quantity;
-            if (newStock < 0) {
-                throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
-            }
+//            int newStock = variant.getStockQuantity() + quantity;
+//            if (newStock < 0) {
+//                throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
+//            }
             
-            variant.setStockQuantity(newStock);
+//            variant.setStockQuantity(newStock);
             variantRepository.save(variant);
             
-            log.info("Updated stock for variant {}: {} (change: {})", variantId, newStock, quantity);
+//            log.info("Updated stock for variant {}: {} (change: {})", variantId, newStock, quantity);
         } else {
             // Update all active variants of the product
             Product product = productRepository.findById(productId)
@@ -1322,11 +1307,11 @@ public class ProductServiceImpl implements ProductService {
             
             for (ProductVariant variant : product.getVariants()) {
                 if (variant.isActive() && !variant.isDeleted()) {
-                    int newStock = variant.getStockQuantity() + quantity;
-                    if (newStock < 0) {
-                        throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
-                    }
-                    variant.setStockQuantity(newStock);
+//                    int newStock = variant.getStockQuantity() + quantity;
+//                    if (newStock < 0) {
+//                        throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
+//                    }
+//                    variant.setStockQuantity(newStock);
                 }
             }
             
@@ -1335,7 +1320,7 @@ public class ProductServiceImpl implements ProductService {
         }
     }
 
-    @Override
+//    @Override
     @Transactional
     public void batchUpdateStock(List<com.vdt2025.common_dto.dto.StockUpdateRequest> updates) {
         for (com.vdt2025.common_dto.dto.StockUpdateRequest update : updates) {

@@ -1,6 +1,8 @@
 package com.vdt2025.product_service.service;
 
 import com.vdt2025.product_service.dto.response.InventoryStockResponse;
+import com.vdt2025.product_service.enums.InventoryStatus;
+import com.vdt2025.product_service.exception.AppException;
 
 /**
  * Service interface cho quản lý tồn kho (Inventory Management)
@@ -118,6 +120,13 @@ public interface InventoryService {
      */
     Integer getAvailableStock(String variantId);
 
+    /**
+     * Kiểm tra số lượng còn lại của variant có phải gần hết không
+     * Khi available stock <= 10% của onHand
+     */
+    boolean isLowStock(String variantId);
+
+    InventoryStatus getInventoryStatusOfProduct(String productId);
     /**
      * Tạo inventory stock mới cho variant
      * Thường được gọi khi tạo variant mới

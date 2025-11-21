@@ -23,9 +23,6 @@ public class VariantUpdateRequest {
 
     BigDecimal originalPrice;
 
-    @Min(value = 0, message = "STOCK_QUANTITY_MUST_BE_POSITIVE")
-    Integer stockQuantity;
-
     String imageName;
 
 }

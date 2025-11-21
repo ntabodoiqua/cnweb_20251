@@ -430,26 +430,4 @@ public class ProductManagementController {
                 .result(response)
                 .build();
     }
-
-    // ========== Inventory Management ==========
-
-    /**
-     * Cập nhật số lượng tồn kho
-     * PATCH /products/{productId}/variants/{variantId}/stock
-     * Required: SELLER (owner) hoặc ADMIN role
-     */
-    @PatchMapping("/{productId}/variants/{variantId}/stock")
-    public ApiResponse<VariantResponse> updateStock(
-            @PathVariable String productId,
-            @PathVariable String variantId,
-            @RequestParam Integer quantity) {
-        log.info("Updating stock for variant {} to {}", variantId, quantity);
-
-        VariantResponse response = productService.updateVariantStock(productId, variantId, quantity);
-
-        return ApiResponse.<VariantResponse>builder()
-                .message("Stock updated successfully")
-                .result(response)
-                .build();
-    }
 }

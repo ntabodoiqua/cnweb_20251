@@ -157,4 +157,4 @@ public interface InventoryStockRepository extends JpaRepository<InventoryStock, 
            "FROM InventoryStock i WHERE i.productVariant.id = :variantId")
     Optional<Integer> getAvailableStock(@Param("variantId") String variantId);
 }
-}
+
