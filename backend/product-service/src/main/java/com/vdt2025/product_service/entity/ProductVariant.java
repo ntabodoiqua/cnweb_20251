@@ -40,10 +40,6 @@ public class ProductVariant {
     @Column(name = "original_price", precision = 19, scale = 2)
     BigDecimal originalPrice; // Giá gốc
 
-    @Min(value = 0, message = "Stock quantity must be at least 0")
-    @Column(name = "stock_quantity", nullable = false)
-    Integer stockQuantity;
-
     @Column(name = "sold_quantity")
     @Builder.Default
     Integer soldQuantity = 0;
@@ -85,4 +81,9 @@ public class ProductVariant {
     )
     @Builder.Default
     List<AttributeValue> attributeValues = new ArrayList<>();
+
+    // One-to-One với InventoryStock
+    // Được map bởi productVariant field trong InventoryStock entity
+    @OneToOne(mappedBy = "productVariant", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    InventoryStock inventoryStock;
 }

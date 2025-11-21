@@ -42,20 +42,6 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     List<ProductVariant> findByProductIdAndIsActiveTrue(String productId);
 
     /**
-     * Cập nhật số lượng tồn kho
-     */
-    @Modifying
-    @Query("UPDATE ProductVariant v SET v.stockQuantity = v.stockQuantity - :quantity WHERE v.id = :variantId AND v.stockQuantity >= :quantity")
-    int decreaseStock(@Param("variantId") String variantId, @Param("quantity") Integer quantity);
-
-    /**
-     * Tăng số lượng tồn kho
-     */
-    @Modifying
-    @Query("UPDATE ProductVariant v SET v.stockQuantity = v.stockQuantity + :quantity WHERE v.id = :variantId")
-    int increaseStock(@Param("variantId") String variantId, @Param("quantity") Integer quantity);
-
-    /**
      * Cập nhật sold quantity
      */
     @Modifying

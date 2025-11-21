@@ -1,5 +1,6 @@
 package com.vdt2025.product_service.service;
 
+import com.vdt2025.common_dto.dto.StockUpdateRequest;
 import com.vdt2025.product_service.dto.request.FindVariantRequest;
 import com.vdt2025.product_service.dto.request.product.*;
 import com.vdt2025.product_service.dto.response.*;
@@ -137,22 +138,6 @@ public interface ProductService {
      * Cập nhật trạng thái nhiều variant cùng lúc
      */
     List<VariantResponse> bulkUpdateVariantStatus(String productId, BulkVariantStatusUpdateRequest request);
-    // ========== Inventory Management ==========
-
-    /**
-     * Cập nhật số lượng tồn kho cho variant
-     */
-    VariantResponse updateVariantStock(String productId, String variantId, Integer quantity);
-
-    /**
-     * Giảm số lượng tồn kho khi có đơn hàng (reserved stock)
-     */
-    void decreaseStock(String variantId, Integer quantity);
-
-    /**
-     * Tăng số lượng tồn kho khi hủy đơn hàng
-     */
-    void increaseStock(String variantId, Integer quantity);
 
     // ========== Statistics & Metrics ==========
 
@@ -190,4 +175,22 @@ public interface ProductService {
      * @throws com.vdt2025.product_service.exception.AppException nếu không tìm thấy variant
      */
     VariantResponse findVariantByAttributes(String productId, FindVariantRequest request);
+
+    // ========== Internal Service Communication ==========
+
+    /**
+     * Get lightweight product info for internal service calls (e.g., order-service)
+     */
+    ProductInternalDTO getProductForInternal(String productId);
+
+    /**
+     * Get lightweight variant info for internal service calls
+     */
+    VariantInternalDTO getVariantForInternal(String variantId);
+
+    /**
+     * Validate multiple products and variants
+     * Used by order-service to check product availability before creating order
+     */
+    List<ProductValidationDTO> validateProductsAndVariants(List<String> productIds, List<String> variantIds);
 }

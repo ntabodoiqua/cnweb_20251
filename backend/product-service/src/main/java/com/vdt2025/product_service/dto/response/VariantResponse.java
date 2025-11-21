@@ -27,8 +27,6 @@ public class VariantResponse {
 
     BigDecimal originalPrice;
 
-    Integer stockQuantity;
-
     Integer soldQuantity;
 
     String imageName;

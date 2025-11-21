@@ -35,6 +35,12 @@ public class OrderItem {
     Order order;
 
     // Thông tin sản phẩm (snapshot tại thời điểm đặt hàng)
+    @Column(name = "store_id", nullable = false)
+    String storeId;
+
+    @Column(name = "store_name", nullable = false)
+    String storeName;
+
     @Column(name = "product_id", nullable = false)
     String productId;
 
