@@ -33,26 +33,40 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
     )
     List<String> findAllAvatarNames();
 
-    // Tổng số người dùng đang hoạt động
-    @Query("SELECT COUNT(u) FROM User u WHERE u.enabled = true")
-    long countEnabledUsers();
-
-    // Tổng số người dùng bị vô hiệu hóa
-    @Query("SELECT COUNT(u) FROM User u WHERE u.enabled = false")
-    long countDisabledUsers();
-
-    // Đếm số lượng người dùng theo vai trò
-    @Query("SELECT r.name, COUNT(u) FROM User u JOIN u.roles r GROUP BY r.name")
-    List<Object[]> countUsersByRole();
-
-    // Đếm người dùng theo tháng tạo tài khoản
-    @Query("""
-       SELECT MONTH(u.createdAt) AS month, COUNT(u)
-       FROM User u
-       WHERE YEAR(u.createdAt) = YEAR(CURRENT_DATE)
-       GROUP BY MONTH(u.createdAt)
-       ORDER BY MONTH(u.createdAt)
-       """)
-    List<Object[]> countUsersByCreatedMonth();
-
+    @Query(value = """
+    SELECT jsonb_build_object(
+          'totalUsers', COUNT(*),
+          'enabledUsers', SUM(CASE WHEN enabled = true THEN 1 ELSE 0 END),
+          'disabledUsers', SUM(CASE WHEN enabled = false THEN 1 ELSE 0 END),
+          'maleUsers', SUM(CASE WHEN gender = 'MALE' THEN 1 ELSE 0 END),
+          'femaleUsers', SUM(CASE WHEN gender = 'FEMALE' THEN 1 ELSE 0 END),
+          'otherUsers', SUM(CASE WHEN gender = 'OTHER' THEN 1 ELSE 0 END),
+          'usersByRole', (
+              SELECT jsonb_object_agg(r.name, r.role_count)
+              FROM (
+                  SELECT r.name, COUNT(DISTINCT u.id) as role_count
+                  FROM users u
+                  JOIN user_role ur ON u.id = ur.user_id
+                  JOIN role r ON ur.role_id = r.name 
+                  GROUP BY r.name
+              ) r
+          ),
+          'usersByMonth', (
+              SELECT jsonb_object_agg(
+                          CONCAT('Tháng ', month_num),
+                          month_count
+                      )
+              FROM (
+                  SELECT EXTRACT(MONTH FROM created_at) as month_num,
+                         COUNT(*) as month_count
+                  FROM users
+                  WHERE EXTRACT(YEAR FROM created_at) = EXTRACT(YEAR FROM CURRENT_DATE)
+                  GROUP BY EXTRACT(MONTH FROM created_at)
+                  ORDER BY month_num
+              ) m
+          )
+      ) AS statistics
+      FROM users;
+    """, nativeQuery = true)
+    String getUserStatisticsJson();
 }
