@@ -31,6 +31,7 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_POST_ENDPOINTS = {
             "/v1/payments/zalopay/callback"  // ZaloPay callback phải public (no /api prefix)
+            "/v1/payments/zalopay/create-order"
     };
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {
