@@ -1,9 +1,11 @@
 # 🛒 E-Commerce Platform - Microservices Architecture
 
 > **Dự án Capstone: Web Technologies and E-services**  
-> Trường Đại học Bách khoa Hà Nội - Học kỳ 2024.2
+> Trường Đại học Bách khoa Hà Nội - Học kỳ 2025.1
 
 [![Deploy Status](https://github.com/ntabodoiqua/cnweb_20251/actions/workflows/deploy.yml/badge.svg)](https://github.com/ntabodoiqua/cnweb_20251/actions)
+[![Deploy Status](https://github.com/ntabodoiqua/cnweb_20251/actions/workflows/frontend-deploy.yaml/badge.svg)](https://github.com/ntabodoiqua/cnweb_20251/actions)
+[![Deploy Status](https://github.com/ntabodoiqua/cnweb_20251/actions/workflows/qodana_code_quality.yml/badge.svg)](https://github.com/ntabodoiqua/cnweb_20251/actions)
 [![Java](https://img.shields.io/badge/Java-21-orange.svg)](https://www.oracle.com/java/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.2-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![License](https://img.shields.io/badge/License-Educational-blue.svg)](LICENSE)
