@@ -1,13 +1,12 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import { message, Modal, Spin } from "antd";
+import { message, Modal } from "antd";
 import {
   DeleteOutlined,
   ShoppingOutlined,
   MinusOutlined,
   PlusOutlined,
   ShoppingCartOutlined,
-  CreditCardOutlined,
   ArrowLeftOutlined,
   CheckSquareOutlined,
   BorderOutlined,
@@ -17,7 +16,6 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import { AuthContext } from "../../components/context/auth.context";
-import { createZaloPayOrderApi } from "../../util/api";
 import styles from "./CartPage.module.css";
 
 /**
@@ -36,7 +34,7 @@ const CartPage = () => {
       name: "Laptop Dell XPS 13",
       price: 2500000,
       quantity: 1,
-      image: "https://via.placeholder.com/100",
+      image: "https://onlylap.vn/wp-content/uploads/2023/10/Dell-XPS-9380.webp",
       seller: "Dell Official Store",
       inStock: true,
       selected: false,
@@ -46,7 +44,8 @@ const CartPage = () => {
       name: "iPhone 15 Pro Max 256GB",
       price: 3200000,
       quantity: 2,
-      image: "https://via.placeholder.com/100",
+      image:
+        "https://cdn2.cellphones.com.vn/insecure/rs:fill:358:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/iphone-15-pro-max_2__5_2_1_1.jpg",
       seller: "Apple Store",
       inStock: true,
       selected: false,
@@ -56,14 +55,13 @@ const CartPage = () => {
       name: "Samsung Galaxy S24 Ultra",
       price: 2800000,
       quantity: 1,
-      image: "https://via.placeholder.com/100",
+      image:
+        "https://cdn.tgdd.vn/Products/Images/42/307174/samsung-galaxy-s24-ultra-xam-5-750x500.jpg",
       seller: "Samsung Official",
       inStock: false,
       selected: false,
     },
   ]);
-
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   // Voucher state
   const [platformVoucher, setPlatformVoucher] = useState(null);
@@ -352,14 +350,14 @@ const CartPage = () => {
     return Array.from(sellers);
   };
 
-  // Xử lý thanh toán
-  const handleCheckout = async () => {
+  // Xử lý đặt hàng
+  const handleCheckout = () => {
     // Kiểm tra đăng nhập
     if (!auth.isAuthenticated) {
       Modal.confirm({
         title: "Yêu cầu đăng nhập",
         content:
-          "Bạn cần đăng nhập để thực hiện thanh toán. Bạn có muốn đăng nhập ngay không?",
+          "Bạn cần đăng nhập để đặt hàng. Bạn có muốn đăng nhập ngay không?",
         okText: "Đăng nhập",
         cancelText: "Hủy",
         onOk: () => {
@@ -374,115 +372,28 @@ const CartPage = () => {
     const selectedItems = getSelectedItems();
 
     if (selectedItems.length === 0) {
-      message.warning("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
+      message.warning("Vui lòng chọn ít nhất một sản phẩm để đặt hàng!");
       return;
     }
 
     const hasOutOfStock = selectedItems.some((item) => !item.inStock);
     if (hasOutOfStock) {
       message.warning(
-        "Vui lòng bỏ chọn các sản phẩm hết hàng trước khi thanh toán!"
+        "Vui lòng bỏ chọn các sản phẩm hết hàng trước khi đặt hàng!"
       );
       return;
     }
 
-    // Xác nhận thanh toán
-    Modal.confirm({
-      title: "Xác nhận thanh toán",
-      content: (
-        <div>
-          <p>
-            Bạn đang thanh toán <strong>{selectedItems.length}</strong> sản phẩm
-            với tổng giá trị:{" "}
-            <strong style={{ color: "#ee4d2d" }}>
-              {formatCurrency(calculateSelectedTotal())}
-            </strong>
-          </p>
-          <p>Phương thức thanh toán: ZaloPay</p>
-        </div>
-      ),
-      okText: "Thanh toán ngay",
-      cancelText: "Hủy",
-      onOk: async () => {
-        await processZaloPayPayment(selectedItems);
+    // Chuyển sang trang checkout với thông tin đơn hàng
+    navigate("/checkout", {
+      state: {
+        selectedItems: selectedItems,
+        subtotal: calculateSelectedTotal(),
+        shopDiscounts: calculateShopDiscounts(),
+        platformDiscount: calculatePlatformDiscount(),
+        finalTotal: calculateFinalTotal(),
       },
     });
-  };
-
-  // Xử lý thanh toán qua ZaloPay
-  const processZaloPayPayment = async (selectedItems) => {
-    setIsProcessingPayment(true);
-    const hideLoading = message.loading("Đang xử lý thanh toán...", 0);
-
-    try {
-      // Chuẩn bị dữ liệu thanh toán
-      const paymentData = {
-        appUser: auth.user?.username || "user",
-        amount: calculateSelectedTotal(),
-        description: `Thanh toán đơn hàng từ ${
-          auth.user?.username || "khách hàng"
-        }`,
-        items: selectedItems.map((item) => ({
-          itemid: `P${item.id.toString().padStart(3, "0")}`,
-          itemname: item.name,
-          itemprice: item.price,
-          itemquantity: item.quantity,
-        })),
-        bankCode: "",
-        embedData: {
-          redirecturl: `${window.location.origin}/payment-result`,
-          merchantinfo: "HUSTBuy - Nền tảng thương mại điện tử",
-        },
-        title: `Đơn hàng #${Date.now()}`,
-        phone: auth.user?.phone || "0987654321",
-        email: auth.user?.email || "customer@hustbuy.com",
-      };
-
-      // Gọi API ZaloPay
-      const response = await createZaloPayOrderApi(paymentData);
-
-      hideLoading();
-
-      console.log("ZaloPay API Full Response:", response);
-
-      // Axios interceptor đã return response.data, nên response chính là data
-      // Response format: { appTransId, orderUrl, zpTransToken, qrCode, status, message, errorCode }
-      const responseData = response;
-
-      if (responseData?.errorCode === 1 && responseData?.orderUrl) {
-        message.success("Đang chuyển đến cổng thanh toán ZaloPay...", 1.5);
-
-        // Lưu thông tin đơn hàng để xử lý sau khi thanh toán
-        sessionStorage.setItem(
-          "pendingOrder",
-          JSON.stringify({
-            items: selectedItems,
-            total: calculateSelectedTotal(),
-            timestamp: Date.now(),
-            appTransId: responseData.appTransId,
-            zpTransToken: responseData.zpTransToken,
-          })
-        );
-
-        // Chuyển hướng đến trang thanh toán ZaloPay
-        window.open(responseData.orderUrl, "_self");
-      } else {
-        console.error("Payment failed:", responseData);
-        throw new Error(
-          responseData?.message || "Không thể tạo đơn hàng thanh toán"
-        );
-      }
-    } catch (error) {
-      hideLoading();
-      console.error("Payment error:", error);
-      message.error(
-        error.response?.data?.message ||
-          error.message ||
-          "Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại!"
-      );
-    } finally {
-      setIsProcessingPayment(false);
-    }
   };
 
   return (
@@ -907,23 +818,13 @@ const CartPage = () => {
               <button
                 className={styles.checkoutButton}
                 onClick={handleCheckout}
-                disabled={isProcessingPayment}
               >
-                {isProcessingPayment ? (
-                  <>
-                    <Spin size="small" />
-                    <span>Đang xử lý...</span>
-                  </>
-                ) : (
-                  <>
-                    <CreditCardOutlined />
-                    <span>
-                      Thanh toán qua ZaloPay
-                      {getSelectedItemsCount() > 0 &&
-                        ` (${getSelectedItemsCount()} sản phẩm)`}
-                    </span>
-                  </>
-                )}
+                <ShoppingOutlined />
+                <span>
+                  Đặt hàng
+                  {getSelectedItemsCount() > 0 &&
+                    ` (${getSelectedItemsCount()} sản phẩm)`}
+                </span>
               </button>
 
               <button
@@ -935,10 +836,10 @@ const CartPage = () => {
               </button>
 
               <div className={styles.securePayment}>
-                <p>🔒 Thanh toán an toàn qua ZaloPay</p>
+                <p>🔒 Thông tin đơn hàng được bảo mật</p>
                 {!auth.isAuthenticated && (
                   <p className={styles.loginHint}>
-                    💡 Vui lòng đăng nhập để thanh toán
+                    💡 Vui lòng đăng nhập để đặt hàng
                   </p>
                 )}
               </div>

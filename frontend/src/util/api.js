@@ -569,6 +569,31 @@ const getProductsApi = (params) => {
   });
 };
 
+// Get public products with filters (for homepage and products page)
+const getPublicProductsApi = (params) => {
+  const URL_API = "/api/product/public/products";
+  return axios.get(URL_API, {
+    params,
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get public stores (no authentication required)
+const getPublicStoresApi = (page = 0, size = 20) => {
+  const URL_API = "/api/product/public/stores";
+  return axios.get(URL_API, {
+    params: {
+      page,
+      size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 const getProductsByStoreApi = (storeId, page = 0, size = 20) => {
   const URL_API = `/api/product/products/by-store/${storeId}`;
   return axios.get(URL_API, {
@@ -689,8 +714,22 @@ const getPlatformCategoryDetailApi = (categoryId) => {
   });
 };
 
-const getBrandsApi = () => {
+const getBrandsApi = (page = 0, size = 100) => {
   const URL_API = "/api/product/brands/public";
+  return axios.get(URL_API, {
+    params: {
+      page,
+      size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get public platform categories (no authentication required)
+const getPublicPlatformCategoriesApi = () => {
+  const URL_API = "/api/product/public/categories/platform";
   return axios.get(URL_API, {
     headers: {
       "Accept-Language": "vi",
@@ -1173,6 +1212,8 @@ export {
   uploadCategoryImageApi,
   createProductApi,
   getProductsApi,
+  getPublicProductsApi,
+  getPublicStoresApi,
   getProductsByStoreApi,
   getProductDetailApi,
   updateProductApi,
@@ -1183,6 +1224,7 @@ export {
   setProductImagePrimaryApi,
   getCategoriesApi,
   getPlatformCategoriesApi,
+  getPublicPlatformCategoriesApi,
   getPlatformCategoryDetailApi,
   getBrandsApi,
   // Payment APIs
