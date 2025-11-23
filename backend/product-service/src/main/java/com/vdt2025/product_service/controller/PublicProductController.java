@@ -7,6 +7,8 @@ import com.vdt2025.product_service.dto.response.ProductResponse;
 import com.vdt2025.product_service.dto.response.ProductSummaryResponse;
 import com.vdt2025.product_service.dto.response.VariantResponse;
 import com.vdt2025.product_service.dto.response.*;
+import com.vdt2025.product_service.facade.ProductDetailFacade;
+import com.vdt2025.product_service.facade.ProductSearchFacade;
 import com.vdt2025.product_service.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -39,6 +41,8 @@ import java.util.List;
 public class PublicProductController {
 
     ProductService productService;
+    ProductSearchFacade productSearchFacade;
+    private final ProductDetailFacade productDetailFacade;
 
     /**
      * Tìm kiếm/xem danh sách sản phẩm (chỉ hiển thị sản phẩm active)
@@ -64,7 +68,7 @@ public class PublicProductController {
         // Force filter to only show active products
         filter.setIsActive(true);
 
-        PageCacheDTO<ProductSummaryResponse> dto = productService.searchProductsCacheable(filter, pageable);
+        PageCacheDTO<ProductSummaryResponse> dto = productSearchFacade.searchProductsWithStock(filter, pageable);
 
         return ApiResponse.<Page<ProductSummaryResponse>>builder()
                 .result(new PageImpl<>(
@@ -86,7 +90,7 @@ public class PublicProductController {
         // Increment view count
         productService.incrementViewCount(productId);
 
-        ProductResponse response = productService.getProductById(productId);
+        ProductResponse response = productDetailFacade.getProductDetailWithStock(productId);
 
         return ApiResponse.<ProductResponse>builder()
                 .result(response)
@@ -109,60 +113,6 @@ public class PublicProductController {
     }
 
     /**
-     * Xem sản phẩm theo store
-     * GET /public/products/store/{storeId}
-     */
-    @GetMapping("/store/{storeId}")
-    public ApiResponse<Page<ProductSummaryResponse>> getProductsByStore(
-            @PathVariable String storeId,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
-            Pageable pageable) {
-        log.info("Public: Fetching products for store: {}", storeId);
-
-        Page<ProductSummaryResponse> response = productService.getProductsByStoreId(storeId, pageable);
-
-        return ApiResponse.<Page<ProductSummaryResponse>>builder()
-                .result(response)
-                .build();
-    }
-
-    /**
-     * Xem sản phẩm theo category
-     * GET /public/products/category/{categoryId}
-     */
-    @GetMapping("/category/{categoryId}")
-    public ApiResponse<Page<ProductSummaryResponse>> getProductsByCategory(
-            @PathVariable String categoryId,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
-            Pageable pageable) {
-        log.info("Public: Fetching products for category: {}", categoryId);
-
-        Page<ProductSummaryResponse> response = productService.getProductsByCategoryId(categoryId, pageable);
-
-        return ApiResponse.<Page<ProductSummaryResponse>>builder()
-                .result(response)
-                .build();
-    }
-
-    /**
-     * Xem sản phẩm theo brand
-     * GET /public/products/brand/{brandId}
-     */
-    @GetMapping("/brand/{brandId}")
-    public ApiResponse<Page<ProductSummaryResponse>> getProductsByBrand(
-            @PathVariable String brandId,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
-            Pageable pageable) {
-        log.info("Public: Fetching products for brand: {}", brandId);
-
-        Page<ProductSummaryResponse> response = productService.getProductsByBrandId(brandId, pageable);
-
-        return ApiResponse.<Page<ProductSummaryResponse>>builder()
-                .result(response)
-                .build();
-    }
-
-    /**
      * Xem sản phẩm bán chạy (best sellers)
      * GET /public/products/best-sellers
      */
@@ -177,7 +127,7 @@ public class PublicProductController {
                 .build();
 
 
-        PageCacheDTO<ProductSummaryResponse> dto = productService.searchProductsCacheable(filter, pageable);
+        PageCacheDTO<ProductSummaryResponse> dto = productSearchFacade.searchProductsWithStock(filter, pageable);
 
         return ApiResponse.<Page<ProductSummaryResponse>>builder()
                 .result(new PageImpl<>(
@@ -204,7 +154,7 @@ public class PublicProductController {
                 .ratingFrom(minRating)
                 .build();
 
-        PageCacheDTO<ProductSummaryResponse> dto = productService.searchProductsCacheable(filter, pageable);
+        PageCacheDTO<ProductSummaryResponse> dto = productSearchFacade.searchProductsWithStock(filter, pageable);
 
         return ApiResponse.<Page<ProductSummaryResponse>>builder()
                 .result(new PageImpl<>(
@@ -229,7 +179,7 @@ public class PublicProductController {
                 .isActive(true)
                 .build();
 
-        PageCacheDTO<ProductSummaryResponse> dto = productService.searchProductsCacheable(filter, pageable);
+        PageCacheDTO<ProductSummaryResponse> dto = productSearchFacade.searchProductsWithStock(filter, pageable);
 
         return ApiResponse.<Page<ProductSummaryResponse>>builder()
                 .result(new PageImpl<>(

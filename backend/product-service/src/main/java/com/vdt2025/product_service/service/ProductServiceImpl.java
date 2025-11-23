@@ -40,11 +40,6 @@ import java.util.stream.Collectors;
 
 /**
  * Service implementation cho Product với best practices cho e-commerce
- * - Validation đầy đủ
- * - Authorization (chỉ seller của store hoặc admin mới được thao tác)
- * - Caching
- * - Transaction management
- * - Logging
  */
 @Service
 @RequiredArgsConstructor
@@ -325,27 +320,29 @@ public class ProductServiceImpl implements ProductService {
 
     // ========== Search & Filter ==========
 
-    @Cacheable(value = "product-search", key = "#filter.toString() + '-' + #pageable.toString()")
     @Override
+    @Cacheable(
+            value = "product-search",
+            key = "#filter.toString() + '-' + #pageable.toString()",
+            condition = "!#filter.hasStockFilter()"
+    )
     @Transactional(readOnly = true)
-    public PageCacheDTO<ProductSummaryResponse> searchProductsCacheable(ProductFilterRequest filter, Pageable pageable) {
-        log.info("Searching products with filter: {}", filter);
-
+    public PageCacheDTO<ProductSummaryResponse> searchProductsInternal(ProductFilterRequest filter, Pageable pageable) {
+        // Xử lý Sort direction
         if (filter.getSortBy() != null && !filter.getSortBy().isBlank()) {
-            Sort.Direction direction =
-                    "asc".equalsIgnoreCase(filter.getSortDirection()) ? Sort.Direction.ASC : Sort.Direction.DESC;
-            pageable = PageRequest.of(
-                    pageable.getPageNumber(),
-                    pageable.getPageSize(),
-                    Sort.by(direction, filter.getSortBy())
-            );
+            Sort.Direction direction = "asc".equalsIgnoreCase(filter.getSortDirection())
+                    ? Sort.Direction.ASC : Sort.Direction.DESC;
+            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                    Sort.by(direction, filter.getSortBy()));
         }
 
+        // Query DB (Nặng nhất -> Cần Cache)
         Page<Product> productPage = productRepository.findAll(
                 ProductSpecification.withFilter(filter),
                 pageable
         );
 
+        // Map sang DTO (Stock để mặc định là null hoặc 0)
         List<ProductSummaryResponse> content = productPage
                 .map(this::mapToProductSummaryResponse)
                 .getContent();
@@ -357,58 +354,6 @@ public class ProductServiceImpl implements ProductService {
                 productPage.getTotalElements()
         );
     }
-
-
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ProductSummaryResponse> getProductsByStoreId(String storeId, Pageable pageable) {
-        log.info("Fetching products for store: {}", storeId);
-        
-        // Verify store exists
-        if (!storeRepository.existsById(storeId)) {
-            throw new AppException(ErrorCode.STORE_NOT_FOUND);
-        }
-        
-        Page<Product> productPage = productRepository.findByStoreIdAndIsDeletedFalse(storeId, pageable);
-        return productPage.map(this::mapToProductSummaryResponse);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ProductSummaryResponse> getProductsByCategoryId(String categoryId, Pageable pageable) {
-        log.info("Fetching products for category: {}", categoryId);
-        
-        // Verify category exists
-        if (!categoryRepository.existsById(categoryId)) {
-            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-        }
-        
-        Page<Product> productPage = productRepository.findByCategoryIdAndIsActiveTrue(categoryId, pageable);
-        return productPage.map(this::mapToProductSummaryResponse);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ProductSummaryResponse> getProductsByBrandId(String brandId, Pageable pageable) {
-        log.info("Fetching products for brand: {}", brandId);
-
-        // Verify brand exists
-        if (!brandRepository.existsById(brandId)) {
-            throw new AppException(ErrorCode.BRAND_NOT_FOUND);
-        }
-
-        brandRepository.findByIdAndIsActiveTrue(brandId)
-                .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
-
-
-        // Lấy danh sách product thuộc brand, chỉ lấy sản phẩm đang active
-        Page<Product> productPage = productRepository.findByBrandIdAndIsActiveTrue(brandId, pageable);
-
-        // Map sang DTO summary
-        return productPage.map(this::mapToProductSummaryResponse);
-    }
-
 
 
     // ========== Variant Management ==========

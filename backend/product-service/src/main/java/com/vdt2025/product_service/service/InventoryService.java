@@ -126,7 +126,6 @@ public interface InventoryService {
      */
     boolean isLowStock(String variantId);
 
-    InventoryStatus getInventoryStatusOfProduct(String productId);
     /**
      * Tạo inventory stock mới cho variant
      * Thường được gọi khi tạo variant mới

@@ -68,22 +68,8 @@ public interface ProductService {
      * Tìm kiếm sản phẩm với filter và pagination
      * Trả về ProductSummaryResponse để tối ưu performance
      */
-    PageCacheDTO<ProductSummaryResponse> searchProductsCacheable(ProductFilterRequest filter, Pageable pageable);
+    PageCacheDTO<ProductSummaryResponse> searchProductsInternal(ProductFilterRequest filter, Pageable pageable);
 
-    /**
-     * Tìm kiếm sản phẩm theo store
-     */
-    Page<ProductSummaryResponse> getProductsByStoreId(String storeId, Pageable pageable);
-
-    /**
-     * Tìm kiếm sản phẩm theo category
-     */
-    Page<ProductSummaryResponse> getProductsByCategoryId(String categoryId, Pageable pageable);
-
-    /**
-     * Tìm kiếm sản phẩm theo brand
-     */
-    Page<ProductSummaryResponse> getProductsByBrandId(String brandId, Pageable pageable);
     // ========== Variant Management ==========
 
     /**

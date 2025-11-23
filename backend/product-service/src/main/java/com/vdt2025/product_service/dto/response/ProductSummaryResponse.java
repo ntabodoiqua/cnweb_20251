@@ -12,7 +12,7 @@ import java.util.List;
  * Không bao gồm thông tin chi tiết để tối ưu performance
  */
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -49,4 +49,6 @@ public class ProductSummaryResponse {
     String brandName;
 
     LocalDateTime createdAt;
+
+    Integer totalAvailableStock;
 }

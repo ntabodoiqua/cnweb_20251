@@ -156,5 +156,27 @@ public interface InventoryStockRepository extends JpaRepository<InventoryStock, 
     @Query("SELECT (i.quantityOnHand - i.quantityReserved) " +
            "FROM InventoryStock i WHERE i.productVariant.id = :variantId")
     Optional<Integer> getAvailableStock(@Param("variantId") String variantId);
+
+    /**
+     * Tính tổng tồn kho khả dụng cho một danh sách Product IDs.
+     * Logic: Tổng (OnHand - Reserved) của tất cả variants thuộc về product đó.
+     * * @param productIds Danh sách ID của Product (Product cha)
+     * @return List Object[] gồm: [String productId, Long totalAvailable]
+     */
+    @Query("SELECT v.product.id, SUM(i.quantityOnHand - i.quantityReserved) " +
+            "FROM InventoryStock i " +
+            "JOIN i.productVariant v " +
+            "WHERE v.product.id IN :productIds " +
+            "GROUP BY v.product.id")
+    List<Object[]> countTotalAvailableStockByProductIds(@Param("productIds") List<String> productIds);
+
+    /**
+     * Lấy thông tin tồn kho của tất cả variants thuộc 1 sản phẩm
+     * Trả về: [variantId, quantityOnHand, quantityReserved]
+     */
+    @Query("SELECT i.productVariant.id, i.quantityOnHand, i.quantityReserved " +
+            "FROM InventoryStock i " +
+            "WHERE i.productVariant.product.id = :productId")
+    List<Object[]> findAllStockByProductId(@Param("productId") String productId);
 }
 

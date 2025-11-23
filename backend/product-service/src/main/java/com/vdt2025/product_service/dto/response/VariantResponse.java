@@ -11,7 +11,7 @@ import java.util.List;
  * Response chứa thông tin variant
  */
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -43,4 +43,8 @@ public class VariantResponse {
 
     // Danh sách thuộc tính của variant (màu sắc, kích thước, etc.)
     List<AttributeValueResponse> attributeValues;
+
+    Integer availableStock;
+
+    Integer reservedStock;
 }

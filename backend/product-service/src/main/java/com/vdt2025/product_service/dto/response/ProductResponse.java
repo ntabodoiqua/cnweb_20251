@@ -11,7 +11,7 @@ import java.util.List;
  * Best practice: bao gồm đầy đủ thông tin cho e-commerce
  */
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
