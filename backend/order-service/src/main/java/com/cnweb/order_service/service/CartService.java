@@ -1,18 +1,23 @@
 package com.cnweb.order_service.service;
 
 import com.cnweb.order_service.client.ProductClient;
-import com.cnweb.order_service.client.ProductValidationDTO;
-import com.cnweb.order_service.client.VariantInfoDTO;
+import com.cnweb.order_service.client.VariantInternalDTO;
+import com.cnweb.order_service.client.VariantValidationDTO;
+import com.cnweb.order_service.client.VariantsQueryRequest;
 import com.cnweb.order_service.dto.request.AddToCartRequest;
 import com.cnweb.order_service.dto.request.UpdateCartItemRequest;
 import com.cnweb.order_service.dto.response.CartDTO;
+import com.cnweb.order_service.dto.response.CartItemChangeDTO;
 import com.cnweb.order_service.dto.response.CartItemDTO;
+import com.cnweb.order_service.dto.response.CartValidationResult;
 import com.cnweb.order_service.repository.RedisCartRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,6 +32,7 @@ public class CartService {
 
     /**
      * Get cart for user or guest session
+     * Auto-validates and syncs with product-service to ensure data freshness
      */
     public CartDTO getCart(String identifier) {
         // Try to get from Redis first
@@ -49,6 +55,17 @@ public class CartService {
                     .build();
         }
         
+        // Auto-validate and sync cart with product-service if cart has items
+        if (!cart.getItems().isEmpty()) {
+            CartValidationResult validationResult = validateAndSyncCart(identifier, cart);
+            cart = validationResult.getCart();
+            
+            if (validationResult.isHasChanges()) {
+                log.info("Cart auto-synced for identifier: {}. Changes detected: {}", 
+                        identifier, validationResult.getChanges().size());
+            }
+        }
+        
         return cart;
     }
 
@@ -57,12 +74,23 @@ public class CartService {
      */
     public CartDTO addToCart(String identifier, AddToCartRequest request) {
         // Validate product/variant from product-service
+        VariantInternalDTO variant = null;
         try {
             if (request.getVariantId() != null && !request.getVariantId().isEmpty()) {
-                // Validate variant
-                VariantInfoDTO variant = productClient.getVariantById(request.getVariantId()).getResult();
+                // Get variant info from product-service
+                VariantsQueryRequest queryRequest = VariantsQueryRequest.builder()
+                        .variantIds(Collections.singletonList(request.getVariantId()))
+                        .build();
                 
-                if (variant == null || !variant.isActive() || variant.isDeleted()) {
+                List<VariantInternalDTO> variants = productClient.getVariants(queryRequest).getResult();
+                
+                if (variants == null || variants.isEmpty()) {
+                    throw new RuntimeException("Product variant not found");
+                }
+                
+                variant = variants.get(0);
+                
+                if (!variant.isActive() || variant.isDeleted()) {
                     throw new RuntimeException("Product variant is not available");
                 }
                 
@@ -70,34 +98,14 @@ public class CartService {
                     throw new RuntimeException("Insufficient stock. Available: " + variant.getStockQuantity());
                 }
                 
-                // Use product-service price to ensure accuracy
+                // Use product-service data to ensure accuracy
                 request.setPrice(variant.getPrice());
                 request.setOriginalPrice(variant.getOriginalPrice());
                 request.setProductName(variant.getProductName());
                 request.setVariantName(variant.getVariantName());
                 request.setImageUrl(variant.getImageUrl());
             } else {
-                // Validate product only
-                List<ProductValidationDTO> validations = productClient.validateProducts(
-                        Collections.singletonList(request.getProductId()),
-                        null
-                ).getResult();
-                
-                if (validations.isEmpty() || !validations.get(0).isValid()) {
-                    throw new RuntimeException("Product is not available");
-                }
-                
-                ProductValidationDTO validation = validations.get(0);
-                if (!validation.isInStock()) {
-                    throw new RuntimeException("Product is out of stock");
-                }
-                
-                if (validation.getAvailableStock() < request.getQuantity()) {
-                    throw new RuntimeException("Insufficient stock. Available: " + validation.getAvailableStock());
-                }
-                
-                // Use product-service price
-                request.setPrice(validation.getCurrentPrice());
+                throw new RuntimeException("Variant ID is required");
             }
         } catch (Exception e) {
             log.error("Error validating product for cart: {}", e.getMessage());
@@ -109,7 +117,11 @@ public class CartService {
                 .productName(request.getProductName())
                 .variantId(request.getVariantId())
                 .variantName(request.getVariantName())
+                .sku(variant != null ? variant.getSku() : null)
                 .imageUrl(request.getImageUrl())
+                .storeName(variant != null ? variant.getStoreName() : null)
+                .storeId(variant != null ? variant.getStoreId() : null)
+                .storeLogo(variant != null ? variant.getStoreLogo() : null)
                 .quantity(request.getQuantity())
                 .price(request.getPrice())
                 .originalPrice(request.getOriginalPrice())
@@ -133,14 +145,27 @@ public class CartService {
         // Validate stock availability
         try {
             if (request.getVariantId() != null && !request.getVariantId().isEmpty()) {
-                VariantInfoDTO variant = productClient.getVariantById(request.getVariantId()).getResult();
+                VariantsQueryRequest queryRequest = VariantsQueryRequest.builder()
+                        .variantIds(Collections.singletonList(request.getVariantId()))
+                        .build();
                 
-                if (variant != null && variant.getStockQuantity() < request.getQuantity()) {
-                    throw new RuntimeException("Insufficient stock. Available: " + variant.getStockQuantity());
+                List<VariantValidationDTO> validations = productClient.validateVariants(queryRequest).getResult();
+                
+                if (validations != null && !validations.isEmpty()) {
+                    VariantValidationDTO validation = validations.get(0);
+                    
+                    if (!validation.isActive() || validation.isDeleted() || !validation.isInStock()) {
+                        throw new RuntimeException("Product variant is not available");
+                    }
+                    
+                    if (validation.getAvailableStock() < request.getQuantity()) {
+                        throw new RuntimeException("Insufficient stock. Available: " + validation.getAvailableStock());
+                    }
                 }
             }
         } catch (Exception e) {
             log.error("Error validating stock for cart update: {}", e.getMessage());
+            throw new RuntimeException("Failed to validate stock: " + e.getMessage());
         }
 
         CartDTO cart = redisCartRepository.updateItem(
@@ -218,48 +243,257 @@ public class CartService {
     }
     
     /**
-     * Validate entire cart before checkout
-     * Returns validation results for all items
+     * Validate and sync cart with product-service
+     * Returns detailed validation result with change tracking
      */
-    public boolean validateCart(String identifier) {
-        CartDTO cart = getCart(identifier);
-        
-        if (cart.getItems().isEmpty()) {
-            return false;
-        }
-        
+    public CartValidationResult validateAndSyncCart(String identifier, CartDTO cart) {
+        List<CartItemChangeDTO> changes = new ArrayList<>();
+        boolean hasChanges = false;
         boolean allValid = true;
         
-        for (CartItemDTO item : cart.getItems()) {
-            try {
-                if (item.getVariantId() != null && !item.getVariantId().isEmpty()) {
-                    VariantInfoDTO variant = productClient.getVariantById(item.getVariantId()).getResult();
+        if (cart == null) {
+            cart = getCartWithoutValidation(identifier);
+        }
+        
+        if (cart.getItems().isEmpty()) {
+            return CartValidationResult.builder()
+                    .valid(true)
+                    .hasChanges(false)
+                    .cart(cart)
+                    .message("Cart is empty")
+                    .build();
+        }
+        
+        // Collect all variant IDs
+        List<String> variantIds = cart.getItems().stream()
+                .map(CartItemDTO::getVariantId)
+                .filter(id -> id != null && !id.isEmpty())
+                .toList();
+        
+        if (variantIds.isEmpty()) {
+            return CartValidationResult.builder()
+                    .valid(false)
+                    .hasChanges(false)
+                    .cart(cart)
+                    .message("No valid variants in cart")
+                    .build();
+        }
+        
+        try {
+            // Batch validate all variants
+            VariantsQueryRequest queryRequest = VariantsQueryRequest.builder()
+                    .variantIds(variantIds)
+                    .build();
+            
+            List<VariantInternalDTO> variants = productClient.getVariants(queryRequest).getResult();
+            
+            // Create a map for quick lookup
+            java.util.Map<String, VariantInternalDTO> variantMap = variants.stream()
+                    .collect(java.util.stream.Collectors.toMap(
+                            VariantInternalDTO::getId,
+                            v -> v
+                    ));
+            
+            // Track items to remove (unavailable products)
+            List<CartItemDTO> itemsToRemove = new ArrayList<>();
+            
+            // Validate and sync each cart item
+            for (CartItemDTO item : cart.getItems()) {
+                VariantInternalDTO variant = variantMap.get(item.getVariantId());
+                
+                // Check if variant is unavailable
+                if (variant == null || !variant.isActive() || variant.isDeleted()) {
+                    log.warn("Cart item unavailable: variant {}", item.getVariantId());
                     
-                    if (variant == null || !variant.isActive() || variant.isDeleted()) {
-                        log.warn("Cart item invalid: variant {} not available", item.getVariantId());
-                        allValid = false;
-                    } else if (variant.getStockQuantity() < item.getQuantity()) {
-                        log.warn("Cart item invalid: variant {} insufficient stock", item.getVariantId());
-                        allValid = false;
-                    } else if (!variant.getPrice().equals(item.getPrice())) {
-                        log.warn("Cart item price changed: variant {} old={} new={}", 
-                                item.getVariantId(), item.getPrice(), variant.getPrice());
-                        // Update price in cart
-                        item.setPrice(variant.getPrice());
-                        allValid = false; // Price changed, need user confirmation
-                    }
+                    changes.add(CartItemChangeDTO.builder()
+                            .variantId(item.getVariantId())
+                            .productName(item.getProductName())
+                            .variantName(item.getVariantName())
+                            .unavailable(true)
+                            .message("Product is no longer available and has been removed from cart")
+                            .build());
+                    
+                    itemsToRemove.add(item);
+                    hasChanges = true;
+                    allValid = false;
+                    continue;
                 }
-            } catch (Exception e) {
-                log.error("Error validating cart item: {}", e.getMessage());
-                allValid = false;
+                
+                boolean itemChanged = false;
+                CartItemChangeDTO.CartItemChangeDTOBuilder changeBuilder = CartItemChangeDTO.builder()
+                        .variantId(item.getVariantId())
+                        .productName(item.getProductName())
+                        .variantName(item.getVariantName());
+                
+                // Check price changes
+                if (!variant.getPrice().equals(item.getPrice())) {
+                    log.info("Price changed for variant {}: {} -> {}", 
+                            item.getVariantId(), item.getPrice(), variant.getPrice());
+                    
+                    changeBuilder
+                            .priceChanged(true)
+                            .oldPrice(item.getPrice())
+                            .newPrice(variant.getPrice());
+                    
+                    // Update price in cart
+                    item.setPrice(variant.getPrice());
+                    item.setOriginalPrice(variant.getOriginalPrice());
+                    item.setUpdatedAt(LocalDateTime.now());
+                    
+                    itemChanged = true;
+                    hasChanges = true;
+                    allValid = false; // Price changed, need user confirmation
+                }
+                
+                // Check stock availability
+                if (variant.getStockQuantity() < item.getQuantity()) {
+                    log.warn("Insufficient stock for variant {}: Available={}, Requested={}", 
+                            item.getVariantId(), variant.getStockQuantity(), item.getQuantity());
+                    
+                    changeBuilder
+                            .stockChanged(true)
+                            .oldQuantity(item.getQuantity())
+                            .newQuantity(variant.getStockQuantity())
+                            .availableStock(variant.getStockQuantity());
+                    
+                    // Adjust quantity to available stock (or remove if 0)
+                    if (variant.getStockQuantity() > 0) {
+                        item.setQuantity(variant.getStockQuantity());
+                        item.setUpdatedAt(LocalDateTime.now());
+                        itemChanged = true;
+                    } else {
+                        itemsToRemove.add(item);
+                        changeBuilder.unavailable(true);
+                    }
+                    
+                    hasChanges = true;
+                    allValid = false;
+                }
+                
+                // Update store info if changed
+                if (!variant.getStoreName().equals(item.getStoreName()) ||
+                    !variant.getStoreId().equals(item.getStoreId())) {
+                    item.setStoreName(variant.getStoreName());
+                    item.setStoreId(variant.getStoreId());
+                    item.setStoreLogo(variant.getStoreLogo());
+                    item.setUpdatedAt(LocalDateTime.now());
+                    hasChanges = true;
+                }
+                
+                // Add change record if item was modified
+                if (itemChanged || changeBuilder.build().isUnavailable()) {
+                    String message = buildChangeMessage(changeBuilder.build());
+                    changes.add(changeBuilder.message(message).build());
+                }
+            }
+            
+            // Remove unavailable items
+            if (!itemsToRemove.isEmpty()) {
+                cart.getItems().removeAll(itemsToRemove);
+            }
+            
+        } catch (Exception e) {
+            log.error("Error validating cart: {}", e.getMessage(), e);
+            return CartValidationResult.builder()
+                    .valid(false)
+                    .hasChanges(false)
+                    .cart(cart)
+                    .message("Error validating cart: " + e.getMessage())
+                    .build();
+        }
+        
+        // Recalculate totals and save if there were changes
+        if (hasChanges) {
+            cart.calculateTotals();
+            redisCartRepository.saveCart(cart);
+            
+            // Persist to database for authenticated users
+            if (!identifier.startsWith("guest:")) {
+                cartPersistenceService.persistCartToDatabase(identifier);
             }
         }
         
-        // Update cart if prices changed
-        if (!allValid) {
-            redisCartRepository.saveCart(cart);
+        String message = allValid ? "Cart is valid" : 
+                String.format("Cart has %d change(s). Please review before checkout.", changes.size());
+        
+        return CartValidationResult.builder()
+                .valid(allValid)
+                .hasChanges(hasChanges)
+                .changes(changes)
+                .cart(cart)
+                .message(message)
+                .build();
+    }
+    
+    /**
+     * Get cart without auto-validation (internal use)
+     */
+    private CartDTO getCartWithoutValidation(String identifier) {
+        // Try to get from Redis first
+        CartDTO cart = redisCartRepository.getCart(identifier);
+        
+        // If not found in Redis and it's a user (not guest), try to load from database
+        if (cart == null && !identifier.startsWith("guest:")) {
+            cart = cartPersistenceService.loadCartFromDatabase(identifier);
         }
         
-        return allValid;
+        // If still null, return empty cart
+        if (cart == null) {
+            cart = CartDTO.builder()
+                    .sessionId(identifier.startsWith("guest:") ? identifier : null)
+                    .userName(identifier.startsWith("guest:") ? null : identifier)
+                    .items(new java.util.ArrayList<>())
+                    .totalItems(0)
+                    .totalPrice(java.math.BigDecimal.ZERO)
+                    .createdAt(LocalDateTime.now())
+                    .build();
+        }
+        
+        return cart;
+    }
+    
+    /**
+     * Build human-readable change message
+     */
+    private String buildChangeMessage(CartItemChangeDTO change) {
+        List<String> messages = new ArrayList<>();
+        
+        if (change.isUnavailable()) {
+            messages.add("Product is no longer available");
+        }
+        
+        if (change.isPriceChanged()) {
+            messages.add(String.format("Price changed from %s to %s", 
+                    change.getOldPrice(), change.getNewPrice()));
+        }
+        
+        if (change.isStockChanged()) {
+            if (change.getNewQuantity() == 0) {
+                messages.add("Out of stock");
+            } else {
+                messages.add(String.format("Quantity adjusted from %d to %d due to limited stock", 
+                        change.getOldQuantity(), change.getNewQuantity()));
+            }
+        }
+        
+        return String.join(". ", messages);
+    }
+    
+    /**
+     * Validate entire cart before checkout (public API)
+     * Returns simple boolean for backward compatibility
+     */
+    public boolean validateCart(String identifier) {
+        CartDTO cart = getCartWithoutValidation(identifier);
+        CartValidationResult result = validateAndSyncCart(identifier, cart);
+        return result.isValid();
+    }
+    
+    /**
+     * Get detailed validation result (for checkout or user notification)
+     */
+    public CartValidationResult getCartValidationResult(String identifier) {
+        CartDTO cart = getCartWithoutValidation(identifier);
+        return validateAndSyncCart(identifier, cart);
     }
 }

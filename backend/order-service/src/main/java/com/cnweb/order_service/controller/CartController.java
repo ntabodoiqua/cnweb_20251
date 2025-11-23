@@ -5,6 +5,7 @@ import com.cnweb.order_service.dto.request.AddToCartRequest;
 import com.cnweb.order_service.dto.request.MergeCartRequest;
 import com.cnweb.order_service.dto.request.UpdateCartItemRequest;
 import com.cnweb.order_service.dto.response.CartDTO;
+import com.cnweb.order_service.dto.response.CartValidationResult;
 import com.cnweb.order_service.service.CartService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -177,6 +178,22 @@ public class CartController {
                 .code(200)
                 .message(isValid ? "Cart is valid" : "Cart has invalid items or price changes")
                 .result(isValid)
+                .build());
+    }
+    
+    @GetMapping("/validate/detailed")
+    @Operation(summary = "Get detailed cart validation", 
+               description = "Get detailed validation result with all changes (price, stock, availability)")
+    public ResponseEntity<ApiResponse<CartValidationResult>> getDetailedValidation(
+            @RequestHeader(value = "X-Session-Id", required = false) String sessionId) {
+        
+        String identifier = getCartIdentifier(sessionId);
+        CartValidationResult result = cartService.getCartValidationResult(identifier);
+        
+        return ResponseEntity.ok(ApiResponse.<CartValidationResult>builder()
+                .code(200)
+                .message(result.getMessage())
+                .result(result)
                 .build());
     }
 }

@@ -1,44 +1,31 @@
 package com.cnweb.order_service.client;
 
 import com.vdt2025.common_dto.dto.response.ApiResponse;
+import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
+/**
+ * Feign client for product-service internal APIs
+ */
 @FeignClient(name = "product-service", path = "/internal/products")
 public interface ProductClient {
 
     /**
-     * Get product information by ID
+     * Get variant information by IDs
+     * POST /internal/products/variants
      */
-    @GetMapping("/{productId}")
-    ApiResponse<ProductInfoDTO> getProductById(@PathVariable("productId") String productId);
+    @GetMapping("/variants")
+    ApiResponse<List<VariantInternalDTO>> getVariants(@RequestBody @Valid VariantsQueryRequest request);
 
     /**
-     * Get variant information by ID
-     */
-    @GetMapping("/variants/{variantId}")
-    ApiResponse<VariantInfoDTO> getVariantById(@PathVariable("variantId") String variantId);
-
-    /**
-     * Validate multiple products availability and stock
+     * Validate multiple variants
+     * GET /internal/products/validate
      */
     @GetMapping("/validate")
-    ApiResponse<List<ProductValidationDTO>> validateProducts(
-            @RequestParam("productIds") List<String> productIds,
-            @RequestParam(value = "variantIds", required = false) List<String> variantIds
-    );
-
-    /**
-     * Update stock quantity after order
-     */
-    @GetMapping("/update-stock")
-    ApiResponse<Void> updateStock(
-            @RequestParam("productId") String productId,
-            @RequestParam(value = "variantId", required = false) String variantId,
-            @RequestParam("quantity") Integer quantity
-    );
+    ApiResponse<List<VariantValidationDTO>> validateVariants(@RequestBody @Valid VariantsQueryRequest request);
 }

@@ -18,7 +18,11 @@ public class CartItemDTO implements Serializable {
     String productName;
     String variantId;
     String variantName;
+    String sku;
     String imageUrl;
+    String storeName;
+    String storeId;
+    String storeLogo;
     Integer quantity;
     BigDecimal price;
     BigDecimal originalPrice;
