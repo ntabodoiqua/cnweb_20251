@@ -1,5 +1,6 @@
 package com.vdt2025.product_service.service;
 
+import com.vdt2025.product_service.dto.request.inventory.InventoryChangeRequest;
 import com.vdt2025.product_service.dto.response.InventoryStockResponse;
 import com.vdt2025.product_service.entity.InventoryStock;
 import com.vdt2025.product_service.entity.InventoryTransaction;
@@ -19,6 +20,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * Service implementation cho quản lý tồn kho
@@ -473,5 +479,234 @@ public class InventoryServiceImpl implements InventoryService {
         transactionRepository.save(transaction);
         log.debug("Logged inventory transaction: type={}, variant={}, change={}", 
                 type, stock.getProductVariant().getId(), quantityChange);
+    }
+
+    //=========== Internal methods ==========
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void reserveStockBatch(List<InventoryChangeRequest> requests) {
+        if (requests == null || requests.isEmpty()) return;
+
+        // BƯỚC 1: Gộp các request trùng variantId lại với nhau (đề phòng FE gửi trùng)
+        // Map<VariantId, TotalQuantity>
+        Map<String, Integer> quantityMap = requests.stream()
+                .collect(Collectors.groupingBy(
+                        InventoryChangeRequest::getVariantId,
+                        Collectors.summingInt(InventoryChangeRequest::getQuantity)
+                ));
+
+        // BƯỚC 2: Lấy danh sách ID và SẮP XẾP TĂNG DẦN
+        // Việc sort variantId giúp tránh Deadlock khi 2 transaction
+        // cùng tranh chấp các resource giống nhau nhưng khác thứ tự.
+        List<String> variantIds = quantityMap.keySet().stream()
+                .sorted()
+                .collect(Collectors.toList());
+
+        log.info("Starting batch reserve for Variants: {}", variantIds);
+
+        // BƯỚC 3: Lock DB
+        List<InventoryStock> stocks = inventoryStockRepository.findAllByProductVariantIdInWithLock(variantIds);
+
+        // Kiểm tra xem có lấy đủ số lượng bản ghi không (đề phòng ID rác)
+        if (stocks.size() != variantIds.size()) {
+            List<String> foundIds = stocks.stream()
+                    .map(s -> s.getProductVariant().getId())
+                    .toList();
+            List<String> missingIds = variantIds.stream()
+                    .filter(id -> !foundIds.contains(id))
+                    .toList();
+
+            throw new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND);
+        }
+
+        // BƯỚC 4: Duyệt và xử lý logic
+        List<InventoryTransaction> transactions = new ArrayList<>();
+
+        for (InventoryStock stock : stocks) {
+            String vId = stock.getProductVariant().getId();
+            Integer requestedQty = quantityMap.get(vId);
+
+            validateQuantity(requestedQty);
+
+            // Check tồn kho
+            if (!stock.canReserve(requestedQty)) {
+                log.warn("Batch reserve failed for Variant {} insufficient. Available: {}, Requested: {}",
+                        vId, stock.getAvailableQuantity(), requestedQty);
+                // Ném lỗi -> Transaction Rollback toàn bộ các items trước đó
+                throw new AppException(ErrorCode.OUT_OF_STOCK);
+            }
+
+            // Capture state cũ
+            int onHandBefore = stock.getQuantityOnHand();
+            int reservedBefore = stock.getQuantityReserved();
+
+            // Update logic
+            stock.setQuantityReserved(stock.getQuantityReserved() + requestedQty);
+
+            // Validate state
+            if (!stock.isValid()) {
+                throw new AppException(ErrorCode.INVALID_INVENTORY_STATE);
+            }
+
+            // Tạo log transaction (nhưng chưa save vội)
+            InventoryTransaction transaction = InventoryTransaction.builder()
+                    .variant(stock.getProductVariant())
+                    .transactionType(InventoryTransaction.TransactionType.RESERVE)
+                    .quantityChange(0) // onHand không đổi
+                    .quantityBefore(onHandBefore)
+                    .quantityAfter(stock.getQuantityOnHand())
+                    .reservedBefore(reservedBefore)
+                    .reservedAfter(stock.getQuantityReserved())
+                    .reason("Batch reserve stock")
+                    .performedBy(SecurityContextHolder.getContext().getAuthentication().getName())
+                    .referenceType(null)
+                    .referenceId(null)
+                    .build();
+            transactions.add(transaction);
+            log.info("Reserved {} for variant {}", requestedQty, vId);
+        }
+
+        // BƯỚC 5: Save All
+        inventoryStockRepository.saveAll(stocks);
+
+        // Lưu transaction history
+        transactionRepository.saveAll(transactions);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void confirmSaleBatch(List<InventoryChangeRequest> requests) {
+        if (requests == null || requests.isEmpty()) return;
+
+        // 1. Gom nhóm số lượng
+        Map<String, Integer> quantityMap = requests.stream()
+                .collect(Collectors.groupingBy(
+                        InventoryChangeRequest::getVariantId,
+                        Collectors.summingInt(InventoryChangeRequest::getQuantity)
+                ));
+
+        // 2. Sắp xếp ID để tránh Deadlock
+        List<String> variantIds = quantityMap.keySet().stream()
+                .sorted()
+                .collect(Collectors.toList());
+
+        // 3. Batch Lock DB (Pessimistic Write)
+        List<InventoryStock> stocks = inventoryStockRepository.findAllByProductVariantIdInWithLock(variantIds);
+
+        // Validate đủ số lượng bản ghi
+        if (stocks.size() != variantIds.size()) {
+            throw new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND);
+        }
+
+        // 4. Xử lý logic
+        List<InventoryTransaction> transactions = new ArrayList<>(); // Nếu muốn lưu log
+
+        for (InventoryStock stock : stocks) {
+            String vId = stock.getProductVariant().getId();
+            Integer confirmedQty = quantityMap.get(vId);
+
+            validateQuantity(confirmedQty);
+
+            // CHECK QUAN TRỌNG: Phải đảm bảo số lượng đã được Reserve trước đó
+            // Nếu Reserved < Confirmed => Có lỗi logic (Ví dụ: Timeout hủy đơn nhưng Payment lại thành công sau đó)
+            if (!stock.canReleaseReserved(confirmedQty)) {
+                log.error("Data inconsistency. Variant {}: Reserved={}, Confirming={}",
+                        vId, stock.getQuantityReserved(), confirmedQty);
+                throw new AppException(ErrorCode.INVALID_INVENTORY_OPERATION);
+            }
+
+            // Capture state cũ (để log)
+            int onHandBefore = stock.getQuantityOnHand();
+            int reservedBefore = stock.getQuantityReserved();
+
+            // UPDATE LOGIC: Trừ cả OnHand và Reserved
+            stock.setQuantityOnHand(stock.getQuantityOnHand() - confirmedQty);
+            stock.setQuantityReserved(stock.getQuantityReserved() - confirmedQty);
+
+            // Validate state lần cuối
+            if (!stock.isValid()) {
+                throw new AppException(ErrorCode.INVALID_INVENTORY_STATE);
+            }
+
+            // Ghi log
+            InventoryTransaction transaction = InventoryTransaction.builder()
+                    .variant(stock.getProductVariant())
+                    .transactionType(InventoryTransaction.TransactionType.CONFIRM_SALE)
+                    .quantityChange(-confirmedQty)
+                    .quantityBefore(onHandBefore)
+                    .quantityAfter(stock.getQuantityOnHand())
+                    .reservedBefore(reservedBefore)
+                    .reservedAfter(stock.getQuantityReserved())
+                    .reason("Batch confirm sale")
+                    .performedBy(SecurityContextHolder.getContext().getAuthentication().getName())
+                    .referenceType("ORDER")
+                    .referenceId(null)
+                    .build();
+            transactions.add(transaction);
+
+            log.info("Confirmed sale {} for variant {})", confirmedQty, vId);
+        }
+
+        // 5. Save All
+        inventoryStockRepository.saveAll(stocks);
+        transactionRepository.saveAll(transactions);
+
+        // TODO: Gửi Event (Kafka/RabbitMQ) báo "ItemSold" để:
+        // - Service Product cập nhật "sold_count" (số lượng đã bán)
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void releaseReservationBatch(List<InventoryChangeRequest> requests) {
+        if (requests == null || requests.isEmpty()) return;
+
+        // 1. Gom nhóm số lượng (Group by VariantId)
+        Map<String, Integer> quantityMap = requests.stream()
+                .collect(Collectors.groupingBy(
+                        InventoryChangeRequest::getVariantId,
+                        Collectors.summingInt(InventoryChangeRequest::getQuantity)
+                ));
+
+        // 2. Sắp xếp ID để tránh Deadlock (Bắt buộc)
+        List<String> variantIds = quantityMap.keySet().stream()
+                .sorted()
+                .collect(Collectors.toList());
+
+
+        // 3. Batch Lock DB (Pessimistic Write)
+        List<InventoryStock> stocks = inventoryStockRepository.findAllByProductVariantIdInWithLock(variantIds);
+
+        if (stocks.size() != variantIds.size()) {
+            throw new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND);
+        }
+
+        // 4. Xử lý Logic
+        for (InventoryStock stock : stocks) {
+            String vId = stock.getProductVariant().getId();
+            Integer quantityToRelease = quantityMap.get(vId);
+
+            validateQuantity(quantityToRelease);
+
+            // CHECK AN TOÀN: Có đủ hàng reserved để release không?
+            // Nếu không đủ, chứng tỏ logic hệ thống bị sai (Release 2 lần? Hoặc chưa Reserve mà đã Release?)
+            if (!stock.canReleaseReserved(quantityToRelease)) {
+                log.error("Data inconsistency. Variant {}: Reserved={}, Releasing={}",
+                        vId, stock.getQuantityReserved(), quantityToRelease);
+                throw new AppException(ErrorCode.INVALID_INVENTORY_OPERATION);
+            }
+
+            // UPDATE LOGIC: Chỉ trừ Reserved, OnHand giữ nguyên
+            stock.setQuantityReserved(stock.getQuantityReserved() - quantityToRelease);
+
+            // Validate state
+            if (!stock.isValid()) {
+                throw new AppException(ErrorCode.INVALID_INVENTORY_STATE);
+            }
+
+            log.info("Released reservation {} for variant {})", quantityToRelease, vId);
+        }
+
+        // 5. Save All
+        inventoryStockRepository.saveAll(stocks);
     }
 }

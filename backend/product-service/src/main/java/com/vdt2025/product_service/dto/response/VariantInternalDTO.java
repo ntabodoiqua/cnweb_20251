@@ -21,6 +21,9 @@ public class VariantInternalDTO implements Serializable {
     String variantName;
     String productId;
     String productName;
+    String storeName;
+    String storeId;
+    String storeLogo;
     BigDecimal price;
     BigDecimal originalPrice;
     Integer stockQuantity;

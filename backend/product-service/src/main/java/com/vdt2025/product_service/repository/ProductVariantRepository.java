@@ -1,6 +1,8 @@
 package com.vdt2025.product_service.repository;
 
 import com.vdt2025.product_service.entity.ProductVariant;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,6 +22,18 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
      * Tìm tất cả variants của một sản phẩm
      */
     List<ProductVariant> findByProductId(String productId);
+
+    /**
+     * Tìm tất cả variants theo danh sách IDs kèm theo Product và InventoryStock (eager fetch)
+     */
+    // Trong ProductVariantRepository.java
+    @Query("SELECT v FROM ProductVariant v " +
+            "JOIN FETCH v.product p " +
+            "JOIN FETCH p.store s " +
+            "LEFT JOIN FETCH v.inventoryStock " +
+            "WHERE v.id IN :ids")
+    List<ProductVariant> findAllByIdWithDetails(@Param("ids") List<String> ids);
+
 
     /**
      * Tìm variant theo SKU

@@ -178,5 +178,9 @@ public interface InventoryStockRepository extends JpaRepository<InventoryStock, 
             "FROM InventoryStock i " +
             "WHERE i.productVariant.product.id = :productId")
     List<Object[]> findAllStockByProductId(@Param("productId") String productId);
+
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT i FROM InventoryStock i WHERE i.productVariant.id IN :variantIds")
+    List<InventoryStock> findAllByProductVariantIdInWithLock(@Param("variantIds") List<String> variantIds);
 }
 

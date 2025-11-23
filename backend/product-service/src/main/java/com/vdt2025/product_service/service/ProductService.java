@@ -163,20 +163,18 @@ public interface ProductService {
     VariantResponse findVariantByAttributes(String productId, FindVariantRequest request);
 
     // ========== Internal Service Communication ==========
-
-    /**
-     * Get lightweight product info for internal service calls (e.g., order-service)
-     */
-    ProductInternalDTO getProductForInternal(String productId);
-
     /**
      * Get lightweight variant info for internal service calls
      */
-    VariantInternalDTO getVariantForInternal(String variantId);
+    List<VariantInternalDTO> getVariantsForInternal(List<String> variantIds);
 
     /**
-     * Validate multiple products and variants
+     * Validate multiple variants
      * Used by order-service to check product availability before creating order
      */
-    List<ProductValidationDTO> validateProductsAndVariants(List<String> productIds, List<String> variantIds);
+    List<VariantValidationDTO> validateVariants(List<String> variantIds);
+
+    /**
+     *
+     */
 }

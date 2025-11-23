@@ -1,8 +1,11 @@
 package com.vdt2025.product_service.service;
 
+import com.vdt2025.product_service.dto.request.inventory.InventoryChangeRequest;
 import com.vdt2025.product_service.dto.response.InventoryStockResponse;
 import com.vdt2025.product_service.enums.InventoryStatus;
 import com.vdt2025.product_service.exception.AppException;
+
+import java.util.List;
 
 /**
  * Service interface cho quản lý tồn kho (Inventory Management)
@@ -135,4 +138,11 @@ public interface InventoryService {
      * @return InventoryStockResponse
      */
     InventoryStockResponse createInventoryStock(String variantId, Integer initialQuantity);
+
+    //=========== Internal Methods ===========
+    void reserveStockBatch(List<InventoryChangeRequest> requests);
+
+    void confirmSaleBatch(List<InventoryChangeRequest> requests);
+
+    void releaseReservationBatch(List<InventoryChangeRequest> requests);
 }

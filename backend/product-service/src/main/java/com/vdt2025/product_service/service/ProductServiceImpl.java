@@ -24,10 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -36,6 +33,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -1098,184 +1096,113 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional(readOnly = true)
-    public ProductInternalDTO getProductForInternal(String productId) {
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+    public List<VariantInternalDTO> getVariantsForInternal(List<String> variantIds) {
+        // 1. Query tối ưu: Variant + Product + Store + Stock (1 SQL query)
+        List<ProductVariant> variants = variantRepository.findAllByIdWithDetails(variantIds);
 
-        // Get first image URL if available
-        String imageUrl = product.getImages().stream()
-                .min(Comparator.comparingInt(ProductImage::getDisplayOrder))
-                .map(ProductImage::getImageUrl)
-                .orElse(null);
+        return variants.stream()
+                .map(variant -> {
+                    // Xử lý Stock (Null safety)
+                    int quantity = 0;
+                    if (variant.getInventoryStock() != null) {
+                        quantity = variant.getInventoryStock().getAvailableQuantity();
+                    }
 
-        // Calculate total stock
-//        Integer totalStock = product.getVariants().stream()
-//                .filter(v -> !v.isDeleted() && v.isActive())
-//                .mapToInt(ProductVariant::getStockQuantity)
-//                .sum();
+                    // Lấy thông tin Product và Store (Giả định Product luôn có Store do rằng buộc nullable=false)
+                    Product product = variant.getProduct();
+                    Store store = product.getStore();
 
-        return ProductInternalDTO.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .shortDescription(product.getShortDescription())
-                .imageUrl(imageUrl)
-                .minPrice(product.getMinPrice())
-                .maxPrice(product.getMaxPrice())
-                .isActive(product.isActive())
-                .isDeleted(product.isDeleted())
-//                .totalStock(totalStock)
-                .storeId(product.getStore().getId())
-                .storeName(product.getStore().getStoreName())
-                .build();
+                    return VariantInternalDTO.builder()
+                            .productId(product.getId())
+                            .variantName(variant.getVariantName())
+                            .sku(variant.getSku())
+                            .productName(product.getName())
+                            .imageUrl(variant.getImageUrl())
+                            .stockQuantity(quantity)
+                            .price(variant.getPrice())
+                            .originalPrice(variant.getOriginalPrice())
+                            .isActive(variant.isActive())
+
+                            // --- MAPPING STORE INFO ---
+                            .storeId(store.getId())
+                            .storeName(store.getStoreName())
+                            .storeLogo(store.getLogoUrl())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     @Override
     @Transactional(readOnly = true)
-    public VariantInternalDTO getVariantForInternal(String variantId) {
-        ProductVariant variant = variantRepository.findById(variantId)
-                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+    public List<VariantValidationDTO> validateVariants(List<String> variantIds) {
+        // 1. Fail-fast
+        if (variantIds == null || variantIds.isEmpty()) {
+            return Collections.emptyList();
+        }
 
-        return VariantInternalDTO.builder()
-                .id(variant.getId())
-                .sku(variant.getSku())
-                .variantName(variant.getVariantName())
-                .productId(variant.getProduct().getId())
-                .productName(variant.getProduct().getName())
-                .price(variant.getPrice())
-                .originalPrice(variant.getOriginalPrice())
-//                .stockQuantity(variant.getStockQuantity())
-                .imageUrl(variant.getImageUrl())
-                .isActive(variant.isActive())
-                .isDeleted(variant.isDeleted())
-                .build();
-    }
+        List<VariantValidationDTO> result = new ArrayList<>();
 
-    @Override
-    @Transactional(readOnly = true)
-    public List<ProductValidationDTO> validateProductsAndVariants(List<String> productIds, List<String> variantIds) {
-        List<ProductValidationDTO> validations = new ArrayList<>();
+        // 2. Query tối ưu: Lấy Variant + Product + Store + Stock
+        List<ProductVariant> variants = variantRepository.findAllByIdWithDetails(variantIds);
 
-        // If variantIds is provided, validate variants
-        if (variantIds != null && !variantIds.isEmpty()) {
-            for (int i = 0; i < variantIds.size(); i++) {
-                String variantId = variantIds.get(i);
-                String productId = i < productIds.size() ? productIds.get(i) : null;
+        // 3. Map để truy xuất nhanh
+        Map<String, ProductVariant> variantMap = variants.stream()
+                .collect(Collectors.toMap(ProductVariant::getId, Function.identity()));
 
-                Optional<ProductVariant> variantOpt = variantRepository.findById(variantId);
+        // 4. Duyệt theo danh sách ID đầu vào
+        for (String id : variantIds) {
+            ProductVariant variant = variantMap.get(id);
 
-                if (variantOpt.isEmpty()) {
-                    validations.add(ProductValidationDTO.builder()
-                            .productId(productId)
-                            .variantId(variantId)
-                            .isValid(false)
-                            .message("Variant not found")
-                            .build());
-                    continue;
-                }
-
-                ProductVariant variant = variantOpt.get();
-                boolean isValid = variant.isActive() && !variant.isDeleted() 
-                        && variant.getProduct().isActive() && !variant.getProduct().isDeleted();
-//                boolean inStock = variant.getStockQuantity() > 0;
-
-                validations.add(ProductValidationDTO.builder()
-                        .productId(variant.getProduct().getId())
-                        .variantId(variant.getId())
-                        .isValid(isValid)
-                        .isActive(variant.isActive())
-//                        .inStock(inStock)
-//                        .availableStock(variant.getStockQuantity())
-                        .currentPrice(variant.getPrice())
-//                        .message(isValid ? (inStock ? "Valid" : "Out of stock") : "Product or variant is inactive")
+            // Case: Không tìm thấy
+            if (variant == null) {
+                result.add(VariantValidationDTO.builder()
+                        .variantId(id)
+                        .isActive(false)
+                        .isDeleted(true)
+                        .inStock(false)
+                        .availableStock(0)
+                        .message("Variant not found")
                         .build());
+                continue;
             }
-        } else {
-            // Validate products only
-            for (String productId : productIds) {
-                Optional<Product> productOpt = productRepository.findById(productId);
 
-                if (productOpt.isEmpty()) {
-                    validations.add(ProductValidationDTO.builder()
-                            .productId(productId)
-                            .isValid(false)
-                            .message("Product not found")
-                            .build());
-                    continue;
-                }
+            // Lấy các entity liên quan
+            Product product = variant.getProduct();
+            Store store = product.getStore();
+            InventoryStock stock = variant.getInventoryStock();
 
-                Product product = productOpt.get();
-                boolean isValid = product.isActive() && !product.isDeleted();
-                
-//                Integer totalStock = product.getVariants().stream()
-//                        .filter(v -> !v.isDeleted() && v.isActive())
-//                        .mapToInt(ProductVariant::getStockQuantity)
-//                        .sum();
-                
-//                boolean inStock = totalStock > 0;
+            // Tính toán Stock
+            int availableQty = (stock != null) ? stock.getAvailableQuantity() : 0;
 
-                validations.add(ProductValidationDTO.builder()
-                        .productId(product.getId())
-                        .isValid(isValid)
-                        .isActive(product.isActive())
-//                        .inStock(inStock)
-//                        .availableStock(totalStock)
-                        .currentPrice(product.getMinPrice())
-//                        .message(isValid ? (inStock ? "Valid" : "Out of stock") : "Product is inactive")
-                        .build());
+            // --- LOGIC VALIDATION QUAN TRỌNG ---
+            // Một item khả dụng khi: Variant OK + Product OK + STORE OK
+            boolean isVariantActive = variant.isActive() && !variant.isDeleted();
+            boolean isProductActive = product.isActive() && !product.isDeleted();
+            boolean isStoreActive = store.isActive(); // Check thêm trạng thái cửa hàng
+
+            // Kết luận cuối cùng
+            boolean itemActive = isVariantActive && isProductActive && isStoreActive;
+
+            // Tạo thông báo lỗi cụ thể (Optional - giúp FE hiển thị lý do)
+            String message = null;
+            if (!itemActive) {
+                if (!isStoreActive) message = "Store is inactive";
+                else if (!isProductActive) message = "Product is inactive";
+                else message = "Variant is inactive";
             }
+
+            result.add(VariantValidationDTO.builder()
+                    .variantId(variant.getId())
+                    .isActive(itemActive)
+                    .isDeleted(variant.isDeleted())
+                    .inStock(availableQty > 0)
+                    .availableStock(availableQty)
+                    .message(message)
+                    .build());
         }
 
-        return validations;
+        return result;
     }
 
-//    @Override
-    @Transactional
-    public void updateStock(String productId, String variantId, Integer quantity) {
-        if (variantId != null && !variantId.isEmpty()) {
-            // Update variant stock
-            ProductVariant variant = variantRepository.findById(variantId)
-                    .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
-            
-//            int newStock = variant.getStockQuantity() + quantity;
-//            if (newStock < 0) {
-//                throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
-//            }
-            
-//            variant.setStockQuantity(newStock);
-            variantRepository.save(variant);
-            
-//            log.info("Updated stock for variant {}: {} (change: {})", variantId, newStock, quantity);
-        } else {
-            // Update all active variants of the product
-            Product product = productRepository.findById(productId)
-                    .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-            
-            for (ProductVariant variant : product.getVariants()) {
-                if (variant.isActive() && !variant.isDeleted()) {
-//                    int newStock = variant.getStockQuantity() + quantity;
-//                    if (newStock < 0) {
-//                        throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
-//                    }
-//                    variant.setStockQuantity(newStock);
-                }
-            }
-            
-            productRepository.save(product);
-            log.info("Updated stock for all variants of product {}", productId);
-        }
-    }
-
-//    @Override
-    @Transactional
-    public void batchUpdateStock(List<com.vdt2025.common_dto.dto.StockUpdateRequest> updates) {
-        for (com.vdt2025.common_dto.dto.StockUpdateRequest update : updates) {
-            try {
-                updateStock(update.productId(), update.variantId(), update.quantity());
-            } catch (Exception e) {
-                log.error("Failed to update stock for product {} variant {}: {}", 
-                        update.productId(), update.variantId(), e.getMessage());
-                // Continue with other updates instead of failing completely
-            }
-        }
-    }
+    void updateSold
 }
