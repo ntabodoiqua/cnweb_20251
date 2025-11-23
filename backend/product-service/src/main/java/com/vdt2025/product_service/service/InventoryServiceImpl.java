@@ -709,4 +709,71 @@ public class InventoryServiceImpl implements InventoryService {
         // 5. Save All
         inventoryStockRepository.saveAll(stocks);
     }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED)
+    public void returnInventoryBatch(List<InventoryChangeRequest> requests) {
+        if (requests == null || requests.isEmpty()) return;
+
+        // 1. Gom nhóm số lượng (Group by VariantId)
+        Map<String, Integer> quantityMap = requests.stream()
+                .collect(Collectors.groupingBy(
+                        InventoryChangeRequest::getVariantId,
+                        Collectors.summingInt(InventoryChangeRequest::getQuantity)
+                ));
+
+        // 2. Sắp xếp ID để tránh Deadlock (Bắt buộc)
+        List<String> variantIds = quantityMap.keySet().stream()
+                .sorted()
+                .collect(Collectors.toList());
+
+        // 3. Batch Lock DB (Pessimistic Write)
+        List<InventoryStock> stocks = inventoryStockRepository.findAllByProductVariantIdInWithLock(variantIds);
+
+        // Validate: Đảm bảo tìm thấy tất cả variant
+        if (stocks.size() != variantIds.size()) {
+            throw new AppException(ErrorCode.INVENTORY_STOCK_NOT_FOUND);
+        }
+
+        // 4. Xử lý Logic
+        for (InventoryStock stock : stocks) {
+            String vId = stock.getProductVariant().getId();
+            Integer quantityToReturn = quantityMap.get(vId);
+
+            validateQuantity(quantityToReturn);
+
+            // Capture state cũ
+            int onHandBefore = stock.getQuantityOnHand();
+            int reservedBefore = stock.getQuantityReserved();
+
+            // UPDATE LOGIC: Tăng OnHand, Reserved giữ nguyên (vì hàng về lại kho)
+            stock.setQuantityOnHand(stock.getQuantityOnHand() + quantityToReturn);
+
+            // Validate state (Đảm bảo logic không bị âm, though cộng thêm thì khó âm được)
+            if (!stock.isValid()) {
+                throw new AppException(ErrorCode.INVALID_INVENTORY_STATE);
+            }
+
+            // Log Transaction: Lưu ý Type nên là RETURN để phân biệt với Nhập hàng mới
+            logTransaction(
+                    stock,
+                    InventoryTransaction.TransactionType.RETURN,
+                    quantityToReturn, //
+                    onHandBefore,
+                    stock.getQuantityOnHand(),
+                    reservedBefore,
+                    stock.getQuantityReserved(),
+                    "Returned inventory from Order",
+                    null
+            );
+
+            log.info("Returned {} units for variant {})", quantityToReturn, vId);
+        }
+
+        // 5. Save All
+        inventoryStockRepository.saveAll(stocks);
+
+        // TODO: Gửi Event Async để giảm 'sold_count' (số lượng đã bán) bên Product Service
+        // eventPublisher.publishEvent(new InventoryReturnedEvent(orderId, quantityMap));
+    }
 }

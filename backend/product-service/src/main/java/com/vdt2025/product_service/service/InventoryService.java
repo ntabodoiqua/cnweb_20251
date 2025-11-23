@@ -145,4 +145,6 @@ public interface InventoryService {
     void confirmSaleBatch(List<InventoryChangeRequest> requests);
 
     void releaseReservationBatch(List<InventoryChangeRequest> requests);
+
+    void returnInventoryBatch(List<InventoryChangeRequest> requests);
 }

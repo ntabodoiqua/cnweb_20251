@@ -1183,7 +1183,7 @@ public class ProductServiceImpl implements ProductService {
             // Kết luận cuối cùng
             boolean itemActive = isVariantActive && isProductActive && isStoreActive;
 
-            // Tạo thông báo lỗi cụ thể (Optional - giúp FE hiển thị lý do)
+            // Tạo thông báo lỗi cụ thể
             String message = null;
             if (!itemActive) {
                 if (!isStoreActive) message = "Store is inactive";

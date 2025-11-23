@@ -99,6 +99,22 @@ public class InternalController {
                 .build();
     }
 
+    /**
+     * Trả hàng cho một loạt hàng hóa khi khách hàng thực hiện hoàn trả
+     * @param request BatchInventoryChangeRequest
+     * @return Void
+     */
+
+    @PostMapping("/return-batch")
+    public ApiResponse<Void> returnBatch(@RequestBody @Valid BatchInventoryChangeRequest request) {
+
+        inventoryService.returnInventoryBatch(request.getItems());
+
+        return ApiResponse.<Void>builder()
+                .message("Inventory returned successfully")
+                .build();
+    }
+
 
 
 
