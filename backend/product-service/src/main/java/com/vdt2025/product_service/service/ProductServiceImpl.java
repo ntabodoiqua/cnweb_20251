@@ -328,10 +328,23 @@ public class ProductServiceImpl implements ProductService {
     public PageCacheDTO<ProductSummaryResponse> searchProductsInternal(ProductFilterRequest filter, Pageable pageable) {
         // Xử lý Sort direction
         if (filter.getSortBy() != null && !filter.getSortBy().isBlank()) {
+            String sortField = filter.getSortBy();
+
+            // 1. Mapping 'price' từ FE sang 'minPrice' trong Entity
+            if ("price".equalsIgnoreCase(sortField)) {
+                sortField = "minPrice";
+            }
+
+            // 2. Mapping các trường khác (nếu cần) để tránh lỗi tương tự
+            // Ví dụ FE gửi 'sold' nhưng Entity là 'soldCount'
+            if ("sold".equalsIgnoreCase(sortField)) {
+                sortField = "soldCount";
+            }
             Sort.Direction direction = "asc".equalsIgnoreCase(filter.getSortDirection())
                     ? Sort.Direction.ASC : Sort.Direction.DESC;
+
             pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                    Sort.by(direction, filter.getSortBy()));
+                    Sort.by(direction, sortField));
         }
 
         // Query DB (Nặng nhất -> Cần Cache)
