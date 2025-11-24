@@ -44,15 +44,6 @@ const Header = () => {
 
     setIsLoggingOut(true);
 
-    // Hiển thị thông báo đang đăng xuất
-    const hideLoading = notification.info({
-      message: "Đăng xuất",
-      description: "Đang đăng xuất...",
-      placement: "topRight",
-      duration: 0,
-      key: "logout-loading",
-    });
-
     try {
       const token = localStorage.getItem("access_token");
       if (token) {
@@ -64,9 +55,6 @@ const Header = () => {
       console.error("Logout error:", error);
       // Vẫn thực hiện logout ở frontend ngay cả khi API thất bại
     } finally {
-      // Đóng loading
-      notification.close("logout-loading");
-
       // Xóa token và reset auth state
       localStorage.removeItem("access_token");
       setAuth({
@@ -94,7 +82,7 @@ const Header = () => {
         duration: 2,
       });
 
-      // Chuyển về trang chủ ngay lập tức
+      // Reset trạng thái và chuyển về trang chủ
       setIsLoggingOut(false);
       navigate("/", { replace: true });
     }

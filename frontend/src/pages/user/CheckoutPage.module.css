@@ -334,10 +334,12 @@
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(238, 77, 45, 0.08);
   position: sticky;
-  top: 40px;
-  max-height: calc(100vh - 80px);
+  top: 90px;
+  max-height: calc(100vh - 110px);
   overflow-y: auto;
   transition: all 0.3s ease;
+  z-index: 100;
+  align-self: flex-start;
 }
 
 .orderSummary:hover {

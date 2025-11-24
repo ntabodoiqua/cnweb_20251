@@ -105,13 +105,19 @@ instance.interceptors.response.use(
       }
 
       try {
-        // Gọi API refresh token
-        const response = await instance.post("/api/user/auth/refresh", {
-          token,
-        });
+        // Gọi API refresh token - không gửi Authorization header
+        const response = await axios.post(
+          `${import.meta.env.VITE_BACKEND_URL}/api/user/auth/refresh`,
+          { token },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
-        if (response && response.result && response.result.token) {
-          const newToken = response.result.token;
+        if (response?.data?.result?.token) {
+          const newToken = response.data.result.token;
           localStorage.setItem("access_token", newToken);
 
           // Cập nhật token cho request gốc
@@ -128,6 +134,7 @@ instance.interceptors.response.use(
         }
       } catch (refreshError) {
         // Xử lý lỗi refresh token
+        console.error("Refresh token error:", refreshError);
         processQueue(refreshError, null);
         localStorage.clear();
         window.location.href = "/login";
