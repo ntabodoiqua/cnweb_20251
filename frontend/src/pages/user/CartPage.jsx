@@ -17,6 +17,7 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import { AuthContext } from "../../components/context/auth.context";
+import { useCart } from "../../contexts/CartContext";
 import {
   getCartApi,
   updateCartItemApi,
@@ -35,6 +36,7 @@ import styles from "./CartPage.module.css";
 const CartPage = () => {
   const navigate = useNavigate();
   const { auth } = useContext(AuthContext);
+  const { loadCartCount } = useCart();
 
   // State cho giỏ hàng từ API
   const [cartData, setCartData] = useState(null);
@@ -316,6 +318,7 @@ const CartPage = () => {
             i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i
           )
         );
+        loadCartCount(); // Update global cart count
         notification.success({
           message: "Thành công",
           description: "Đã tăng số lượng sản phẩm",
@@ -353,6 +356,7 @@ const CartPage = () => {
             i.id === itemId ? { ...i, quantity: i.quantity - 1 } : i
           )
         );
+        loadCartCount(); // Update global cart count
         notification.success({
           message: "Thành công",
           description: "Đã giảm số lượng sản phẩm",
@@ -382,6 +386,7 @@ const CartPage = () => {
 
       if (response && response.code === 200) {
         setCartItems((prevItems) => prevItems.filter((i) => i.id !== itemId));
+        loadCartCount(); // Update global cart count
         notification.success({
           message: "Thành công",
           description: "Đã xóa sản phẩm khỏi giỏ hàng",
