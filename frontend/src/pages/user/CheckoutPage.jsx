@@ -1,6 +1,16 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { message, Modal, Spin, Radio, Input, Select, Form, Button } from "antd";
+import {
+  notification,
+  message,
+  Modal,
+  Spin,
+  Radio,
+  Input,
+  Select,
+  Form,
+  Button,
+} from "antd";
 import {
   ShoppingCartOutlined,
   EnvironmentOutlined,
@@ -65,7 +75,11 @@ const CheckoutPage = () => {
   useEffect(() => {
     // Redirect nếu không có sản phẩm
     if (!selectedItems || selectedItems.length === 0) {
-      message.warning("Vui lòng chọn sản phẩm từ giỏ hàng!");
+      notification.warning({
+        message: "Chưa chọn sản phẩm",
+        description: "Vui lòng chọn sản phẩm từ giỏ hàng!",
+        placement: "topRight",
+      });
       navigate(PROTECTED_ROUTES.USER_CART);
       return;
     }
@@ -116,7 +130,11 @@ const CheckoutPage = () => {
       }
     } catch (error) {
       console.error("Error fetching provinces:", error);
-      message.error("Không thể tải danh sách tỉnh/thành phố");
+      notification.error({
+        message: "Lỗi tải dữ liệu",
+        description: "Không thể tải danh sách tỉnh/thành phố",
+        placement: "topRight",
+      });
     } finally {
       setLoadingProvinces(false);
     }
@@ -132,7 +150,11 @@ const CheckoutPage = () => {
       }
     } catch (error) {
       console.error("Error fetching wards:", error);
-      message.error("Không thể tải danh sách phường/xã");
+      notification.error({
+        message: "Lỗi tải dữ liệu",
+        description: "Không thể tải danh sách phường/xã",
+        placement: "topRight",
+      });
     } finally {
       setLoadingWards(false);
     }
@@ -302,11 +324,14 @@ const CheckoutPage = () => {
     } catch (error) {
       hideLoading();
       console.error("Order processing error:", error);
-      message.error(
-        error.response?.data?.message ||
+      notification.error({
+        message: "Lỗi xử lý đơn hàng",
+        description:
+          error.response?.data?.message ||
           error.message ||
-          "Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại!"
-      );
+          "Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại!",
+        placement: "topRight",
+      });
     } finally {
       setIsProcessingPayment(false);
     }

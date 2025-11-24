@@ -20,7 +20,7 @@ import {
   AppstoreOutlined,
   BellOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Space, Drawer, Menu, Input, message } from "antd";
+import { Dropdown, Space, Drawer, Menu, Input, notification } from "antd";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
 import { useCart } from "../../contexts/CartContext";
@@ -44,9 +44,6 @@ const Header = () => {
 
     setIsLoggingOut(true);
 
-    // Hiển thị thông báo đang đăng xuất
-    const hideLoading = message.loading("Đang đăng xuất...", 0);
-
     try {
       const token = localStorage.getItem("access_token");
       if (token) {
@@ -58,9 +55,6 @@ const Header = () => {
       console.error("Logout error:", error);
       // Vẫn thực hiện logout ở frontend ngay cả khi API thất bại
     } finally {
-      // Đóng loading
-      hideLoading();
-
       // Xóa token và reset auth state
       localStorage.removeItem("access_token");
       setAuth({
@@ -80,12 +74,15 @@ const Header = () => {
       resetCart();
 
       // Hiển thị thông báo cảm ơn
-      message.success(
-        "Đăng xuất thành công! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi. Hẹn gặp lại! 👋",
-        2
-      );
+      notification.success({
+        message: "Đăng xuất thành công",
+        description:
+          "Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi. Hẹn gặp lại! 👋",
+        placement: "topRight",
+        duration: 2,
+      });
 
-      // Chuyển về trang chủ ngay lập tức
+      // Reset trạng thái và chuyển về trang chủ
       setIsLoggingOut(false);
       navigate("/", { replace: true });
     }
@@ -401,7 +398,11 @@ const Header = () => {
               <div
                 className={styles.notificationIcon}
                 onClick={() =>
-                  message.info("Tính năng thông báo đang phát triển")
+                  notification.info({
+                    message: "Thông báo",
+                    description: "Tính năng thông báo đang phát triển",
+                    placement: "topRight",
+                  })
                 }
               >
                 <BellOutlined />
