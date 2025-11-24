@@ -1,6 +1,6 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { message, Modal } from "antd";
+import { notification, Modal } from "antd";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import {
   DeleteOutlined,
@@ -99,7 +99,11 @@ const CartPage = () => {
       }
     } catch (error) {
       console.error("Error loading cart:", error);
-      message.error("Không thể tải giỏ hàng. Vui lòng thử lại!");
+      notification.error({
+        message: "Lỗi tải giỏ hàng",
+        description: "Không thể tải giỏ hàng. Vui lòng thử lại!",
+        placement: "topRight",
+      });
     } finally {
       setLoading(false);
     }
@@ -291,7 +295,11 @@ const CartPage = () => {
 
     // Kiểm tra tồn kho
     if (item.quantity >= item.stock) {
-      message.warning("Đã đạt số lượng tối đa trong kho!");
+      notification.warning({
+        message: "Tồn kho không đủ",
+        description: "Đã đạt số lượng tối đa trong kho!",
+        placement: "topRight",
+      });
       return;
     }
 
@@ -308,13 +316,22 @@ const CartPage = () => {
             i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i
           )
         );
-        message.success("Đã tăng số lượng sản phẩm");
+        notification.success({
+          message: "Thành công",
+          description: "Đã tăng số lượng sản phẩm",
+          placement: "topRight",
+          duration: 2,
+        });
       } else {
         throw new Error(response?.message || "Có lỗi xảy ra");
       }
     } catch (error) {
       console.error("Error updating cart:", error);
-      message.error("Không thể cập nhật giỏ hàng!");
+      notification.error({
+        message: "Lỗi cập nhật",
+        description: "Không thể cập nhật giỏ hàng!",
+        placement: "topRight",
+      });
     }
   };
 
@@ -336,13 +353,22 @@ const CartPage = () => {
             i.id === itemId ? { ...i, quantity: i.quantity - 1 } : i
           )
         );
-        message.success("Đã giảm số lượng sản phẩm");
+        notification.success({
+          message: "Thành công",
+          description: "Đã giảm số lượng sản phẩm",
+          placement: "topRight",
+          duration: 2,
+        });
       } else {
         throw new Error(response?.message || "Có lỗi xảy ra");
       }
     } catch (error) {
       console.error("Error updating cart:", error);
-      message.error("Không thể cập nhật giỏ hàng!");
+      notification.error({
+        message: "Lỗi cập nhật",
+        description: "Không thể cập nhật giỏ hàng!",
+        placement: "topRight",
+      });
     }
   };
 
@@ -356,13 +382,22 @@ const CartPage = () => {
 
       if (response && response.code === 200) {
         setCartItems((prevItems) => prevItems.filter((i) => i.id !== itemId));
-        message.success("Đã xóa sản phẩm khỏi giỏ hàng");
+        notification.success({
+          message: "Thành công",
+          description: "Đã xóa sản phẩm khỏi giỏ hàng",
+          placement: "topRight",
+          duration: 2,
+        });
       } else {
         throw new Error(response?.message || "Có lỗi xảy ra");
       }
     } catch (error) {
       console.error("Error removing item:", error);
-      message.error("Không thể xóa sản phẩm!");
+      notification.error({
+        message: "Lỗi xóa sản phẩm",
+        description: "Không thể xóa sản phẩm!",
+        placement: "topRight",
+      });
     }
   };
 
@@ -370,42 +405,66 @@ const CartPage = () => {
   const handleApplyPlatformVoucher = (code) => {
     const voucher = availablePlatformVouchers.find((v) => v.code === code);
     if (!voucher) {
-      message.error("Mã voucher không hợp lệ!");
+      notification.error({
+        message: "Voucher không hợp lệ",
+        description: "Mã voucher không hợp lệ!",
+        placement: "topRight",
+      });
       return;
     }
 
     const subtotal = calculateSelectedTotal();
     if (subtotal < voucher.minOrder) {
-      message.warning(
-        `Đơn hàng tối thiểu ${formatCurrency(
+      notification.warning({
+        message: "Đơn hàng chưa đủ điều kiện",
+        description: `Đơn hàng tối thiểu ${formatCurrency(
           voucher.minOrder
-        )} để áp dụng mã này!`
-      );
+        )} để áp dụng mã này!`,
+        placement: "topRight",
+      });
       return;
     }
 
     setPlatformVoucher(voucher);
     setVoucherInput("");
-    message.success("Áp dụng mã giảm giá sàn thành công!");
+    notification.success({
+      message: "Thành công",
+      description: "Áp dụng mã giảm giá sàn thành công!",
+      placement: "topRight",
+      duration: 2,
+    });
   };
 
   // Xử lý xóa voucher sàn
   const handleRemovePlatformVoucher = () => {
     setPlatformVoucher(null);
-    message.info("Đã hủy mã giảm giá sàn");
+    notification.info({
+      message: "Thông báo",
+      description: "Đã hủy mã giảm giá sàn",
+      placement: "topRight",
+      duration: 2,
+    });
   };
 
   // Xử lý áp dụng voucher shop
   const handleApplyShopVoucher = (seller, code) => {
     const shopVoucherList = availableShopVouchers[seller];
     if (!shopVoucherList) {
-      message.error("Shop không có voucher!");
+      notification.error({
+        message: "Không có voucher",
+        description: "Shop không có voucher!",
+        placement: "topRight",
+      });
       return;
     }
 
     const voucher = shopVoucherList.find((v) => v.code === code);
     if (!voucher) {
-      message.error("Mã voucher shop không hợp lệ!");
+      notification.error({
+        message: "Voucher không hợp lệ",
+        description: "Mã voucher shop không hợp lệ!",
+        placement: "topRight",
+      });
       return;
     }
 
@@ -415,17 +474,24 @@ const CartPage = () => {
       .reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     if (shopTotal < voucher.minOrder) {
-      message.warning(
-        `Đơn hàng shop tối thiểu ${formatCurrency(
+      notification.warning({
+        message: "Đơn hàng chưa đủ điều kiện",
+        description: `Đơn hàng shop tối thiểu ${formatCurrency(
           voucher.minOrder
-        )} để áp dụng mã này!`
-      );
+        )} để áp dụng mã này!`,
+        placement: "topRight",
+      });
       return;
     }
 
     setShopVouchers((prev) => ({ ...prev, [seller]: voucher }));
     setShopVoucherInputs((prev) => ({ ...prev, [seller]: "" }));
-    message.success(`Áp dụng mã giảm giá ${seller} thành công!`);
+    notification.success({
+      message: "Thành công",
+      description: `Áp dụng mã giảm giá ${seller} thành công!`,
+      placement: "topRight",
+      duration: 2,
+    });
   };
 
   // Xử lý xóa voucher shop
@@ -435,7 +501,12 @@ const CartPage = () => {
       delete newVouchers[seller];
       return newVouchers;
     });
-    message.info(`Đã hủy mã giảm giá ${seller}`);
+    notification.info({
+      message: "Thông báo",
+      description: `Đã hủy mã giảm giá ${seller}`,
+      placement: "topRight",
+      duration: 2,
+    });
   };
 
   // Lấy danh sách shop có sản phẩm được chọn
@@ -531,15 +602,22 @@ const CartPage = () => {
     const selectedItems = getSelectedItems();
 
     if (selectedItems.length === 0) {
-      message.warning("Vui lòng chọn ít nhất một sản phẩm để đặt hàng!");
+      notification.warning({
+        message: "Chưa chọn sản phẩm",
+        description: "Vui lòng chọn ít nhất một sản phẩm để đặt hàng!",
+        placement: "topRight",
+      });
       return;
     }
 
     const hasOutOfStock = selectedItems.some((item) => !item.inStock);
     if (hasOutOfStock) {
-      message.warning(
-        "Vui lòng bỏ chọn các sản phẩm hết hàng trước khi đặt hàng!"
-      );
+      notification.warning({
+        message: "Có sản phẩm hết hàng",
+        description:
+          "Vui lòng bỏ chọn các sản phẩm hết hàng trước khi đặt hàng!",
+        placement: "topRight",
+      });
       return;
     }
 
