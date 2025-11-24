@@ -40,7 +40,9 @@ import {
   getPublicProductVariantOptionsApi,
   findVariantByAttributesApi,
   getWardInfoApi,
+  addToCartApi,
 } from "../util/api";
+import { useCart } from "../contexts/CartContext";
 import LoadingSpinner from "../components/LoadingSpinner";
 import styles from "./ProductDetailPage.module.css";
 
@@ -49,6 +51,7 @@ const { Title, Text, Paragraph } = Typography;
 const ProductDetailPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
+  const { incrementCartCount, loadCartCount } = useCart();
 
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState(null);
@@ -60,6 +63,7 @@ const ProductDetailPage = () => {
   const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
   const [wardInfo, setWardInfo] = useState(null);
   const [variantLoading, setVariantLoading] = useState(false);
+  const [addingToCart, setAddingToCart] = useState(false);
 
   useEffect(() => {
     if (productId) {
@@ -242,7 +246,7 @@ const ProductDetailPage = () => {
     return Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
   };
 
-  const handleAddToCart = () => {
+  const handleAddToCart = async () => {
     if (!selectedVariant) {
       notification.warning({
         message: "Chưa chọn phiên bản",
@@ -268,12 +272,53 @@ const ProductDetailPage = () => {
       return;
     }
 
-    // TODO: Call API to add to cart
-    notification.success({
-      message: "Thêm vào giỏ hàng",
-      description: `Đã thêm ${quantity} sản phẩm vào giỏ hàng!`,
-      placement: "topRight",
-    });
+    try {
+      setAddingToCart(true);
+
+      // Tạo cart item data với đầy đủ thông tin
+      const cartItemData = {
+        productId: product.id,
+        productName: product.name,
+        variantId: selectedVariant?.id,
+        variantName: selectedVariant?.variantName || null,
+        imageUrl:
+          selectedVariant?.images?.[0] || product.images?.[0]?.imageUrl || null,
+        quantity: quantity,
+        price: selectedVariant?.price || product.price,
+        originalPrice:
+          selectedVariant?.originalPrice ||
+          product.originalPrice ||
+          selectedVariant?.price ||
+          product.price,
+      };
+
+      const response = await addToCartApi(cartItemData);
+
+      if (response && response.code === 200) {
+        // Cập nhật cart count trong context
+        incrementCartCount(quantity);
+
+        notification.success({
+          message: "Thêm vào giỏ hàng",
+          description: `Đã thêm ${quantity} sản phẩm vào giỏ hàng!`,
+          placement: "topRight",
+          duration: 2,
+        });
+      } else {
+        throw new Error(response?.message || "Có lỗi xảy ra");
+      }
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      notification.error({
+        message: "Lỗi",
+        description:
+          error.message ||
+          "Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại!",
+        placement: "topRight",
+      });
+    } finally {
+      setAddingToCart(false);
+    }
   };
 
   const handleAddToWishlist = () => {
@@ -658,10 +703,13 @@ const ProductDetailPage = () => {
                     icon={<ShoppingCartOutlined />}
                     onClick={handleAddToCart}
                     className={styles.addToCartBtn}
-                    disabled={!product.active || !selectedVariant}
+                    disabled={
+                      !product.active || !selectedVariant || addingToCart
+                    }
+                    loading={addingToCart}
                     block
                   >
-                    Thêm vào giỏ hàng
+                    {addingToCart ? "Đang thêm..." : "Thêm vào giỏ hàng"}
                   </Button>
                   {!product.active && (
                     <div style={{ marginTop: 12 }}>

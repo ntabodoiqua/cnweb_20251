@@ -793,55 +793,235 @@ const createZaloPayOrderApi = (paymentData) => {
   });
 };
 
-// Cart APIs - TODO: Replace with real backend endpoints
-const getCartItemsApi = () => {
-  // Tạm thời trả về mock data, sẽ thay bằng API thật sau
-  return Promise.resolve({
-    data: {
-      code: 1000,
-      result: {
-        items: [],
-        total: 0,
-      },
+// Cart APIs
+const getCartApi = () => {
+  const URL_API = "/api/order/api/v1/cart";
+  const sessionId =
+    localStorage.getItem("cart_session_id") || generateSessionId();
+
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "X-Session-Id": sessionId,
     },
+    transformRequest: [
+      (data, headers) => {
+        // Xóa Authorization nếu là guest session (có session ID với prefix session_)
+        if (sessionId && sessionId.startsWith("session_")) {
+          delete headers.Authorization;
+        }
+        return data;
+      },
+    ],
   });
 };
 
-const addToCartApi = (productId, quantity) => {
-  const URL_API = "/api/order/cart/add";
+const addToCartApi = (cartItemData) => {
+  const URL_API = "/api/order/api/v1/cart/items";
+  const sessionId =
+    localStorage.getItem("cart_session_id") || generateSessionId();
+
   return axios.post(
     URL_API,
-    { productId, quantity },
+    {
+      productId: cartItemData.productId,
+      productName: cartItemData.productName,
+      variantId: cartItemData.variantId || null,
+      variantName: cartItemData.variantName || null,
+      imageUrl: cartItemData.imageUrl,
+      quantity: cartItemData.quantity,
+      price: cartItemData.price,
+      originalPrice: cartItemData.originalPrice || cartItemData.price,
+    },
     {
       headers: {
         "Accept-Language": "vi",
         "Content-Type": "application/json",
+        "X-Session-Id": sessionId,
       },
+      transformRequest: [
+        (data, headers) => {
+          // Xóa Authorization nếu là guest session (có session ID với prefix session_)
+          if (sessionId && sessionId.startsWith("session_")) {
+            delete headers.Authorization;
+          }
+          return JSON.stringify(data);
+        },
+      ],
     }
   );
 };
 
-const updateCartItemApi = (itemId, quantity) => {
-  const URL_API = `/api/order/cart/items/${itemId}`;
+const updateCartItemApi = (productId, variantId, quantity) => {
+  const URL_API = "/api/order/api/v1/cart/items";
+  const sessionId =
+    localStorage.getItem("cart_session_id") || generateSessionId();
+
   return axios.put(
     URL_API,
-    { quantity },
+    {
+      productId,
+      variantId,
+      quantity,
+    },
     {
       headers: {
         "Accept-Language": "vi",
         "Content-Type": "application/json",
+        "X-Session-Id": sessionId,
       },
+      transformRequest: [
+        (data, headers) => {
+          // Xóa Authorization nếu là guest session (có session ID với prefix session_)
+          if (sessionId && sessionId.startsWith("session_")) {
+            delete headers.Authorization;
+          }
+          return JSON.stringify(data);
+        },
+      ],
     }
   );
 };
 
-const removeCartItemApi = (itemId) => {
-  const URL_API = `/api/order/cart/items/${itemId}`;
+const removeCartItemApi = (productId, variantId) => {
+  const URL_API = "/api/order/api/v1/cart/items";
+  const sessionId =
+    localStorage.getItem("cart_session_id") || generateSessionId();
+
+  return axios.delete(URL_API, {
+    params: {
+      productId,
+      variantId,
+    },
+    headers: {
+      "Accept-Language": "vi",
+      "X-Session-Id": sessionId,
+    },
+    transformRequest: [
+      (data, headers) => {
+        // Xóa Authorization nếu là guest session (có session ID với prefix session_)
+        if (sessionId && sessionId.startsWith("session_")) {
+          delete headers.Authorization;
+        }
+        return data;
+      },
+    ],
+  });
+};
+
+const clearCartApi = () => {
+  const URL_API = "/api/order/api/v1/cart";
+  const sessionId =
+    localStorage.getItem("cart_session_id") || generateSessionId();
+
   return axios.delete(URL_API, {
     headers: {
       "Accept-Language": "vi",
+      "X-Session-Id": sessionId,
     },
+    transformRequest: [
+      (data, headers) => {
+        // Xóa Authorization nếu là guest session (có session ID với prefix session_)
+        if (sessionId && sessionId.startsWith("session_")) {
+          delete headers.Authorization;
+        }
+        return data;
+      },
+    ],
   });
+};
+
+const mergeCartApi = (guestSessionId) => {
+  const URL_API = "/api/order/api/v1/cart/merge";
+
+  return axios.post(
+    URL_API,
+    { guestSessionId },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const getCartCountApi = () => {
+  const URL_API = "/api/order/api/v1/cart/count";
+  const sessionId =
+    localStorage.getItem("cart_session_id") || generateSessionId();
+
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "X-Session-Id": sessionId,
+    },
+    transformRequest: [
+      (data, headers) => {
+        // Xóa Authorization nếu là guest session (có session ID với prefix session_)
+        if (sessionId && sessionId.startsWith("session_")) {
+          delete headers.Authorization;
+        }
+        return data;
+      },
+    ],
+  });
+};
+
+const validateCartApi = () => {
+  const URL_API = "/api/order/api/v1/cart/validate";
+  const sessionId =
+    localStorage.getItem("cart_session_id") || generateSessionId();
+
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "X-Session-Id": sessionId,
+    },
+    transformRequest: [
+      (data, headers) => {
+        // Xóa Authorization nếu là guest session (có session ID với prefix session_)
+        if (sessionId && sessionId.startsWith("session_")) {
+          delete headers.Authorization;
+        }
+        return data;
+      },
+    ],
+  });
+};
+
+const getDetailedCartValidationApi = () => {
+  const URL_API = "/api/order/api/v1/cart/validate/detailed";
+  const sessionId =
+    localStorage.getItem("cart_session_id") || generateSessionId();
+
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "X-Session-Id": sessionId,
+    },
+    transformRequest: [
+      (data, headers) => {
+        // Xóa Authorization nếu là guest session (có session ID với prefix session_)
+        if (sessionId && sessionId.startsWith("session_")) {
+          delete headers.Authorization;
+        }
+        return data;
+      },
+    ],
+  });
+};
+
+// Helper function to generate session ID for guest users
+const generateSessionId = () => {
+  // Generate session ID with "session_" prefix
+  // Backend will add "guest:" prefix, then Redis adds "cart:" prefix
+  // Final Redis key: cart:guest:session_{timestamp}_{random}
+  const sessionId = `session_${Date.now()}_${Math.random()
+    .toString(36)
+    .substr(2, 9)}`;
+  localStorage.setItem("cart_session_id", sessionId);
+  return sessionId;
 };
 
 // Product Attributes APIs
@@ -1278,10 +1458,15 @@ export {
   // Payment APIs
   createZaloPayOrderApi,
   // Cart APIs
-  getCartItemsApi,
+  getCartApi,
   addToCartApi,
   updateCartItemApi,
   removeCartItemApi,
+  clearCartApi,
+  mergeCartApi,
+  getCartCountApi,
+  validateCartApi,
+  getDetailedCartValidationApi,
   // Product Attributes APIs
   createProductAttributeApi,
   getProductAttributesByCategoryApi,

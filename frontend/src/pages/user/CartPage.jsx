@@ -1,6 +1,6 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { message, Modal } from "antd";
+import { message, Modal, Spin } from "antd";
 import {
   DeleteOutlined,
   ShoppingOutlined,
@@ -16,6 +16,14 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import { AuthContext } from "../../components/context/auth.context";
+import {
+  getCartApi,
+  updateCartItemApi,
+  removeCartItemApi,
+  clearCartApi,
+  mergeCartApi,
+  getDetailedCartValidationApi,
+} from "../../util/api";
 import styles from "./CartPage.module.css";
 
 /**
@@ -27,47 +35,71 @@ const CartPage = () => {
   const navigate = useNavigate();
   const { auth } = useContext(AuthContext);
 
-  // Mock data cho giỏ hàng - Sẽ được thay thế bằng state management sau
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Laptop Dell XPS 13",
-      price: 2500000,
-      quantity: 1,
-      image: "https://onlylap.vn/wp-content/uploads/2023/10/Dell-XPS-9380.webp",
-      seller: "Dell Official Store",
-      inStock: true,
-      selected: false,
-    },
-    {
-      id: 2,
-      name: "iPhone 15 Pro Max 256GB",
-      price: 3200000,
-      quantity: 2,
-      image:
-        "https://cdn2.cellphones.com.vn/insecure/rs:fill:358:358/q:90/plain/https://cellphones.com.vn/media/catalog/product/i/p/iphone-15-pro-max_2__5_2_1_1.jpg",
-      seller: "Apple Store",
-      inStock: true,
-      selected: false,
-    },
-    {
-      id: 3,
-      name: "Samsung Galaxy S24 Ultra",
-      price: 2800000,
-      quantity: 1,
-      image:
-        "https://cdn.tgdd.vn/Products/Images/42/307174/samsung-galaxy-s24-ultra-xam-5-750x500.jpg",
-      seller: "Samsung Official",
-      inStock: false,
-      selected: false,
-    },
-  ]);
+  // State cho giỏ hàng từ API
+  const [cartData, setCartData] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedItems, setSelectedItems] = useState(new Set());
 
   // Voucher state
   const [platformVoucher, setPlatformVoucher] = useState(null);
   const [shopVouchers, setShopVouchers] = useState({});
   const [voucherInput, setVoucherInput] = useState("");
   const [shopVoucherInputs, setShopVoucherInputs] = useState({});
+
+  // Load giỏ hàng khi component mount
+  useEffect(() => {
+    loadCart();
+  }, []);
+
+  // Load cart data from API
+  const loadCart = async () => {
+    try {
+      setLoading(true);
+      const response = await getCartApi();
+
+      if (response && response.code === 200) {
+        setCartData(response.result);
+
+        // Transform API data to component state
+        const items = response.result.items.map((item) => {
+          // API response không có available và stock, tạm thời set default
+          const stock = item.stock || 999; // Default stock nếu API không trả về
+          const available =
+            item.available !== undefined ? item.available : true; // Default available = true
+
+          return {
+            id: `${item.productId}_${item.variantId || "default"}`,
+            productId: item.productId,
+            variantId: item.variantId,
+            name: item.productName,
+            variantName: item.variantName,
+            sku: item.sku,
+            price: item.price,
+            originalPrice: item.originalPrice,
+            quantity: item.quantity,
+            image: item.imageUrl,
+            seller: item.storeName,
+            storeId: item.storeId,
+            storeLogo: item.storeLogo,
+            subtotal: item.subtotal,
+            inStock: available && item.quantity <= stock,
+            stock: stock,
+            selected: false,
+          };
+        });
+
+        setCartItems(items);
+      } else {
+        throw new Error(response?.message || "Không thể tải giỏ hàng");
+      }
+    } catch (error) {
+      console.error("Error loading cart:", error);
+      message.error("Không thể tải giỏ hàng. Vui lòng thử lại!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Mock data voucher sàn
   const availablePlatformVouchers = [
@@ -242,31 +274,85 @@ const CartPage = () => {
   };
 
   // Xử lý tăng số lượng
-  const handleIncreaseQuantity = (itemId) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === itemId ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
-    message.success("Đã tăng số lượng sản phẩm");
+  const handleIncreaseQuantity = async (itemId) => {
+    const item = cartItems.find((i) => i.id === itemId);
+    if (!item) return;
+
+    // Kiểm tra tồn kho
+    if (item.quantity >= item.stock) {
+      message.warning("Đã đạt số lượng tối đa trong kho!");
+      return;
+    }
+
+    try {
+      const response = await updateCartItemApi(
+        item.productId,
+        item.variantId,
+        item.quantity + 1
+      );
+
+      if (response && response.code === 200) {
+        setCartItems((prevItems) =>
+          prevItems.map((i) =>
+            i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i
+          )
+        );
+        message.success("Đã tăng số lượng sản phẩm");
+      } else {
+        throw new Error(response?.message || "Có lỗi xảy ra");
+      }
+    } catch (error) {
+      console.error("Error updating cart:", error);
+      message.error("Không thể cập nhật giỏ hàng!");
+    }
   };
 
   // Xử lý giảm số lượng
-  const handleDecreaseQuantity = (itemId) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === itemId && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
-    );
-    message.success("Đã giảm số lượng sản phẩm");
+  const handleDecreaseQuantity = async (itemId) => {
+    const item = cartItems.find((i) => i.id === itemId);
+    if (!item || item.quantity <= 1) return;
+
+    try {
+      const response = await updateCartItemApi(
+        item.productId,
+        item.variantId,
+        item.quantity - 1
+      );
+
+      if (response && response.code === 200) {
+        setCartItems((prevItems) =>
+          prevItems.map((i) =>
+            i.id === itemId ? { ...i, quantity: i.quantity - 1 } : i
+          )
+        );
+        message.success("Đã giảm số lượng sản phẩm");
+      } else {
+        throw new Error(response?.message || "Có lỗi xảy ra");
+      }
+    } catch (error) {
+      console.error("Error updating cart:", error);
+      message.error("Không thể cập nhật giỏ hàng!");
+    }
   };
 
   // Xử lý xóa sản phẩm
-  const handleRemoveItem = (itemId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
-    message.success("Đã xóa sản phẩm khỏi giỏ hàng");
+  const handleRemoveItem = async (itemId) => {
+    const item = cartItems.find((i) => i.id === itemId);
+    if (!item) return;
+
+    try {
+      const response = await removeCartItemApi(item.productId, item.variantId);
+
+      if (response && response.code === 200) {
+        setCartItems((prevItems) => prevItems.filter((i) => i.id !== itemId));
+        message.success("Đã xóa sản phẩm khỏi giỏ hàng");
+      } else {
+        throw new Error(response?.message || "Có lỗi xảy ra");
+      }
+    } catch (error) {
+      console.error("Error removing item:", error);
+      message.error("Không thể xóa sản phẩm!");
+    }
   };
 
   // Xử lý áp dụng voucher sàn
@@ -396,6 +482,20 @@ const CartPage = () => {
     });
   };
 
+  // Hiển thị loading spinner
+  if (loading) {
+    return (
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <div style={{ textAlign: "center", padding: "100px 0" }}>
+            <Spin size="large" />
+            <p style={{ marginTop: 20 }}>Đang tải giỏ hàng...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>
@@ -490,11 +590,101 @@ const CartPage = () => {
                   </div>
 
                   <div className={styles.itemInfo}>
-                    <h3 className={styles.itemName}>{item.name}</h3>
-                    <p className={styles.itemSeller}>Bán bởi: {item.seller}</p>
-                    <p className={styles.itemPrice}>
-                      {formatCurrency(item.price)}
-                    </p>
+                    <h3 className={styles.itemName}>
+                      {item.name}
+                      {item.variantName && (
+                        <span
+                          style={{
+                            fontSize: "0.85em",
+                            color: "#666",
+                            fontWeight: "normal",
+                            marginLeft: "8px",
+                          }}
+                        >
+                          ({item.variantName})
+                        </span>
+                      )}
+                    </h3>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                        marginTop: "4px",
+                      }}
+                    >
+                      {item.storeLogo ? (
+                        <img
+                          src={item.storeLogo}
+                          alt={item.seller}
+                          style={{
+                            width: "20px",
+                            height: "20px",
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ) : null}
+                      <p className={styles.itemSeller} style={{ margin: 0 }}>
+                        Bán bởi: {item.seller}
+                      </p>
+                    </div>
+                    {item.sku && (
+                      <p
+                        style={{
+                          fontSize: "0.8em",
+                          color: "#999",
+                          marginTop: "4px",
+                          marginBottom: "4px",
+                        }}
+                      >
+                        SKU: {item.sku}
+                      </p>
+                    )}
+                    <div className={styles.itemPrice}>
+                      {item.originalPrice && item.originalPrice > item.price ? (
+                        <>
+                          <span
+                            style={{
+                              color: "#ff4d4f",
+                              fontWeight: "bold",
+                              fontSize: "1.1em",
+                            }}
+                          >
+                            {formatCurrency(item.price)}
+                          </span>
+                          <span
+                            style={{
+                              textDecoration: "line-through",
+                              color: "#999",
+                              fontSize: "0.9em",
+                              marginLeft: "8px",
+                            }}
+                          >
+                            {formatCurrency(item.originalPrice)}
+                          </span>
+                          <span
+                            style={{
+                              backgroundColor: "#ff4d4f",
+                              color: "white",
+                              padding: "2px 6px",
+                              borderRadius: "4px",
+                              fontSize: "0.75em",
+                              marginLeft: "8px",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            -
+                            {Math.round(
+                              (1 - item.price / item.originalPrice) * 100
+                            )}
+                            %
+                          </span>
+                        </>
+                      ) : (
+                        <span>{formatCurrency(item.price)}</span>
+                      )}
+                    </div>
                   </div>
 
                   <div className={styles.itemActions}>
