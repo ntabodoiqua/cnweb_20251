@@ -594,6 +594,51 @@ const getPublicStoresApi = (page = 0, size = 20) => {
   });
 };
 
+// Get public product detail (no authentication required)
+const getPublicProductDetailApi = (productId) => {
+  const URL_API = `/api/product/public/products/${productId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Get public product variant options (no authentication required)
+const getPublicProductVariantOptionsApi = (
+  productId,
+  attributeValueIds = []
+) => {
+  const URL_API = `/api/product/public/products/${productId}/variant-options`;
+  return axios.get(URL_API, {
+    data: {
+      attributeValueIds: attributeValueIds,
+    },
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Find variant by attribute combination (no authentication required)
+const findVariantByAttributesApi = (productId, attributeValueIds) => {
+  const URL_API = `/api/product/public/products/${productId}/find-variant`;
+  return axios.post(
+    URL_API,
+    {
+      attributeValueIds: attributeValueIds,
+    },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
 const getProductsByStoreApi = (storeId, page = 0, size = 20) => {
   const URL_API = `/api/product/products/by-store/${storeId}`;
   return axios.get(URL_API, {
@@ -1214,6 +1259,9 @@ export {
   getProductsApi,
   getPublicProductsApi,
   getPublicStoresApi,
+  getPublicProductDetailApi,
+  getPublicProductVariantOptionsApi,
+  findVariantByAttributesApi,
   getProductsByStoreApi,
   getProductDetailApi,
   updateProductApi,

@@ -7,7 +7,7 @@
 export const PUBLIC_ROUTES = {
   HOME: "/",
   PRODUCTS: "/products",
-  PRODUCT_DETAIL: "/product/:id",
+  PRODUCT_DETAIL: "/product/:productId",
   LOGIN: "/login",
   REGISTER: "/register",
   VERIFY_EMAIL: "/verify-email",

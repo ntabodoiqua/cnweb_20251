@@ -19,6 +19,7 @@ import PublicRoute from "./guards/PublicRoute";
 // Public Pages
 const HomePage = lazy(() => import("../pages/home"));
 const ProductsPage = lazy(() => import("../pages/ProductsPage"));
+const ProductDetailPage = lazy(() => import("../pages/ProductDetailPage"));
 const LoginPage = lazy(() => import("../pages/login"));
 const RegisterPage = lazy(() => import("../pages/register"));
 const VerifyEmailPage = lazy(() => import("../pages/verify-email"));
@@ -179,6 +180,14 @@ const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <ProductsPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.PRODUCT_DETAIL,
+        element: (
+          <SuspenseWrapper>
+            <ProductDetailPage />
           </SuspenseWrapper>
         ),
       },
