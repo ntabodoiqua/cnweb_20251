@@ -1,5 +1,6 @@
 package com.cnweb.order_service.exception;
 
+import com.cnweb.order_service.service.MessageService;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import lombok.RequiredArgsConstructor;

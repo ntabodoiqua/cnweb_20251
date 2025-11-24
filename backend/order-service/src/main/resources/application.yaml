@@ -43,11 +43,6 @@ jwt:
   valid-duration: 3600
   refreshable-duration: 86400
 
-logging:
-  level:
-    org.springframework.data.redis: DEBUG
-    io.lettuce.core: DEBUG
-
 internal:
   service:
     secret: ${INTERNAL_SERVICE_SECRET:InT3rn@l-S3rv1c3-S3cr3t-K3y-2025-VDT}

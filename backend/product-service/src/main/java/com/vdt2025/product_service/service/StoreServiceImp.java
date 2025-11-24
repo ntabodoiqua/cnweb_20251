@@ -7,6 +7,7 @@ import com.vdt2025.common_dto.service.UserServiceClient;
 import com.vdt2025.product_service.dto.request.store.StoreSimpleRequest;
 import com.vdt2025.product_service.dto.response.PageCacheDTO;
 import com.vdt2025.product_service.dto.response.StoreResponse;
+import com.vdt2025.product_service.dto.response.StoreSimpleResponse;
 import com.vdt2025.product_service.entity.Store;
 import com.vdt2025.product_service.exception.AppException;
 import com.vdt2025.product_service.exception.ErrorCode;
@@ -89,6 +90,17 @@ public class StoreServiceImp implements StoreService {
             throw new AppException(ErrorCode.STORE_FETCH_FAILED);
         }
 
+    }
+
+    @Override
+    public Page<StoreSimpleResponse> getPublicStores(Pageable pageable) {
+        log.info("Fetching public stores for page: {}", pageable);
+        try {
+            return storeRepository.findAllByIsActiveTrue(pageable).map(storeMapper::toStoreSimpleResponse);
+        } catch (Exception e) {
+            log.error("Failed to fetch public stores for page: {}", pageable, e);
+            throw new AppException(ErrorCode.STORE_FETCH_FAILED);
+        }
     }
 
     @Override

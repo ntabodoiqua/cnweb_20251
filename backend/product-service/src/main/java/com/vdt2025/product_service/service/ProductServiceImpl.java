@@ -24,10 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -36,15 +33,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
  * Service implementation cho Product với best practices cho e-commerce
- * - Validation đầy đủ
- * - Authorization (chỉ seller của store hoặc admin mới được thao tác)
- * - Caching
- * - Transaction management
- * - Logging
  */
 @Service
 @RequiredArgsConstructor
@@ -63,11 +56,13 @@ public class ProductServiceImpl implements ProductService {
     ProductImageRepository productImageRepository;
     AttributeValueRepository attributeValueRepository;
     ProductAttributeRepository productAttributeRepository;
+    InventoryStockRepository inventoryStockRepository;
     private final CategoryMapper categoryMapper;
     private final StoreMapper storeMapper;
     private final BrandMapper brandMapper;
     CategoryManagementService categoryManagementService;
     private final CacheEvictService cacheEvictService;
+    private final InventoryService inventoryService;
 
     @Value("${product-images.max-per-product:5}")
     @NonFinal
@@ -323,27 +318,42 @@ public class ProductServiceImpl implements ProductService {
 
     // ========== Search & Filter ==========
 
-    @Cacheable(value = "product-search", key = "#filter.toString() + '-' + #pageable.toString()")
     @Override
+    @Cacheable(
+            value = "product-search",
+            key = "#filter.toString() + '-' + #pageable.toString()",
+            condition = "!#filter.hasStockFilter()"
+    )
     @Transactional(readOnly = true)
-    public PageCacheDTO<ProductSummaryResponse> searchProductsCacheable(ProductFilterRequest filter, Pageable pageable) {
-        log.info("Searching products with filter: {}", filter);
-
+    public PageCacheDTO<ProductSummaryResponse> searchProductsInternal(ProductFilterRequest filter, Pageable pageable) {
+        // Xử lý Sort direction
         if (filter.getSortBy() != null && !filter.getSortBy().isBlank()) {
-            Sort.Direction direction =
-                    "asc".equalsIgnoreCase(filter.getSortDirection()) ? Sort.Direction.ASC : Sort.Direction.DESC;
-            pageable = PageRequest.of(
-                    pageable.getPageNumber(),
-                    pageable.getPageSize(),
-                    Sort.by(direction, filter.getSortBy())
-            );
+            String sortField = filter.getSortBy();
+
+            // 1. Mapping 'price' từ FE sang 'minPrice' trong Entity
+            if ("price".equalsIgnoreCase(sortField)) {
+                sortField = "minPrice";
+            }
+
+            // 2. Mapping các trường khác (nếu cần) để tránh lỗi tương tự
+            // Ví dụ FE gửi 'sold' nhưng Entity là 'soldCount'
+            if ("sold".equalsIgnoreCase(sortField)) {
+                sortField = "soldCount";
+            }
+            Sort.Direction direction = "asc".equalsIgnoreCase(filter.getSortDirection())
+                    ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                    Sort.by(direction, sortField));
         }
 
+        // Query DB (Nặng nhất -> Cần Cache)
         Page<Product> productPage = productRepository.findAll(
                 ProductSpecification.withFilter(filter),
                 pageable
         );
 
+        // Map sang DTO (Stock để mặc định là null hoặc 0)
         List<ProductSummaryResponse> content = productPage
                 .map(this::mapToProductSummaryResponse)
                 .getContent();
@@ -355,58 +365,6 @@ public class ProductServiceImpl implements ProductService {
                 productPage.getTotalElements()
         );
     }
-
-
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ProductSummaryResponse> getProductsByStoreId(String storeId, Pageable pageable) {
-        log.info("Fetching products for store: {}", storeId);
-        
-        // Verify store exists
-        if (!storeRepository.existsById(storeId)) {
-            throw new AppException(ErrorCode.STORE_NOT_FOUND);
-        }
-        
-        Page<Product> productPage = productRepository.findByStoreIdAndIsDeletedFalse(storeId, pageable);
-        return productPage.map(this::mapToProductSummaryResponse);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ProductSummaryResponse> getProductsByCategoryId(String categoryId, Pageable pageable) {
-        log.info("Fetching products for category: {}", categoryId);
-        
-        // Verify category exists
-        if (!categoryRepository.existsById(categoryId)) {
-            throw new AppException(ErrorCode.CATEGORY_NOT_FOUND);
-        }
-        
-        Page<Product> productPage = productRepository.findByCategoryIdAndIsActiveTrue(categoryId, pageable);
-        return productPage.map(this::mapToProductSummaryResponse);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public Page<ProductSummaryResponse> getProductsByBrandId(String brandId, Pageable pageable) {
-        log.info("Fetching products for brand: {}", brandId);
-
-        // Verify brand exists
-        if (!brandRepository.existsById(brandId)) {
-            throw new AppException(ErrorCode.BRAND_NOT_FOUND);
-        }
-
-        brandRepository.findByIdAndIsActiveTrue(brandId)
-                .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
-
-
-        // Lấy danh sách product thuộc brand, chỉ lấy sản phẩm đang active
-        Page<Product> productPage = productRepository.findByBrandIdAndIsActiveTrue(brandId, pageable);
-
-        // Map sang DTO summary
-        return productPage.map(this::mapToProductSummaryResponse);
-    }
-
 
 
     // ========== Variant Management ==========
@@ -463,9 +421,6 @@ public class ProductServiceImpl implements ProductService {
         }
         if (request.getOriginalPrice() != null) {
             variant.setOriginalPrice(request.getOriginalPrice());
-        }
-        if (request.getStockQuantity() != null) {
-            variant.setStockQuantity(request.getStockQuantity());
         }
         if (request.getImageName() != null) {
             variant.setImageName(request.getImageName());
@@ -821,63 +776,6 @@ public class ProductServiceImpl implements ProductService {
                 .map(this::mapToVariantResponse)
                 .collect(Collectors.toList());
     }
-
-    // ========== Inventory Management ==========
-
-    @Override
-    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
-    @Transactional
-    public VariantResponse updateVariantStock(String productId, String variantId, Integer quantity) {
-        log.info("Updating stock for variant {} to {}", variantId, quantity);
-        
-        Product product = productRepository.findById(productId)
-                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
-        
-        checkProductAccess(product);
-        
-        ProductVariant variant = variantRepository.findByProductIdAndId(productId, variantId)
-                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
-        
-        variant.setStockQuantity(quantity);
-        variant = variantRepository.save(variant);
-        
-        log.info("Stock updated for variant {}", variant.getSku());
-        return mapToVariantResponse(variant);
-    }
-
-    @Override
-    @Transactional
-    public void decreaseStock(String variantId, Integer quantity) {
-        log.info("Decreasing stock for variant {} by {}", variantId, quantity);
-        
-        ProductVariant variant = variantRepository.findById(variantId)
-                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
-        
-        if (variant.getStockQuantity() < quantity) {
-            throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
-        }
-        
-        int updated = variantRepository.decreaseStock(variantId, quantity);
-        if (updated == 0) {
-            throw new AppException(ErrorCode.INSUFFICIENT_STOCK);
-        }
-        
-        log.info("Stock decreased for variant {}", variant.getSku());
-    }
-
-    @Override
-    @Transactional
-    public void increaseStock(String variantId, Integer quantity) {
-        log.info("Increasing stock for variant {} by {}", variantId, quantity);
-        
-        if (!variantRepository.existsById(variantId)) {
-            throw new AppException(ErrorCode.VARIANT_NOT_FOUND);
-        }
-        
-        variantRepository.increaseStock(variantId, quantity);
-        log.info("Stock increased for variant {}", variantId);
-    }
-
     // ========== Statistics & Metrics ==========
 
     @Override
@@ -911,14 +809,16 @@ public class ProductServiceImpl implements ProductService {
                 .variantName(request.getVariantName())
                 .price(request.getPrice())
                 .originalPrice(request.getOriginalPrice())
-                .stockQuantity(request.getStockQuantity())
                 .imageName(request.getImageName())
                 .isActive(true)
                 .product(product)
                 .soldQuantity(0)
                 .build();
         
-        return variantRepository.save(variant);
+        var res =  variantRepository.save(variant);
+        // Khởi tạo inventory cho variant
+        inventoryService.createInventoryStock(res.getId(), request.getStockQuantity());
+        return res;
     }
 
     private String generateSKU(Product product) {
@@ -938,11 +838,11 @@ public class ProductServiceImpl implements ProductService {
                 .map(ProductVariant::getPrice)
                 .max(BigDecimal::compareTo)
                 .orElse(BigDecimal.ZERO);
-        
-        Integer totalStock = variants.stream()
-                .mapToInt(ProductVariant::getStockQuantity)
-                .sum();
-        
+
+//        Integer totalStock = variants.stream()
+//                .mapToInt(ProductVariant::getStockQuantity)
+//                .sum();
+
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
@@ -963,7 +863,7 @@ public class ProductServiceImpl implements ProductService {
                 .updatedAt(product.getUpdatedAt())
                 .minPrice(minPrice)
                 .maxPrice(maxPrice)
-                .totalStock(totalStock)
+//                .totalStock(totalStock)
                 .storeCategories(
                         Optional.ofNullable(product.getStoreCategories())
                                 .filter(list -> !list.isEmpty())
@@ -1029,7 +929,6 @@ public class ProductServiceImpl implements ProductService {
                 .variantName(variant.getVariantName())
                 .price(variant.getPrice())
                 .originalPrice(variant.getOriginalPrice())
-                .stockQuantity(variant.getStockQuantity())
                 .soldQuantity(variant.getSoldQuantity())
                 .imageName(variant.getImageName())
                 .imageUrl(variant.getImageUrl())
@@ -1167,6 +1066,7 @@ public class ProductServiceImpl implements ProductService {
      * 4. Return variant hoặc throw exception nếu không tìm thấy
      */
     @Override
+    @Cacheable(value = "variantByAttributes", key = "#productId + '-' + T(java.util.Arrays).toString(#request.getAttributeValueIds().toArray())")
     public VariantResponse findVariantByAttributes(String productId, FindVariantRequest request) {
         log.info("Finding variant for product {} with attributes: {}", 
                 productId, request.getAttributeValueIds());
@@ -1204,5 +1104,118 @@ public class ProductServiceImpl implements ProductService {
                 variant.getId(), productId, uniqueAttributeValueIds);
         
         return mapToVariantResponse(variant);
+    }
+
+    // ========== Internal Service Communication ==========
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<VariantInternalDTO> getVariantsForInternal(List<String> variantIds) {
+        // 1. Query tối ưu: Variant + Product + Store + Stock (1 SQL query)
+        List<ProductVariant> variants = variantRepository.findAllByIdWithDetails(variantIds);
+
+        return variants.stream()
+                .map(variant -> {
+                    // Xử lý Stock (Null safety)
+                    int quantity = 0;
+                    if (variant.getInventoryStock() != null) {
+                        quantity = variant.getInventoryStock().getAvailableQuantity();
+                    }
+
+                    // Lấy thông tin Product và Store (Giả định Product luôn có Store do rằng buộc nullable=false)
+                    Product product = variant.getProduct();
+                    Store store = product.getStore();
+
+                    return VariantInternalDTO.builder()
+                            .id(variant.getId())
+                            .productId(product.getId())
+                            .variantName(variant.getVariantName())
+                            .sku(variant.getSku())
+                            .productName(product.getName())
+                            .imageUrl(variant.getImageUrl())
+                            .stockQuantity(quantity)
+                            .price(variant.getPrice())
+                            .originalPrice(variant.getOriginalPrice())
+                            .isActive(variant.isActive())
+
+                            // --- MAPPING STORE INFO ---
+                            .storeId(store.getId())
+                            .storeName(store.getStoreName())
+                            .storeLogo(store.getLogoUrl())
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<VariantValidationDTO> validateVariants(List<String> variantIds) {
+        // 1. Fail-fast
+        if (variantIds == null || variantIds.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        List<VariantValidationDTO> result = new ArrayList<>();
+
+        // 2. Query tối ưu: Lấy Variant + Product + Store + Stock
+        List<ProductVariant> variants = variantRepository.findAllByIdWithDetails(variantIds);
+
+        // 3. Map để truy xuất nhanh
+        Map<String, ProductVariant> variantMap = variants.stream()
+                .collect(Collectors.toMap(ProductVariant::getId, Function.identity()));
+
+        // 4. Duyệt theo danh sách ID đầu vào
+        for (String id : variantIds) {
+            ProductVariant variant = variantMap.get(id);
+
+            // Case: Không tìm thấy
+            if (variant == null) {
+                result.add(VariantValidationDTO.builder()
+                        .variantId(id)
+                        .isActive(false)
+                        .isDeleted(true)
+                        .inStock(false)
+                        .availableStock(0)
+                        .message("Variant not found")
+                        .build());
+                continue;
+            }
+
+            // Lấy các entity liên quan
+            Product product = variant.getProduct();
+            Store store = product.getStore();
+            InventoryStock stock = variant.getInventoryStock();
+
+            // Tính toán Stock
+            int availableQty = (stock != null) ? stock.getAvailableQuantity() : 0;
+
+            // --- LOGIC VALIDATION QUAN TRỌNG ---
+            // Một item khả dụng khi: Variant OK + Product OK + STORE OK
+            boolean isVariantActive = variant.isActive() && !variant.isDeleted();
+            boolean isProductActive = product.isActive() && !product.isDeleted();
+            boolean isStoreActive = store.isActive(); // Check thêm trạng thái cửa hàng
+
+            // Kết luận cuối cùng
+            boolean itemActive = isVariantActive && isProductActive && isStoreActive;
+
+            // Tạo thông báo lỗi cụ thể
+            String message = null;
+            if (!itemActive) {
+                if (!isStoreActive) message = "Store is inactive";
+                else if (!isProductActive) message = "Product is inactive";
+                else message = "Variant is inactive";
+            }
+
+            result.add(VariantValidationDTO.builder()
+                    .variantId(variant.getId())
+                    .isActive(itemActive)
+                    .isDeleted(variant.isDeleted())
+                    .inStock(availableQty > 0)
+                    .availableStock(availableQty)
+                    .message(message)
+                    .build());
+        }
+
+        return result;
     }
 }
