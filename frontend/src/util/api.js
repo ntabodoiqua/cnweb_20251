@@ -796,30 +796,39 @@ const createZaloPayOrderApi = (paymentData) => {
 // Cart APIs
 const getCartApi = () => {
   const URL_API = "/api/order/api/v1/cart";
-  const sessionId =
-    localStorage.getItem("cart_session_id") || generateSessionId();
+  const token = localStorage.getItem("access_token");
 
-  return axios.get(URL_API, {
-    headers: {
-      "Accept-Language": "vi",
-      "X-Session-Id": sessionId,
-    },
-    transformRequest: [
-      (data, headers) => {
-        // Xóa Authorization nếu là guest session (có session ID với prefix session_)
-        if (sessionId && sessionId.startsWith("session_")) {
-          delete headers.Authorization;
-        }
-        return data;
-      },
-    ],
-  });
+  const headers = {
+    "Accept-Language": "vi",
+  };
+
+  // Chễ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.get(URL_API, { headers });
 };
 
 const addToCartApi = (cartItemData) => {
   const URL_API = "/api/order/api/v1/cart/items";
-  const sessionId =
-    localStorage.getItem("cart_session_id") || generateSessionId();
+  const token = localStorage.getItem("access_token");
+
+  const headers = {
+    "Accept-Language": "vi",
+    "Content-Type": "application/json",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
 
   return axios.post(
     URL_API,
@@ -833,29 +842,26 @@ const addToCartApi = (cartItemData) => {
       price: cartItemData.price,
       originalPrice: cartItemData.originalPrice || cartItemData.price,
     },
-    {
-      headers: {
-        "Accept-Language": "vi",
-        "Content-Type": "application/json",
-        "X-Session-Id": sessionId,
-      },
-      transformRequest: [
-        (data, headers) => {
-          // Xóa Authorization nếu là guest session (có session ID với prefix session_)
-          if (sessionId && sessionId.startsWith("session_")) {
-            delete headers.Authorization;
-          }
-          return JSON.stringify(data);
-        },
-      ],
-    }
+    { headers }
   );
 };
 
 const updateCartItemApi = (productId, variantId, quantity) => {
   const URL_API = "/api/order/api/v1/cart/items";
-  const sessionId =
-    localStorage.getItem("cart_session_id") || generateSessionId();
+  const token = localStorage.getItem("access_token");
+
+  const headers = {
+    "Accept-Language": "vi",
+    "Content-Type": "application/json",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
 
   return axios.put(
     URL_API,
@@ -864,71 +870,52 @@ const updateCartItemApi = (productId, variantId, quantity) => {
       variantId,
       quantity,
     },
-    {
-      headers: {
-        "Accept-Language": "vi",
-        "Content-Type": "application/json",
-        "X-Session-Id": sessionId,
-      },
-      transformRequest: [
-        (data, headers) => {
-          // Xóa Authorization nếu là guest session (có session ID với prefix session_)
-          if (sessionId && sessionId.startsWith("session_")) {
-            delete headers.Authorization;
-          }
-          return JSON.stringify(data);
-        },
-      ],
-    }
+    { headers }
   );
 };
 
 const removeCartItemApi = (productId, variantId) => {
   const URL_API = "/api/order/api/v1/cart/items";
-  const sessionId =
-    localStorage.getItem("cart_session_id") || generateSessionId();
+  const token = localStorage.getItem("access_token");
+
+  const headers = {
+    "Accept-Language": "vi",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
 
   return axios.delete(URL_API, {
     params: {
       productId,
       variantId,
     },
-    headers: {
-      "Accept-Language": "vi",
-      "X-Session-Id": sessionId,
-    },
-    transformRequest: [
-      (data, headers) => {
-        // Xóa Authorization nếu là guest session (có session ID với prefix session_)
-        if (sessionId && sessionId.startsWith("session_")) {
-          delete headers.Authorization;
-        }
-        return data;
-      },
-    ],
+    headers,
   });
 };
 
 const clearCartApi = () => {
   const URL_API = "/api/order/api/v1/cart";
-  const sessionId =
-    localStorage.getItem("cart_session_id") || generateSessionId();
+  const token = localStorage.getItem("access_token");
 
-  return axios.delete(URL_API, {
-    headers: {
-      "Accept-Language": "vi",
-      "X-Session-Id": sessionId,
-    },
-    transformRequest: [
-      (data, headers) => {
-        // Xóa Authorization nếu là guest session (có session ID với prefix session_)
-        if (sessionId && sessionId.startsWith("session_")) {
-          delete headers.Authorization;
-        }
-        return data;
-      },
-    ],
-  });
+  const headers = {
+    "Accept-Language": "vi",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.delete(URL_API, { headers });
 };
 
 const mergeCartApi = (guestSessionId) => {
@@ -948,68 +935,59 @@ const mergeCartApi = (guestSessionId) => {
 
 const getCartCountApi = () => {
   const URL_API = "/api/order/api/v1/cart/count";
-  const sessionId =
-    localStorage.getItem("cart_session_id") || generateSessionId();
+  const token = localStorage.getItem("access_token");
 
-  return axios.get(URL_API, {
-    headers: {
-      "Accept-Language": "vi",
-      "X-Session-Id": sessionId,
-    },
-    transformRequest: [
-      (data, headers) => {
-        // Xóa Authorization nếu là guest session (có session ID với prefix session_)
-        if (sessionId && sessionId.startsWith("session_")) {
-          delete headers.Authorization;
-        }
-        return data;
-      },
-    ],
-  });
+  const headers = {
+    "Accept-Language": "vi",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.get(URL_API, { headers });
 };
 
 const validateCartApi = () => {
   const URL_API = "/api/order/api/v1/cart/validate";
-  const sessionId =
-    localStorage.getItem("cart_session_id") || generateSessionId();
+  const token = localStorage.getItem("access_token");
 
-  return axios.get(URL_API, {
-    headers: {
-      "Accept-Language": "vi",
-      "X-Session-Id": sessionId,
-    },
-    transformRequest: [
-      (data, headers) => {
-        // Xóa Authorization nếu là guest session (có session ID với prefix session_)
-        if (sessionId && sessionId.startsWith("session_")) {
-          delete headers.Authorization;
-        }
-        return data;
-      },
-    ],
-  });
+  const headers = {
+    "Accept-Language": "vi",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.get(URL_API, { headers });
 };
 
 const getDetailedCartValidationApi = () => {
   const URL_API = "/api/order/api/v1/cart/validate/detailed";
-  const sessionId =
-    localStorage.getItem("cart_session_id") || generateSessionId();
+  const token = localStorage.getItem("access_token");
 
-  return axios.get(URL_API, {
-    headers: {
-      "Accept-Language": "vi",
-      "X-Session-Id": sessionId,
-    },
-    transformRequest: [
-      (data, headers) => {
-        // Xóa Authorization nếu là guest session (có session ID với prefix session_)
-        if (sessionId && sessionId.startsWith("session_")) {
-          delete headers.Authorization;
-        }
-        return data;
-      },
-    ],
-  });
+  const headers = {
+    "Accept-Language": "vi",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.get(URL_API, { headers });
 };
 
 // Helper function to generate session ID for guest users

@@ -32,7 +32,7 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { auth, setAuth } = useContext(AuthContext);
-  const { cartCount } = useCart();
+  const { cartCount, resetCart } = useCart();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -75,6 +75,9 @@ const Header = () => {
           avatarUrl: "",
         },
       });
+
+      // Reset giỏ hàng về 0
+      resetCart();
 
       // Hiển thị thông báo cảm ơn
       message.success(

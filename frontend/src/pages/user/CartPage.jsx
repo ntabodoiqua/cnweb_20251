@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { message, Modal, Spin } from "antd";
+import { message, Modal } from "antd";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import {
   DeleteOutlined,
   ShoppingOutlined,
@@ -46,6 +47,9 @@ const CartPage = () => {
   const [shopVouchers, setShopVouchers] = useState({});
   const [voucherInput, setVoucherInput] = useState("");
   const [shopVoucherInputs, setShopVoucherInputs] = useState({});
+
+  // Filter state
+  const [selectedShopFilter, setSelectedShopFilter] = useState("all");
 
   // Load giỏ hàng khi component mount
   useEffect(() => {
@@ -241,9 +245,16 @@ const CartPage = () => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
   };
 
-  // Tính số lượng sản phẩm đã chọn
+  // Tính số lượng sản phẩm đã chọn (số items)
   const getSelectedItemsCount = () => {
     return cartItems.filter((item) => item.selected && item.inStock).length;
+  };
+
+  // Tính tổng quantity của các sản phẩm đã chọn
+  const getSelectedTotalQuantity = () => {
+    return cartItems
+      .filter((item) => item.selected && item.inStock)
+      .reduce((total, item) => total + item.quantity, 0);
   };
 
   // Lấy danh sách sản phẩm đã chọn
@@ -436,6 +447,68 @@ const CartPage = () => {
     return Array.from(sellers);
   };
 
+  // Lấy danh sách tất cả các shop trong giỏ hàng
+  const getAllShops = () => {
+    const shops = new Map();
+    cartItems.forEach((item) => {
+      if (!shops.has(item.seller)) {
+        shops.set(item.seller, {
+          name: item.seller,
+          logo: item.storeLogo,
+          storeId: item.storeId,
+          count: 0,
+        });
+      }
+      const shop = shops.get(item.seller);
+      shop.count += 1;
+    });
+    return Array.from(shops.values());
+  };
+
+  // Lọc sản phẩm theo shop được chọn
+  const getFilteredItems = () => {
+    if (selectedShopFilter === "all") {
+      return cartItems;
+    }
+    return cartItems.filter((item) => item.seller === selectedShopFilter);
+  };
+
+  // Gom nhóm sản phẩm theo shop
+  const groupItemsByShop = () => {
+    const filtered = getFilteredItems();
+    const grouped = new Map();
+
+    filtered.forEach((item) => {
+      if (!grouped.has(item.seller)) {
+        grouped.set(item.seller, {
+          shopName: item.seller,
+          shopLogo: item.storeLogo,
+          storeId: item.storeId,
+          items: [],
+        });
+      }
+      grouped.get(item.seller).items.push(item);
+    });
+
+    return Array.from(grouped.values());
+  };
+
+  // Xử lý chọn tất cả sản phẩm của một shop
+  const handleSelectAllShopItems = (shopName) => {
+    const shopItems = cartItems.filter(
+      (item) => item.seller === shopName && item.inStock
+    );
+    const allSelected = shopItems.every((item) => item.selected);
+
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.seller === shopName && item.inStock
+          ? { ...item, selected: !allSelected }
+          : item
+      )
+    );
+  };
+
   // Xử lý đặt hàng
   const handleCheckout = () => {
     // Kiểm tra đăng nhập
@@ -484,16 +557,7 @@ const CartPage = () => {
 
   // Hiển thị loading spinner
   if (loading) {
-    return (
-      <div className={styles.page}>
-        <div className={styles.container}>
-          <div style={{ textAlign: "center", padding: "100px 0" }}>
-            <Spin size="large" />
-            <p style={{ marginTop: 20 }}>Đang tải giỏ hàng...</p>
-          </div>
-        </div>
-      </div>
-    );
+    return <LoadingSpinner tip="Đang tải giỏ hàng..." fullScreen={false} />;
   }
 
   return (
@@ -561,163 +625,341 @@ const CartPage = () => {
                 <h2 className={styles.sectionTitle}>Danh sách sản phẩm</h2>
               </div>
 
-              {cartItems.map((item) => (
+              {/* Shop Filter */}
+              {getAllShops().length > 1 && (
                 <div
-                  key={item.id}
-                  className={`${styles.cartItem} ${
-                    !item.inStock ? styles.outOfStock : ""
-                  } ${item.selected ? styles.selected : ""}`}
+                  style={{
+                    padding: "16px",
+                    backgroundColor: "#f5f5f5",
+                    borderRadius: "8px",
+                    marginBottom: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    flexWrap: "wrap",
+                  }}
                 >
-                  <div className={styles.itemCheckbox}>
+                  <span style={{ fontWeight: "500", color: "#333" }}>
+                    <ShopOutlined /> Lọc theo cửa hàng:
+                  </span>
+                  <button
+                    onClick={() => setSelectedShopFilter("all")}
+                    style={{
+                      padding: "6px 16px",
+                      borderRadius: "20px",
+                      border:
+                        selectedShopFilter === "all"
+                          ? "2px solid #1890ff"
+                          : "1px solid #d9d9d9",
+                      backgroundColor:
+                        selectedShopFilter === "all" ? "#e6f7ff" : "white",
+                      color: selectedShopFilter === "all" ? "#1890ff" : "#666",
+                      cursor: "pointer",
+                      fontWeight:
+                        selectedShopFilter === "all" ? "600" : "normal",
+                      transition: "all 0.3s",
+                    }}
+                  >
+                    Tất cả ({cartItems.length})
+                  </button>
+                  {getAllShops().map((shop) => (
                     <button
-                      className={styles.checkboxButton}
-                      onClick={() => handleToggleSelect(item.id)}
-                      disabled={!item.inStock}
-                    >
-                      {item.selected ? (
-                        <CheckSquareOutlined />
-                      ) : (
-                        <BorderOutlined />
-                      )}
-                    </button>
-                  </div>
-
-                  <div className={styles.itemImage}>
-                    <img src={item.image} alt={item.name} />
-                    {!item.inStock && (
-                      <div className={styles.outOfStockBadge}>Hết hàng</div>
-                    )}
-                  </div>
-
-                  <div className={styles.itemInfo}>
-                    <h3 className={styles.itemName}>
-                      {item.name}
-                      {item.variantName && (
-                        <span
-                          style={{
-                            fontSize: "0.85em",
-                            color: "#666",
-                            fontWeight: "normal",
-                            marginLeft: "8px",
-                          }}
-                        >
-                          ({item.variantName})
-                        </span>
-                      )}
-                    </h3>
-                    <div
+                      key={shop.storeId}
+                      onClick={() => setSelectedShopFilter(shop.name)}
                       style={{
+                        padding: "6px 16px",
+                        borderRadius: "20px",
+                        border:
+                          selectedShopFilter === shop.name
+                            ? "2px solid #1890ff"
+                            : "1px solid #d9d9d9",
+                        backgroundColor:
+                          selectedShopFilter === shop.name
+                            ? "#e6f7ff"
+                            : "white",
+                        color:
+                          selectedShopFilter === shop.name ? "#1890ff" : "#666",
+                        cursor: "pointer",
+                        fontWeight:
+                          selectedShopFilter === shop.name ? "600" : "normal",
+                        transition: "all 0.3s",
                         display: "flex",
                         alignItems: "center",
-                        gap: "8px",
-                        marginTop: "4px",
+                        gap: "6px",
                       }}
                     >
-                      {item.storeLogo ? (
+                      {shop.logo && (
                         <img
-                          src={item.storeLogo}
-                          alt={item.seller}
+                          src={shop.logo}
+                          alt={shop.name}
                           style={{
-                            width: "20px",
-                            height: "20px",
+                            width: "18px",
+                            height: "18px",
                             borderRadius: "50%",
                             objectFit: "cover",
                           }}
                         />
-                      ) : null}
-                      <p className={styles.itemSeller} style={{ margin: 0 }}>
-                        Bán bởi: {item.seller}
-                      </p>
-                    </div>
-                    {item.sku && (
-                      <p
-                        style={{
-                          fontSize: "0.8em",
-                          color: "#999",
-                          marginTop: "4px",
-                          marginBottom: "4px",
-                        }}
-                      >
-                        SKU: {item.sku}
-                      </p>
-                    )}
-                    <div className={styles.itemPrice}>
-                      {item.originalPrice && item.originalPrice > item.price ? (
-                        <>
-                          <span
-                            style={{
-                              color: "#ff4d4f",
-                              fontWeight: "bold",
-                              fontSize: "1.1em",
-                            }}
-                          >
-                            {formatCurrency(item.price)}
-                          </span>
-                          <span
-                            style={{
-                              textDecoration: "line-through",
-                              color: "#999",
-                              fontSize: "0.9em",
-                              marginLeft: "8px",
-                            }}
-                          >
-                            {formatCurrency(item.originalPrice)}
-                          </span>
-                          <span
-                            style={{
-                              backgroundColor: "#ff4d4f",
-                              color: "white",
-                              padding: "2px 6px",
-                              borderRadius: "4px",
-                              fontSize: "0.75em",
-                              marginLeft: "8px",
-                              fontWeight: "bold",
-                            }}
-                          >
-                            -
-                            {Math.round(
-                              (1 - item.price / item.originalPrice) * 100
-                            )}
-                            %
-                          </span>
-                        </>
-                      ) : (
-                        <span>{formatCurrency(item.price)}</span>
                       )}
+                      {shop.name} ({shop.count})
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {groupItemsByShop().map((shop) => (
+                <div key={shop.storeId} style={{ marginBottom: "24px" }}>
+                  {/* Shop Header */}
+                  <div
+                    style={{
+                      backgroundColor: "#fafafa",
+                      padding: "12px 16px",
+                      borderRadius: "8px 8px 0 0",
+                      border: "1px solid #f0f0f0",
+                      borderBottom: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                      }}
+                    >
+                      <button
+                        className={styles.checkboxButton}
+                        onClick={() => handleSelectAllShopItems(shop.shopName)}
+                        style={{ marginRight: "8px" }}
+                      >
+                        {shop.items
+                          .filter((item) => item.inStock)
+                          .every((item) => item.selected) &&
+                        shop.items.some((item) => item.inStock) ? (
+                          <CheckSquareOutlined />
+                        ) : (
+                          <BorderOutlined />
+                        )}
+                      </button>
+                      {shop.shopLogo && (
+                        <img
+                          src={shop.shopLogo}
+                          alt={shop.shopName}
+                          style={{
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            border: "2px solid #fff",
+                          }}
+                        />
+                      )}
+                      <div>
+                        <div
+                          style={{
+                            fontWeight: "600",
+                            fontSize: "15px",
+                            color: "#262626",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          <ShoppingOutlined style={{ color: "#1890ff" }} />
+                          {shop.shopName}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#8c8c8c",
+                            marginTop: "2px",
+                          }}
+                        >
+                          {shop.items.length} sản phẩm
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className={styles.itemActions}>
-                    <div className={styles.quantityControl}>
-                      <button
-                        className={styles.quantityButton}
-                        onClick={() => handleDecreaseQuantity(item.id)}
-                        disabled={item.quantity <= 1 || !item.inStock}
+                  {/* Shop Items */}
+                  <div
+                    style={{
+                      border: "1px solid #f0f0f0",
+                      borderRadius: "0 0 8px 8px",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {shop.items.map((item, index) => (
+                      <div
+                        key={item.id}
+                        className={`${styles.cartItem} ${
+                          !item.inStock ? styles.outOfStock : ""
+                        } ${item.selected ? styles.selected : ""}`}
+                        style={{
+                          borderTop: index > 0 ? "1px solid #f0f0f0" : "none",
+                          borderRadius: "0",
+                        }}
                       >
-                        <MinusOutlined />
-                      </button>
-                      <span className={styles.quantityDisplay}>
-                        {item.quantity}
-                      </span>
-                      <button
-                        className={styles.quantityButton}
-                        onClick={() => handleIncreaseQuantity(item.id)}
-                        disabled={!item.inStock}
-                      >
-                        <PlusOutlined />
-                      </button>
-                    </div>
+                        <div className={styles.itemCheckbox}>
+                          <button
+                            className={styles.checkboxButton}
+                            onClick={() => handleToggleSelect(item.id)}
+                            disabled={!item.inStock}
+                          >
+                            {item.selected ? (
+                              <CheckSquareOutlined />
+                            ) : (
+                              <BorderOutlined />
+                            )}
+                          </button>
+                        </div>
 
-                    <p className={styles.itemTotal}>
-                      {formatCurrency(item.price * item.quantity)}
-                    </p>
+                        <div className={styles.itemImage}>
+                          <img src={item.image} alt={item.name} />
+                          {!item.inStock && (
+                            <div className={styles.outOfStockBadge}>
+                              Hết hàng
+                            </div>
+                          )}
+                        </div>
 
-                    <button
-                      className={styles.removeButton}
-                      onClick={() => handleRemoveItem(item.id)}
-                    >
-                      <DeleteOutlined />
-                    </button>
+                        <div className={styles.itemInfo}>
+                          <h3 className={styles.itemName}>
+                            {item.name}
+                            {item.variantName && (
+                              <span
+                                style={{
+                                  fontSize: "0.85em",
+                                  color: "#666",
+                                  fontWeight: "normal",
+                                  marginLeft: "8px",
+                                }}
+                              >
+                                ({item.variantName})
+                              </span>
+                            )}
+                          </h3>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              marginTop: "4px",
+                            }}
+                          >
+                            {item.storeLogo ? (
+                              <img
+                                src={item.storeLogo}
+                                alt={item.seller}
+                                style={{
+                                  width: "20px",
+                                  height: "20px",
+                                  borderRadius: "50%",
+                                  objectFit: "cover",
+                                }}
+                              />
+                            ) : null}
+                            <p
+                              className={styles.itemSeller}
+                              style={{ margin: 0 }}
+                            >
+                              Bán bởi: {item.seller}
+                            </p>
+                          </div>
+                          {item.sku && (
+                            <p
+                              style={{
+                                fontSize: "0.8em",
+                                color: "#999",
+                                marginTop: "4px",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              SKU: {item.sku}
+                            </p>
+                          )}
+                          <div className={styles.itemPrice}>
+                            {item.originalPrice &&
+                            item.originalPrice > item.price ? (
+                              <>
+                                <span
+                                  style={{
+                                    color: "#ff4d4f",
+                                    fontWeight: "bold",
+                                    fontSize: "1.1em",
+                                  }}
+                                >
+                                  {formatCurrency(item.price)}
+                                </span>
+                                <span
+                                  style={{
+                                    textDecoration: "line-through",
+                                    color: "#999",
+                                    fontSize: "0.9em",
+                                    marginLeft: "8px",
+                                  }}
+                                >
+                                  {formatCurrency(item.originalPrice)}
+                                </span>
+                                <span
+                                  style={{
+                                    backgroundColor: "#ff4d4f",
+                                    color: "white",
+                                    padding: "2px 6px",
+                                    borderRadius: "4px",
+                                    fontSize: "0.75em",
+                                    marginLeft: "8px",
+                                    fontWeight: "bold",
+                                  }}
+                                >
+                                  -
+                                  {Math.round(
+                                    (1 - item.price / item.originalPrice) * 100
+                                  )}
+                                  %
+                                </span>
+                              </>
+                            ) : (
+                              <span>{formatCurrency(item.price)}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className={styles.itemActions}>
+                          <div className={styles.quantityControl}>
+                            <button
+                              className={styles.quantityButton}
+                              onClick={() => handleDecreaseQuantity(item.id)}
+                              disabled={item.quantity <= 1 || !item.inStock}
+                            >
+                              <MinusOutlined />
+                            </button>
+                            <span className={styles.quantityDisplay}>
+                              {item.quantity}
+                            </span>
+                            <button
+                              className={styles.quantityButton}
+                              onClick={() => handleIncreaseQuantity(item.id)}
+                              disabled={!item.inStock}
+                            >
+                              <PlusOutlined />
+                            </button>
+                          </div>
+
+                          <p className={styles.itemTotal}>
+                            {formatCurrency(item.price * item.quantity)}
+                          </p>
+
+                          <button
+                            className={styles.removeButton}
+                            onClick={() => handleRemoveItem(item.id)}
+                          >
+                            <DeleteOutlined />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
@@ -730,7 +972,8 @@ const CartPage = () => {
               {getSelectedItemsCount() > 0 && (
                 <div className={styles.selectedInfo}>
                   <p>
-                    Đã chọn <strong>{getSelectedItemsCount()}</strong> sản phẩm
+                    Đã chọn <strong>{getSelectedTotalQuantity()}</strong> sản
+                    phẩm ({getSelectedItemsCount()} loại)
                   </p>
                 </div>
               )}
@@ -923,7 +1166,7 @@ const CartPage = () => {
                 <span>
                   Tạm tính (
                   {getSelectedItemsCount() > 0
-                    ? getSelectedItemsCount()
+                    ? getSelectedTotalQuantity()
                     : getTotalItems()}{" "}
                   sản phẩm)
                 </span>
@@ -961,23 +1204,6 @@ const CartPage = () => {
               )}
 
               <div className={styles.summaryItem}>
-                <span>
-                  Tạm tính (
-                  {getSelectedItemsCount() > 0
-                    ? getSelectedItemsCount()
-                    : getTotalItems()}{" "}
-                  sản phẩm)
-                </span>
-                <span>
-                  {formatCurrency(
-                    getSelectedItemsCount() > 0
-                      ? calculateSelectedTotal()
-                      : calculateTotal()
-                  )}
-                </span>
-              </div>
-
-              <div className={styles.summaryItem}>
                 <span>Phí vận chuyển</span>
                 <span className={styles.freeShipping}>Miễn phí</span>
               </div>
@@ -1013,7 +1239,7 @@ const CartPage = () => {
                 <span>
                   Đặt hàng
                   {getSelectedItemsCount() > 0 &&
-                    ` (${getSelectedItemsCount()} sản phẩm)`}
+                    ` (${getSelectedTotalQuantity()} sản phẩm)`}
                 </span>
               </button>
 

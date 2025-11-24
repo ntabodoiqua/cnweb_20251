@@ -5,9 +5,11 @@ import {
   resendOtpApi,
   loginWithGoogleApi,
   getMyInfoApi,
+  mergeCartApi,
 } from "../util/api";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../components/context/auth.context";
+import { useCart } from "../contexts/CartContext";
 import { UserOutlined, LockOutlined, GoogleOutlined } from "@ant-design/icons";
 import { getTokenInfo } from "../util/jwt";
 import { GoogleLogin } from "@react-oauth/google";
@@ -18,6 +20,7 @@ import logo from "../assets/logo.png";
 const LoginPage = () => {
   const navigate = useNavigate();
   const { setAuth } = useContext(AuthContext);
+  const { loadCartCount } = useCart();
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
@@ -28,6 +31,9 @@ const LoginPage = () => {
     setLoading(true);
     try {
       const { username, password } = values;
+
+      // Lưu guest session ID trước khi đăng nhập (nếu có)
+      const guestSessionId = localStorage.getItem("cart_session_id");
 
       const res = await loginApi(username, password);
 
@@ -118,6 +124,23 @@ const LoginPage = () => {
             });
           }
 
+          // Merge giỏ hàng guest vào giỏ hàng user (nếu có)
+          if (guestSessionId && guestSessionId.startsWith("session_")) {
+            try {
+              await mergeCartApi(guestSessionId);
+              console.log("Cart merged successfully from guest to user");
+            } catch (mergeError) {
+              console.error("Error merging cart:", mergeError);
+              // Không thông báo lỗi để không làm gián đoạn trải nghiệm đăng nhập
+            }
+          }
+
+          // Xóa session ID cũ để dùng user cart
+          localStorage.removeItem("cart_session_id");
+
+          // Cập nhật số lượng giỏ hàng sau khi đăng nhập
+          await loadCartCount();
+
           // Chuyển hướng đến trang profile
           navigate("/profile");
         }
@@ -206,6 +229,9 @@ const LoginPage = () => {
       setLoading(true);
       const { credential } = credentialResponse;
 
+      // Lưu guest session ID trước khi đăng nhập (nếu có)
+      const guestSessionId = localStorage.getItem("cart_session_id");
+
       // Gửi token lên backend để xác thực
       const res = await loginWithGoogleApi(credential);
 
@@ -291,6 +317,23 @@ const LoginPage = () => {
               },
             });
           }
+
+          // Merge giỏ hàng guest vào giỏ hàng user (nếu có)
+          if (guestSessionId && guestSessionId.startsWith("session_")) {
+            try {
+              await mergeCartApi(guestSessionId);
+              console.log("Cart merged successfully from guest to user");
+            } catch (mergeError) {
+              console.error("Error merging cart:", mergeError);
+              // Không thông báo lỗi để không làm gián đoạn trải nghiệm đăng nhập
+            }
+          }
+
+          // Xóa session ID cũ để dùng user cart
+          localStorage.removeItem("cart_session_id");
+
+          // Cập nhật số lượng giỏ hàng sau khi đăng nhập
+          await loadCartCount();
 
           // Chuyển hướng đến trang profile
           navigate("/profile");
