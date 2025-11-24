@@ -56,6 +56,7 @@ public class CartService {
         }
         
         // Auto-validate and sync cart with product-service if cart has items
+        log.info("cart before validate: {}", cart);
         if (!cart.getItems().isEmpty()) {
             CartValidationResult validationResult = validateAndSyncCart(identifier, cart);
             cart = validationResult.getCart();
@@ -286,6 +287,8 @@ public class CartService {
                     .build();
             
             List<VariantInternalDTO> variants = productClient.getVariants(queryRequest).getResult();
+            log.info("Fetched {} variants for cart validation", variants.size());
+            log.info("Variants: {}", variants);
             
             // Create a map for quick lookup
             java.util.Map<String, VariantInternalDTO> variantMap = variants.stream()

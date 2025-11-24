@@ -41,11 +41,23 @@ public class SecurityConfig {
     };
 
     private static final String[] PUBLIC_POST_ENDPOINTS = {
-
+            "/api/v1/cart/items"  // Add to cart
     };
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {
+            "/api/v1/cart",           // Get cart
+            "/api/v1/cart/count",     // Get cart count
+            "/api/v1/cart/validate",  // Validate cart
+            "/api/v1/cart/validate/detailed"  // Detailed validation
+    };
 
+    private static final String[] PUBLIC_PUT_ENDPOINTS = {
+            "/api/v1/cart/items"  // Update cart item
+    };
+
+    private static final String[] PUBLIC_DELETE_ENDPOINTS = {
+            "/api/v1/cart",        // Clear cart
+            "/api/v1/cart/items"   // Remove cart item
     };
 
     CustomJwtDecoder customJwtDecoder;
@@ -69,6 +81,10 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
                                 // Allow GET requests to public endpoints
                                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
+                                // Allow PUT requests to public endpoints
+                                .requestMatchers(HttpMethod.PUT, PUBLIC_PUT_ENDPOINTS).permitAll()
+                                // Allow DELETE requests to public endpoints
+                                .requestMatchers(HttpMethod.DELETE, PUBLIC_DELETE_ENDPOINTS).permitAll()
                                 // All other requests need authentication
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 ->

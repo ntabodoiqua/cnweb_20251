@@ -3,7 +3,6 @@ package com.cnweb.order_service.client;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -19,13 +18,13 @@ public interface ProductClient {
      * Get variant information by IDs
      * POST /internal/products/variants
      */
-    @GetMapping("/variants")
+    @PostMapping("/variants")
     ApiResponse<List<VariantInternalDTO>> getVariants(@RequestBody @Valid VariantsQueryRequest request);
 
     /**
      * Validate multiple variants
-     * GET /internal/products/validate
+     * POST /internal/products/validate
      */
-    @GetMapping("/validate")
+    @PostMapping("/validate")
     ApiResponse<List<VariantValidationDTO>> validateVariants(@RequestBody @Valid VariantsQueryRequest request);
 }

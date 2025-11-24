@@ -80,7 +80,10 @@ public enum ErrorCode {
     DUPLICATE_IMAGE_DISPLAY_ORDER(1627, "error.1627", HttpStatus.BAD_REQUEST),
     PRODUCT_IMAGE_NOT_FOUND(1628, "error.1628", HttpStatus.NOT_FOUND),
     PRODUCT_IMAGE_NOT_BELONG_TO_PRODUCT(1629, "error.1629", HttpStatus.BAD_REQUEST),
-
+    PRODUCT_ID_REQUIRED(1602, "error.1630", HttpStatus.BAD_REQUEST),
+    QUANTITY_NOT_NULL(1631, "error.1631", HttpStatus.BAD_REQUEST),
+    QUANTITY_MIN_1(1632, "error.1632", HttpStatus.BAD_REQUEST),
+    PRICE_NOT_NULL(1633, "error.1633", HttpStatus.BAD_REQUEST),
     // Lỗi store (17xx)
     STORE_NOT_FOUND(1701, "error.1701", HttpStatus.NOT_FOUND),
     STORE_ALREADY_EXISTS(1702, "error.1702", HttpStatus.CONFLICT),

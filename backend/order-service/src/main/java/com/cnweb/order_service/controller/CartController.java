@@ -32,18 +32,24 @@ public class CartController {
      */
     private String getCartIdentifier(String sessionId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        
-        if (authentication != null && authentication.isAuthenticated() 
+
+        // Check if user is authenticated with valid JWT token
+        if (authentication != null && authentication.isAuthenticated()
+                && !"anonymousUser".equals(authentication.getPrincipal())
                 && authentication.getPrincipal() instanceof Jwt) {
-            Jwt jwt = (Jwt) authentication.getPrincipal();
-            String userName = jwt.getClaimAsString("preferred_username");
-            if (userName != null) {
+            String userName = authentication.getName();
+            if (userName != null && !userName.isEmpty()) {
                 return userName;
             }
         }
-        
+
         // For guest users, use session ID
-        return sessionId != null ? "guest:" + sessionId : "guest:" + java.util.UUID.randomUUID().toString();
+        if (sessionId != null && !sessionId.isEmpty()) {
+            return "guest:" + sessionId;
+        }
+
+        // Fallback: generate new session ID
+        return "guest:" + java.util.UUID.randomUUID().toString();
     }
 
     @GetMapping
@@ -138,8 +144,8 @@ public class CartController {
                     .build());
         }
         
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        String userName = jwt.getClaimAsString("preferred_username");
+
+        String userName = authentication.getName();
         
         String guestSessionId = "guest:" + request.getGuestSessionId();
         CartDTO cart = cartService.mergeCart(guestSessionId, userName);
