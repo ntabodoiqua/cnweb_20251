@@ -1,6 +1,8 @@
 package com.vdt2025.product_service.repository;
 
 import com.vdt2025.product_service.entity.ProductVariant;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -22,6 +24,18 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     List<ProductVariant> findByProductId(String productId);
 
     /**
+     * Tìm tất cả variants theo danh sách IDs kèm theo Product và InventoryStock (eager fetch)
+     */
+    // Trong ProductVariantRepository.java
+    @Query("SELECT v FROM ProductVariant v " +
+            "JOIN FETCH v.product p " +
+            "JOIN FETCH p.store s " +
+            "LEFT JOIN FETCH v.inventoryStock " +
+            "WHERE v.id IN :ids")
+    List<ProductVariant> findAllByIdWithDetails(@Param("ids") List<String> ids);
+
+
+    /**
      * Tìm variant theo SKU
      */
     Optional<ProductVariant> findBySku(String sku);
@@ -40,20 +54,6 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
      * Tìm tất cả variants đang active của một sản phẩm
      */
     List<ProductVariant> findByProductIdAndIsActiveTrue(String productId);
-
-    /**
-     * Cập nhật số lượng tồn kho
-     */
-    @Modifying
-    @Query("UPDATE ProductVariant v SET v.stockQuantity = v.stockQuantity - :quantity WHERE v.id = :variantId AND v.stockQuantity >= :quantity")
-    int decreaseStock(@Param("variantId") String variantId, @Param("quantity") Integer quantity);
-
-    /**
-     * Tăng số lượng tồn kho
-     */
-    @Modifying
-    @Query("UPDATE ProductVariant v SET v.stockQuantity = v.stockQuantity + :quantity WHERE v.id = :variantId")
-    int increaseStock(@Param("variantId") String variantId, @Param("quantity") Integer quantity);
 
     /**
      * Cập nhật sold quantity
@@ -104,4 +104,19 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
         ORDER BY v.createdAt DESC
     """)
     List<ProductVariant> findByProductIdWithAttributeValues(@Param("productId") String productId);
+
+    List<ProductVariant> findByProductIdAndIdIn(String productId, List<String> variantIds);
+
+    @Modifying
+    @Query(
+            value = """
+            UPDATE product_variants
+            SET is_active = :status
+            WHERE product_id IN (:productIds)
+        """,
+            nativeQuery = true
+    )
+    int bulkUpdateVariantStatusNative(
+            @Param("productIds") List<String> productIds,
+            @Param("status") boolean status);
 }

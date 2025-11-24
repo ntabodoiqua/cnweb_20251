@@ -43,6 +43,7 @@ public class SecurityConfig {
     private static final String[] PUBLIC_GET_ENDPOINTS = {
             "/wards/**",
             "/provinces/**",
+            "/users/internal/**",  // Allow internal service-to-service calls
     };
 
     @Autowired

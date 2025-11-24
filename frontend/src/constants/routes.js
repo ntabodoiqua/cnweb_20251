@@ -6,6 +6,8 @@
 // Public routes - không yêu cầu đăng nhập
 export const PUBLIC_ROUTES = {
   HOME: "/",
+  PRODUCTS: "/products",
+  PRODUCT_DETAIL: "/product/:productId",
   LOGIN: "/login",
   REGISTER: "/register",
   VERIFY_EMAIL: "/verify-email",
@@ -50,6 +52,7 @@ export const PROTECTED_ROUTES = {
   // User routes
   USER_ORDERS: "/orders",
   USER_CART: "/cart",
+  USER_CHECKOUT: "/checkout",
   USER_WISHLIST: "/wishlist",
 
   // Seller routes
@@ -73,6 +76,8 @@ export const ERROR_ROUTES = {
 // Route titles cho document.title
 export const ROUTE_TITLES = {
   [PUBLIC_ROUTES.HOME]: "Trang chủ",
+  [PUBLIC_ROUTES.PRODUCTS]: "Sản phẩm",
+  [PUBLIC_ROUTES.PRODUCT_DETAIL]: "Chi tiết sản phẩm",
   [PUBLIC_ROUTES.LOGIN]: "Đăng nhập",
   [PUBLIC_ROUTES.REGISTER]: "Đăng ký",
   [PUBLIC_ROUTES.VERIFY_EMAIL]: "Xác thực email",
@@ -104,6 +109,7 @@ export const ROUTE_TITLES = {
   [PROTECTED_ROUTES.ADMIN_SETTINGS]: "Cài đặt hệ thống",
   [PROTECTED_ROUTES.USER_ORDERS]: "Đơn hàng của tôi",
   [PROTECTED_ROUTES.USER_CART]: "Giỏ hàng",
+  [PROTECTED_ROUTES.USER_CHECKOUT]: "Đặt hàng",
   [PROTECTED_ROUTES.SELLER_DASHBOARD]: "Kênh Người Bán",
   [PROTECTED_ROUTES.SELLER_PRODUCTS]: "Quản lý sản phẩm",
   [PROTECTED_ROUTES.SELLER_ORDERS]: "Quản lý đơn hàng",

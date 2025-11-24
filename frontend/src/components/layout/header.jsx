@@ -23,6 +23,7 @@ import {
 import { Dropdown, Space, Drawer, Menu, Input, message } from "antd";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
+import { useCart } from "../../contexts/CartContext";
 import { getRoleName, ROLES, getHighestRole } from "../../constants/roles";
 import styles from "./header.module.css";
 import logo from "../../assets/logo.png";
@@ -31,6 +32,7 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { auth, setAuth } = useContext(AuthContext);
+  const { cartCount, resetCart } = useCart();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -73,6 +75,9 @@ const Header = () => {
           avatarUrl: "",
         },
       });
+
+      // Reset giỏ hàng về 0
+      resetCart();
 
       // Hiển thị thông báo cảm ơn
       message.success(
@@ -386,7 +391,9 @@ const Header = () => {
             {/* Cart Icon with Badge */}
             <div className={styles.cartIcon} onClick={() => navigate("/cart")}>
               <ShoppingCartOutlined />
-              <span className={styles.cartBadge}>0</span>
+              <span className={styles.cartBadge}>
+                {cartCount > 99 ? "99+" : cartCount}
+              </span>
             </div>
 
             {/* Notification Icon with Badge */}

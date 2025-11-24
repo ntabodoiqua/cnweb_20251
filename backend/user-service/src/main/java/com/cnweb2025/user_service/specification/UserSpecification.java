@@ -37,6 +37,9 @@ public class UserSpecification {
                 Join<User, Role> roleJoin = root.join("roles");
                 predicates.add(cb.equal(roleJoin.get("name"), filter.getRole()));
             }
+            if (filter.getGender() != null) {
+                predicates.add(cb.equal(root.get("gender"), filter.getGender()));
+            }
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }

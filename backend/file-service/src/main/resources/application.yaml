@@ -51,3 +51,7 @@ file:
 
 app:
   default-admin-id: ${DEFAULT_ADMIN_ID:d50f8589-da20-49e8-a3f3-6a115d1f68d7}
+
+internal:
+  service:
+    secret: ${INTERNAL_SERVICE_SECRET:InT3rn@l-S3rv1c3-S3cr3t-K3y-2025-VDT}

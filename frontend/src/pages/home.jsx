@@ -6,14 +6,12 @@ import { FireOutlined, StarOutlined } from "@ant-design/icons";
 import {
   bannerSlides,
   categories,
-  flashSaleProducts,
-  featuredProducts,
-  dailyDeals,
   topBrands,
   testimonials,
   homePageMeta,
 } from "../data/mockdata";
 import LoadingSpinner from "../components/LoadingSpinner";
+import { getPublicProductsApi } from "../util/api";
 import {
   HeroBanner,
   CategoriesSection,
@@ -34,6 +32,59 @@ const HomePage = () => {
   const [imagesLoaded, setImagesLoaded] = useState(false);
   const [quickViewVisible, setQuickViewVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+
+  // Product data from API
+  const [flashSaleProducts, setFlashSaleProducts] = useState([]);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [dailyDeals, setDailyDeals] = useState([]);
+
+  // Fetch products from API
+  useEffect(() => {
+    const fetchHomeProducts = async () => {
+      try {
+        // Fetch flash sale products (sorted by createdAt, limited to 8)
+        const flashSaleResponse = await getPublicProductsApi({
+          isActive: true,
+          sortBy: "createdAt",
+          sortDirection: "desc",
+          page: 0,
+          size: 8,
+        });
+        if (flashSaleResponse.code === 1000) {
+          setFlashSaleProducts(flashSaleResponse.result.content || []);
+        }
+
+        // Fetch featured products (sorted by soldCount if available, otherwise by rating)
+        const featuredResponse = await getPublicProductsApi({
+          isActive: true,
+          sortBy: "createdAt",
+          sortDirection: "desc",
+          page: 0,
+          size: 8,
+        });
+        if (featuredResponse.code === 1000) {
+          setFeaturedProducts(featuredResponse.result.content || []);
+        }
+
+        // Fetch daily deals (different set of products)
+        const dealsResponse = await getPublicProductsApi({
+          isActive: true,
+          sortBy: "price",
+          sortDirection: "asc",
+          page: 0,
+          size: 8,
+        });
+        if (dealsResponse.code === 1000) {
+          setDailyDeals(dealsResponse.result.content || []);
+        }
+      } catch (error) {
+        console.error("Error fetching home products:", error);
+        message.error("Không thể tải sản phẩm");
+      }
+    };
+
+    fetchHomeProducts();
+  }, []);
 
   // Simulate loading and wait for critical images
   useEffect(() => {
@@ -90,7 +141,6 @@ const HomePage = () => {
 
   // Handle product click
   const handleProductClick = (productId) => {
-    message.info("Chi tiết sản phẩm sẽ được thêm sau khi ghép API");
     // Save to recently viewed
     const product = [
       ...flashSaleProducts,
@@ -100,7 +150,7 @@ const HomePage = () => {
     if (product) {
       addToRecentlyViewed(product);
     }
-    // navigate(`/product/${productId}`);
+    navigate(`/product/${productId}`);
   };
 
   // Handle quick view
