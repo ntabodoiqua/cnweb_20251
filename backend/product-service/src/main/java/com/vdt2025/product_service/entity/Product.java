@@ -60,6 +60,10 @@ public class Product {
     @Builder.Default
     boolean isActive = true;
 
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    boolean isDeleted = false;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     LocalDateTime createdAt;
@@ -111,4 +115,6 @@ public class Product {
     // Người tạo sản phẩm
     @Column(name = "created_by")
     String createdBy;
+
+
 }

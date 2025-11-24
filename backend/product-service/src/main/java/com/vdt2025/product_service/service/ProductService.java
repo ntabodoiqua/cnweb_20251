@@ -1,5 +1,6 @@
 package com.vdt2025.product_service.service;
 
+import com.vdt2025.common_dto.dto.StockUpdateRequest;
 import com.vdt2025.product_service.dto.request.FindVariantRequest;
 import com.vdt2025.product_service.dto.request.product.*;
 import com.vdt2025.product_service.dto.response.*;
@@ -43,7 +44,7 @@ public interface ProductService {
      * Xóa ảnh sản phẩm theo ID ảnh
      * @return void
      */
-    void deleteProductImage(String imageId);
+    void deleteProductImage(String productId, String imageId);
 
     /**
      * Cập nhật thứ tự hiển thị ảnh sản phẩm
@@ -67,22 +68,8 @@ public interface ProductService {
      * Tìm kiếm sản phẩm với filter và pagination
      * Trả về ProductSummaryResponse để tối ưu performance
      */
-    PageCacheDTO<ProductSummaryResponse> searchProductsCacheable(ProductFilterRequest filter, Pageable pageable);
+    PageCacheDTO<ProductSummaryResponse> searchProductsInternal(ProductFilterRequest filter, Pageable pageable);
 
-    /**
-     * Tìm kiếm sản phẩm theo store
-     */
-    Page<ProductSummaryResponse> getProductsByStoreId(String storeId, Pageable pageable);
-
-    /**
-     * Tìm kiếm sản phẩm theo category
-     */
-    Page<ProductSummaryResponse> getProductsByCategoryId(String categoryId, Pageable pageable);
-
-    /**
-     * Tìm kiếm sản phẩm theo brand
-     */
-    Page<ProductSummaryResponse> getProductsByBrandId(String brandId, Pageable pageable);
     // ========== Variant Management ==========
 
     /**
@@ -126,24 +113,17 @@ public interface ProductService {
     /**
      * Cập nhật trạng thái nhiều sản phẩm cùng lúc
      */
-    List<ProductResponse> bulkUpdateStatus(BulkStatusUpdateRequest request);
-
-    // ========== Inventory Management ==========
+    void bulkUpdateStatus(BulkStatusUpdateRequest request);
 
     /**
-     * Cập nhật số lượng tồn kho cho variant
+     * Cập nhật trạng thái variant (active/inactive)
      */
-    VariantResponse updateVariantStock(String productId, String variantId, Integer quantity);
+    VariantResponse updateVariantStatus(String productId, String variantId, boolean isActive);
 
     /**
-     * Giảm số lượng tồn kho khi có đơn hàng (reserved stock)
+     * Cập nhật trạng thái nhiều variant cùng lúc
      */
-    void decreaseStock(String variantId, Integer quantity);
-
-    /**
-     * Tăng số lượng tồn kho khi hủy đơn hàng
-     */
-    void increaseStock(String variantId, Integer quantity);
+    List<VariantResponse> bulkUpdateVariantStatus(String productId, BulkVariantStatusUpdateRequest request);
 
     // ========== Statistics & Metrics ==========
 
@@ -181,4 +161,20 @@ public interface ProductService {
      * @throws com.vdt2025.product_service.exception.AppException nếu không tìm thấy variant
      */
     VariantResponse findVariantByAttributes(String productId, FindVariantRequest request);
+
+    // ========== Internal Service Communication ==========
+    /**
+     * Get lightweight variant info for internal service calls
+     */
+    List<VariantInternalDTO> getVariantsForInternal(List<String> variantIds);
+
+    /**
+     * Validate multiple variants
+     * Used by order-service to check product availability before creating order
+     */
+    List<VariantValidationDTO> validateVariants(List<String> variantIds);
+
+    /**
+     *
+     */
 }

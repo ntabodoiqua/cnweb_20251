@@ -7,6 +7,8 @@ import com.vdt2025.product_service.dto.response.ProductResponse;
 import com.vdt2025.product_service.dto.response.ProductSummaryResponse;
 import com.vdt2025.product_service.dto.response.VariantResponse;
 import com.vdt2025.product_service.dto.response.*;
+import com.vdt2025.product_service.facade.ProductDetailFacade;
+import com.vdt2025.product_service.facade.ProductSearchFacade;
 import com.vdt2025.product_service.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -42,6 +44,8 @@ import java.util.List;
 public class ProductManagementController {
 
     ProductService productService;
+    ProductSearchFacade productSearchFacade;
+    ProductDetailFacade productDetailFacade;
 
     // ========== CRUD Operations ==========
 
@@ -72,10 +76,7 @@ public class ProductManagementController {
     public ApiResponse<ProductResponse> getProductById(@PathVariable String productId) {
         log.info("Fetching product with ID: {}", productId);
 
-        // Increment view count
-        productService.incrementViewCount(productId);
-
-        ProductResponse response = productService.getProductById(productId);
+        ProductResponse response = productDetailFacade.getProductDetailWithStock(productId);
 
         return ApiResponse.<ProductResponse>builder()
                 .result(response)
@@ -122,16 +123,33 @@ public class ProductManagementController {
 
     /**
      * Xóa ảnh sản phẩm
-     * DELETE /products/images/{imageId}
+     * DELETE /products/{productId}/images/{imageId}
      * Required: SELLER (owner) hoặc ADMIN role
      */
-    @DeleteMapping("/images/{imageId}")
-    public ApiResponse<String> deleteProductImage(@PathVariable String imageId) {
+    @DeleteMapping("/{productId}/images/{imageId}")
+    public ApiResponse<String> deleteProductImage(@PathVariable String productId, @PathVariable String imageId) {
         log.info("Deleting product image with ID: {}", imageId);
-        productService.deleteProductImage(imageId);
+        productService.deleteProductImage(productId, imageId);
         return ApiResponse.<String>builder()
                 .message("Product image deleted successfully")
                 .result("Image with ID " + imageId + " has been removed")
+                .build();
+    }
+
+    /**
+     * Cập nhật thứ tự hiển thị ảnh sản phẩm
+     * PUT /products/{productId}/images/order
+     * Required: SELLER (owner) hoặc ADMIN role
+     */
+    @PutMapping("/{productId}/images/order")
+    public ApiResponse<List<ProductImageResponse>> updateProductImageOrder(
+            @PathVariable String productId,
+            @Valid @RequestBody List<ImageOrderUpdateRequest> imageOrders) {
+        log.info("Updating image order for product ID: {}", productId);
+        List<ProductImageResponse> response = productService.updateProductImageOrder(productId, imageOrders);
+        return ApiResponse.<List<ProductImageResponse>>builder()
+                .message("Product image order updated successfully")
+                .result(response)
                 .build();
     }
 
@@ -184,7 +202,7 @@ public class ProductManagementController {
             Pageable pageable) {
         log.info("Searching products with filter: {}", filter);
 
-        PageCacheDTO<ProductSummaryResponse> dto = productService.searchProductsCacheable(filter, pageable);
+        PageCacheDTO<ProductSummaryResponse> dto = productSearchFacade.searchProductsWithStock(filter, pageable);
 
         return ApiResponse.<Page<ProductSummaryResponse>>builder()
                 .result(new PageImpl<>(
@@ -192,42 +210,6 @@ public class ProductManagementController {
                         PageRequest.of(dto.pageNumber(), dto.pageSize()),
                         dto.totalElements()
                 ))
-                .build();
-    }
-
-    /**
-     * Lấy sản phẩm theo store
-     * GET /products/by-store/{storeId}
-     */
-    @GetMapping("/by-store/{storeId}")
-    public ApiResponse<Page<ProductSummaryResponse>> getProductsByStore(
-            @PathVariable String storeId,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
-            Pageable pageable) {
-        log.info("Fetching products for store: {}", storeId);
-
-        Page<ProductSummaryResponse> response = productService.getProductsByStoreId(storeId, pageable);
-
-        return ApiResponse.<Page<ProductSummaryResponse>>builder()
-                .result(response)
-                .build();
-    }
-
-    /**
-     * Lấy sản phẩm theo category
-     * GET /products/by-category/{categoryId}
-     */
-    @GetMapping("/by-category/{categoryId}")
-    public ApiResponse<Page<ProductSummaryResponse>> getProductsByCategory(
-            @PathVariable String categoryId,
-            @PageableDefault(size = 20, sort = "createdAt", direction = Sort.Direction.DESC)
-            Pageable pageable) {
-        log.info("Fetching products for category: {}", categoryId);
-
-        Page<ProductSummaryResponse> response = productService.getProductsByCategoryId(categoryId, pageable);
-
-        return ApiResponse.<Page<ProductSummaryResponse>>builder()
-                .result(response)
                 .build();
     }
 
@@ -368,36 +350,48 @@ public class ProductManagementController {
      * Required: SELLER (owner) hoặc ADMIN role
      */
     @PatchMapping("/bulk-status")
-    public ApiResponse<List<ProductResponse>> bulkUpdateStatus(
+    public ApiResponse<Void> bulkUpdateStatus(
             @Valid @RequestBody BulkStatusUpdateRequest request) {
         log.info("Bulk updating status for {} products", request.getProductIds().size());
 
-        List<ProductResponse> response = productService.bulkUpdateStatus(request);
+        productService.bulkUpdateStatus(request);
 
-        return ApiResponse.<List<ProductResponse>>builder()
+        return ApiResponse.<Void>builder()
                 .message("Bulk status update completed")
+                .build();
+    }
+
+    /**
+     * Cập nhật trạng thái variant
+     * PATCH /products/{productId}/variants/{variantId}/status
+     * Required: SELLER (owner) hoặc ADMIN role
+     */
+    @PatchMapping("/{productId}/variants/{variantId}/status")
+    public ApiResponse<VariantResponse> updateVariantStatus(
+            @PathVariable String productId,
+            @PathVariable String variantId,
+            @RequestParam boolean isActive) {
+        log.info("Updating variant {} of product {} status to {}", variantId, productId, isActive);
+        VariantResponse response = productService.updateVariantStatus(productId, variantId, isActive);
+        return ApiResponse.<VariantResponse>builder()
+                .message("Variant status updated successfully")
                 .result(response)
                 .build();
     }
 
-    // ========== Inventory Management ==========
-
     /**
-     * Cập nhật số lượng tồn kho
-     * PATCH /products/{productId}/variants/{variantId}/stock
+     * Cập nhật trạng thái nhiều variant cùng lúc
+     * PATCH /products/{productId}/variants/bulk-status
      * Required: SELLER (owner) hoặc ADMIN role
      */
-    @PatchMapping("/{productId}/variants/{variantId}/stock")
-    public ApiResponse<VariantResponse> updateStock(
+    @PatchMapping("/{productId}/variants/bulk-status")
+    public ApiResponse<List<VariantResponse>> bulkUpdateVariantStatus(
             @PathVariable String productId,
-            @PathVariable String variantId,
-            @RequestParam Integer quantity) {
-        log.info("Updating stock for variant {} to {}", variantId, quantity);
-
-        VariantResponse response = productService.updateVariantStock(productId, variantId, quantity);
-
-        return ApiResponse.<VariantResponse>builder()
-                .message("Stock updated successfully")
+            @Valid @RequestBody BulkVariantStatusUpdateRequest request) {
+        log.info("Bulk updating status for {} variants of product {}", request.getVariantIds().size(), productId);
+        List<VariantResponse> response = productService.bulkUpdateVariantStatus(productId, request);
+        return ApiResponse.<List<VariantResponse>>builder()
+                .message("Bulk variant status update completed")
                 .result(response)
                 .build();
     }

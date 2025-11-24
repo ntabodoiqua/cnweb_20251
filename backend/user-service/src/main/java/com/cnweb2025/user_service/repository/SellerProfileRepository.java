@@ -2,16 +2,24 @@ package com.cnweb2025.user_service.repository;
 
 import com.cnweb2025.user_service.entity.SellerProfile;
 import com.cnweb2025.user_service.enums.VerificationStatus;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface SellerProfileRepository extends JpaRepository<SellerProfile, String> {
     Boolean existsByUserId(String userId);
 
-    Optional<SellerProfile> findByUserId(String userId);
+
+
+    Optional<SellerProfile> findByIdAndUserId(String id, String userId);
+
+    Page<SellerProfile> findAllByUserId(String userId, Pageable pageable);
 
     Boolean existsByUserIdAndVerificationStatusNot(String userId, VerificationStatus status);
 

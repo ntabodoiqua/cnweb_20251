@@ -40,6 +40,11 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     Page<Product> findByStoreIdAndIsActiveTrue(String storeId, Pageable pageable);
 
     /**
+     * Tìm sản phẩm chưa bị xóa theo store
+     */
+    Page<Product> findByStoreIdAndIsDeletedFalse(String storeId, Pageable pageable);
+
+    /**
      * Tìm sản phẩm active theo category
      */
     Page<Product> findByCategoryIdAndIsActiveTrue(String categoryId, Pageable pageable);
@@ -85,4 +90,34 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     @Modifying
     @Query("UPDATE Product p SET p.averageRating = :averageRating, p.ratingCount = :ratingCount WHERE p.id = :productId")
     int updateRating(@Param("productId") String productId, @Param("averageRating") Double averageRating, @Param("ratingCount") Integer ratingCount);
+
+
+    // Lấy danh sách productId mà user này có quyền sửa
+    @Query(
+            value = """
+            SELECT p.id 
+            FROM products p
+            JOIN stores s ON p.store_id = s.id
+            WHERE p.id IN (:ids)
+              AND s.user_name = :username
+        """,
+            nativeQuery = true
+    )
+    List<String> findAccessibleProductIdsNative(
+            @Param("ids") List<String> ids,
+            @Param("username") String username);
+
+    // Bulk update status product (native)
+    @Modifying
+    @Query(
+            value = """
+            UPDATE products
+            SET is_active = :status
+            WHERE id IN (:ids)
+        """,
+            nativeQuery = true
+    )
+    int bulkUpdateStatusNative(
+            @Param("ids") List<String> ids,
+            @Param("status") boolean status);
 }
