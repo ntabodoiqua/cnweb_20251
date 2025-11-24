@@ -9,6 +9,7 @@ import com.vdt2025.product_service.dto.response.VariantResponse;
 import com.vdt2025.product_service.dto.response.*;
 import com.vdt2025.product_service.facade.ProductDetailFacade;
 import com.vdt2025.product_service.facade.ProductSearchFacade;
+import com.vdt2025.product_service.facade.VariantDetailFacade;
 import com.vdt2025.product_service.service.ProductService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -42,7 +43,8 @@ public class PublicProductController {
 
     ProductService productService;
     ProductSearchFacade productSearchFacade;
-    private final ProductDetailFacade productDetailFacade;
+    ProductDetailFacade productDetailFacade;
+    VariantDetailFacade variantDetailFacade;
 
     /**
      * Tìm kiếm/xem danh sách sản phẩm (chỉ hiển thị sản phẩm active)
@@ -278,7 +280,8 @@ public class PublicProductController {
         log.info("Public: Finding variant for product {} with attributes: {}",
                 productId, request.getAttributeValueIds());
 
-        VariantResponse response = productService.findVariantByAttributes(productId, request);
+        // Sử dụng facade để lấy variant với thông tin tồn kho realtime
+        VariantResponse response = variantDetailFacade.findVariantWithStock(productId, request);
 
         return ApiResponse.<VariantResponse>builder()
                 .message("Found variant successfully")

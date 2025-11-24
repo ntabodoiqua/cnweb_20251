@@ -1066,6 +1066,7 @@ public class ProductServiceImpl implements ProductService {
      * 4. Return variant hoặc throw exception nếu không tìm thấy
      */
     @Override
+    @Cacheable(value = "variantByAttributes", key = "#productId + '-' + T(java.util.Arrays).toString(#request.getAttributeValueIds().toArray())")
     public VariantResponse findVariantByAttributes(String productId, FindVariantRequest request) {
         log.info("Finding variant for product {} with attributes: {}", 
                 productId, request.getAttributeValueIds());
