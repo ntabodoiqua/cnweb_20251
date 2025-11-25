@@ -116,6 +116,8 @@ public class CartPersistenceService {
                     .productName(itemDTO.getProductName())
                     .variantId(itemDTO.getVariantId())
                     .variantName(itemDTO.getVariantName())
+                    .storeId(itemDTO.getStoreId())
+                    .storeName(itemDTO.getStoreName())
                     .imageUrl(itemDTO.getImageUrl())
                     .quantity(itemDTO.getQuantity())
                     .price(itemDTO.getPrice())

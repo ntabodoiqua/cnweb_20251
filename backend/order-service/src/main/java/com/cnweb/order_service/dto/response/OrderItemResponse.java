@@ -16,6 +16,8 @@ import java.math.BigDecimal;
 public class OrderItemResponse {
 
     String id;
+    String storeId;
+    String storeName;
     String productId;
     String productName;
     String variantId;

@@ -38,6 +38,12 @@ public class CartItem {
     @Column(name = "variant_name")
     String variantName;
 
+    @Column(name = "store_id")
+    String storeId;
+
+    @Column(name = "store_name")
+    String storeName;
+
     @Column(name = "image_url")
     String imageUrl;
 
