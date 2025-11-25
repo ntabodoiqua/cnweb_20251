@@ -1,7 +1,7 @@
-import { ProfileOrders, mockOrders } from "../../components/profile";
+import { ProfileOrders } from "../../components/profile";
 
 const ProfileOrdersPage = () => {
-  return <ProfileOrders orders={mockOrders} />;
+  return <ProfileOrders />;
 };
 
 export default ProfileOrdersPage;
