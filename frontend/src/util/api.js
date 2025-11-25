@@ -826,6 +826,28 @@ const initiateOrderPaymentApi = (orderIds) => {
   });
 };
 
+// Get my orders with filters
+const getMyOrdersApi = (params = {}) => {
+  const URL_API = "/api/order/api/v1/orders/my-orders";
+  return axios.get(URL_API, {
+    params: {
+      search: params.search || "",
+      status: params.status || "",
+      paymentStatus: params.paymentStatus || "",
+      startDate: params.startDate || "",
+      endDate: params.endDate || "",
+      minAmount: params.minAmount || "",
+      maxAmount: params.maxAmount || "",
+      page: params.page || 0,
+      size: params.size || 10,
+      sort: params.sort || "createdAt,desc",
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // Cart APIs
 const getCartApi = () => {
   const URL_API = "/api/order/api/v1/cart";
@@ -1495,6 +1517,7 @@ export {
   createOrderApi,
   applyCouponToOrdersApi,
   initiateOrderPaymentApi,
+  getMyOrdersApi,
   // Cart APIs
   getCartApi,
   addToCartApi,
