@@ -27,4 +27,34 @@ public interface ProductClient {
      */
     @PostMapping("/validate")
     ApiResponse<List<VariantValidationDTO>> validateVariants(@RequestBody @Valid VariantsQueryRequest request);
+
+
+    /**
+     * Giữ chỗ một loạt hàng hóa khi customer đặt hàng (chưa thanh toán)
+     * POST /internal/products/reserve-batch
+     */
+    @PostMapping("/reserve-batch")
+    ApiResponse<Void> reserveBatch(@RequestBody @Valid BatchInventoryChangeRequest request);
+
+    /**
+     * Chốt đơn cho một loạt hàng hóa khi customer thanh toán thành công
+     * POST /internal/products/confirm-batch
+     */
+    @PostMapping("/confirm-batch")
+    ApiResponse<Void> confirmBatch(@RequestBody @Valid BatchInventoryChangeRequest request);
+
+    /**
+     * Xả hàng đã giữ chỗ cho một loạt hàng hóa khi đơn hàng bị hủy hoặc timeout
+     * POST /internal/products/release-batch
+     */
+    @PostMapping("/release-batch")
+    ApiResponse<Void> releaseBatch(@RequestBody @Valid BatchInventoryChangeRequest request);
+
+    /**
+     * Trả hàng cho một loạt hàng hóa khi khách hàng thực hiện hoàn trả
+     * POST /internal/products/return-batch
+     */
+
+    @PostMapping("/return-batch")
+    ApiResponse<Void> returnBatch(@RequestBody @Valid BatchInventoryChangeRequest request);
 }

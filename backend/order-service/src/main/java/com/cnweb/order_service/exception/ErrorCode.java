@@ -86,6 +86,7 @@ public enum ErrorCode {
     QUANTITY_MIN_1(1632, "error.1632", HttpStatus.BAD_REQUEST),
     PRICE_NOT_NULL(1633, "error.1633", HttpStatus.BAD_REQUEST),
     VARIANT_ID_REQUIRED(1634, "error.1634", HttpStatus.BAD_REQUEST),
+    PRODUCT_LIST_CANNOT_BE_EMPTY(1635, "error.1635", HttpStatus.BAD_REQUEST),
     // Lỗi store (17xx)
 
     // Lỗi coupon (18xx)
