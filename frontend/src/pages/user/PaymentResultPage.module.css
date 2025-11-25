@@ -146,6 +146,22 @@
   font-size: 20px !important;
 }
 
+.orderItem {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 8px;
+  border-left: 3px solid #ee4d2d;
+}
+
+.orderItem div {
+  margin-bottom: 4px;
+}
+
+.orderItem div:last-child {
+  margin-bottom: 0;
+}
+
 /* ==================== Error Details ==================== */
 
 .errorDetails {

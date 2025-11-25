@@ -793,6 +793,39 @@ const createZaloPayOrderApi = (paymentData) => {
   });
 };
 
+// Order APIs
+const createOrderApi = (orderData) => {
+  const URL_API = "/api/order/api/v1/orders";
+  return axios.post(URL_API, orderData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const applyCouponToOrdersApi = (couponCode, orderIds) => {
+  const URL_API = `/api/order/api/v1/orders/apply-coupon?couponCode=${encodeURIComponent(
+    couponCode
+  )}`;
+  return axios.post(URL_API, orderIds, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const initiateOrderPaymentApi = (orderIds) => {
+  const URL_API = "/api/order/api/v1/orders/payment";
+  return axios.post(URL_API, orderIds, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
 // Cart APIs
 const getCartApi = () => {
   const URL_API = "/api/order/api/v1/cart";
@@ -1435,6 +1468,10 @@ export {
   getBrandsApi,
   // Payment APIs
   createZaloPayOrderApi,
+  // Order APIs
+  createOrderApi,
+  applyCouponToOrdersApi,
+  initiateOrderPaymentApi,
   // Cart APIs
   getCartApi,
   addToCartApi,

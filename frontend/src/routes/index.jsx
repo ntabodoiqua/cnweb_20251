@@ -360,7 +360,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/payment-result",
+        path: PROTECTED_ROUTES.PAYMENT_RESULT,
         element: (
           <SuspenseWrapper>
             <PaymentResultPage />
