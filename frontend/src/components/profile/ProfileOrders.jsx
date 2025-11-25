@@ -287,9 +287,9 @@ const ProfileOrders = () => {
 
   // Kiểm tra đơn hàng có thể thanh toán không
   const canPayOrder = (order) => {
-    // Cho phép thanh toán với UNPAID (chưa thanh toán) và PENDING (đã khởi tạo nhưng chưa hoàn tất)
-    if (order.paymentStatus !== "UNPAID" && order.paymentStatus !== "PENDING")
-      return false;
+    // Chỉ cho phép thanh toán với đơn hàng PENDING (chờ xác nhận) và chưa thanh toán
+    if (order.status !== "PENDING") return false;
+    if (order.paymentStatus === "PAID") return false;
     const timeRemaining = calculateTimeRemaining(order.createdAt);
     // Hiển thị nút miễn là chưa hết hạn, validation chi tiết khi click
     return !timeRemaining.expired;
