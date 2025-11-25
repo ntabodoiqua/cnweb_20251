@@ -16,10 +16,10 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrderItemRequest {
 
-    @NotBlank(message = "Variant ID is required")
+    @NotBlank(message = "VARIANT_ID_REQUIRED")
     String variantId;
 
-    @NotNull(message = "Quantity is required")
-    @Min(value = 1, message = "Quantity must be at least 1")
+    @NotNull(message = "QUANTITY_NOT_NULL")
+    @Min(value = 1, message = "QUANTITY_MIN_1")
     Integer quantity;
 }

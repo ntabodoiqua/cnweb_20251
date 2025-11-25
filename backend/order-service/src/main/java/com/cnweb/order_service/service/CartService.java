@@ -89,7 +89,7 @@ public class CartService {
                     throw new RuntimeException("Product variant not found");
                 }
                 
-                variant = variants.get(0);
+                variant = variants.getFirst();
                 
                 if (!variant.isActive() || variant.isDeleted()) {
                     throw new RuntimeException("Product variant is not available");
@@ -118,11 +118,11 @@ public class CartService {
                 .productName(request.getProductName())
                 .variantId(request.getVariantId())
                 .variantName(request.getVariantName())
-                .sku(variant != null ? variant.getSku() : null)
+                .sku(variant.getSku())
                 .imageUrl(request.getImageUrl())
-                .storeName(variant != null ? variant.getStoreName() : null)
-                .storeId(variant != null ? variant.getStoreId() : null)
-                .storeLogo(variant != null ? variant.getStoreLogo() : null)
+                .storeName(variant.getStoreName())
+                .storeId(variant.getStoreId())
+                .storeLogo(variant.getStoreLogo())
                 .quantity(request.getQuantity())
                 .price(request.getPrice())
                 .originalPrice(request.getOriginalPrice())
@@ -153,7 +153,7 @@ public class CartService {
                 List<VariantValidationDTO> validations = productClient.validateVariants(queryRequest).getResult();
                 
                 if (validations != null && !validations.isEmpty()) {
-                    VariantValidationDTO validation = validations.get(0);
+                    VariantValidationDTO validation = validations.getFirst();
                     
                     if (!validation.isActive() || validation.isDeleted() || !validation.isInStock()) {
                         throw new RuntimeException("Product variant is not available");

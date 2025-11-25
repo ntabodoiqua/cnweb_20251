@@ -11,6 +11,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MergeCartRequest {
 
-    @NotBlank(message = "Guest session ID is required")
+    @NotBlank(message = "GUESS_SESSION_ID_REQUIRED")
     String guestSessionId;
 }
