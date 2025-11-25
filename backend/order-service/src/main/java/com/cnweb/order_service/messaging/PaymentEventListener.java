@@ -42,16 +42,22 @@ public class PaymentEventListener {
             }
 
             for (Order order : orders) {
+                // Idempotency check: Skip if already PAID
+                if (order.getPaymentStatus() == PaymentStatus.PAID) {
+                    log.info("Order {} already PAID. Skip processing.", order.getOrderNumber());
+                    continue;
+                }
+
                 // Update payment status
                 order.setPaymentStatus(PaymentStatus.PAID);
-                
+
                 // Update order status if it was PENDING
                 if (order.getStatus() == OrderStatus.PENDING) {
                     // Set to PAID as payment is successful
                     order.setStatus(OrderStatus.PAID);
                     order.setPaidAt(LocalDateTime.now());
                 }
-                
+
                 log.info("Updated Order {} to PAID", order.getOrderNumber());
 
                 // Gọi API confirm-batch để chốt đơn hàng trong product-service
@@ -100,14 +106,24 @@ public class PaymentEventListener {
             }
 
             for (Order order : orders) {
+                // Idempotency check: Skip if already FAILED or PAID
+                if (order.getPaymentStatus() == PaymentStatus.FAILED) {
+                    log.info("Order {} already FAILED. Skip processing.", order.getOrderNumber());
+                    continue;
+                }
+                if (order.getPaymentStatus() == PaymentStatus.PAID) {
+                    log.warn("Order {} already PAID. Cannot mark as FAILED. Skip processing.", order.getOrderNumber());
+                    continue;
+                }
+
                 order.setPaymentStatus(PaymentStatus.FAILED);
-                
+
                 String note = order.getNote() != null ? order.getNote() : "";
                 order.setNote(note + " | Payment failed: " + event.getFailureReason());
-                
+
                 log.info("Updated Order {} to PAYMENT_FAILED", order.getOrderNumber());
             }
-            
+
             orderRepository.saveAll(orders);
 
         } catch (Exception e) {
