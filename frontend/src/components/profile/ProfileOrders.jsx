@@ -151,10 +151,8 @@ const ProfileOrders = () => {
     const interval = setInterval(() => {
       const newTimers = {};
       orders.forEach((order) => {
-        if (
-          order.paymentStatus === "UNPAID" ||
-          order.paymentStatus === "PENDING"
-        ) {
+        // Hiển thị countdown cho tất cả đơn hàng PENDING chưa thanh toán
+        if (order.status === "PENDING" && order.paymentStatus !== "PAID") {
           newTimers[order.id] = calculateTimeRemaining(order.createdAt);
         }
       });
@@ -1028,8 +1026,8 @@ const ProfileOrders = () => {
                     )}
 
                     {/* Countdown Timer cho đơn hàng chưa thanh toán */}
-                    {(order.paymentStatus === "UNPAID" ||
-                      order.paymentStatus === "PENDING") &&
+                    {order.status === "PENDING" &&
+                      order.paymentStatus !== "PAID" &&
                       orderTimers[order.id] && (
                         <div style={{ marginTop: "8px" }}>
                           {!orderTimers[order.id].expired ? (
