@@ -72,10 +72,11 @@ public class OrderController {
 
     @PostMapping("/payment")
     @Operation(summary = "Initiate payment", description = "Initiate payment for a list of orders.")
-    public ResponseEntity<ApiResponse<OrderPaymentResponse>> initiatePayment(@RequestBody List<String> orderIds) {
+    public ResponseEntity<ApiResponse<OrderPaymentResponse>> initiatePayment(
+            @RequestBody @Valid com.cnweb.order_service.dto.request.OrderPaymentRequest request) {
         String username = getCurrentUsername();
-        OrderPaymentResponse response = orderService.initiatePayment(username, orderIds);
-        
+        OrderPaymentResponse response = orderService.initiatePayment(username, request);
+
         return ResponseEntity.ok(ApiResponse.<OrderPaymentResponse>builder()
                 .code(200)
                 .message("Payment initiated successfully")
