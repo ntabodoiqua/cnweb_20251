@@ -569,6 +569,76 @@ const getProductsApi = (params) => {
   });
 };
 
+// Get public products with filters (for homepage and products page)
+const getPublicProductsApi = (params) => {
+  const URL_API = "/api/product/public/products";
+  return axios.get(URL_API, {
+    params,
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get public stores (no authentication required)
+const getPublicStoresApi = (page = 0, size = 20) => {
+  const URL_API = "/api/product/public/stores";
+  return axios.get(URL_API, {
+    params: {
+      page,
+      size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get public product detail (no authentication required)
+const getPublicProductDetailApi = (productId) => {
+  const URL_API = `/api/product/public/products/${productId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Get public product variant options (no authentication required)
+const getPublicProductVariantOptionsApi = (
+  productId,
+  attributeValueIds = []
+) => {
+  const URL_API = `/api/product/public/products/${productId}/variant-options`;
+  return axios.get(URL_API, {
+    data: {
+      attributeValueIds: attributeValueIds,
+    },
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Find variant by attribute combination (no authentication required)
+const findVariantByAttributesApi = (productId, attributeValueIds) => {
+  const URL_API = `/api/product/public/products/${productId}/find-variant`;
+  return axios.post(
+    URL_API,
+    {
+      attributeValueIds: attributeValueIds,
+    },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
 const getProductsByStoreApi = (storeId, page = 0, size = 20) => {
   const URL_API = `/api/product/products/by-store/${storeId}`;
   return axios.get(URL_API, {
@@ -689,8 +759,22 @@ const getPlatformCategoryDetailApi = (categoryId) => {
   });
 };
 
-const getBrandsApi = () => {
+const getBrandsApi = (page = 0, size = 100) => {
   const URL_API = "/api/product/brands/public";
+  return axios.get(URL_API, {
+    params: {
+      page,
+      size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get public platform categories (no authentication required)
+const getPublicPlatformCategoriesApi = () => {
+  const URL_API = "/api/product/public/categories/platform";
   return axios.get(URL_API, {
     headers: {
       "Accept-Language": "vi",
@@ -709,55 +793,268 @@ const createZaloPayOrderApi = (paymentData) => {
   });
 };
 
-// Cart APIs - TODO: Replace with real backend endpoints
-const getCartItemsApi = () => {
-  // Tạm thời trả về mock data, sẽ thay bằng API thật sau
-  return Promise.resolve({
-    data: {
-      code: 1000,
-      result: {
-        items: [],
-        total: 0,
-      },
+// Order APIs
+const createOrderApi = (orderData) => {
+  const URL_API = "/api/order/api/v1/orders";
+  return axios.post(URL_API, orderData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
     },
   });
 };
 
-const addToCartApi = (productId, quantity) => {
-  const URL_API = "/api/order/cart/add";
-  return axios.post(
-    URL_API,
-    { productId, quantity },
-    {
-      headers: {
-        "Accept-Language": "vi",
-        "Content-Type": "application/json",
-      },
-    }
-  );
+const applyCouponToOrdersApi = (couponCode, orderIds) => {
+  const URL_API = `/api/order/api/v1/orders/apply-coupon?couponCode=${encodeURIComponent(
+    couponCode
+  )}`;
+  return axios.post(URL_API, orderIds, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
 };
 
-const updateCartItemApi = (itemId, quantity) => {
-  const URL_API = `/api/order/cart/items/${itemId}`;
-  return axios.put(
-    URL_API,
-    { quantity },
-    {
-      headers: {
-        "Accept-Language": "vi",
-        "Content-Type": "application/json",
-      },
-    }
-  );
+const initiateOrderPaymentApi = (orderIds) => {
+  const URL_API = "/api/order/api/v1/orders/payment";
+  return axios.post(URL_API, orderIds, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
 };
 
-const removeCartItemApi = (itemId) => {
-  const URL_API = `/api/order/cart/items/${itemId}`;
-  return axios.delete(URL_API, {
+// Get my orders with filters
+const getMyOrdersApi = (params = {}) => {
+  const URL_API = "/api/order/api/v1/orders/my-orders";
+  return axios.get(URL_API, {
+    params: {
+      search: params.search || "",
+      status: params.status || "",
+      paymentStatus: params.paymentStatus || "",
+      startDate: params.startDate || "",
+      endDate: params.endDate || "",
+      minAmount: params.minAmount || "",
+      maxAmount: params.maxAmount || "",
+      page: params.page || 0,
+      size: params.size || 10,
+      sort: params.sort || "createdAt,desc",
+    },
     headers: {
       "Accept-Language": "vi",
     },
   });
+};
+
+// Cart APIs
+const getCartApi = () => {
+  const URL_API = "/api/order/api/v1/cart";
+  const token = localStorage.getItem("access_token");
+
+  const headers = {
+    "Accept-Language": "vi",
+  };
+
+  // Chễ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.get(URL_API, { headers });
+};
+
+const addToCartApi = (cartItemData) => {
+  const URL_API = "/api/order/api/v1/cart/items";
+  const token = localStorage.getItem("access_token");
+
+  const headers = {
+    "Accept-Language": "vi",
+    "Content-Type": "application/json",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.post(
+    URL_API,
+    {
+      productId: cartItemData.productId,
+      productName: cartItemData.productName,
+      variantId: cartItemData.variantId || null,
+      variantName: cartItemData.variantName || null,
+      imageUrl: cartItemData.imageUrl,
+      quantity: cartItemData.quantity,
+      price: cartItemData.price,
+      originalPrice: cartItemData.originalPrice || cartItemData.price,
+    },
+    { headers }
+  );
+};
+
+const updateCartItemApi = (productId, variantId, quantity) => {
+  const URL_API = "/api/order/api/v1/cart/items";
+  const token = localStorage.getItem("access_token");
+
+  const headers = {
+    "Accept-Language": "vi",
+    "Content-Type": "application/json",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.put(
+    URL_API,
+    {
+      productId,
+      variantId,
+      quantity,
+    },
+    { headers }
+  );
+};
+
+const removeCartItemApi = (productId, variantId) => {
+  const URL_API = "/api/order/api/v1/cart/items";
+  const token = localStorage.getItem("access_token");
+
+  const headers = {
+    "Accept-Language": "vi",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.delete(URL_API, {
+    params: {
+      productId,
+      variantId,
+    },
+    headers,
+  });
+};
+
+const clearCartApi = () => {
+  const URL_API = "/api/order/api/v1/cart";
+  const token = localStorage.getItem("access_token");
+
+  const headers = {
+    "Accept-Language": "vi",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.delete(URL_API, { headers });
+};
+
+const mergeCartApi = (guestSessionId) => {
+  const URL_API = "/api/order/api/v1/cart/merge";
+
+  return axios.post(
+    URL_API,
+    { guestSessionId },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const getCartCountApi = () => {
+  const URL_API = "/api/order/api/v1/cart/count";
+  const token = localStorage.getItem("access_token");
+
+  const headers = {
+    "Accept-Language": "vi",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.get(URL_API, { headers });
+};
+
+const validateCartApi = () => {
+  const URL_API = "/api/order/api/v1/cart/validate";
+  const token = localStorage.getItem("access_token");
+
+  const headers = {
+    "Accept-Language": "vi",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.get(URL_API, { headers });
+};
+
+const getDetailedCartValidationApi = () => {
+  const URL_API = "/api/order/api/v1/cart/validate/detailed";
+  const token = localStorage.getItem("access_token");
+
+  const headers = {
+    "Accept-Language": "vi",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.get(URL_API, { headers });
+};
+
+// Helper function to generate session ID for guest users
+const generateSessionId = () => {
+  // Generate session ID with "session_" prefix
+  // Backend will add "guest:" prefix, then Redis adds "cart:" prefix
+  // Final Redis key: cart:guest:session_{timestamp}_{random}
+  const sessionId = `session_${Date.now()}_${Math.random()
+    .toString(36)
+    .substr(2, 9)}`;
+  localStorage.setItem("cart_session_id", sessionId);
+  return sessionId;
 };
 
 // Product Attributes APIs
@@ -1181,6 +1478,29 @@ const rejectSellerProfileApi = (id, reason = "") => {
   );
 };
 
+const removeCartItemsApi = (variantIds) => {
+  const URL_API = "/api/order/api/v1/cart/items/bulk";
+  const token = localStorage.getItem("access_token");
+
+  const headers = {
+    "Accept-Language": "vi",
+    "Content-Type": "application/json",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.delete(URL_API, {
+    data: variantIds,
+    headers,
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -1225,6 +1545,11 @@ export {
   uploadCategoryImageApi,
   createProductApi,
   getProductsApi,
+  getPublicProductsApi,
+  getPublicStoresApi,
+  getPublicProductDetailApi,
+  getPublicProductVariantOptionsApi,
+  findVariantByAttributesApi,
   getProductsByStoreApi,
   getProductDetailApi,
   updateProductApi,
@@ -1235,15 +1560,27 @@ export {
   setProductImagePrimaryApi,
   getCategoriesApi,
   getPlatformCategoriesApi,
+  getPublicPlatformCategoriesApi,
   getPlatformCategoryDetailApi,
   getBrandsApi,
   // Payment APIs
   createZaloPayOrderApi,
+  // Order APIs
+  createOrderApi,
+  applyCouponToOrdersApi,
+  initiateOrderPaymentApi,
+  getMyOrdersApi,
   // Cart APIs
-  getCartItemsApi,
+  getCartApi,
   addToCartApi,
   updateCartItemApi,
   removeCartItemApi,
+  removeCartItemsApi,
+  clearCartApi,
+  mergeCartApi,
+  getCartCountApi,
+  validateCartApi,
+  getDetailedCartValidationApi,
   // Product Attributes APIs
   createProductAttributeApi,
   getProductAttributesByCategoryApi,
@@ -1289,4 +1626,5 @@ export {
   getSellerProfileByIdApi,
   approveSellerProfileApi,
   rejectSellerProfileApi,
+  // Cart bulk remove API
 };

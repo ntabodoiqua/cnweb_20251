@@ -1,13 +1,13 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { message, Modal, Spin } from "antd";
+import { notification, Modal } from "antd";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import {
   DeleteOutlined,
   ShoppingOutlined,
   MinusOutlined,
   PlusOutlined,
   ShoppingCartOutlined,
-  CreditCardOutlined,
   ArrowLeftOutlined,
   CheckSquareOutlined,
   BorderOutlined,
@@ -17,7 +17,15 @@ import {
   CheckCircleOutlined,
 } from "@ant-design/icons";
 import { AuthContext } from "../../components/context/auth.context";
-import { createZaloPayOrderApi } from "../../util/api";
+import { useCart } from "../../contexts/CartContext";
+import {
+  getCartApi,
+  updateCartItemApi,
+  removeCartItemApi,
+  clearCartApi,
+  mergeCartApi,
+  getDetailedCartValidationApi,
+} from "../../util/api";
 import styles from "./CartPage.module.css";
 
 /**
@@ -28,48 +36,80 @@ import styles from "./CartPage.module.css";
 const CartPage = () => {
   const navigate = useNavigate();
   const { auth } = useContext(AuthContext);
+  const { loadCartCount } = useCart();
 
-  // Mock data cho giỏ hàng - Sẽ được thay thế bằng state management sau
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Laptop Dell XPS 13",
-      price: 2500000,
-      quantity: 1,
-      image: "https://via.placeholder.com/100",
-      seller: "Dell Official Store",
-      inStock: true,
-      selected: false,
-    },
-    {
-      id: 2,
-      name: "iPhone 15 Pro Max 256GB",
-      price: 3200000,
-      quantity: 2,
-      image: "https://via.placeholder.com/100",
-      seller: "Apple Store",
-      inStock: true,
-      selected: false,
-    },
-    {
-      id: 3,
-      name: "Samsung Galaxy S24 Ultra",
-      price: 2800000,
-      quantity: 1,
-      image: "https://via.placeholder.com/100",
-      seller: "Samsung Official",
-      inStock: false,
-      selected: false,
-    },
-  ]);
-
-  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  // State cho giỏ hàng từ API
+  const [cartData, setCartData] = useState(null);
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedItems, setSelectedItems] = useState(new Set());
 
   // Voucher state
   const [platformVoucher, setPlatformVoucher] = useState(null);
   const [shopVouchers, setShopVouchers] = useState({});
   const [voucherInput, setVoucherInput] = useState("");
   const [shopVoucherInputs, setShopVoucherInputs] = useState({});
+
+  // Filter state
+  const [selectedShopFilter, setSelectedShopFilter] = useState("all");
+
+  // Load giỏ hàng khi component mount
+  useEffect(() => {
+    loadCart();
+  }, []);
+
+  // Load cart data from API
+  const loadCart = async () => {
+    try {
+      setLoading(true);
+      const response = await getCartApi();
+
+      if (response && response.code === 200) {
+        setCartData(response.result);
+
+        // Transform API data to component state
+        const items = response.result.items.map((item) => {
+          // API response không có available và stock, tạm thời set default
+          const stock = item.stock || 999; // Default stock nếu API không trả về
+          const available =
+            item.available !== undefined ? item.available : true; // Default available = true
+
+          return {
+            id: `${item.productId}_${item.variantId || "default"}`,
+            productId: item.productId,
+            variantId: item.variantId,
+            name: item.productName,
+            variantName: item.variantName,
+            sku: item.sku,
+            price: item.price,
+            originalPrice: item.originalPrice,
+            quantity: item.quantity,
+            image: item.imageUrl,
+            seller: item.storeName,
+            storeId: item.storeId,
+            storeLogo: item.storeLogo,
+            subtotal: item.subtotal,
+            inStock: available && item.quantity <= stock,
+            stock: stock,
+            selected: false,
+          };
+        });
+
+        setCartItems(items);
+      } else {
+        throw new Error(response?.message || "Không thể tải giỏ hàng");
+      }
+    } catch (error) {
+      console.error("Error loading cart:", error);
+      notification.error({
+        message: "Lỗi tải giỏ hàng",
+        description: "Không thể tải giỏ hàng. Vui lòng thử lại!",
+        placement: "topRight",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Mock data voucher sàn
   const availablePlatformVouchers = [
@@ -211,9 +251,16 @@ const CartPage = () => {
     return cartItems.reduce((total, item) => total + item.quantity, 0);
   };
 
-  // Tính số lượng sản phẩm đã chọn
+  // Tính số lượng sản phẩm đã chọn (số items)
   const getSelectedItemsCount = () => {
     return cartItems.filter((item) => item.selected && item.inStock).length;
+  };
+
+  // Tính tổng quantity của các sản phẩm đã chọn
+  const getSelectedTotalQuantity = () => {
+    return cartItems
+      .filter((item) => item.selected && item.inStock)
+      .reduce((total, item) => total + item.quantity, 0);
   };
 
   // Lấy danh sách sản phẩm đã chọn
@@ -244,73 +291,185 @@ const CartPage = () => {
   };
 
   // Xử lý tăng số lượng
-  const handleIncreaseQuantity = (itemId) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === itemId ? { ...item, quantity: item.quantity + 1 } : item
-      )
-    );
-    message.success("Đã tăng số lượng sản phẩm");
+  const handleIncreaseQuantity = async (itemId) => {
+    const item = cartItems.find((i) => i.id === itemId);
+    if (!item) return;
+
+    // Kiểm tra tồn kho
+    if (item.quantity >= item.stock) {
+      notification.warning({
+        message: "Tồn kho không đủ",
+        description: "Đã đạt số lượng tối đa trong kho!",
+        placement: "topRight",
+      });
+      return;
+    }
+
+    try {
+      const response = await updateCartItemApi(
+        item.productId,
+        item.variantId,
+        item.quantity + 1
+      );
+
+      if (response && response.code === 200) {
+        setCartItems((prevItems) =>
+          prevItems.map((i) =>
+            i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i
+          )
+        );
+        loadCartCount(); // Update global cart count
+        notification.success({
+          message: "Thành công",
+          description: "Đã tăng số lượng sản phẩm",
+          placement: "topRight",
+          duration: 2,
+        });
+      } else {
+        throw new Error(response?.message || "Có lỗi xảy ra");
+      }
+    } catch (error) {
+      console.error("Error updating cart:", error);
+      notification.error({
+        message: "Lỗi cập nhật",
+        description: "Không thể cập nhật giỏ hàng!",
+        placement: "topRight",
+      });
+    }
   };
 
   // Xử lý giảm số lượng
-  const handleDecreaseQuantity = (itemId) => {
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === itemId && item.quantity > 1
-          ? { ...item, quantity: item.quantity - 1 }
-          : item
-      )
-    );
-    message.success("Đã giảm số lượng sản phẩm");
+  const handleDecreaseQuantity = async (itemId) => {
+    const item = cartItems.find((i) => i.id === itemId);
+    if (!item || item.quantity <= 1) return;
+
+    try {
+      const response = await updateCartItemApi(
+        item.productId,
+        item.variantId,
+        item.quantity - 1
+      );
+
+      if (response && response.code === 200) {
+        setCartItems((prevItems) =>
+          prevItems.map((i) =>
+            i.id === itemId ? { ...i, quantity: i.quantity - 1 } : i
+          )
+        );
+        loadCartCount(); // Update global cart count
+        notification.success({
+          message: "Thành công",
+          description: "Đã giảm số lượng sản phẩm",
+          placement: "topRight",
+          duration: 2,
+        });
+      } else {
+        throw new Error(response?.message || "Có lỗi xảy ra");
+      }
+    } catch (error) {
+      console.error("Error updating cart:", error);
+      notification.error({
+        message: "Lỗi cập nhật",
+        description: "Không thể cập nhật giỏ hàng!",
+        placement: "topRight",
+      });
+    }
   };
 
   // Xử lý xóa sản phẩm
-  const handleRemoveItem = (itemId) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== itemId));
-    message.success("Đã xóa sản phẩm khỏi giỏ hàng");
+  const handleRemoveItem = async (itemId) => {
+    const item = cartItems.find((i) => i.id === itemId);
+    if (!item) return;
+
+    try {
+      const response = await removeCartItemApi(item.productId, item.variantId);
+
+      if (response && response.code === 200) {
+        setCartItems((prevItems) => prevItems.filter((i) => i.id !== itemId));
+        loadCartCount(); // Update global cart count
+        notification.success({
+          message: "Thành công",
+          description: "Đã xóa sản phẩm khỏi giỏ hàng",
+          placement: "topRight",
+          duration: 2,
+        });
+      } else {
+        throw new Error(response?.message || "Có lỗi xảy ra");
+      }
+    } catch (error) {
+      console.error("Error removing item:", error);
+      notification.error({
+        message: "Lỗi xóa sản phẩm",
+        description: "Không thể xóa sản phẩm!",
+        placement: "topRight",
+      });
+    }
   };
 
   // Xử lý áp dụng voucher sàn
   const handleApplyPlatformVoucher = (code) => {
     const voucher = availablePlatformVouchers.find((v) => v.code === code);
     if (!voucher) {
-      message.error("Mã voucher không hợp lệ!");
+      notification.error({
+        message: "Voucher không hợp lệ",
+        description: "Mã voucher không hợp lệ!",
+        placement: "topRight",
+      });
       return;
     }
 
     const subtotal = calculateSelectedTotal();
     if (subtotal < voucher.minOrder) {
-      message.warning(
-        `Đơn hàng tối thiểu ${formatCurrency(
+      notification.warning({
+        message: "Đơn hàng chưa đủ điều kiện",
+        description: `Đơn hàng tối thiểu ${formatCurrency(
           voucher.minOrder
-        )} để áp dụng mã này!`
-      );
+        )} để áp dụng mã này!`,
+        placement: "topRight",
+      });
       return;
     }
 
     setPlatformVoucher(voucher);
     setVoucherInput("");
-    message.success("Áp dụng mã giảm giá sàn thành công!");
+    notification.success({
+      message: "Thành công",
+      description: "Áp dụng mã giảm giá sàn thành công!",
+      placement: "topRight",
+      duration: 2,
+    });
   };
 
   // Xử lý xóa voucher sàn
   const handleRemovePlatformVoucher = () => {
     setPlatformVoucher(null);
-    message.info("Đã hủy mã giảm giá sàn");
+    notification.info({
+      message: "Thông báo",
+      description: "Đã hủy mã giảm giá sàn",
+      placement: "topRight",
+      duration: 2,
+    });
   };
 
   // Xử lý áp dụng voucher shop
   const handleApplyShopVoucher = (seller, code) => {
     const shopVoucherList = availableShopVouchers[seller];
     if (!shopVoucherList) {
-      message.error("Shop không có voucher!");
+      notification.error({
+        message: "Không có voucher",
+        description: "Shop không có voucher!",
+        placement: "topRight",
+      });
       return;
     }
 
     const voucher = shopVoucherList.find((v) => v.code === code);
     if (!voucher) {
-      message.error("Mã voucher shop không hợp lệ!");
+      notification.error({
+        message: "Voucher không hợp lệ",
+        description: "Mã voucher shop không hợp lệ!",
+        placement: "topRight",
+      });
       return;
     }
 
@@ -320,17 +479,24 @@ const CartPage = () => {
       .reduce((sum, item) => sum + item.price * item.quantity, 0);
 
     if (shopTotal < voucher.minOrder) {
-      message.warning(
-        `Đơn hàng shop tối thiểu ${formatCurrency(
+      notification.warning({
+        message: "Đơn hàng chưa đủ điều kiện",
+        description: `Đơn hàng shop tối thiểu ${formatCurrency(
           voucher.minOrder
-        )} để áp dụng mã này!`
-      );
+        )} để áp dụng mã này!`,
+        placement: "topRight",
+      });
       return;
     }
 
     setShopVouchers((prev) => ({ ...prev, [seller]: voucher }));
     setShopVoucherInputs((prev) => ({ ...prev, [seller]: "" }));
-    message.success(`Áp dụng mã giảm giá ${seller} thành công!`);
+    notification.success({
+      message: "Thành công",
+      description: `Áp dụng mã giảm giá ${seller} thành công!`,
+      placement: "topRight",
+      duration: 2,
+    });
   };
 
   // Xử lý xóa voucher shop
@@ -340,7 +506,12 @@ const CartPage = () => {
       delete newVouchers[seller];
       return newVouchers;
     });
-    message.info(`Đã hủy mã giảm giá ${seller}`);
+    notification.info({
+      message: "Thông báo",
+      description: `Đã hủy mã giảm giá ${seller}`,
+      placement: "topRight",
+      duration: 2,
+    });
   };
 
   // Lấy danh sách shop có sản phẩm được chọn
@@ -352,14 +523,76 @@ const CartPage = () => {
     return Array.from(sellers);
   };
 
-  // Xử lý thanh toán
-  const handleCheckout = async () => {
+  // Lấy danh sách tất cả các shop trong giỏ hàng
+  const getAllShops = () => {
+    const shops = new Map();
+    cartItems.forEach((item) => {
+      if (!shops.has(item.seller)) {
+        shops.set(item.seller, {
+          name: item.seller,
+          logo: item.storeLogo,
+          storeId: item.storeId,
+          count: 0,
+        });
+      }
+      const shop = shops.get(item.seller);
+      shop.count += 1;
+    });
+    return Array.from(shops.values());
+  };
+
+  // Lọc sản phẩm theo shop được chọn
+  const getFilteredItems = () => {
+    if (selectedShopFilter === "all") {
+      return cartItems;
+    }
+    return cartItems.filter((item) => item.seller === selectedShopFilter);
+  };
+
+  // Gom nhóm sản phẩm theo shop
+  const groupItemsByShop = () => {
+    const filtered = getFilteredItems();
+    const grouped = new Map();
+
+    filtered.forEach((item) => {
+      if (!grouped.has(item.seller)) {
+        grouped.set(item.seller, {
+          shopName: item.seller,
+          shopLogo: item.storeLogo,
+          storeId: item.storeId,
+          items: [],
+        });
+      }
+      grouped.get(item.seller).items.push(item);
+    });
+
+    return Array.from(grouped.values());
+  };
+
+  // Xử lý chọn tất cả sản phẩm của một shop
+  const handleSelectAllShopItems = (shopName) => {
+    const shopItems = cartItems.filter(
+      (item) => item.seller === shopName && item.inStock
+    );
+    const allSelected = shopItems.every((item) => item.selected);
+
+    setCartItems((prevItems) =>
+      prevItems.map((item) =>
+        item.seller === shopName && item.inStock
+          ? { ...item, selected: !allSelected }
+          : item
+      )
+    );
+  };
+
+  // Xử lý đặt hàng
+  const handleCheckout = () => {
     // Kiểm tra đăng nhập
     if (!auth.isAuthenticated) {
       Modal.confirm({
         title: "Yêu cầu đăng nhập",
         content:
-          "Bạn cần đăng nhập để thực hiện thanh toán. Bạn có muốn đăng nhập ngay không?",
+          "Bạn cần đăng nhập để đặt hàng. Bạn có muốn đăng nhập ngay không?",
         okText: "Đăng nhập",
         cancelText: "Hủy",
         onOk: () => {
@@ -374,116 +607,41 @@ const CartPage = () => {
     const selectedItems = getSelectedItems();
 
     if (selectedItems.length === 0) {
-      message.warning("Vui lòng chọn ít nhất một sản phẩm để thanh toán!");
+      notification.warning({
+        message: "Chưa chọn sản phẩm",
+        description: "Vui lòng chọn ít nhất một sản phẩm để đặt hàng!",
+        placement: "topRight",
+      });
       return;
     }
 
     const hasOutOfStock = selectedItems.some((item) => !item.inStock);
     if (hasOutOfStock) {
-      message.warning(
-        "Vui lòng bỏ chọn các sản phẩm hết hàng trước khi thanh toán!"
-      );
+      notification.warning({
+        message: "Có sản phẩm hết hàng",
+        description:
+          "Vui lòng bỏ chọn các sản phẩm hết hàng trước khi đặt hàng!",
+        placement: "topRight",
+      });
       return;
     }
 
-    // Xác nhận thanh toán
-    Modal.confirm({
-      title: "Xác nhận thanh toán",
-      content: (
-        <div>
-          <p>
-            Bạn đang thanh toán <strong>{selectedItems.length}</strong> sản phẩm
-            với tổng giá trị:{" "}
-            <strong style={{ color: "#ee4d2d" }}>
-              {formatCurrency(calculateSelectedTotal())}
-            </strong>
-          </p>
-          <p>Phương thức thanh toán: ZaloPay</p>
-        </div>
-      ),
-      okText: "Thanh toán ngay",
-      cancelText: "Hủy",
-      onOk: async () => {
-        await processZaloPayPayment(selectedItems);
+    // Chuyển sang trang checkout với thông tin đơn hàng
+    navigate("/checkout", {
+      state: {
+        selectedItems: selectedItems,
+        subtotal: calculateSelectedTotal(),
+        shopDiscounts: calculateShopDiscounts(),
+        platformDiscount: calculatePlatformDiscount(),
+        finalTotal: calculateFinalTotal(),
       },
     });
   };
 
-  // Xử lý thanh toán qua ZaloPay
-  const processZaloPayPayment = async (selectedItems) => {
-    setIsProcessingPayment(true);
-    const hideLoading = message.loading("Đang xử lý thanh toán...", 0);
-
-    try {
-      // Chuẩn bị dữ liệu thanh toán
-      const paymentData = {
-        appUser: auth.user?.username || "user",
-        amount: calculateSelectedTotal(),
-        description: `Thanh toán đơn hàng từ ${
-          auth.user?.username || "khách hàng"
-        }`,
-        items: selectedItems.map((item) => ({
-          itemid: `P${item.id.toString().padStart(3, "0")}`,
-          itemname: item.name,
-          itemprice: item.price,
-          itemquantity: item.quantity,
-        })),
-        bankCode: "",
-        embedData: {
-          redirecturl: `${window.location.origin}/payment-result`,
-          merchantinfo: "HUSTBuy - Nền tảng thương mại điện tử",
-        },
-        title: `Đơn hàng #${Date.now()}`,
-        phone: auth.user?.phone || "0987654321",
-        email: auth.user?.email || "customer@hustbuy.com",
-      };
-
-      // Gọi API ZaloPay
-      const response = await createZaloPayOrderApi(paymentData);
-
-      hideLoading();
-
-      console.log("ZaloPay API Full Response:", response);
-
-      // Axios interceptor đã return response.data, nên response chính là data
-      // Response format: { appTransId, orderUrl, zpTransToken, qrCode, status, message, errorCode }
-      const responseData = response;
-
-      if (responseData?.errorCode === 1 && responseData?.orderUrl) {
-        message.success("Đang chuyển đến cổng thanh toán ZaloPay...", 1.5);
-
-        // Lưu thông tin đơn hàng để xử lý sau khi thanh toán
-        sessionStorage.setItem(
-          "pendingOrder",
-          JSON.stringify({
-            items: selectedItems,
-            total: calculateSelectedTotal(),
-            timestamp: Date.now(),
-            appTransId: responseData.appTransId,
-            zpTransToken: responseData.zpTransToken,
-          })
-        );
-
-        // Chuyển hướng đến trang thanh toán ZaloPay
-        window.open(responseData.orderUrl, "_self");
-      } else {
-        console.error("Payment failed:", responseData);
-        throw new Error(
-          responseData?.message || "Không thể tạo đơn hàng thanh toán"
-        );
-      }
-    } catch (error) {
-      hideLoading();
-      console.error("Payment error:", error);
-      message.error(
-        error.response?.data?.message ||
-          error.message ||
-          "Có lỗi xảy ra khi xử lý thanh toán. Vui lòng thử lại!"
-      );
-    } finally {
-      setIsProcessingPayment(false);
-    }
-  };
+  // Hiển thị loading spinner
+  if (loading) {
+    return <LoadingSpinner tip="Đang tải giỏ hàng..." fullScreen={false} />;
+  }
 
   return (
     <div className={styles.page}>
@@ -550,73 +708,341 @@ const CartPage = () => {
                 <h2 className={styles.sectionTitle}>Danh sách sản phẩm</h2>
               </div>
 
-              {cartItems.map((item) => (
+              {/* Shop Filter */}
+              {getAllShops().length > 1 && (
                 <div
-                  key={item.id}
-                  className={`${styles.cartItem} ${
-                    !item.inStock ? styles.outOfStock : ""
-                  } ${item.selected ? styles.selected : ""}`}
+                  style={{
+                    padding: "16px",
+                    backgroundColor: "#f5f5f5",
+                    borderRadius: "8px",
+                    marginBottom: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "12px",
+                    flexWrap: "wrap",
+                  }}
                 >
-                  <div className={styles.itemCheckbox}>
+                  <span style={{ fontWeight: "500", color: "#333" }}>
+                    <ShopOutlined /> Lọc theo cửa hàng:
+                  </span>
+                  <button
+                    onClick={() => setSelectedShopFilter("all")}
+                    style={{
+                      padding: "6px 16px",
+                      borderRadius: "20px",
+                      border:
+                        selectedShopFilter === "all"
+                          ? "2px solid #1890ff"
+                          : "1px solid #d9d9d9",
+                      backgroundColor:
+                        selectedShopFilter === "all" ? "#e6f7ff" : "white",
+                      color: selectedShopFilter === "all" ? "#1890ff" : "#666",
+                      cursor: "pointer",
+                      fontWeight:
+                        selectedShopFilter === "all" ? "600" : "normal",
+                      transition: "all 0.3s",
+                    }}
+                  >
+                    Tất cả ({cartItems.length})
+                  </button>
+                  {getAllShops().map((shop) => (
                     <button
-                      className={styles.checkboxButton}
-                      onClick={() => handleToggleSelect(item.id)}
-                      disabled={!item.inStock}
+                      key={shop.storeId}
+                      onClick={() => setSelectedShopFilter(shop.name)}
+                      style={{
+                        padding: "6px 16px",
+                        borderRadius: "20px",
+                        border:
+                          selectedShopFilter === shop.name
+                            ? "2px solid #1890ff"
+                            : "1px solid #d9d9d9",
+                        backgroundColor:
+                          selectedShopFilter === shop.name
+                            ? "#e6f7ff"
+                            : "white",
+                        color:
+                          selectedShopFilter === shop.name ? "#1890ff" : "#666",
+                        cursor: "pointer",
+                        fontWeight:
+                          selectedShopFilter === shop.name ? "600" : "normal",
+                        transition: "all 0.3s",
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "6px",
+                      }}
                     >
-                      {item.selected ? (
-                        <CheckSquareOutlined />
-                      ) : (
-                        <BorderOutlined />
+                      {shop.logo && (
+                        <img
+                          src={shop.logo}
+                          alt={shop.name}
+                          style={{
+                            width: "18px",
+                            height: "18px",
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                          }}
+                        />
                       )}
+                      {shop.name} ({shop.count})
                     </button>
-                  </div>
+                  ))}
+                </div>
+              )}
 
-                  <div className={styles.itemImage}>
-                    <img src={item.image} alt={item.name} />
-                    {!item.inStock && (
-                      <div className={styles.outOfStockBadge}>Hết hàng</div>
-                    )}
-                  </div>
-
-                  <div className={styles.itemInfo}>
-                    <h3 className={styles.itemName}>{item.name}</h3>
-                    <p className={styles.itemSeller}>Bán bởi: {item.seller}</p>
-                    <p className={styles.itemPrice}>
-                      {formatCurrency(item.price)}
-                    </p>
-                  </div>
-
-                  <div className={styles.itemActions}>
-                    <div className={styles.quantityControl}>
-                      <button
-                        className={styles.quantityButton}
-                        onClick={() => handleDecreaseQuantity(item.id)}
-                        disabled={item.quantity <= 1 || !item.inStock}
-                      >
-                        <MinusOutlined />
-                      </button>
-                      <span className={styles.quantityDisplay}>
-                        {item.quantity}
-                      </span>
-                      <button
-                        className={styles.quantityButton}
-                        onClick={() => handleIncreaseQuantity(item.id)}
-                        disabled={!item.inStock}
-                      >
-                        <PlusOutlined />
-                      </button>
-                    </div>
-
-                    <p className={styles.itemTotal}>
-                      {formatCurrency(item.price * item.quantity)}
-                    </p>
-
-                    <button
-                      className={styles.removeButton}
-                      onClick={() => handleRemoveItem(item.id)}
+              {groupItemsByShop().map((shop) => (
+                <div key={shop.storeId} style={{ marginBottom: "24px" }}>
+                  {/* Shop Header */}
+                  <div
+                    style={{
+                      backgroundColor: "#fafafa",
+                      padding: "12px 16px",
+                      borderRadius: "8px 8px 0 0",
+                      border: "1px solid #f0f0f0",
+                      borderBottom: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "12px",
+                      }}
                     >
-                      <DeleteOutlined />
-                    </button>
+                      <button
+                        className={styles.checkboxButton}
+                        onClick={() => handleSelectAllShopItems(shop.shopName)}
+                        style={{ marginRight: "8px" }}
+                      >
+                        {shop.items
+                          .filter((item) => item.inStock)
+                          .every((item) => item.selected) &&
+                        shop.items.some((item) => item.inStock) ? (
+                          <CheckSquareOutlined />
+                        ) : (
+                          <BorderOutlined />
+                        )}
+                      </button>
+                      {shop.shopLogo && (
+                        <img
+                          src={shop.shopLogo}
+                          alt={shop.shopName}
+                          style={{
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "50%",
+                            objectFit: "cover",
+                            border: "2px solid #fff",
+                          }}
+                        />
+                      )}
+                      <div>
+                        <div
+                          style={{
+                            fontWeight: "600",
+                            fontSize: "15px",
+                            color: "#262626",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "8px",
+                          }}
+                        >
+                          <ShoppingOutlined style={{ color: "#1890ff" }} />
+                          {shop.shopName}
+                        </div>
+                        <div
+                          style={{
+                            fontSize: "12px",
+                            color: "#8c8c8c",
+                            marginTop: "2px",
+                          }}
+                        >
+                          {shop.items.length} sản phẩm
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Shop Items */}
+                  <div
+                    style={{
+                      border: "1px solid #f0f0f0",
+                      borderRadius: "0 0 8px 8px",
+                      overflow: "hidden",
+                    }}
+                  >
+                    {shop.items.map((item, index) => (
+                      <div
+                        key={item.id}
+                        className={`${styles.cartItem} ${
+                          !item.inStock ? styles.outOfStock : ""
+                        } ${item.selected ? styles.selected : ""}`}
+                        style={{
+                          borderTop: index > 0 ? "1px solid #f0f0f0" : "none",
+                          borderRadius: "0",
+                        }}
+                      >
+                        <div className={styles.itemCheckbox}>
+                          <button
+                            className={styles.checkboxButton}
+                            onClick={() => handleToggleSelect(item.id)}
+                            disabled={!item.inStock}
+                          >
+                            {item.selected ? (
+                              <CheckSquareOutlined />
+                            ) : (
+                              <BorderOutlined />
+                            )}
+                          </button>
+                        </div>
+
+                        <div className={styles.itemImage}>
+                          <img src={item.image} alt={item.name} />
+                          {!item.inStock && (
+                            <div className={styles.outOfStockBadge}>
+                              Hết hàng
+                            </div>
+                          )}
+                        </div>
+
+                        <div className={styles.itemInfo}>
+                          <h3 className={styles.itemName}>
+                            {item.name}
+                            {item.variantName && (
+                              <span
+                                style={{
+                                  fontSize: "0.85em",
+                                  color: "#666",
+                                  fontWeight: "normal",
+                                  marginLeft: "8px",
+                                }}
+                              >
+                                ({item.variantName})
+                              </span>
+                            )}
+                          </h3>
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "8px",
+                              marginTop: "4px",
+                            }}
+                          >
+                            {item.storeLogo ? (
+                              <img
+                                src={item.storeLogo}
+                                alt={item.seller}
+                                style={{
+                                  width: "20px",
+                                  height: "20px",
+                                  borderRadius: "50%",
+                                  objectFit: "cover",
+                                }}
+                              />
+                            ) : null}
+                            <p
+                              className={styles.itemSeller}
+                              style={{ margin: 0 }}
+                            >
+                              Bán bởi: {item.seller}
+                            </p>
+                          </div>
+                          {item.sku && (
+                            <p
+                              style={{
+                                fontSize: "0.8em",
+                                color: "#999",
+                                marginTop: "4px",
+                                marginBottom: "4px",
+                              }}
+                            >
+                              SKU: {item.sku}
+                            </p>
+                          )}
+                          <div className={styles.itemPrice}>
+                            {item.originalPrice &&
+                            item.originalPrice > item.price ? (
+                              <>
+                                <span
+                                  style={{
+                                    color: "#ff4d4f",
+                                    fontWeight: "bold",
+                                    fontSize: "1.1em",
+                                  }}
+                                >
+                                  {formatCurrency(item.price)}
+                                </span>
+                                <span
+                                  style={{
+                                    textDecoration: "line-through",
+                                    color: "#999",
+                                    fontSize: "0.9em",
+                                    marginLeft: "8px",
+                                  }}
+                                >
+                                  {formatCurrency(item.originalPrice)}
+                                </span>
+                                <span
+                                  style={{
+                                    backgroundColor: "#ff4d4f",
+                                    color: "white",
+                                    padding: "2px 6px",
+                                    borderRadius: "4px",
+                                    fontSize: "0.75em",
+                                    marginLeft: "8px",
+                                    fontWeight: "bold",
+                                  }}
+                                >
+                                  -
+                                  {Math.round(
+                                    (1 - item.price / item.originalPrice) * 100
+                                  )}
+                                  %
+                                </span>
+                              </>
+                            ) : (
+                              <span>{formatCurrency(item.price)}</span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className={styles.itemActions}>
+                          <div className={styles.quantityControl}>
+                            <button
+                              className={styles.quantityButton}
+                              onClick={() => handleDecreaseQuantity(item.id)}
+                              disabled={item.quantity <= 1 || !item.inStock}
+                            >
+                              <MinusOutlined />
+                            </button>
+                            <span className={styles.quantityDisplay}>
+                              {item.quantity}
+                            </span>
+                            <button
+                              className={styles.quantityButton}
+                              onClick={() => handleIncreaseQuantity(item.id)}
+                              disabled={!item.inStock}
+                            >
+                              <PlusOutlined />
+                            </button>
+                          </div>
+
+                          <p className={styles.itemTotal}>
+                            {formatCurrency(item.price * item.quantity)}
+                          </p>
+
+                          <button
+                            className={styles.removeButton}
+                            onClick={() => handleRemoveItem(item.id)}
+                          >
+                            <DeleteOutlined />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
@@ -629,7 +1055,8 @@ const CartPage = () => {
               {getSelectedItemsCount() > 0 && (
                 <div className={styles.selectedInfo}>
                   <p>
-                    Đã chọn <strong>{getSelectedItemsCount()}</strong> sản phẩm
+                    Đã chọn <strong>{getSelectedTotalQuantity()}</strong> sản
+                    phẩm ({getSelectedItemsCount()} loại)
                   </p>
                 </div>
               )}
@@ -822,7 +1249,7 @@ const CartPage = () => {
                 <span>
                   Tạm tính (
                   {getSelectedItemsCount() > 0
-                    ? getSelectedItemsCount()
+                    ? getSelectedTotalQuantity()
                     : getTotalItems()}{" "}
                   sản phẩm)
                 </span>
@@ -860,23 +1287,6 @@ const CartPage = () => {
               )}
 
               <div className={styles.summaryItem}>
-                <span>
-                  Tạm tính (
-                  {getSelectedItemsCount() > 0
-                    ? getSelectedItemsCount()
-                    : getTotalItems()}{" "}
-                  sản phẩm)
-                </span>
-                <span>
-                  {formatCurrency(
-                    getSelectedItemsCount() > 0
-                      ? calculateSelectedTotal()
-                      : calculateTotal()
-                  )}
-                </span>
-              </div>
-
-              <div className={styles.summaryItem}>
                 <span>Phí vận chuyển</span>
                 <span className={styles.freeShipping}>Miễn phí</span>
               </div>
@@ -907,23 +1317,13 @@ const CartPage = () => {
               <button
                 className={styles.checkoutButton}
                 onClick={handleCheckout}
-                disabled={isProcessingPayment}
               >
-                {isProcessingPayment ? (
-                  <>
-                    <Spin size="small" />
-                    <span>Đang xử lý...</span>
-                  </>
-                ) : (
-                  <>
-                    <CreditCardOutlined />
-                    <span>
-                      Thanh toán qua ZaloPay
-                      {getSelectedItemsCount() > 0 &&
-                        ` (${getSelectedItemsCount()} sản phẩm)`}
-                    </span>
-                  </>
-                )}
+                <ShoppingOutlined />
+                <span>
+                  Đặt hàng
+                  {getSelectedItemsCount() > 0 &&
+                    ` (${getSelectedTotalQuantity()} sản phẩm)`}
+                </span>
               </button>
 
               <button
@@ -935,10 +1335,10 @@ const CartPage = () => {
               </button>
 
               <div className={styles.securePayment}>
-                <p>🔒 Thanh toán an toàn qua ZaloPay</p>
+                <p>🔒 Thông tin đơn hàng được bảo mật</p>
                 {!auth.isAuthenticated && (
                   <p className={styles.loginHint}>
-                    💡 Vui lòng đăng nhập để thanh toán
+                    💡 Vui lòng đăng nhập để đặt hàng
                   </p>
                 )}
               </div>

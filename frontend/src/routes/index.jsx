@@ -18,6 +18,8 @@ import PublicRoute from "./guards/PublicRoute";
 
 // Public Pages
 const HomePage = lazy(() => import("../pages/home"));
+const ProductsPage = lazy(() => import("../pages/ProductsPage"));
+const ProductDetailPage = lazy(() => import("../pages/ProductDetailPage"));
 const LoginPage = lazy(() => import("../pages/login"));
 const RegisterPage = lazy(() => import("../pages/register"));
 const VerifyEmailPage = lazy(() => import("../pages/verify-email"));
@@ -51,6 +53,7 @@ const ProfileLayout = lazy(() => import("../pages/ProfileLayout"));
 
 // User Pages
 const CartPage = lazy(() => import("../pages/user/CartPage"));
+const CheckoutPage = lazy(() => import("../pages/user/CheckoutPage"));
 const PaymentResultPage = lazy(() => import("../pages/user/PaymentResultPage"));
 
 // Profile sub-pages
@@ -172,6 +175,22 @@ const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <HomePage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.PRODUCTS,
+        element: (
+          <SuspenseWrapper>
+            <ProductsPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.PRODUCT_DETAIL,
+        element: (
+          <SuspenseWrapper>
+            <ProductDetailPage />
           </SuspenseWrapper>
         ),
       },
@@ -334,7 +353,17 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "/payment-result",
+        path: PROTECTED_ROUTES.USER_CHECKOUT,
+        element: (
+          <SuspenseWrapper>
+            <ProtectedRoute allowedRoles={[ROLES.USER, ROLES.ADMIN]}>
+              <CheckoutPage />
+            </ProtectedRoute>
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PROTECTED_ROUTES.PAYMENT_RESULT,
         element: (
           <SuspenseWrapper>
             <PaymentResultPage />

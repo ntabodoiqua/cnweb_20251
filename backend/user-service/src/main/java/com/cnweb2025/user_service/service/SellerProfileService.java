@@ -14,7 +14,9 @@ public interface SellerProfileService {
 
     SellerProfileResponse createSellerProfile(SellerProfileCreationRequest request);
 
-    SellerProfileResponse getSellerProfileOfCurrentUser();
+    Page<SellerProfileResponse> getSellerProfileOfCurrentUser(Pageable pageable);
+
+    SellerProfileResponse getSpecificSellerProfileOfCurrentUser(String sellerProfileId);
 
     Page<SellerProfileResponse> getAllSellerProfiles(Pageable pageable);
 
@@ -25,6 +27,8 @@ public interface SellerProfileService {
     String rejectSellerProfile(String sellerProfileId, String reason, Locale locale);
 
     FileInfoResponse uploadSellerDocument(String sellerProfileId, MultipartFile file, Locale locale);
+
+    FileInfoResponse getTempLinkForSellerDocument(String sellerProfileId, Locale locale);
 
     SellerProfileResponse editSellerProfile(String sellerProfileId, SellerProfileUpdateRequest request);
 

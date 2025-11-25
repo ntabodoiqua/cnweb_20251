@@ -41,6 +41,7 @@ public class CacheConfiguration {
                 .allowIfSubType("org.springframework.data.support")
                 .allowIfSubType("org.springframework.data")
                 .allowIfSubType("java.math")
+                .allowIfSubType("java.lang")
                 .build();
 
         objectMapper.activateDefaultTyping(

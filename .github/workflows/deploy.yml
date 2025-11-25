@@ -41,6 +41,8 @@ jobs:
             path: user-service
           - name: product-service
             path: product-service
+          - name: order-service
+            path: order-service
           - name: notification-service
             path: notification-service
           - name: file-service
@@ -129,7 +131,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             # Wait for services to be healthy
-            sleep 120
+            sleep 150
 
             # Check service health
             echo "Checking Discovery Service..."
@@ -150,6 +152,9 @@ jobs:
             echo "Checking File Service..."
             curl -f http://localhost:8083/actuator/health || exit 1
 
+            echo "Checking Order Service..."
+            curl -f http://localhost:8085/actuator/health || exit 1
+
             echo "Checking Payment Service..."
             curl -f http://localhost:8086/actuator/health || exit 1
 
@@ -159,7 +164,7 @@ jobs:
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Deployment successful for tag ${{ needs.prepare.outputs.tag }}"
+            echo "Deployment successful for tag ${{ needs.prepare.outputs.tag }}"
           else
-            echo "❌ Deployment failed for tag ${{ needs.prepare.outputs.tag }}"
+            echo "Deployment failed for tag ${{ needs.prepare.outputs.tag }}"
           fi

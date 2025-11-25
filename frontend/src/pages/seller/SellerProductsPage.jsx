@@ -7,7 +7,7 @@ import {
   ShopOutlined,
   LoadingOutlined,
 } from "@ant-design/icons";
-import { message, Modal, Switch } from "antd";
+import { notification, Modal, Switch } from "antd";
 import AddProductModal from "../../components/seller/AddProductModal";
 import {
   getProductsByStoreApi,
@@ -90,7 +90,11 @@ const SellerProductsPage = () => {
       }
     } catch (error) {
       console.error("Error fetching products:", error);
-      message.error("Không thể tải danh sách sản phẩm");
+      notification.error({
+        message: "Lỗi tải dữ liệu",
+        description: "Không thể tải danh sách sản phẩm",
+        placement: "topRight",
+      });
     } finally {
       setLoading(false);
     }
@@ -224,7 +228,12 @@ const SellerProductsPage = () => {
 
   const handleProductCreated = () => {
     fetchProducts(); // Refresh product list
-    message.success("Tạo sản phẩm thành công!");
+    notification.success({
+      message: "Thành công",
+      description: "Tạo sản phẩm thành công!",
+      placement: "topRight",
+      duration: 2,
+    });
   };
 
   const handleViewProduct = (productId) => {
@@ -243,7 +252,11 @@ const SellerProductsPage = () => {
 
   const handleBulkUpdateStatus = async (isActive) => {
     if (selectedProducts.length === 0) {
-      message.warning("Vui lòng chọn ít nhất một sản phẩm");
+      notification.warning({
+        message: "Chưa chọn sản phẩm",
+        description: "Vui lòng chọn ít nhất một sản phẩm",
+        placement: "topRight",
+      });
       return;
     }
 
@@ -283,14 +296,21 @@ const SellerProductsPage = () => {
         onOk: async () => {
           try {
             await bulkUpdateProductStatusApi(selectedProducts, isActive);
-            message.success(
-              `Vô hiệu hóa ${selectedProducts.length} sản phẩm thành công`
-            );
+            notification.success({
+              message: "Thành công",
+              description: `Vô hiệu hóa ${selectedProducts.length} sản phẩm thành công`,
+              placement: "topRight",
+              duration: 2,
+            });
             setSelectedProducts([]);
             fetchProducts();
           } catch (error) {
             console.error("Error bulk updating product status:", error);
-            message.error("Không thể cập nhật trạng thái sản phẩm");
+            notification.error({
+              message: "Lỗi cập nhật",
+              description: "Không thể cập nhật trạng thái sản phẩm",
+              placement: "topRight",
+            });
           }
         },
       });
@@ -298,14 +318,21 @@ const SellerProductsPage = () => {
       // No warning for activation
       try {
         await bulkUpdateProductStatusApi(selectedProducts, isActive);
-        message.success(
-          `Kích hoạt ${selectedProducts.length} sản phẩm thành công`
-        );
+        notification.success({
+          message: "Thành công",
+          description: `Kích hoạt ${selectedProducts.length} sản phẩm thành công`,
+          placement: "topRight",
+          duration: 2,
+        });
         setSelectedProducts([]);
         fetchProducts();
       } catch (error) {
         console.error("Error bulk updating product status:", error);
-        message.error("Không thể cập nhật trạng thái sản phẩm");
+        notification.error({
+          message: "Lỗi cập nhật",
+          description: "Không thể cập nhật trạng thái sản phẩm",
+          placement: "topRight",
+        });
       }
     }
   };
@@ -348,11 +375,20 @@ const SellerProductsPage = () => {
         onOk: async () => {
           try {
             await bulkUpdateProductStatusApi([productId], isActive);
-            message.success("Vô hiệu hóa sản phẩm thành công");
+            notification.success({
+              message: "Thành công",
+              description: "Vô hiệu hóa sản phẩm thành công",
+              placement: "topRight",
+              duration: 2,
+            });
             fetchProducts();
           } catch (error) {
             console.error("Error updating product status:", error);
-            message.error("Không thể cập nhật trạng thái sản phẩm");
+            notification.error({
+              message: "Lỗi cập nhật",
+              description: "Không thể cập nhật trạng thái sản phẩm",
+              placement: "topRight",
+            });
           }
         },
       });
@@ -360,11 +396,20 @@ const SellerProductsPage = () => {
       // No warning for activation
       try {
         await bulkUpdateProductStatusApi([productId], isActive);
-        message.success("Kích hoạt sản phẩm thành công");
+        notification.success({
+          message: "Thành công",
+          description: "Kích hoạt sản phẩm thành công",
+          placement: "topRight",
+          duration: 2,
+        });
         fetchProducts();
       } catch (error) {
         console.error("Error updating product status:", error);
-        message.error("Không thể cập nhật trạng thái sản phẩm");
+        notification.error({
+          message: "Lỗi cập nhật",
+          description: "Không thể cập nhật trạng thái sản phẩm",
+          placement: "topRight",
+        });
       }
     }
   };

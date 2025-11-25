@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "user-service", contextId = "userServiceClient", path = "/users")
 public interface UserServiceClient {
-    @GetMapping("/{username}")
+    // Use internal endpoint for service-to-service communication (no auth required)
+    @GetMapping("/internal/{username}")
     ApiResponse<UserResponse> getUserByUsername(@PathVariable String username);
 }

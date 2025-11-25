@@ -1,5 +1,6 @@
 package com.cnweb2025.user_service.service;
 
+import com.cnweb2025.user_service.dto.request.user.AdminUserUpdateRequest;
 import com.cnweb2025.user_service.dto.request.user.UserFilterRequest;
 import com.cnweb2025.user_service.dto.request.user.UserUpdateRequest;
 import com.cnweb2025.user_service.dto.response.UserResponse;
@@ -67,7 +68,7 @@ public class AdminServiceImp implements AdminService{
     // Cập nhật thông tin người dùng
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public UserResponse updateUser(String id, UserUpdateRequest request) {
+    public UserResponse updateUser(String id, AdminUserUpdateRequest request) {
         log.info("Updating user with ID: {}", id);
         var user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));

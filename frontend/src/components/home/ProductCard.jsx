@@ -54,12 +54,24 @@ const ProductCard = ({
     >
       <div className="product-image-wrapper">
         <img
-          src={product.image}
+          src={
+            product.thumbnailImage ||
+            product.image ||
+            "https://via.placeholder.com/300x300?text=No+Image"
+          }
           alt={product.name}
           className="product-image"
           loading="lazy"
         />
         {product.badge && <div className="product-badge">{product.badge}</div>}
+        {product.soldCount > 0 && (
+          <div className="product-badge sold-badge">
+            Đã bán {product.soldCount}
+          </div>
+        )}
+        {!product.active && (
+          <div className="product-badge inactive-badge">Ngừng kinh doanh</div>
+        )}
         {product.discount > 0 && (
           <div className="product-discount">-{product.discount}%</div>
         )}
@@ -94,17 +106,41 @@ const ProductCard = ({
       </div>
       <div className="product-info">
         <h3 className="product-name">{product.name}</h3>
+
+        {/* Short Description */}
+        {product.shortDescription && (
+          <p className="product-short-desc">{product.shortDescription}</p>
+        )}
+
+        {/* Rating */}
         <div className="product-rating">
-          <Rate
-            disabled
-            defaultValue={product.rating}
-            style={{ fontSize: 14 }}
-          />
-          <span className="rating-count">({product.reviews})</span>
+          {product.averageRating ? (
+            <>
+              <Rate
+                disabled
+                allowHalf
+                defaultValue={product.averageRating || product.rating}
+                style={{ fontSize: 14 }}
+              />
+              <span className="rating-count">
+                ({product.ratingCount || product.reviews})
+              </span>
+            </>
+          ) : (
+            <span className="no-rating">Chưa có đánh giá</span>
+          )}
         </div>
+
+        {/* Price */}
         <div className="product-price-wrapper">
           <span className="product-price">
-            {formatPrice(product.price || product.salePrice)}
+            {product.minPrice && product.maxPrice
+              ? product.minPrice === product.maxPrice
+                ? formatPrice(product.minPrice)
+                : `${formatPrice(product.minPrice)} - ${formatPrice(
+                    product.maxPrice
+                  )}`
+              : formatPrice(product.price || product.salePrice)}
           </span>
           {(product.originalPrice ||
             (product.salePrice && product.originalPrice)) && (
@@ -113,23 +149,46 @@ const ProductCard = ({
             </span>
           )}
         </div>
+
+        {/* Store and Category Info */}
+        <div className="product-meta-info">
+          {product.storeName && (
+            <span className="store-name" title={product.storeName}>
+              <ShoppingCartOutlined /> {product.storeName}
+            </span>
+          )}
+          {product.brandName && (
+            <span className="brand-name">• {product.brandName}</span>
+          )}
+        </div>
+
+        {/* Stock Progress or Sold Count */}
         {showProgress &&
-        product.sold !== undefined &&
-        product.stock !== undefined ? (
+        (product.soldCount !== undefined || product.sold !== undefined) &&
+        (product.totalAvailableStock !== undefined ||
+          product.stock !== undefined) ? (
           <div className="stock-progress">
             <Progress
               percent={Math.round(
-                (product.sold / (product.sold + product.stock)) * 100
+                ((product.soldCount || product.sold) /
+                  ((product.soldCount || product.sold) +
+                    (product.totalAvailableStock || product.stock))) *
+                  100
               )}
               status="active"
               strokeColor="#ee4d2d"
-              format={(percent) => `Đã bán ${product.sold}`}
+              format={(percent) =>
+                `Đã bán ${product.soldCount || product.sold}`
+              }
             />
           </div>
         ) : (
-          product.sold !== undefined && (
+          (product.soldCount !== undefined || product.sold !== undefined) && (
             <div className="product-sold">
-              <span>Đã bán {product.sold.toLocaleString()}</span>
+              <span>
+                Đã bán{" "}
+                {((product.soldCount ?? product.sold) || 0).toLocaleString()}
+              </span>
             </div>
           )
         )}

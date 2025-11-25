@@ -20,9 +20,10 @@ import {
   AppstoreOutlined,
   BellOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Space, Drawer, Menu, Input, message } from "antd";
+import { Dropdown, Space, Drawer, Menu, Input, notification } from "antd";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
+import { useCart } from "../../contexts/CartContext";
 import { getRoleName, ROLES, getHighestRole } from "../../constants/roles";
 import styles from "./header.module.css";
 import logo from "../../assets/logo.png";
@@ -31,6 +32,7 @@ const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { auth, setAuth } = useContext(AuthContext);
+  const { cartCount, resetCart } = useCart();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -41,9 +43,6 @@ const Header = () => {
     if (isLoggingOut) return;
 
     setIsLoggingOut(true);
-
-    // Hiển thị thông báo đang đăng xuất
-    const hideLoading = message.loading("Đang đăng xuất...", 0);
 
     try {
       const token = localStorage.getItem("access_token");
@@ -56,9 +55,6 @@ const Header = () => {
       console.error("Logout error:", error);
       // Vẫn thực hiện logout ở frontend ngay cả khi API thất bại
     } finally {
-      // Đóng loading
-      hideLoading();
-
       // Xóa token và reset auth state
       localStorage.removeItem("access_token");
       setAuth({
@@ -74,13 +70,19 @@ const Header = () => {
         },
       });
 
-      // Hiển thị thông báo cảm ơn
-      message.success(
-        "Đăng xuất thành công! Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi. Hẹn gặp lại! 👋",
-        2
-      );
+      // Reset giỏ hàng về 0
+      resetCart();
 
-      // Chuyển về trang chủ ngay lập tức
+      // Hiển thị thông báo cảm ơn
+      notification.success({
+        message: "Đăng xuất thành công",
+        description:
+          "Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi. Hẹn gặp lại! 👋",
+        placement: "topRight",
+        duration: 2,
+      });
+
+      // Reset trạng thái và chuyển về trang chủ
       setIsLoggingOut(false);
       navigate("/", { replace: true });
     }
@@ -386,7 +388,9 @@ const Header = () => {
             {/* Cart Icon with Badge */}
             <div className={styles.cartIcon} onClick={() => navigate("/cart")}>
               <ShoppingCartOutlined />
-              <span className={styles.cartBadge}>0</span>
+              <span className={styles.cartBadge}>
+                {cartCount > 99 ? "99+" : cartCount}
+              </span>
             </div>
 
             {/* Notification Icon with Badge */}
@@ -394,7 +398,11 @@ const Header = () => {
               <div
                 className={styles.notificationIcon}
                 onClick={() =>
-                  message.info("Tính năng thông báo đang phát triển")
+                  notification.info({
+                    message: "Thông báo",
+                    description: "Tính năng thông báo đang phát triển",
+                    placement: "topRight",
+                  })
                 }
               >
                 <BellOutlined />
