@@ -793,6 +793,20 @@ const createZaloPayOrderApi = (paymentData) => {
   });
 };
 
+const queryPaymentStatusApi = (appTransId) => {
+  const URL_API = "/api/payment/v1/payments/zalopay/query-order";
+  return axios.post(
+    URL_API,
+    { appTransId },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
 // Order APIs
 const createOrderApi = (orderData) => {
   const URL_API = "/api/order/api/v1/orders";
@@ -1522,6 +1536,7 @@ export {
   getBrandsApi,
   // Payment APIs
   createZaloPayOrderApi,
+  queryPaymentStatusApi,
   // Order APIs
   createOrderApi,
   applyCouponToOrdersApi,

@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
-import { removeCartItemApi, removeCartItemsApi } from "../../util/api";
+import {
+  removeCartItemApi,
+  removeCartItemsApi,
+  queryPaymentStatusApi,
+} from "../../util/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import {
   CheckCircleOutlined,
@@ -37,7 +41,23 @@ const PaymentResultPage = () => {
     console.log("Payment callback params:", { status, apptransid, amount });
 
     // Xử lý kết quả thanh toán
-    setTimeout(async () => {
+    const processPaymentResult = async () => {
+      // Gọi API query payment status để backend cập nhật đơn hàng ngay lập tức
+      if (apptransid) {
+        console.log("Querying payment status for:", apptransid);
+        try {
+          const queryResponse = await queryPaymentStatusApi(apptransid);
+          console.log("Payment status query response:", queryResponse);
+
+          // Backend sẽ tự động cập nhật order status dựa trên kết quả query
+          // Nếu return_code = 1 (success), backend sẽ publish PaymentSuccessEvent
+          // Nếu return_code = 2 (failed), backend sẽ publish PaymentFailedEvent
+        } catch (error) {
+          console.error("Error querying payment status:", error);
+          // Không block UI nếu query failed, vẫn dựa vào status từ URL
+        }
+      }
+
       // Thành công khi status = "1"
       if (status === "1") {
         setPaymentStatus("success");
@@ -73,14 +93,16 @@ const PaymentResultPage = () => {
 
         // Xóa pending orders sau khi thành công
         sessionStorage.removeItem("pendingOrders");
-
-        // TODO: Có thể gọi API để verify payment status với backend
-        // verifyPaymentApi(apptransid)
       } else {
         // Thất bại khi status != "1" hoặc không có status
         setPaymentStatus("failed");
       }
-    }, 2000);
+    };
+
+    // Delay 1.5s để hiển thị loading spinner
+    setTimeout(() => {
+      processPaymentResult();
+    }, 1500);
   }, [searchParams, loadCartCount]);
 
   const formatCurrency = (amount) => {
