@@ -13,5 +13,5 @@ import java.util.List;
  */
 @Repository
 public interface CouponUsageRepository extends JpaRepository<CouponUsage, String> {
-
+    int countByUserIdAndCouponId(String userId, String couponId);
 }
