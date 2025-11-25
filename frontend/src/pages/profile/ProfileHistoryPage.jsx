@@ -153,6 +153,11 @@ const ProfileHistoryPage = () => {
         text: "Thất bại",
         icon: <CloseCircleOutlined />,
       },
+      EXPIRED: {
+        color: "#8c8c8c",
+        text: "Đã hết hạn",
+        icon: <CloseCircleOutlined />,
+      },
     };
 
     const config = statusConfig[status] || statusConfig.PENDING;
@@ -306,6 +311,7 @@ const ProfileHistoryPage = () => {
               <option value="SUCCESS">Thành công</option>
               <option value="PENDING">Đang xử lý</option>
               <option value="FAILED">Thất bại</option>
+              <option value="EXPIRED">Đã hết hạn</option>
             </select>
           </div>
         </div>
@@ -595,33 +601,38 @@ const ProfileHistoryPage = () => {
               </div>
 
               {/* Return Message */}
-              {transaction.returnMessage && (
-                <div
-                  style={{
-                    marginTop: "12px",
-                    padding: "12px",
-                    background:
-                      transaction.status === "SUCCESS"
-                        ? "rgba(82, 196, 26, 0.1)"
-                        : "rgba(255, 77, 79, 0.1)",
-                    borderRadius: "8px",
-                    fontSize: "13px",
-                  }}
-                >
-                  <strong style={{ color: "#666" }}>Thông báo: </strong>
-                  <span
+              {transaction.returnMessage &&
+                transaction.status !== "PENDING" && (
+                  <div
                     style={{
-                      color:
+                      marginTop: "12px",
+                      padding: "12px",
+                      background:
                         transaction.status === "SUCCESS"
-                          ? "#52c41a"
-                          : "#ff4d4f",
-                      fontWeight: 500,
+                          ? "rgba(82, 196, 26, 0.1)"
+                          : transaction.status === "EXPIRED"
+                          ? "rgba(140, 140, 140, 0.1)"
+                          : "rgba(255, 77, 79, 0.1)",
+                      borderRadius: "8px",
+                      fontSize: "13px",
                     }}
                   >
-                    {transaction.returnMessage}
-                  </span>
-                </div>
-              )}
+                    <strong style={{ color: "#666" }}>Thông báo: </strong>
+                    <span
+                      style={{
+                        color:
+                          transaction.status === "SUCCESS"
+                            ? "#52c41a"
+                            : transaction.status === "EXPIRED"
+                            ? "#8c8c8c"
+                            : "#ff4d4f",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {transaction.returnMessage}
+                    </span>
+                  </div>
+                )}
             </div>
           ))}
         </div>
