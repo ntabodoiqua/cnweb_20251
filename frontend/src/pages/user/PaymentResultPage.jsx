@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
-import { removeCartItemApi } from "../../util/api";
+import { removeCartItemApi, removeCartItemsApi } from "../../util/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import {
   CheckCircleOutlined,
@@ -53,19 +53,13 @@ const PaymentResultPage = () => {
                 (order) => order.items || []
               );
 
-              // Xóa từng sản phẩm khỏi giỏ hàng
-              for (const item of allItems) {
-                try {
-                  // Backend order items có variantId, cần map về cart item format
-                  if (item.variantId) {
-                    await removeCartItemApi(item.productId, item.variantId);
-                  }
-                } catch (error) {
-                  console.error(
-                    `Error removing item ${item.variantId}:`,
-                    error
-                  );
-                }
+              // Collect all variant IDs to remove
+              const variantIdsToRemove = allItems
+                .filter((item) => item.variantId)
+                .map((item) => item.variantId);
+
+              if (variantIdsToRemove.length > 0) {
+                await removeCartItemsApi(variantIdsToRemove);
               }
 
               // Cập nhật lại số lượng giỏ hàng

@@ -1404,6 +1404,29 @@ const uploadCategoryImageAdminApi = (categoryId, file) => {
   });
 };
 
+const removeCartItemsApi = (variantIds) => {
+  const URL_API = "/api/order/api/v1/cart/items/bulk";
+  const token = localStorage.getItem("access_token");
+
+  const headers = {
+    "Accept-Language": "vi",
+    "Content-Type": "application/json",
+  };
+
+  // Chỉ gửi X-Session-Id nếu là guest (chưa đăng nhập)
+  // Khi đã đăng nhập, axios interceptor sẽ tự động thêm Authorization header
+  if (!token) {
+    const sessionId =
+      localStorage.getItem("cart_session_id") || generateSessionId();
+    headers["X-Session-Id"] = sessionId;
+  }
+
+  return axios.delete(URL_API, {
+    data: variantIds,
+    headers,
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -1477,6 +1500,7 @@ export {
   addToCartApi,
   updateCartItemApi,
   removeCartItemApi,
+  removeCartItemsApi,
   clearCartApi,
   mergeCartApi,
   getCartCountApi,
@@ -1522,4 +1546,5 @@ export {
   deleteCategoryAdminApi,
   toggleCategoryStatusApi,
   uploadCategoryImageAdminApi,
+  // Cart bulk remove API
 };
