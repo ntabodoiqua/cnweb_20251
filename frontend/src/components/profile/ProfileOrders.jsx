@@ -20,11 +20,21 @@ import {
   UpOutlined,
   GiftOutlined,
   ExclamationCircleOutlined,
+  PayCircleOutlined,
+  WarningOutlined,
 } from "@ant-design/icons";
 import NoImages from "../../assets/NoImages.webp";
 import styles from "../../pages/Profile.module.css";
-import { getMyOrdersApi } from "../../util/api";
-import { message, Pagination, DatePicker, InputNumber, Modal, Tag } from "antd";
+import { getMyOrdersApi, initiateOrderPaymentApi } from "../../util/api";
+import {
+  message,
+  Pagination,
+  DatePicker,
+  InputNumber,
+  Modal,
+  Tag,
+  Spin,
+} from "antd";
 import LoadingSpinner from "../LoadingSpinner";
 import useDebounce from "../../hooks/useDebounce";
 
@@ -38,6 +48,8 @@ const ProfileOrders = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [detailModalVisible, setDetailModalVisible] = useState(false);
+  const [payingOrderId, setPayingOrderId] = useState(null);
+  const [orderTimers, setOrderTimers] = useState({});
 
   // Pagination
   const [pagination, setPagination] = useState({
@@ -133,6 +145,21 @@ const ProfileOrders = () => {
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
+
+  // Update countdown timers every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const newTimers = {};
+      orders.forEach((order) => {
+        if (order.paymentStatus === "UNPAID" || order.paymentStatus === "PENDING") {
+          newTimers[order.id] = calculateTimeRemaining(order.createdAt);
+        }
+      });
+      setOrderTimers(newTimers);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [orders]);
 
   const orderTabs = [
     { key: "all", label: "Tất cả" },
@@ -234,6 +261,165 @@ const ProfileOrders = () => {
   const formatDateTime = (dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleString("vi-VN");
+  };
+
+  // Tính thời gian còn lại của đơn hàng (15 phút từ khi tạo)
+  const calculateTimeRemaining = (createdAt) => {
+    const ORDER_EXPIRY_MINUTES = 15;
+    const createdTime = new Date(createdAt).getTime();
+    const expiryTime = createdTime + ORDER_EXPIRY_MINUTES * 60 * 1000;
+    const now = Date.now();
+    const remaining = expiryTime - now;
+
+    if (remaining <= 0) {
+      return { expired: true, minutes: 0, seconds: 0, totalSeconds: 0 };
+    }
+
+    const totalSeconds = Math.floor(remaining / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    return { expired: false, minutes, seconds, totalSeconds };
+  };
+
+  // Kiểm tra đơn hàng có thể thanh toán không
+  const canPayOrder = (order) => {
+    // Cho phép thanh toán với UNPAID (chưa thanh toán) và PENDING (đã khởi tạo nhưng chưa hoàn tất)
+    if (order.paymentStatus !== "UNPAID" && order.paymentStatus !== "PENDING") return false;
+    const timeRemaining = calculateTimeRemaining(order.createdAt);
+    // Hiển thị nút miễn là chưa hết hạn, validation chi tiết khi click
+    return !timeRemaining.expired;
+  };
+
+  // Format countdown timer
+  const formatCountdown = (minutes, seconds) => {
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(
+      2,
+      "0"
+    )}`;
+  };
+
+  // Xử lý thanh toán đơn hàng
+  const handlePayOrder = async (order) => {
+    const timeRemaining = calculateTimeRemaining(order.createdAt);
+
+    if (timeRemaining.expired) {
+      Modal.warning({
+        title: "Đơn hàng đã hết hạn",
+        content:
+          "Đơn hàng này đã quá thời gian thanh toán (15 phút). Vui lòng tạo đơn hàng mới.",
+        okText: "Đã hiểu",
+      });
+      return;
+    }
+
+    if (timeRemaining.totalSeconds < 300) {
+      Modal.warning({
+        title: "Thời gian còn lại không đủ",
+        content:
+          "Đơn hàng còn lại ít hơn 5 phút. Vui lòng tạo đơn hàng mới để có đủ thời gian thanh toán.",
+        okText: "Đã hiểu",
+      });
+      return;
+    }
+
+    Modal.confirm({
+      title: "Xác nhận thanh toán",
+      content: (
+        <div>
+          <p>
+            Bạn muốn thanh toán đơn hàng <strong>{order.orderNumber}</strong>?
+          </p>
+          <p>
+            Tổng tiền:{" "}
+            <strong style={{ color: "#ee4d2d" }}>
+              {formatCurrency(order.totalAmount)}
+            </strong>
+          </p>
+          <p style={{ color: "#faad14" }}>
+            <ClockCircleOutlined /> Thời gian còn lại:{" "}
+            <strong>
+              {formatCountdown(timeRemaining.minutes, timeRemaining.seconds)}
+            </strong>
+          </p>
+        </div>
+      ),
+      okText: "Thanh toán ngay",
+      cancelText: "Hủy",
+      onOk: async () => {
+        setPayingOrderId(order.id);
+        try {
+          // Truyền thời gian còn lại thực tế (tối thiểu 300 giây theo yêu cầu ZaloPay)
+          const expirySeconds = Math.max(timeRemaining.totalSeconds, 300);
+          const response = await initiateOrderPaymentApi(
+            [order.id],
+            expirySeconds
+          );
+
+          if (response?.code === 200 && response?.result?.paymentUrl) {
+            message.success("Đang chuyển đến cổng thanh toán...", 1.5);
+
+            // Lưu thông tin đơn hàng và thời gian còn lại
+            sessionStorage.setItem(
+              "pendingOrders",
+              JSON.stringify({
+                orders: [order],
+                orderIds: [order.id],
+                appTransId: response.result.appTransId,
+                timestamp: Date.now(),
+                expirySeconds: timeRemaining.totalSeconds, // Truyền thời gian còn lại
+              })
+            );
+
+            // Chuyển đến cổng thanh toán
+            window.open(response.result.paymentUrl, "_self");
+          } else {
+            throw new Error(
+              response?.message || "Không thể khởi tạo thanh toán"
+            );
+          }
+        } catch (error) {
+          console.error("Payment error:", error);
+
+          // Xử lý các error message từ backend
+          let errorMessage = "Không thể thanh toán. Vui lòng thử lại!";
+
+          if (error.response?.data?.message) {
+            const backendMessage = error.response.data.message;
+
+            // Xử lý message về đơn hàng hết hạn
+            if (
+              backendMessage.includes("hết hạn") ||
+              backendMessage.includes("expired")
+            ) {
+              errorMessage =
+                "Đơn hàng đã hết hạn thanh toán. Vui lòng tạo đơn hàng mới.";
+              // Refresh danh sách đơn hàng
+              fetchOrders();
+            }
+            // Xử lý message về đơn hàng đã bị hủy
+            else if (
+              backendMessage.includes("đã bị hủy") ||
+              backendMessage.includes("CANCELLED")
+            ) {
+              errorMessage = "Đơn hàng đã bị hủy. Không thể thanh toán.";
+              // Refresh danh sách đơn hàng
+              fetchOrders();
+            }
+            // Các lỗi khác hiển thị message từ backend
+            else {
+              errorMessage = backendMessage;
+            }
+          } else if (error.message) {
+            errorMessage = error.message;
+          }
+
+          message.error(errorMessage);
+        } finally {
+          setPayingOrderId(null);
+        }
+      },
+    });
   };
 
   const handleTabChange = (tabKey) => {
@@ -836,14 +1022,123 @@ const ProfileOrders = () => {
                         Mã GD: {order.paymentTransactionId}
                       </span>
                     )}
+
+                    {/* Countdown Timer cho đơn hàng chưa thanh toán */}
+                    {(order.paymentStatus === "UNPAID" || order.paymentStatus === "PENDING") &&
+                      orderTimers[order.id] && (
+                        <div style={{ marginTop: "8px" }}>
+                          {!orderTimers[order.id].expired ? (
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                padding: "4px 10px",
+                                background:
+                                  orderTimers[order.id].totalSeconds < 300
+                                    ? "rgba(255, 77, 79, 0.1)"
+                                    : "rgba(250, 173, 20, 0.1)",
+                                border:
+                                  orderTimers[order.id].totalSeconds < 300
+                                    ? "1px solid #ff4d4f"
+                                    : "1px solid #faad14",
+                                borderRadius: "6px",
+                                color:
+                                  orderTimers[order.id].totalSeconds < 300
+                                    ? "#ff4d4f"
+                                    : "#faad14",
+                                fontWeight: 600,
+                                fontSize: "13px",
+                              }}
+                            >
+                              {orderTimers[order.id].totalSeconds < 300 ? (
+                                <WarningOutlined />
+                              ) : (
+                                <ClockCircleOutlined />
+                              )}
+                              Còn lại:{" "}
+                              {formatCountdown(
+                                orderTimers[order.id].minutes,
+                                orderTimers[order.id].seconds
+                              )}
+                              {orderTimers[order.id].totalSeconds < 300 && (
+                                <span
+                                  style={{
+                                    fontSize: "11px",
+                                    marginLeft: "4px",
+                                  }}
+                                >
+                                  (Sắp hết hạn)
+                                </span>
+                              )}
+                            </span>
+                          ) : (
+                            <span
+                              style={{
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: "6px",
+                                padding: "4px 10px",
+                                background: "rgba(255, 77, 79, 0.1)",
+                                border: "1px solid #ff4d4f",
+                                borderRadius: "6px",
+                                color: "#ff4d4f",
+                                fontWeight: 600,
+                                fontSize: "13px",
+                              }}
+                            >
+                              <WarningOutlined />
+                              Đã hết hạn thanh toán
+                            </span>
+                          )}
+                        </div>
+                      )}
                   </div>
-                  <button
-                    className={`${styles.btn} ${styles.btnPrimary}`}
-                    onClick={() => showOrderDetail(order)}
+
+                  <div
+                    style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}
                   >
-                    <EyeOutlined />
-                    Xem chi tiết
-                  </button>
+                    {/* Nút thanh toán cho đơn hàng chưa thanh toán và còn hạn */}
+                    {canPayOrder(order) && (
+                      <button
+                        className={`${styles.btn}`}
+                        style={{
+                          background: "#52c41a",
+                          color: "white",
+                          border: "none",
+                          padding: "8px 16px",
+                          borderRadius: "6px",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                        onClick={() => handlePayOrder(order)}
+                        disabled={payingOrderId === order.id}
+                      >
+                        {payingOrderId === order.id ? (
+                          <>
+                            <Spin size="small" />
+                            <span>Đang xử lý...</span>
+                          </>
+                        ) : (
+                          <>
+                            <PayCircleOutlined />
+                            <span>Thanh toán ngay</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+
+                    <button
+                      className={`${styles.btn} ${styles.btnPrimary}`}
+                      onClick={() => showOrderDetail(order)}
+                    >
+                      <EyeOutlined />
+                      Xem chi tiết
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -1143,7 +1438,7 @@ const ProfileOrders = () => {
             </div>
 
             {/* Timeline */}
-            <div>
+            <div style={{ marginBottom: "24px" }}>
               <h4 style={{ margin: "0 0 12px", color: "#333" }}>
                 Lịch sử đơn hàng
               </h4>
@@ -1179,6 +1474,138 @@ const ProfileOrders = () => {
                 </div>
               </div>
             </div>
+
+            {/* Payment Action Button */}
+            {canPayOrder(selectedOrder) && (
+              <div
+                style={{
+                  marginTop: "24px",
+                  padding: "16px",
+                  background: "rgba(82, 196, 26, 0.1)",
+                  border: "2px solid #52c41a",
+                  borderRadius: "12px",
+                  textAlign: "center",
+                }}
+              >
+                <div style={{ marginBottom: "12px" }}>
+                  {orderTimers[selectedOrder.id] &&
+                    !orderTimers[selectedOrder.id].expired && (
+                      <div
+                        style={{
+                          fontSize: "16px",
+                          fontWeight: 600,
+                          color:
+                            orderTimers[selectedOrder.id].totalSeconds < 300
+                              ? "#ff4d4f"
+                              : "#faad14",
+                          marginBottom: "8px",
+                        }}
+                      >
+                        {orderTimers[selectedOrder.id].totalSeconds < 300 ? (
+                          <WarningOutlined />
+                        ) : (
+                          <ClockCircleOutlined />
+                        )}{" "}
+                        Thời gian còn lại:{" "}
+                        <span style={{ fontSize: "20px", color: "#ff4d4f" }}>
+                          {formatCountdown(
+                            orderTimers[selectedOrder.id].minutes,
+                            orderTimers[selectedOrder.id].seconds
+                          )}
+                        </span>
+                        {orderTimers[selectedOrder.id].totalSeconds < 300 && (
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              marginLeft: "8px",
+                              display: "block",
+                              color: "#ff4d4f",
+                            }}
+                          >
+                            ⚠️ Đơn hàng sắp hết hạn. Vui lòng tạo đơn mới nếu
+                            cần thêm thời gian.
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  <p
+                    style={{ margin: "8px 0", color: "#666", fontSize: "14px" }}
+                  >
+                    Vui lòng thanh toán để hoàn tất đơn hàng
+                  </p>
+                </div>
+                <button
+                  style={{
+                    width: "100%",
+                    padding: "12px 24px",
+                    background: "#52c41a",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "8px",
+                    fontSize: "16px",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                  }}
+                  onClick={() => {
+                    setDetailModalVisible(false);
+                    handlePayOrder(selectedOrder);
+                  }}
+                  disabled={payingOrderId === selectedOrder.id}
+                >
+                  {payingOrderId === selectedOrder.id ? (
+                    <>
+                      <Spin size="small" />
+                      <span>Đang xử lý...</span>
+                    </>
+                  ) : (
+                    <>
+                      <PayCircleOutlined />
+                      <span>Thanh toán ngay</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {/* Expired Warning */}
+            {selectedOrder.paymentStatus === "UNPAID" &&
+              orderTimers[selectedOrder.id]?.expired && (
+                <div
+                  style={{
+                    marginTop: "24px",
+                    padding: "16px",
+                    background: "rgba(255, 77, 79, 0.1)",
+                    border: "2px solid #ff4d4f",
+                    borderRadius: "12px",
+                    textAlign: "center",
+                  }}
+                >
+                  <WarningOutlined
+                    style={{
+                      fontSize: "32px",
+                      color: "#ff4d4f",
+                      marginBottom: "8px",
+                    }}
+                  />
+                  <p
+                    style={{
+                      margin: "8px 0",
+                      color: "#ff4d4f",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Đơn hàng đã hết hạn thanh toán
+                  </p>
+                  <p style={{ margin: "0", color: "#666", fontSize: "14px" }}>
+                    Thời gian thanh toán đã quá 15 phút. Vui lòng tạo đơn hàng
+                    mới.
+                  </p>
+                </div>
+              )}
           </div>
         )}
       </Modal>
