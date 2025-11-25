@@ -151,7 +151,10 @@ const ProfileOrders = () => {
     const interval = setInterval(() => {
       const newTimers = {};
       orders.forEach((order) => {
-        if (order.paymentStatus === "UNPAID" || order.paymentStatus === "PENDING") {
+        if (
+          order.paymentStatus === "UNPAID" ||
+          order.paymentStatus === "PENDING"
+        ) {
           newTimers[order.id] = calculateTimeRemaining(order.createdAt);
         }
       });
@@ -285,7 +288,8 @@ const ProfileOrders = () => {
   // Kiểm tra đơn hàng có thể thanh toán không
   const canPayOrder = (order) => {
     // Cho phép thanh toán với UNPAID (chưa thanh toán) và PENDING (đã khởi tạo nhưng chưa hoàn tất)
-    if (order.paymentStatus !== "UNPAID" && order.paymentStatus !== "PENDING") return false;
+    if (order.paymentStatus !== "UNPAID" && order.paymentStatus !== "PENDING")
+      return false;
     const timeRemaining = calculateTimeRemaining(order.createdAt);
     // Hiển thị nút miễn là chưa hết hạn, validation chi tiết khi click
     return !timeRemaining.expired;
@@ -1024,7 +1028,8 @@ const ProfileOrders = () => {
                     )}
 
                     {/* Countdown Timer cho đơn hàng chưa thanh toán */}
-                    {(order.paymentStatus === "UNPAID" || order.paymentStatus === "PENDING") &&
+                    {(order.paymentStatus === "UNPAID" ||
+                      order.paymentStatus === "PENDING") &&
                       orderTimers[order.id] && (
                         <div style={{ marginTop: "8px" }}>
                           {!orderTimers[order.id].expired ? (
