@@ -26,4 +26,6 @@ public interface StoreService {
     StoreResponse updateStoreMedia(String storeId, Integer mediaType, MultipartFile file);
 
     void activateStoreById(String storeId);
+
+    boolean validateStoreOwnership(String storeId, String username);
 }

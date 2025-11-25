@@ -3,6 +3,7 @@ package com.cnweb.order_service.service;
 import com.cnweb.order_service.client.*;
 import com.cnweb.order_service.dto.payment.*;
 import com.cnweb.order_service.dto.request.OrderCreationRequest;
+import com.cnweb.order_service.dto.request.OrderFilterRequest;
 import com.cnweb.order_service.dto.request.OrderItemRequest;
 import com.cnweb.order_service.dto.response.CouponResponse;
 import com.cnweb.order_service.dto.response.CouponValidationResponse;
@@ -11,11 +12,17 @@ import com.cnweb.order_service.entity.Order;
 import com.cnweb.order_service.entity.OrderItem;
 import com.cnweb.order_service.mapper.OrderMapper;
 import com.cnweb.order_service.repository.OrderRepository;
+import com.cnweb.order_service.specification.OrderSpecification;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +44,9 @@ public class OrderServiceImpl implements OrderService {
     PaymentClient paymentClient;
     OrderMapper orderMapper;
     CouponService couponService;
+    @Value("${payment.redirect-url}")
+    @NonFinal
+    String paymentRedirectUrl;
 
     @Override
     @Transactional
@@ -258,17 +268,17 @@ public class OrderServiceImpl implements OrderService {
         CreatePaymentRequest paymentRequest = CreatePaymentRequest.builder()
                 .appUser(username)
                 .amount(totalPaymentAmount.longValue())
-                .description("Payment for orders: " + String.join(", ", orders.stream().map(Order::getOrderNumber).toList()))
+                .description("Thanh toán cho đơn hàng: " + String.join(", ", orders.stream().map(Order::getOrderNumber).toList()))
                 .items(paymentItems)
                 .embedData(PaymentEmbedData.builder()
                         .orderIds(orderIds)
                         .email(orders.getFirst().getReceiverEmail()) // Assume same email for batch
-                        .redirectUrl("http://localhost:5173/payment/result")
+                        .redirectUrl(paymentRedirectUrl)
                         .build())
                 .email(orders.getFirst().getReceiverEmail())
                 .phone(orders.getFirst().getReceiverPhone())
                 .address(orders.getFirst().getShippingAddress())
-                .title("Payment for " + orders.size() + " orders")
+                .title("Thanh toán cho " + orders.size() + " đơn hàng")
                 .build();
         
         // Call Payment Service
@@ -292,6 +302,26 @@ public class OrderServiceImpl implements OrderService {
         } else {
             throw new RuntimeException("Payment initialization failed: " + paymentResponse.getMessage());
         }
+    }
+
+    @Override
+    public Page<OrderResponse> getMyOrders(String username, OrderFilterRequest filter, Pageable pageable) {
+        Specification<Order> spec = OrderSpecification.getOrdersByFilter(filter, username, null);
+        Page<Order> orders = orderRepository.findAll(spec, pageable);
+        return orders.map(orderMapper::toOrderResponse);
+    }
+
+    @Override
+    public Page<OrderResponse> getStoreOrders(String requesterUsername, String storeId, OrderFilterRequest filter, Pageable pageable) {
+        // Validate store ownership
+        ApiResponse<Boolean> validationResponse = productClient.validateStoreOwner(storeId, requesterUsername);
+        if (validationResponse.getResult() == null || !validationResponse.getResult()) {
+            throw new RuntimeException("Unauthorized access to store orders");
+        }
+
+        Specification<Order> spec = OrderSpecification.getOrdersByFilter(filter, null, storeId);
+        Page<Order> orders = orderRepository.findAll(spec, pageable);
+        return orders.map(orderMapper::toOrderResponse);
     }
 
     private void applyCoupon(String username, String couponCode, List<Order> orders) {

@@ -18,6 +18,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/cart")
 @RequiredArgsConstructor
@@ -200,6 +202,22 @@ public class CartController {
                 .code(200)
                 .message(result.getMessage())
                 .result(result)
+                .build());
+    }
+
+    @DeleteMapping("/items/bulk")
+    @Operation(summary = "Remove multiple items from cart", description = "Remove multiple product items from cart")
+    public ResponseEntity<ApiResponse<CartDTO>> removeCartItems(
+            @RequestBody List<String> variantIds,
+            @RequestHeader(value = "X-Session-Id", required = false) String sessionId) {
+
+        String identifier = getCartIdentifier(sessionId);
+        CartDTO cart = cartService.removeCartItems(identifier, variantIds);
+
+        return ResponseEntity.ok(ApiResponse.<CartDTO>builder()
+                .code(200)
+                .message("Items removed from cart successfully")
+                .result(cart)
                 .build());
     }
 }

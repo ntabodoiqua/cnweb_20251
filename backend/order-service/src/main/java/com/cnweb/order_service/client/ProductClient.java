@@ -3,8 +3,11 @@ package com.cnweb.order_service.client;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -57,4 +60,11 @@ public interface ProductClient {
 
     @PostMapping("/return-batch")
     ApiResponse<Void> returnBatch(@RequestBody @Valid BatchInventoryChangeRequest request);
+
+    /**
+     * Validate if a user owns a store
+     * GET /internal/products/stores/{storeId}/validate-owner
+     */
+    @GetMapping("/stores/{storeId}/validate-owner")
+    ApiResponse<Boolean> validateStoreOwner(@PathVariable("storeId") String storeId, @RequestParam("username") String username);
 }

@@ -9,6 +9,7 @@ import com.vdt2025.product_service.dto.response.VariantInternalDTO;
 import com.vdt2025.product_service.dto.response.VariantValidationDTO;
 import com.vdt2025.product_service.service.InventoryService;
 import com.vdt2025.product_service.service.ProductService;
+import com.vdt2025.product_service.service.StoreService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,19 @@ public class InternalController {
 
     private final ProductService productService;
     private final InventoryService inventoryService;
+    private final StoreService storeService;
+
+    /**
+     * Validate if a user owns a store
+     * GET /internal/products/stores/{storeId}/validate-owner
+     */
+    @GetMapping("/stores/{storeId}/validate-owner")
+    public ApiResponse<Boolean> validateStoreOwner(@PathVariable String storeId, @RequestParam String username) {
+        boolean isOwner = storeService.validateStoreOwnership(storeId, username);
+        return ApiResponse.<Boolean>builder()
+                .result(isOwner)
+                .build();
+    }
 
     /**
      * Get variant information by ID (for internal service calls)

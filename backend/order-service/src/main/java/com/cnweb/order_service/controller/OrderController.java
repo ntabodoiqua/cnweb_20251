@@ -1,6 +1,7 @@
 package com.cnweb.order_service.controller;
 
 import com.cnweb.order_service.dto.request.OrderCreationRequest;
+import com.cnweb.order_service.dto.request.OrderFilterRequest;
 import com.cnweb.order_service.dto.response.OrderPaymentResponse;
 import com.cnweb.order_service.dto.response.OrderResponse;
 import com.cnweb.order_service.service.OrderService;
@@ -10,6 +11,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -74,6 +79,39 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.<OrderPaymentResponse>builder()
                 .code(200)
                 .message("Payment initiated successfully")
+                .result(response)
+                .build());
+    }
+
+    @GetMapping("/my-orders")
+    @Operation(summary = "Get my orders", description = "Get list of orders for current user with filtering and pagination")
+    public ResponseEntity<ApiResponse<Page<OrderResponse>>> getMyOrders(
+            @ModelAttribute OrderFilterRequest filter,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        
+        String username = getCurrentUsername();
+        Page<OrderResponse> response = orderService.getMyOrders(username, filter, pageable);
+        
+        return ResponseEntity.ok(ApiResponse.<Page<OrderResponse>>builder()
+                .code(200)
+                .message("Orders retrieved successfully")
+                .result(response)
+                .build());
+    }
+
+    @GetMapping("/store/{storeId}")
+    @Operation(summary = "Get store orders", description = "Get list of orders for a specific store with filtering and pagination")
+    public ResponseEntity<ApiResponse<Page<OrderResponse>>> getStoreOrders(
+            @PathVariable String storeId,
+            @ModelAttribute OrderFilterRequest filter,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        
+        String username = getCurrentUsername();
+        Page<OrderResponse> response = orderService.getStoreOrders(username, storeId, filter, pageable);
+        
+        return ResponseEntity.ok(ApiResponse.<Page<OrderResponse>>builder()
+                .code(200)
+                .message("Store orders retrieved successfully")
                 .result(response)
                 .build());
     }

@@ -3,3 +3,15 @@ eureka:
     service-url:
       # Ghi đè cấu hình này để trỏ về localhost
       defaultZone: http://localhost:8761/eureka/
+
+spring:
+  cache:
+    type: redis
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      username: ""
+      password: ""
+      ssl:
+        enabled: false

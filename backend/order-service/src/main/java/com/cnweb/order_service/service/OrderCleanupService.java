@@ -6,9 +6,11 @@ import com.cnweb.order_service.client.ProductClient;
 import com.cnweb.order_service.entity.Order;
 import com.cnweb.order_service.entity.OrderItem;
 import com.cnweb.order_service.enums.OrderStatus;
+import com.cnweb.order_service.enums.PaymentStatus;
 import com.cnweb.order_service.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,14 +27,16 @@ public class OrderCleanupService {
     private final OrderRepository orderRepository;
     private final ProductClient productClient;
 
+    @Value("${timeout.order}")
+    private int minute;
     /**
      * Run every minute to check for expired orders.
      * Expired orders are PENDING orders created more than 10 minutes ago.
      */
-    @Scheduled(fixedRate = 60000) // 1 minute
+    @Scheduled(fixedRateString = "${schedule.order-cleanup}") // 1 minute
     @Transactional
     public void cancelExpiredOrders() {
-        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(10);
+        LocalDateTime expirationTime = LocalDateTime.now().minusMinutes(minute);
         List<Order> expiredOrders = orderRepository.findByStatusAndCreatedAtBefore(OrderStatus.PENDING, expirationTime);
 
         if (expiredOrders.isEmpty()) {
@@ -66,7 +70,8 @@ public class OrderCleanupService {
 
                 // 2. Update order status
                 order.setStatus(OrderStatus.CANCELLED);
-                order.setCancelReason("Payment timeout (10 minutes)");
+                order.setPaymentStatus(PaymentStatus.UNPAID);
+                order.setCancelReason("Hết thời gian thanh toán");
                 order.setCancelledAt(LocalDateTime.now());
                 order.setCancelledBy("SYSTEM");
                 

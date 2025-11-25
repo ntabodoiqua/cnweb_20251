@@ -12,6 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(name = "payment-service")
 public interface PaymentClient {
 
-    @PostMapping("/api/v1/payments/zalopay/create-order")
+    @PostMapping("/v1/payments/zalopay/create-order")
     CreatePaymentResponse createZaloPayOrder(@RequestBody CreatePaymentRequest request);
 }
