@@ -427,6 +427,25 @@ public class CartService {
                 .message(message)
                 .build();
     }
+
+    /**
+     * Remove multiple items from cart
+     */
+    public CartDTO removeCartItems(String identifier, List<String> variantIds) {
+        CartDTO cart = redisCartRepository.removeItems(identifier, variantIds);
+
+        if (cart == null) {
+            throw new RuntimeException("Cart not found");
+        }
+
+        // Trigger async persistence for authenticated users
+        if (!identifier.startsWith("guest:")) {
+            cartPersistenceService.persistCartToDatabase(identifier);
+        }
+
+        log.info("Removed {} items from cart for identifier: {}", variantIds.size(), identifier);
+        return cart;
+    }
     
     /**
      * Get cart without auto-validation (internal use)

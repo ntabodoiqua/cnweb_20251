@@ -45,6 +45,24 @@ public class RedisCartRepository {
     }
 
     /**
+     * Remove multiple items from cart
+     */
+    public CartDTO removeItems(String identifier, List<String> variantIds) {
+        CartDTO cart = getCart(identifier);
+
+        if (cart == null) {
+            return null;
+        }
+
+        cart.getItems().removeIf(item ->
+                item.getVariantId() != null && variantIds.contains(item.getVariantId())
+        );
+
+        saveCart(cart);
+        return cart;
+    }
+
+    /**
      * Get cart from Redis
      */
     public CartDTO getCart(String identifier) {
