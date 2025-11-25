@@ -6,6 +6,7 @@ import com.cnweb.order_service.client.ProductClient;
 import com.cnweb.order_service.entity.Order;
 import com.cnweb.order_service.entity.OrderItem;
 import com.cnweb.order_service.enums.OrderStatus;
+import com.cnweb.order_service.enums.PaymentStatus;
 import com.cnweb.order_service.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -69,7 +70,8 @@ public class OrderCleanupService {
 
                 // 2. Update order status
                 order.setStatus(OrderStatus.CANCELLED);
-                order.setCancelReason("Payment timeout (10 minutes)");
+                order.setPaymentStatus(PaymentStatus.UNPAID);
+                order.setCancelReason("Hết thời gian thanh toán");
                 order.setCancelledAt(LocalDateTime.now());
                 order.setCancelledBy("SYSTEM");
                 

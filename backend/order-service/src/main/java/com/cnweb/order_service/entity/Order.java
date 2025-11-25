@@ -135,6 +135,9 @@ public class Order {
     @Column(name = "cancelled_at")
     LocalDateTime cancelledAt;
 
+    @Column(name = "paid_at")
+    LocalDateTime paidAt;
+
     // Relationships
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
@@ -167,7 +170,7 @@ public class Order {
      * Kiểm tra đơn hàng có thể hủy được không
      */
     public boolean canBeCancelled() {
-        return status == OrderStatus.PENDING || status == OrderStatus.CONFIRMED;
+        return status == OrderStatus.PENDING || status == OrderStatus.PAID;
     }
 
     /**

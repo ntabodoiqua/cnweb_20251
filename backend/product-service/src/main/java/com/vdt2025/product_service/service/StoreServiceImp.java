@@ -245,6 +245,11 @@ public class StoreServiceImp implements StoreService {
         }
     }
 
+    @Override
+    public boolean validateStoreOwnership(String storeId, String username) {
+        return storeRepository.existsByIdAndUserNameIgnoreCase(storeId, username);
+    }
+
     /**
      * Helper method để kiểm tra xem một cửa hàng có thuộc về người bán hiện tại hay không
      * @param storeId ID của cửa hàng

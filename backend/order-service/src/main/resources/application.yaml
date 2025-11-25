@@ -52,3 +52,6 @@ schedule:
 
 timeout:
   order: 16 # minutes
+
+payment:
+  redirect-url: ${PAYMENT_REDIRECT_URL:http://localhost:5173/payment/result}

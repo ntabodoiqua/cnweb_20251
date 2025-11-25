@@ -1,6 +1,10 @@
 package com.cnweb.order_service.messaging;
 
+import com.cnweb.order_service.client.BatchInventoryChangeRequest;
+import com.cnweb.order_service.client.InventoryChangeRequest;
+import com.cnweb.order_service.client.ProductClient;
 import com.cnweb.order_service.entity.Order;
+import com.cnweb.order_service.entity.OrderItem;
 import com.cnweb.order_service.enums.OrderStatus;
 import com.cnweb.order_service.enums.PaymentStatus;
 import com.cnweb.order_service.repository.OrderRepository;
@@ -13,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -20,6 +25,7 @@ import java.util.List;
 public class PaymentEventListener {
 
     private final OrderRepository orderRepository;
+    private final ProductClient productClient;
 
     @RabbitListener(queues = "order-service-payment-success-queue")
     @Transactional
@@ -41,12 +47,33 @@ public class PaymentEventListener {
                 
                 // Update order status if it was PENDING
                 if (order.getStatus() == OrderStatus.PENDING) {
-                    // Set to CONFIRMED as payment is successful
-                    order.setStatus(OrderStatus.CONFIRMED);
-                    order.setConfirmedAt(LocalDateTime.now());
+                    // Set to PAID as payment is successful
+                    order.setStatus(OrderStatus.PAID);
+                    order.setPaidAt(LocalDateTime.now());
                 }
                 
-                log.info("Updated Order {} to PAID/CONFIRMED", order.getOrderNumber());
+                log.info("Updated Order {} to PAID", order.getOrderNumber());
+
+                // Gọi API confirm-batch để chốt đơn hàng trong product-service
+                try {
+                    List<InventoryChangeRequest> items = order.getItems().stream()
+                            .map(item -> InventoryChangeRequest.builder()
+                                    .variantId(item.getVariantId())
+                                    .quantity(item.getQuantity())
+                                    .build())
+                            .collect(Collectors.toList());
+
+                    BatchInventoryChangeRequest confirmRequest = BatchInventoryChangeRequest.builder()
+                            .items(items)
+                            .build();
+
+                    productClient.confirmBatch(confirmRequest);
+                    log.info("Successfully confirmed batch for Order {}", order.getOrderNumber());
+                } catch (Exception e) {
+                    log.error("Failed to confirm batch for Order {}: {}", order.getOrderNumber(), e.getMessage(), e);
+                    // Không throw exception ở đây để không làm rollback transaction của order
+                    // Order đã PAID nhưng inventory chưa confirm, cần xử lý manual hoặc retry mechanism
+                }
             }
 
             orderRepository.saveAll(orders);
