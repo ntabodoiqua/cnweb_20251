@@ -14,6 +14,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ApplyCouponRequest {
 
-    @NotBlank(message = "Coupon code is required")
+    @NotBlank(message = "COUPON_CODE_REQUIRED")
     String couponCode;
 }

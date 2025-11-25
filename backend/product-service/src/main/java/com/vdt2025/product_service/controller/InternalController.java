@@ -31,9 +31,9 @@ public class InternalController {
 
     /**
      * Get variant information by ID (for internal service calls)
-     * GET /internal/products/variants
+     * POST /internal/products/variants
      */
-    @GetMapping("/variants")
+    @PostMapping("/variants")
     public ApiResponse<List<VariantInternalDTO>> getVariantById(@RequestBody @Valid VariantsQueryRequest request) {
         log.info("Internal: Fetching variant info for IDs: {}", request.getVariantIds());
 
@@ -48,7 +48,7 @@ public class InternalController {
      * Validate multiple products and variants
      * GET /internal/products/validate
      */
-    @GetMapping("/validate")
+    @PostMapping("/validate")
     public ApiResponse<List<VariantValidationDTO>> validateProducts(@RequestBody @Valid VariantsQueryRequest request) {
         List<String> variantIds = request.getVariantIds();
         log.info("Internal: Validating variants: {}", variantIds);
