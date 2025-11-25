@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "../../contexts/CartContext";
-import { removeCartItemApi } from "../../util/api";
+import { removeCartItemApi, removeCartItemsApi } from "../../util/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import {
   CheckCircleOutlined,
@@ -23,37 +23,43 @@ const PaymentResultPage = () => {
   const [orderInfo, setOrderInfo] = useState(null);
 
   useEffect(() => {
-    // Lấy thông tin đơn hàng từ sessionStorage
-    const pendingOrder = sessionStorage.getItem("pendingOrder");
-    if (pendingOrder) {
-      setOrderInfo(JSON.parse(pendingOrder));
+    // Lấy thông tin đơn hàng từ sessionStorage (backend flow mới)
+    const pendingOrders = sessionStorage.getItem("pendingOrders");
+    if (pendingOrders) {
+      setOrderInfo(JSON.parse(pendingOrders));
     }
 
     // Kiểm tra query params từ ZaloPay
     const status = searchParams.get("status");
     const apptransid = searchParams.get("apptransid");
+    const amount = searchParams.get("amount");
 
-    // Giả lập xử lý kết quả thanh toán
+    console.log("Payment callback params:", { status, apptransid, amount });
+
+    // Xử lý kết quả thanh toán
     setTimeout(async () => {
-      // Chễ thành công khi status = "1"
+      // Thành công khi status = "1"
       if (status === "1") {
         setPaymentStatus("success");
 
         // Xóa các sản phẩm đã thanh toán khỏi giỏ hàng
-        if (pendingOrder) {
-          const orderData = JSON.parse(pendingOrder);
-          if (orderData.items && orderData.items.length > 0) {
+        if (pendingOrders) {
+          const orderData = JSON.parse(pendingOrders);
+
+          // Lấy danh sách items từ orders
+          if (orderData.orders && orderData.orders.length > 0) {
             try {
-              // Xóa từng sản phẩm khỏi giỏ hàng
-              for (const item of orderData.items) {
-                try {
-                  await removeCartItemApi(item.productId, item.variantId);
-                } catch (error) {
-                  console.error(
-                    `Error removing item ${item.productId}:`,
-                    error
-                  );
-                }
+              const allItems = orderData.orders.flatMap(
+                (order) => order.items || []
+              );
+
+              // Collect all variant IDs to remove
+              const variantIdsToRemove = allItems
+                .filter((item) => item.variantId)
+                .map((item) => item.variantId);
+
+              if (variantIdsToRemove.length > 0) {
+                await removeCartItemsApi(variantIdsToRemove);
               }
 
               // Cập nhật lại số lượng giỏ hàng
@@ -65,16 +71,17 @@ const PaymentResultPage = () => {
           }
         }
 
-        // Xóa pending order sau khi thành công
-        sessionStorage.removeItem("pendingOrder");
+        // Xóa pending orders sau khi thành công
+        sessionStorage.removeItem("pendingOrders");
 
-        // TODO: Gọi API để cập nhật trạng thái đơn hàng
+        // TODO: Có thể gọi API để verify payment status với backend
+        // verifyPaymentApi(apptransid)
       } else {
         // Thất bại khi status != "1" hoặc không có status
         setPaymentStatus("failed");
       }
     }, 2000);
-  }, [searchParams]);
+  }, [searchParams, loadCartCount]);
 
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat("vi-VN", {
@@ -103,14 +110,23 @@ const PaymentResultPage = () => {
               Cảm ơn bạn đã mua hàng tại HUSTBuy
             </p>
 
-            {orderInfo && (
+            {orderInfo && orderInfo.orders && (
               <div className={styles.orderDetails}>
                 <h3>Thông tin đơn hàng</h3>
                 <div className={styles.detailRow}>
-                  <span>Số lượng sản phẩm:</span>
+                  <span>Số lượng đơn hàng:</span>
+                  <strong>{orderInfo.orders.length}</strong>
+                </div>
+                <div className={styles.detailRow}>
+                  <span>Tổng sản phẩm:</span>
                   <strong>
-                    {orderInfo.items.reduce(
-                      (sum, item) => sum + item.quantity,
+                    {orderInfo.orders.reduce(
+                      (sum, order) =>
+                        sum +
+                        (order.items?.reduce(
+                          (itemSum, item) => itemSum + (item.quantity || 0),
+                          0
+                        ) || 0),
                       0
                     )}
                   </strong>
@@ -118,13 +134,37 @@ const PaymentResultPage = () => {
                 <div className={styles.detailRow}>
                   <span>Tổng tiền:</span>
                   <strong className={styles.amount}>
-                    {formatCurrency(orderInfo.finalTotal)}
+                    {formatCurrency(
+                      orderInfo.orders.reduce(
+                        (sum, order) =>
+                          sum + parseFloat(order.totalAmount || 0),
+                        0
+                      )
+                    )}
                   </strong>
                 </div>
                 <div className={styles.detailRow}>
                   <span>Phương thức thanh toán:</span>
                   <strong>ZaloPay</strong>
                 </div>
+                <div className={styles.detailRow}>
+                  <span>Mã giao dịch:</span>
+                  <strong style={{ fontSize: "12px", color: "#666" }}>
+                    {orderInfo.appTransId ||
+                      searchParams.get("apptransid") ||
+                      "N/A"}
+                  </strong>
+                </div>
+                {orderInfo.orders.map((order, index) => (
+                  <div key={order.id} className={styles.orderItem}>
+                    <div style={{ fontSize: "12px", color: "#666" }}>
+                      📦 Đơn hàng {index + 1}: {order.storeName}
+                    </div>
+                    <div style={{ fontSize: "12px", color: "#888" }}>
+                      Mã đơn: {order.orderNumber}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 

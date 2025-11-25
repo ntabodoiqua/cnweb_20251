@@ -41,6 +41,8 @@ jobs:
             path: user-service
           - name: product-service
             path: product-service
+          - name: order-service
+            path: order-service
           - name: notification-service
             path: notification-service
           - name: file-service
@@ -149,6 +151,9 @@ jobs:
 
             echo "Checking File Service..."
             curl -f http://localhost:8083/actuator/health || exit 1
+
+            echo "Checking Order Service..."
+            curl -f http://localhost:8085/actuator/health || exit 1
 
             echo "Checking Payment Service..."
             curl -f http://localhost:8086/actuator/health || exit 1

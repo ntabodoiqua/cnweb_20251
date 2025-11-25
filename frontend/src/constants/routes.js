@@ -54,6 +54,7 @@ export const PROTECTED_ROUTES = {
   USER_CART: "/cart",
   USER_CHECKOUT: "/checkout",
   USER_WISHLIST: "/wishlist",
+  PAYMENT_RESULT: "/payment/result",
 
   // Seller routes
   SELLER_DASHBOARD: "/seller",

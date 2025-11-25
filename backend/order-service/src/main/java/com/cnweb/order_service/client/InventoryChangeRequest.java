@@ -1,25 +1,23 @@
-package com.cnweb.order_service.dto.request;
+package com.cnweb.order_service.client;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 
-/**
- * OrderItemRequest - DTO cho item trong đơn hàng
- */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE)
-public class OrderItemRequest {
-
+@FieldDefaults(level = lombok.AccessLevel.PRIVATE)
+public class InventoryChangeRequest {
     @NotBlank(message = "VARIANT_ID_REQUIRED")
     String variantId;
-
     @NotNull(message = "QUANTITY_NOT_NULL")
-    @Min(value = 1, message = "QUANTITY_MIN_1")
+    @Min(value = 0, message = "QUANTITY_MIN_1")
     Integer quantity;
 }

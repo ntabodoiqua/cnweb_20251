@@ -30,6 +30,8 @@ import {
   getAddressesApi,
   getProvincesApi,
   getWardsByProvinceApi,
+  createOrderApi,
+  initiateOrderPaymentApi,
 } from "../../util/api";
 import { PROTECTED_ROUTES } from "../../constants/routes";
 import styles from "./CheckoutPage.module.css";
@@ -222,104 +224,118 @@ const CheckoutPage = () => {
       );
       const selectedWard = wards.find((w) => w.id === values.wardId);
 
-      // Chuẩn bị dữ liệu đơn hàng
+      // Chuẩn bị shipping address theo backend format
+      const shippingAddressStr = `${values.detailAddress}, ${
+        selectedWard?.nameWithType || ""
+      }, ${selectedProvince?.fullName || ""}`;
+
+      // Chuẩn bị dữ liệu đơn hàng theo OrderCreationRequest
       const orderData = {
-        shippingAddress: {
-          fullName: values.fullName,
-          phoneNumber: values.phoneNumber,
-          provinceId: values.provinceId,
-          provinceName: selectedProvince?.fullName || "",
-          wardId: values.wardId,
-          wardName: selectedWard?.nameWithType || "",
-          detailAddress: values.detailAddress,
-        },
+        items: selectedItems.map((item) => ({
+          variantId: item.variantId || item.id?.toString(),
+          quantity: item.quantity,
+        })),
+        receiverName: values.fullName,
+        receiverPhone: values.phoneNumber,
+        receiverEmail: auth.user?.email || "",
+        shippingAddress: shippingAddressStr,
+        shippingProvince: selectedProvince?.fullName || "",
+        shippingWard: selectedWard?.nameWithType || "",
+        paymentMethod: paymentMethod === "zalopay" ? "ZALO_PAY" : "COD",
+        couponCode: "", // Có thể thêm coupon sau
         note: values.note || "",
-        items: selectedItems,
-        subtotal: subtotal,
-        shopDiscounts: shopDiscounts,
-        platformDiscount: platformDiscount,
-        finalTotal: finalTotal,
-        paymentMethod: paymentMethod,
       };
 
-      console.log("Order data:", orderData);
+      console.log("Creating order with data:", orderData);
 
-      // Nếu chọn thanh toán ZaloPay
-      if (paymentMethod === "zalopay") {
-        // Chuẩn bị dữ liệu thanh toán ZaloPay
-        const paymentData = {
-          appUser: auth.user?.username || "user",
-          amount: finalTotal,
-          description: `Thanh toán đơn hàng từ ${values.fullName}`,
-          items: selectedItems.map((item) => ({
-            itemid: `P${item.id.toString().padStart(3, "0")}`,
-            itemname: item.name,
-            itemprice: item.price,
-            itemquantity: item.quantity,
-          })),
-          bankCode: "",
-          embedData: {
-            redirecturl: `${window.location.origin}/payment-result`,
-            merchantinfo: "HUSTBuy - Nền tảng thương mại điện tử",
-          },
-          title: `Đơn hàng #${Date.now()}`,
-          phone: values.phoneNumber,
-          email: auth.user?.email || "customer@hustbuy.com",
-        };
+      // Gọi API tạo đơn hàng
+      const orderResponse = await createOrderApi(orderData);
 
-        // Gọi API ZaloPay
-        const response = await createZaloPayOrderApi(paymentData);
+      console.log("Order creation response:", orderResponse);
 
-        hideLoading();
+      if (orderResponse?.code === 201 && orderResponse?.result) {
+        const orders = orderResponse.result;
+        const orderIds = orders.map((order) => order.id);
 
-        console.log("ZaloPay API Response:", response);
+        // Nếu chọn thanh toán ZaloPay
+        if (paymentMethod === "zalopay") {
+          console.log("Initiating payment for orders:", orderIds);
 
-        if (response?.errorCode === 1 && response?.orderUrl) {
-          message.success(
-            "Đơn hàng đã được tạo! Đang chuyển đến cổng thanh toán...",
-            1.5
-          );
+          // Gọi API khởi tạo thanh toán
+          const paymentResponse = await initiateOrderPaymentApi(orderIds);
 
-          // Lưu thông tin đơn hàng
-          sessionStorage.setItem(
-            "pendingOrder",
-            JSON.stringify({
-              ...orderData,
-              appTransId: response.appTransId,
-              zpTransToken: response.zpTransToken,
-              timestamp: Date.now(),
-            })
-          );
+          hideLoading();
 
-          // Chuyển hướng đến trang thanh toán ZaloPay
-          window.open(response.orderUrl, "_self");
+          console.log("Payment initiation response:", paymentResponse);
+
+          if (
+            paymentResponse?.code === 200 &&
+            paymentResponse?.result?.paymentUrl
+          ) {
+            message.success(
+              "Đơn hàng đã được tạo! Đang chuyển đến cổng thanh toán...",
+              1.5
+            );
+
+            // Lưu thông tin đơn hàng
+            sessionStorage.setItem(
+              "pendingOrders",
+              JSON.stringify({
+                orders: orders,
+                orderIds: orderIds,
+                appTransId: paymentResponse.result.appTransId,
+                timestamp: Date.now(),
+              })
+            );
+
+            // Chuyển hướng đến trang thanh toán ZaloPay
+            window.open(paymentResponse.result.paymentUrl, "_self");
+          } else {
+            throw new Error(
+              paymentResponse?.message ||
+                "Không thể khởi tạo thanh toán. Vui lòng thử lại!"
+            );
+          }
         } else {
-          throw new Error(
-            response?.message || "Không thể tạo đơn hàng thanh toán"
+          // Thanh toán khi nhận hàng (COD)
+          hideLoading();
+
+          const orderCount = orders.length;
+          const totalAmount = orders.reduce(
+            (sum, order) => sum + parseFloat(order.totalAmount || 0),
+            0
           );
+
+          Modal.success({
+            title: "Đặt hàng thành công!",
+            content: (
+              <div>
+                <p>
+                  {orderCount > 1
+                    ? `${orderCount} đơn hàng của bạn đã được tạo thành công.`
+                    : "Đơn hàng của bạn đã được ghi nhận."}
+                </p>
+                <p>Phương thức thanh toán: Thanh toán khi nhận hàng (COD)</p>
+                <p>
+                  Tổng tiền: <strong>{formatCurrency(totalAmount)}</strong>
+                </p>
+                {orders.map((order) => (
+                  <p key={order.id} style={{ fontSize: "12px", color: "#666" }}>
+                    Mã đơn: {order.orderNumber} - {order.storeName}
+                  </p>
+                ))}
+              </div>
+            ),
+            okText: "Xem đơn hàng",
+            onOk: () => {
+              navigate(PROTECTED_ROUTES.USER_ORDERS);
+            },
+          });
         }
       } else {
-        // Thanh toán khi nhận hàng (COD)
-        hideLoading();
-
-        Modal.success({
-          title: "Đặt hàng thành công!",
-          content: (
-            <div>
-              <p>Đơn hàng của bạn đã được ghi nhận.</p>
-              <p>Phương thức thanh toán: Thanh toán khi nhận hàng (COD)</p>
-              <p>
-                Tổng tiền: <strong>{formatCurrency(finalTotal)}</strong>
-              </p>
-            </div>
-          ),
-          okText: "Xem đơn hàng",
-          onOk: () => {
-            navigate(PROTECTED_ROUTES.USER_ORDERS);
-          },
-        });
-
-        // TODO: Gọi API tạo đơn hàng với backend
+        throw new Error(
+          orderResponse?.message || "Không thể tạo đơn hàng. Vui lòng thử lại!"
+        );
       }
     } catch (error) {
       hideLoading();

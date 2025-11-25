@@ -1127,6 +1127,7 @@ public class ProductServiceImpl implements ProductService {
                     Store store = product.getStore();
 
                     return VariantInternalDTO.builder()
+                            .id(variant.getId())
                             .productId(product.getId())
                             .variantName(variant.getVariantName())
                             .sku(variant.getSku())

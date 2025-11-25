@@ -18,40 +18,42 @@ import java.time.LocalDateTime;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CouponCreationRequest {
 
-    @NotBlank(message = "Coupon code is required")
-    @Size(min = 3, max = 50, message = "Coupon code must be between 3 and 50 characters")
-    @Pattern(regexp = "^[A-Z0-9_-]+$", message = "Coupon code must contain only uppercase letters, numbers, dash and underscore")
+    @NotBlank(message = "COUPON_CODE_REQUIRED")
+    @Size(min = 3, max = 50, message = "COUPON_CODE_LENGTH")
+    @Pattern(regexp = "^[A-Z0-9_-]+$", message = "COUPON_CODE_FORMAT")
     String code;
 
-    @NotBlank(message = "Coupon name is required")
-    @Size(max = 200, message = "Coupon name must not exceed 200 characters")
+    @NotBlank(message = "COUPON_NAME_REQUIRED")
+    @Size(max = 200, message = "COUPON_NAME_LENGTH")
     String name;
 
-    @Size(max = 2000, message = "Description must not exceed 2000 characters")
+    @Size(max = 2000, message = "DESCRIPTION_LENGTH")
     String description;
 
-    @NotNull(message = "Discount type is required")
+    @NotNull(message = "DISCOUNT_TYPE_REQUIRED")
     DiscountType discountType;
 
-    @NotNull(message = "Discount value is required")
-    @DecimalMin(value = "0.0", inclusive = false, message = "Discount value must be greater than 0")
+    @NotNull(message = "DISCOUNT_VALUE_REQUIRED")
+    @DecimalMin(value = "0.0", inclusive = false, message = "DISCOUNT_VALUE_POSITIVE")
     BigDecimal discountValue;
 
-    @DecimalMin(value = "0.0", message = "Max discount amount must be non-negative")
+    @DecimalMin(value = "0.0", message = "MAX_DISCOUNT_AMOUNT_NON_NEGATIVE")
     BigDecimal maxDiscountAmount;
 
-    @DecimalMin(value = "0.0", message = "Min order amount must be non-negative")
+    @DecimalMin(value = "0.0", message = "MIN_ORDER_AMOUNT_NON_NEGATIVE")
     @Builder.Default
     BigDecimal minOrderAmount = BigDecimal.ZERO;
 
-    @Min(value = 1, message = "Max usage total must be at least 1")
+    @Min(value = 1, message = "MAX_USAGE_TOTAL_AT_LEAST_1")
     Integer maxUsageTotal;
 
-    @NotNull(message = "Max usage per user is required")
-    @Min(value = 1, message = "Max usage per user must be at least 1")
+    @NotNull(message = "MAX_USAGE_PER_USER_REQUIRED")
+    @Min(value = 1, message = "MAX_USAGE_PER_USER_AT_LEAST_1")
     @Builder.Default
     Integer maxUsagePerUser = 1;
 
+
+    // If null or empty, means applicable to all stores
     String storeId;
 
     @Builder.Default
@@ -60,9 +62,9 @@ public class CouponCreationRequest {
     String applicableProductIds; // JSON array string
     String applicableCategoryIds; // JSON array string
 
-    @NotNull(message = "Valid from date is required")
+    @NotNull(message = "VALID_FROM_DATE_REQUIRED")
     LocalDateTime validFrom;
 
-    @NotNull(message = "Valid to date is required")
+    @NotNull(message = "VALID_TO_DATE_REQUIRED")
     LocalDateTime validTo;
 }

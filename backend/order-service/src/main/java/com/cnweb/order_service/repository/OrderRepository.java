@@ -20,5 +20,13 @@ import java.util.Optional;
  */
 @Repository
 public interface OrderRepository extends JpaRepository<Order, String>, JpaSpecificationExecutor<Order> {
+    /**
+     * Tìm đơn hàng theo mã giao dịch thanh toán
+     */
+    List<Order> findByPaymentTransactionId(String paymentTransactionId);
 
+    /**
+     * Tìm các đơn hàng theo trạng thái và thời gian tạo trước một mốc thời gian
+     */
+    List<Order> findByStatusAndCreatedAtBefore(OrderStatus status, LocalDateTime dateTime);
 }

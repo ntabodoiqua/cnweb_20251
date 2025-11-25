@@ -56,6 +56,7 @@ public class CartService {
         }
         
         // Auto-validate and sync cart with product-service if cart has items
+        log.info("cart before validate: {}", cart);
         if (!cart.getItems().isEmpty()) {
             CartValidationResult validationResult = validateAndSyncCart(identifier, cart);
             cart = validationResult.getCart();
@@ -88,7 +89,7 @@ public class CartService {
                     throw new RuntimeException("Product variant not found");
                 }
                 
-                variant = variants.get(0);
+                variant = variants.getFirst();
                 
                 if (!variant.isActive() || variant.isDeleted()) {
                     throw new RuntimeException("Product variant is not available");
@@ -117,11 +118,11 @@ public class CartService {
                 .productName(request.getProductName())
                 .variantId(request.getVariantId())
                 .variantName(request.getVariantName())
-                .sku(variant != null ? variant.getSku() : null)
+                .sku(variant.getSku())
                 .imageUrl(request.getImageUrl())
-                .storeName(variant != null ? variant.getStoreName() : null)
-                .storeId(variant != null ? variant.getStoreId() : null)
-                .storeLogo(variant != null ? variant.getStoreLogo() : null)
+                .storeName(variant.getStoreName())
+                .storeId(variant.getStoreId())
+                .storeLogo(variant.getStoreLogo())
                 .quantity(request.getQuantity())
                 .price(request.getPrice())
                 .originalPrice(request.getOriginalPrice())
@@ -152,7 +153,7 @@ public class CartService {
                 List<VariantValidationDTO> validations = productClient.validateVariants(queryRequest).getResult();
                 
                 if (validations != null && !validations.isEmpty()) {
-                    VariantValidationDTO validation = validations.get(0);
+                    VariantValidationDTO validation = validations.getFirst();
                     
                     if (!validation.isActive() || validation.isDeleted() || !validation.isInStock()) {
                         throw new RuntimeException("Product variant is not available");
@@ -286,6 +287,8 @@ public class CartService {
                     .build();
             
             List<VariantInternalDTO> variants = productClient.getVariants(queryRequest).getResult();
+            log.info("Fetched {} variants for cart validation", variants.size());
+            log.info("Variants: {}", variants);
             
             // Create a map for quick lookup
             java.util.Map<String, VariantInternalDTO> variantMap = variants.stream()

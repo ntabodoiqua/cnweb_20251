@@ -15,10 +15,10 @@ import java.math.BigDecimal;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AddToCartRequest {
 
-    @NotBlank(message = "Product ID is required")
+    @NotBlank(message = "PRODUCT_ID_REQUIRED")
     String productId;
 
-    @NotBlank(message = "Product name is required")
+    @NotBlank(message = "PRODUCT_NAME_REQUIRED")
     String productName;
 
     String variantId;
@@ -27,11 +27,11 @@ public class AddToCartRequest {
 
     String imageUrl;
 
-    @NotNull(message = "Quantity is required")
-    @Min(value = 1, message = "Quantity must be at least 1")
+    @NotNull(message = "QUANTITY_NOT_NULL")
+    @Min(value = 1, message = "QUANTITY_MIN_1")
     Integer quantity;
 
-    @NotNull(message = "Price is required")
+    @NotNull(message = "PRICE_NOT_NULL")
     BigDecimal price;
 
     BigDecimal originalPrice;
