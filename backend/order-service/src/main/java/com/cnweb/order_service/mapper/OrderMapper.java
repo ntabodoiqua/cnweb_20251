@@ -27,6 +27,7 @@ public interface OrderMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "confirmedAt", ignore = true)
+    @Mapping(target = "paidAt", ignore = true)
     @Mapping(target = "cancelledAt", ignore = true)
     @Mapping(target = "status", constant = "PENDING")
     @Mapping(target = "paymentStatus", constant = "UNPAID")

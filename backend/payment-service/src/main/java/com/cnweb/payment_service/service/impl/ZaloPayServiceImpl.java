@@ -1,6 +1,8 @@
 package com.cnweb.payment_service.service.impl;
 
 import com.cnweb.payment_service.config.ZaloPayConfig;
+import com.cnweb.payment_service.dto.transaction.TransactionHistoryFilterRequest;
+import com.cnweb.payment_service.dto.transaction.TransactionHistoryResponse;
 import com.cnweb.payment_service.dto.zalopay.*;
 import com.cnweb.payment_service.entity.ZaloPayTransaction;
 import com.cnweb.payment_service.entity.ZaloPayRefundTransaction;
@@ -8,6 +10,7 @@ import com.cnweb.payment_service.enums.ZaloPaySubReturnCode;
 import com.cnweb.payment_service.messaging.RabbitMQMessagePublisher;
 import com.cnweb.payment_service.repository.ZaloPayTransactionRepository;
 import com.cnweb.payment_service.repository.ZaloPayRefundTransactionRepository;
+import com.cnweb.payment_service.repository.specification.TransactionSpecification;
 import com.cnweb.payment_service.service.ZaloPayService;
 import com.cnweb.payment_service.util.ZaloPayHMACUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -19,6 +22,11 @@ import com.vdt2025.common_dto.dto.RefundSuccessEvent;
 import com.vdt2025.common_dto.dto.RefundFailedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +40,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Implementation của ZaloPayService
@@ -1558,5 +1567,81 @@ public class ZaloPayServiceImpl implements ZaloPayService {
                     refundTransaction.getMRefundId(), e.getMessage(), e);
             // Không throw exception để không block flow chính
         }
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public TransactionHistoryResponse getTransactionHistory(TransactionHistoryFilterRequest filter) {
+        try {
+            // Validate và set default values cho pagination
+            int page = filter.getPage() != null && filter.getPage() >= 0 ? filter.getPage() : 0;
+            int size = filter.getSize() != null && filter.getSize() > 0 && filter.getSize() <= 100 
+                    ? filter.getSize() : 20;
+            
+            // Validate sort field
+            String sortBy = validateAndGetSortField(filter.getSortBy());
+            
+            // Validate sort direction
+            Sort.Direction direction = "ASC".equalsIgnoreCase(filter.getSortDirection()) 
+                    ? Sort.Direction.ASC : Sort.Direction.DESC;
+            
+            // Tạo Pageable
+            Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+            
+            // Tạo Specification từ filter
+            Specification<ZaloPayTransaction> spec = TransactionSpecification.buildSpecification(filter);
+            
+            log.info("Fetching transaction history - Page: {}, Size: {}, SortBy: {}, Direction: {}, Filters: {}", 
+                    page, size, sortBy, direction, filter);
+            
+            // Query với specification và pagination
+            Page<ZaloPayTransaction> transactionPage = transactionRepository.findAll(spec, pageable);
+            
+            // Convert sang DTO
+            List<TransactionHistoryResponse.TransactionDetailDTO> transactionDTOs = transactionPage
+                    .getContent()
+                    .stream()
+                    .map(TransactionHistoryResponse.TransactionDetailDTO::fromEntity)
+                    .collect(Collectors.toList());
+            
+            // Build response
+            TransactionHistoryResponse response = TransactionHistoryResponse.builder()
+                    .transactions(transactionDTOs)
+                    .totalElements(transactionPage.getTotalElements())
+                    .totalPages(transactionPage.getTotalPages())
+                    .currentPage(transactionPage.getNumber())
+                    .pageSize(transactionPage.getSize())
+                    .hasNext(transactionPage.hasNext())
+                    .hasPrevious(transactionPage.hasPrevious())
+                    .build();
+            
+            log.info("Transaction history fetched successfully - Total elements: {}, Total pages: {}, Current page: {}", 
+                    response.getTotalElements(), response.getTotalPages(), response.getCurrentPage());
+            
+            return response;
+            
+        } catch (Exception e) {
+            log.error("Error fetching transaction history: {}", e.getMessage(), e);
+            throw new RuntimeException("Lỗi khi lấy lịch sử giao dịch: " + e.getMessage(), e);
+        }
+    }
+    
+    /**
+     * Validate và trả về sort field hợp lệ
+     */
+    private String validateAndGetSortField(String sortBy) {
+        if (sortBy == null || sortBy.trim().isEmpty()) {
+            return "createdAt";
+        }
+        
+        // Danh sách các field được phép sort
+        List<String> allowedFields = Arrays.asList("createdAt", "amount", "status", "paidAt", "updatedAt");
+        
+        if (allowedFields.contains(sortBy)) {
+            return sortBy;
+        }
+        
+        log.warn("Invalid sort field: {}. Using default 'createdAt'", sortBy);
+        return "createdAt";
     }
 }

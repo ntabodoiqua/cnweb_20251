@@ -58,6 +58,7 @@ public class OrderResponse {
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
     LocalDateTime confirmedAt;
+    LocalDateTime paidAt;
     LocalDateTime cancelledAt;
 
     // Items

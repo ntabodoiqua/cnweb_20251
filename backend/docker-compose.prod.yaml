@@ -274,6 +274,7 @@ services:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
       - JWT_SIGNERKEY=cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2
       - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET:-InT3rn@l-S3rv1c3-S3cr3t-K3y-2025-VDT}
+      - PAYMENT_REDIRECT_URL=${PAYMENT_REDIRECT_URL:-https://nguyentheanh-nta.id.vn/payment/result}
     depends_on:
       discovery-service:
         condition: service_healthy
