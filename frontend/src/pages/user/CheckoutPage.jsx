@@ -32,6 +32,7 @@ import {
   getWardsByProvinceApi,
   createOrderApi,
   initiateOrderPaymentApi,
+  removeCartItemsApi,
 } from "../../util/api";
 import { PROTECTED_ROUTES } from "../../constants/routes";
 import styles from "./CheckoutPage.module.css";
@@ -257,12 +258,24 @@ const CheckoutPage = () => {
         const orders = orderResponse.result;
         const orderIds = orders.map((order) => order.id);
 
+        // Xóa các items đã chọn khỏi giỏ hàng ngay sau khi tạo đơn hàng thành công
+        try {
+          const variantIdsToRemove = selectedItems.map(
+            (item) => item.variantId || item.id
+          );
+          await removeCartItemsApi(variantIdsToRemove);
+          console.log("Cart items removed successfully");
+        } catch (removeError) {
+          console.error("Error removing cart items:", removeError);
+          // Không throw error để không ảnh hưởng đến luồng đặt hàng
+        }
+
         // Nếu chọn thanh toán ZaloPay
         if (paymentMethod === "zalopay") {
           console.log("Initiating payment for orders:", orderIds);
 
-          // Gọi API khởi tạo thanh toán
-          const paymentResponse = await initiateOrderPaymentApi(orderIds);
+          // Gọi API khởi tạo thanh toán với thời gian hết hạn 15 phút (900 giây)
+          const paymentResponse = await initiateOrderPaymentApi(orderIds, 900);
 
           hideLoading();
 
@@ -277,7 +290,7 @@ const CheckoutPage = () => {
               1.5
             );
 
-            // Lưu thông tin đơn hàng
+            // Lưu thông tin đơn hàng với thời gian hết hạn (15 phút = 900 giây)
             sessionStorage.setItem(
               "pendingOrders",
               JSON.stringify({
@@ -285,6 +298,7 @@ const CheckoutPage = () => {
                 orderIds: orderIds,
                 appTransId: paymentResponse.result.appTransId,
                 timestamp: Date.now(),
+                expirySeconds: 15 * 60, // 15 phút
               })
             );
 

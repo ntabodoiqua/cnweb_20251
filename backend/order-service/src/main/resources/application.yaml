@@ -46,3 +46,12 @@ jwt:
 internal:
   service:
     secret: ${INTERNAL_SERVICE_SECRET:InT3rn@l-S3rv1c3-S3cr3t-K3y-2025-VDT}
+
+schedule:
+  order-cleanup: 120000 # Every two minutes
+
+timeout:
+  order: 16 # minutes
+
+payment:
+  redirect-url: ${PAYMENT_REDIRECT_URL:http://localhost:5173/payment/result}

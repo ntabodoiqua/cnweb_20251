@@ -816,9 +816,18 @@ const applyCouponToOrdersApi = (couponCode, orderIds) => {
   });
 };
 
-const initiateOrderPaymentApi = (orderIds) => {
+const initiateOrderPaymentApi = (orderIds, expireDurationSeconds = null) => {
   const URL_API = "/api/order/api/v1/orders/payment";
-  return axios.post(URL_API, orderIds, {
+  const requestBody = {
+    orderIds: orderIds,
+  };
+
+  // Chỉ thêm expireDurationSeconds nếu có giá trị
+  if (expireDurationSeconds !== null && expireDurationSeconds !== undefined) {
+    requestBody.expireDurationSeconds = expireDurationSeconds;
+  }
+
+  return axios.post(URL_API, requestBody, {
     headers: {
       "Accept-Language": "vi",
       "Content-Type": "application/json",

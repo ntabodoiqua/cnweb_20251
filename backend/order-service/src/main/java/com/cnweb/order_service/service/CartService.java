@@ -95,8 +95,27 @@ public class CartService {
                     throw new RuntimeException("Product variant is not available");
                 }
                 
-                if (variant.getStockQuantity() < request.getQuantity()) {
-                    throw new RuntimeException("Insufficient stock. Available: " + variant.getStockQuantity());
+                // Check existing quantity in cart
+                CartDTO existingCart = redisCartRepository.getCart(identifier);
+                int existingQuantity = 0;
+                
+                if (existingCart != null && existingCart.getItems() != null) {
+                    for (CartItemDTO existingItem : existingCart.getItems()) {
+                        if (existingItem.getVariantId() != null && 
+                            existingItem.getVariantId().equals(request.getVariantId())) {
+                            existingQuantity = existingItem.getQuantity();
+                            break;
+                        }
+                    }
+                }
+                
+                // Validate TOTAL quantity (existing + new)
+                int totalQuantity = existingQuantity + request.getQuantity();
+                if (variant.getStockQuantity() < totalQuantity) {
+                    throw new RuntimeException(
+                        String.format("Insufficient stock. Available: %d, Already in cart: %d, Requested: %d, Total would be: %d",
+                            variant.getStockQuantity(), existingQuantity, request.getQuantity(), totalQuantity)
+                    );
                 }
                 
                 // Use product-service data to ensure accuracy
@@ -159,8 +178,12 @@ public class CartService {
                         throw new RuntimeException("Product variant is not available");
                     }
                     
+                    // Validate the NEW quantity directly (updateCartItem sets absolute quantity, not incremental)
                     if (validation.getAvailableStock() < request.getQuantity()) {
-                        throw new RuntimeException("Insufficient stock. Available: " + validation.getAvailableStock());
+                        throw new RuntimeException(
+                            String.format("Insufficient stock. Available: %d, Requested: %d",
+                                validation.getAvailableStock(), request.getQuantity())
+                        );
                     }
                 }
             }
@@ -426,6 +449,25 @@ public class CartService {
                 .cart(cart)
                 .message(message)
                 .build();
+    }
+
+    /**
+     * Remove multiple items from cart
+     */
+    public CartDTO removeCartItems(String identifier, List<String> variantIds) {
+        CartDTO cart = redisCartRepository.removeItems(identifier, variantIds);
+
+        if (cart == null) {
+            throw new RuntimeException("Cart not found");
+        }
+
+        // Trigger async persistence for authenticated users
+        if (!identifier.startsWith("guest:")) {
+            cartPersistenceService.persistCartToDatabase(identifier);
+        }
+
+        log.info("Removed {} items from cart for identifier: {}", variantIds.size(), identifier);
+        return cart;
     }
     
     /**
