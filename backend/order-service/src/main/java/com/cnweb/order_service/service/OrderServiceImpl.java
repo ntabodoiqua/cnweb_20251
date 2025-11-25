@@ -127,19 +127,33 @@ public class OrderServiceImpl implements OrderService {
                 .items(inventoryChanges)
                 .build());
 
-        // 6. Save orders
-        orderRepository.saveAll(createdOrders);
+        try {
+            // 6. Save orders
+            orderRepository.saveAll(createdOrders);
 
-        // 7. Record Coupon Usage (if applied)
-        if (request.getCouponCode() != null && !request.getCouponCode().isEmpty()) {
-             // Only record usage if discount was actually applied to at least one order
-             boolean couponApplied = createdOrders.stream()
-                     .anyMatch(o -> o.getDiscountAmount() != null && o.getDiscountAmount().compareTo(java.math.BigDecimal.ZERO) > 0);
-             
-             if (couponApplied) {
-                 // Use the first order ID for tracking
-                 couponService.useCoupon(createdOrders.get(0).getCouponId(), username, createdOrders.get(0).getId());
-             }
+            // 7. Record Coupon Usage (if applied)
+            if (request.getCouponCode() != null && !request.getCouponCode().isEmpty()) {
+                 // Only record usage if discount was actually applied to at least one order
+                 boolean couponApplied = createdOrders.stream()
+                         .anyMatch(o -> o.getDiscountAmount() != null && o.getDiscountAmount().compareTo(java.math.BigDecimal.ZERO) > 0);
+                 
+                 if (couponApplied) {
+                     // Use the first order ID for tracking
+                     couponService.useCoupon(createdOrders.get(0).getCouponId(), username, createdOrders.get(0).getId());
+                 }
+            }
+        } catch (Exception e) {
+            log.error("Error saving orders, triggering compensation transaction to release stock", e);
+            // Compensation: Release reserved stock
+            try {
+                productClient.releaseBatch(BatchInventoryChangeRequest.builder()
+                        .items(inventoryChanges)
+                        .build());
+            } catch (Exception ex) {
+                log.error("CRITICAL: Failed to compensate stock for failed order. Manual intervention required.", ex);
+                // In a real system, send this to a Dead Letter Queue (DLQ) or alert system
+            }
+            throw e; // Re-throw to rollback Order transaction
         }
 
         // 8. Map to response
