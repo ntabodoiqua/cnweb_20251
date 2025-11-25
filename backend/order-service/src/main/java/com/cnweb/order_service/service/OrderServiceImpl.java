@@ -1,6 +1,7 @@
 package com.cnweb.order_service.service;
 
 import com.cnweb.order_service.client.*;
+import com.cnweb.order_service.dto.payment.*;
 import com.cnweb.order_service.dto.request.OrderCreationRequest;
 import com.cnweb.order_service.dto.request.OrderItemRequest;
 import com.cnweb.order_service.dto.response.CouponResponse;
@@ -8,7 +9,6 @@ import com.cnweb.order_service.dto.response.CouponValidationResponse;
 import com.cnweb.order_service.dto.response.OrderResponse;
 import com.cnweb.order_service.entity.Order;
 import com.cnweb.order_service.entity.OrderItem;
-import com.cnweb.order_service.enums.DiscountType;
 import com.cnweb.order_service.mapper.OrderMapper;
 import com.cnweb.order_service.repository.OrderRepository;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +34,7 @@ public class OrderServiceImpl implements OrderService {
 
     OrderRepository orderRepository;
     ProductClient productClient;
+    PaymentClient paymentClient;
     OrderMapper orderMapper;
     CouponService couponService;
 
@@ -80,7 +82,7 @@ public class OrderServiceImpl implements OrderService {
         for (Map.Entry<String, List<OrderItemRequest>> entry : itemsByStore.entrySet()) {
             String storeId = entry.getKey();
             List<OrderItemRequest> storeItems = entry.getValue();
-            String storeName = variantMap.get(storeItems.get(0).getVariantId()).getStoreName();
+            String storeName = variantMap.get(storeItems.getFirst().getVariantId()).getStoreName();
 
             Order order = orderMapper.toOrder(request);
             order.setOrderNumber(generateOrderNumber());
@@ -117,7 +119,7 @@ public class OrderServiceImpl implements OrderService {
             createdOrders.add(order);
         }
 
-        // 4. Apply Coupon Logic
+        // 4. Apply Coupon Logic (Initial application if provided)
         if (request.getCouponCode() != null && !request.getCouponCode().isEmpty()) {
             applyCoupon(username, request.getCouponCode(), createdOrders);
         }
@@ -135,13 +137,19 @@ public class OrderServiceImpl implements OrderService {
             if (request.getCouponCode() != null && !request.getCouponCode().isEmpty()) {
                  // Only record usage if discount was actually applied to at least one order
                  boolean couponApplied = createdOrders.stream()
-                         .anyMatch(o -> o.getDiscountAmount() != null && o.getDiscountAmount().compareTo(java.math.BigDecimal.ZERO) > 0);
+                         .anyMatch(o -> o.getDiscountAmount() != null && o.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0);
                  
                  if (couponApplied) {
                      // Use the first order ID for tracking
-                     couponService.useCoupon(createdOrders.get(0).getCouponId(), username, createdOrders.get(0).getId());
+                     couponService.useCoupon(createdOrders.getFirst().getCouponId(), username, createdOrders.get(0).getId());
                  }
             }
+            
+            // 8. Map to response (NO PAYMENT INITIATION HERE)
+            return createdOrders.stream()
+                    .map(orderMapper::toOrderResponse)
+                    .toList();
+
         } catch (Exception e) {
             log.error("Error saving orders, triggering compensation transaction to release stock", e);
             // Compensation: Release reserved stock
@@ -151,15 +159,139 @@ public class OrderServiceImpl implements OrderService {
                         .build());
             } catch (Exception ex) {
                 log.error("CRITICAL: Failed to compensate stock for failed order. Manual intervention required.", ex);
-                // In a real system, send this to a Dead Letter Queue (DLQ) or alert system
             }
             throw e; // Re-throw to rollback Order transaction
         }
+    }
 
-        // 8. Map to response
-        return createdOrders.stream()
+    @Override
+    @Transactional
+    public List<OrderResponse> applyCouponToOrders(String username, String couponCode, List<String> orderIds) {
+        List<Order> orders = orderRepository.findAllById(orderIds);
+        
+        if (orders.isEmpty()) {
+            throw new RuntimeException("Orders not found");
+        }
+        
+        // Validate ownership
+        for (Order order : orders) {
+            if (!order.getUsername().equals(username)) {
+                throw new RuntimeException("Unauthorized access to order: " + order.getId());
+            }
+            // Only allow applying coupon to PENDING/UNPAID orders
+            if (order.getPaymentStatus() == com.cnweb.order_service.enums.PaymentStatus.PAID) {
+                throw new RuntimeException("Cannot apply coupon to paid order: " + order.getId());
+            }
+        }
+        
+        // Reset existing discounts first
+        for (Order order : orders) {
+            order.setDiscountAmount(BigDecimal.ZERO);
+            order.setCouponCode(null);
+            order.setCouponId(null);
+            order.calculateTotalAmount(); // Reset total to subtotal
+        }
+        
+        // Apply new coupon
+        applyCoupon(username, couponCode, orders);
+        
+        // Save updates
+        orderRepository.saveAll(orders);
+        
+        // Record usage? 
+        // Note: If we record usage here, we might need to handle re-application or removal.
+        // For simplicity, we assume usage is recorded/validated. 
+        // Ideally, usage should be "reserved" and finalized on payment, but current CouponService uses "useCoupon" immediately.
+        // We might need to check if user already used this coupon for THESE orders to avoid double counting if they retry.
+        // But CouponService logic is simple. Let's just call useCoupon if applied.
+        
+        boolean couponApplied = orders.stream()
+                .anyMatch(o -> o.getDiscountAmount() != null && o.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0);
+        
+        if (couponApplied) {
+            couponService.useCoupon(orders.getFirst().getCouponId(), username, orders.get(0).getId());
+        }
+        
+        return orders.stream()
                 .map(orderMapper::toOrderResponse)
                 .toList();
+    }
+
+    @Override
+    @Transactional
+    public com.cnweb.order_service.dto.response.OrderPaymentResponse initiatePayment(String username, List<String> orderIds) {
+        List<Order> orders = orderRepository.findAllById(orderIds);
+        
+        if (orders.isEmpty()) {
+            throw new RuntimeException("Orders not found");
+        }
+        
+        // Validate
+        for (Order order : orders) {
+            if (!order.getUsername().equals(username)) {
+                throw new RuntimeException("Unauthorized access to order: " + order.getId());
+            }
+            if (order.getPaymentStatus() == com.cnweb.order_service.enums.PaymentStatus.PAID) {
+                throw new RuntimeException("Order already paid: " + order.getId());
+            }
+        }
+        
+        // Calculate total amount for payment
+        BigDecimal totalPaymentAmount = orders.stream()
+                .map(Order::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        
+        // Collect all items for payment request
+        List<PaymentItem> paymentItems = new ArrayList<>();
+        for (Order order : orders) {
+            for (OrderItem item : order.getItems()) {
+                paymentItems.add(PaymentItem.builder()
+                        .itemId(item.getVariantId())
+                        .itemName(item.getProductName() + " - " + item.getVariantName())
+                        .itemPrice(item.getPrice().longValue())
+                        .itemQuantity(item.getQuantity())
+                        .build());
+            }
+        }
+        
+        // Create payment request
+        CreatePaymentRequest paymentRequest = CreatePaymentRequest.builder()
+                .appUser(username)
+                .amount(totalPaymentAmount.longValue())
+                .description("Payment for orders: " + String.join(", ", orders.stream().map(Order::getOrderNumber).toList()))
+                .items(paymentItems)
+                .embedData(PaymentEmbedData.builder()
+                        .orderIds(orderIds)
+                        .email(orders.getFirst().getReceiverEmail()) // Assume same email for batch
+                        .redirectUrl("http://localhost:5173/payment/result")
+                        .build())
+                .email(orders.getFirst().getReceiverEmail())
+                .phone(orders.getFirst().getReceiverPhone())
+                .address(orders.getFirst().getShippingAddress())
+                .title("Payment for " + orders.size() + " orders")
+                .build();
+        
+        // Call Payment Service
+        CreatePaymentResponse paymentResponse = paymentClient.createZaloPayOrder(paymentRequest);
+        
+        if ("SUCCESS".equals(paymentResponse.getStatus())) {
+            String appTransId = paymentResponse.getAppTransId();
+            
+            // Update orders with payment transaction ID
+            for (Order order : orders) {
+                order.setPaymentTransactionId(appTransId);
+                order.setPaymentStatus(com.cnweb.order_service.enums.PaymentStatus.PENDING);
+            }
+            orderRepository.saveAll(orders);
+            
+            return com.cnweb.order_service.dto.response.OrderPaymentResponse.builder()
+                    .paymentUrl(paymentResponse.getOrderUrl())
+                    .appTransId(appTransId)
+                    .message("Payment initiated successfully")
+                    .build();
+        } else {
+            throw new RuntimeException("Payment initialization failed: " + paymentResponse.getMessage());
+        }
     }
 
     private void applyCoupon(String username, String couponCode, List<Order> orders) {

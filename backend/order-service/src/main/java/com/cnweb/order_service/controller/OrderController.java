@@ -1,6 +1,7 @@
 package com.cnweb.order_service.controller;
 
 import com.cnweb.order_service.dto.request.OrderCreationRequest;
+import com.cnweb.order_service.dto.response.OrderPaymentResponse;
 import com.cnweb.order_service.dto.response.OrderResponse;
 import com.cnweb.order_service.service.OrderService;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
@@ -40,12 +41,40 @@ public class OrderController {
     @Operation(summary = "Create order", description = "Create new order(s) from cart items. If items belong to multiple shops, multiple orders will be created.")
     public ResponseEntity<ApiResponse<List<OrderResponse>>> createOrder(@Valid @RequestBody OrderCreationRequest request) {
         String username = getCurrentUsername();
-        List<OrderResponse> orders = orderService.createOrder(username, request);
+        List<OrderResponse> response = orderService.createOrder(username, request);
         
         return ResponseEntity.ok(ApiResponse.<List<OrderResponse>>builder()
                 .code(201)
                 .message("Orders created successfully")
-                .result(orders)
+                .result(response)
+                .build());
+    }
+
+    @PostMapping("/apply-coupon")
+    @Operation(summary = "Apply coupon to orders", description = "Apply a coupon code to a list of existing orders.")
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> applyCoupon(
+            @RequestParam String couponCode,
+            @RequestBody List<String> orderIds) {
+        String username = getCurrentUsername();
+        List<OrderResponse> response = orderService.applyCouponToOrders(username, couponCode, orderIds);
+        
+        return ResponseEntity.ok(ApiResponse.<List<OrderResponse>>builder()
+                .code(200)
+                .message("Coupon applied successfully")
+                .result(response)
+                .build());
+    }
+
+    @PostMapping("/payment")
+    @Operation(summary = "Initiate payment", description = "Initiate payment for a list of orders.")
+    public ResponseEntity<ApiResponse<OrderPaymentResponse>> initiatePayment(@RequestBody List<String> orderIds) {
+        String username = getCurrentUsername();
+        OrderPaymentResponse response = orderService.initiatePayment(username, orderIds);
+        
+        return ResponseEntity.ok(ApiResponse.<OrderPaymentResponse>builder()
+                .code(200)
+                .message("Payment initiated successfully")
+                .result(response)
                 .build());
     }
 }

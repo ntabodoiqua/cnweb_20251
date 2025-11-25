@@ -18,6 +18,8 @@ public interface CouponMapper {
     @Mapping(target = "updatedAt", ignore = true)
     Coupon toCoupon(CouponCreationRequest request);
 
+    @Mapping(target = "isActive", source = "active")
+    @Mapping(target = "isStoreSpecific", source = "storeSpecific")
     CouponResponse toCouponResponse(Coupon coupon);
 
     @Mapping(target = "id", ignore = true)

@@ -139,4 +139,35 @@ public class RabbitMQConfig {
         factory.setMessageConverter(jsonMessageConverter());
         return factory;
     }
+
+    /**
+     * Queue riêng cho order-service để lắng nghe sự kiện thanh toán thành công
+     * (Tránh conflict với notification-service cùng lắng nghe payment-success-queue)
+     */
+    @Bean
+    public Queue orderPaymentSuccessQueue() {
+        return new Queue("order-service-payment-success-queue", true);
+    }
+
+    @Bean
+    public Binding orderPaymentSuccessBinding(Queue orderPaymentSuccessQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(orderPaymentSuccessQueue)
+                .to(exchange)
+                .with(MessageType.PAYMENT_SUCCESS.getRoutingKey());
+    }
+
+    /**
+     * Queue riêng cho order-service để lắng nghe sự kiện thanh toán thất bại
+     */
+    @Bean
+    public Queue orderPaymentFailedQueue() {
+        return new Queue("order-service-payment-failed-queue", true);
+    }
+
+    @Bean
+    public Binding orderPaymentFailedBinding(Queue orderPaymentFailedQueue, TopicExchange exchange) {
+        return BindingBuilder.bind(orderPaymentFailedQueue)
+                .to(exchange)
+                .with(MessageType.PAYMENT_FAILED.getRoutingKey());
+    }
 }
