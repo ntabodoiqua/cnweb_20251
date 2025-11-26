@@ -1309,6 +1309,12 @@ public class ProductServiceImpl implements ProductService {
         // Authorization check
         checkProductAccess(product);
 
+        // Validate metadata data structure
+        SpecsHelper.validateSpecs(request.getMetadata());
+        
+        // Normalize metadata values
+        SpecsHelper.normalizeSpecs(request.getMetadata());
+
         // Update metadata
         variant.setMetadata(request.getMetadata());
         variantRepository.save(variant);

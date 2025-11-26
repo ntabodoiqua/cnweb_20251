@@ -1,5 +1,6 @@
 package com.vdt2025.product_service.entity;
 
+import com.vdt2025.product_service.dto.SpecAttribute;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -92,5 +93,5 @@ public class ProductVariant {
 
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "metadata", columnDefinition = "jsonb")
-    private Map<String, Object> metadata;
+    private Map<String, SpecAttribute> metadata;
 }
