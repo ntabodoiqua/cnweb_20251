@@ -16,6 +16,7 @@ import com.vdt2025.product_service.mapper.ProductImageMapper;
 import com.vdt2025.product_service.mapper.StoreMapper;
 import com.vdt2025.product_service.repository.*;
 import com.vdt2025.product_service.specification.ProductSpecification;
+import com.vdt2025.product_service.util.SpecsHelper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -1232,6 +1233,12 @@ public class ProductServiceImpl implements ProductService {
 
         // Authorization check
         checkProductAccess(product);
+
+        // Validate specs data structure
+        SpecsHelper.validateSpecs(request.getSpecs());
+        
+        // Normalize specs values
+        SpecsHelper.normalizeSpecs(request.getSpecs());
 
         // Update specs
         product.setSpecs(request.getSpecs());

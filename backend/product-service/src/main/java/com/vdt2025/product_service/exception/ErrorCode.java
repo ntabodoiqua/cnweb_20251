@@ -85,6 +85,7 @@ public enum ErrorCode {
     CANNOT_ACTIVATE_VARIANT_OF_INACTIVE_PRODUCT(1632, "error.1632", HttpStatus.BAD_REQUEST),
     CANNOT_DELETE_PRODUCT_WITH_VARIANTS(1633, "error.1633", HttpStatus.BAD_REQUEST),
     VARIANT_NOT_BELONG_TO_PRODUCT(1634, "error.1634", HttpStatus.BAD_REQUEST),
+    INVALID_SPEC_DATA(1635, "error.1635", HttpStatus.BAD_REQUEST),
 
     // Lỗi store (17xx)
     STORE_NOT_FOUND(1701, "error.1701", HttpStatus.NOT_FOUND),

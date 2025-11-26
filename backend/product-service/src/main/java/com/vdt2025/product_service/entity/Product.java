@@ -1,5 +1,6 @@
 package com.vdt2025.product_service.entity;
 
+import com.vdt2025.product_service.dto.SpecAttribute;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -122,7 +123,7 @@ public class Product {
     // Thông tin đặc tả kỹ thuật dưới dạng JSON
     @JdbcTypeCode(SqlTypes.JSON) // Báo cho Hibernate đây là JSON
     @Column(name = "specs", columnDefinition = "jsonb") // Mapping với cột jsonb trong Postgres
-    private Map<String, Object> specs;
+    private Map<String, SpecAttribute> specs;
 
 
 }
