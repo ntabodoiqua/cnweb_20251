@@ -1,0 +1,41 @@
+name: Deploy Monitoring Stack (LGTM)
+
+on:
+  push:
+    paths:
+      - 'monitoring/**' # Chỉ chạy khi thư mục monitoring thay đổi
+    branches:
+      - 'be/dev'        # Hoặc nhánh main tùy bạn
+
+jobs:
+  deploy-monitoring:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to Server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            # 1. Di chuyển vào thư mục project
+            cd /opt/cnweb2025_1 || exit 1
+            
+            # 2. Lấy code cấu hình mới nhất
+            git pull origin be/dev
+            
+            echo "--- START DEPLOYING MONITORING STACK ---"
+            
+            # 3. Pull images mới nhất (nếu có update version)
+            docker compose -f monitoring/docker-compose.yml pull
+            
+            # 4. Up container (Recreate if config changed)
+            # --remove-orphans: Xóa các container rác không còn trong file config
+            docker compose -f monitoring/docker-compose.yml up -d --remove-orphans
+            
+            # 5. Dọn dẹp Image cũ để tiết kiệm ổ cứng
+            docker image prune -f
+            
+            echo "--- DEPLOYMENT SUCCESSFUL ---"
+            docker compose -f monitoring/docker-compose.yml ps
