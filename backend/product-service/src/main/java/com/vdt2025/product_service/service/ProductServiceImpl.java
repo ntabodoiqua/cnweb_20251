@@ -175,6 +175,10 @@ public class ProductServiceImpl implements ProductService {
             product.setMaxPrice(maxPrice);
             product = productRepository.save(product);
         }
+        
+        // Evict product search cache khi thêm sản phẩm mới
+        cacheEvictService.evictProductSearchCache();
+        
         log.info("Product {} created successfully with ID: {}", product.getName(), product.getId());
         return mapToProductResponse(product);
     }
@@ -295,6 +299,9 @@ public class ProductServiceImpl implements ProductService {
             variant.setDeleted(false);
         }
         
+        // Evict product search cache khi xóa sản phẩm
+        cacheEvictService.evictProductSearchCache();
+        
         log.info("Product {} soft deleted successfully", product.getName());
     }
 
@@ -314,6 +321,10 @@ public class ProductServiceImpl implements ProductService {
         }
         
         productRepository.delete(product);
+        
+        // Evict product search cache khi xóa vĩnh viễn sản phẩm
+        cacheEvictService.evictProductSearchCache();
+        
         log.info("Product {} permanently deleted", product.getName());
     }
 
