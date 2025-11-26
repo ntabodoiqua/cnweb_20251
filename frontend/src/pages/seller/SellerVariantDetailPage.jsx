@@ -51,27 +51,6 @@ import styles from "./SellerVariantDetailPage.module.css";
 const { Option } = Select;
 const { TextArea } = Input;
 
-// Predefined metadata groups with translations
-const METADATA_GROUPS = [
-  {
-    key: "overview",
-    labelEn: "General Information",
-    labelVi: "Thông tin chung",
-  },
-  { key: "display", labelEn: "Display", labelVi: "Màn hình" },
-  { key: "performance", labelEn: "Performance", labelVi: "Hiệu năng" },
-  { key: "camera", labelEn: "Camera", labelVi: "Camera" },
-  { key: "battery", labelEn: "Battery & Charging", labelVi: "Pin & Sạc" },
-  { key: "design", labelEn: "Design", labelVi: "Thiết kế" },
-  { key: "connectivity", labelEn: "Connectivity", labelVi: "Kết nối" },
-  {
-    key: "features",
-    labelEn: "Special Features",
-    labelVi: "Tính năng đặc biệt",
-  },
-  { key: "other", labelEn: "Other", labelVi: "Khác" },
-];
-
 // Data types
 const DATA_TYPES = [
   { value: "string", label: "Văn bản" },
@@ -403,7 +382,7 @@ const SellerVariantDetailPage = () => {
         unit: meta.unit || "",
         displayOrder: meta.displayOrder || 1,
         showInList: meta.showInList !== false,
-        group: meta.group || "other",
+        group: meta.groupLabelVi || meta.group || "Khác",
       });
     } else {
       // Add new metadata
@@ -413,7 +392,7 @@ const SellerVariantDetailPage = () => {
         dataType: "string",
         displayOrder: Object.keys(metadata).length + 1,
         showInList: false,
-        group: "other",
+        group: "",
       });
     }
     setIsMetadataModalOpen(true);
@@ -426,7 +405,15 @@ const SellerVariantDetailPage = () => {
   };
 
   const handleSubmitMetadata = async (values) => {
-    const selectedGroup = METADATA_GROUPS.find((g) => g.key === values.group);
+    // Tạo key từ tên nhóm
+    const groupKey = values.group
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/[^a-z0-9]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "");
 
     const metaData = {
       key: values.key,
@@ -442,9 +429,9 @@ const SellerVariantDetailPage = () => {
       unit: values.unit || undefined,
       displayOrder: values.displayOrder,
       showInList: values.showInList,
-      group: values.group,
-      groupLabelEn: selectedGroup?.labelEn || "Other",
-      groupLabelVi: selectedGroup?.labelVi || "Khác",
+      group: groupKey,
+      groupLabelEn: values.group,
+      groupLabelVi: values.group,
     };
 
     const updatedMetadata = { ...metadata };
@@ -510,6 +497,22 @@ const SellerVariantDetailPage = () => {
     );
   });
 
+  // Lấy tất cả các nhóm từ metadata hiện có
+  const allMetadataGroups = Object.entries(metadata).reduce(
+    (acc, [key, meta]) => {
+      const groupKey = meta.group || "other";
+      if (!acc.find((g) => g.key === groupKey)) {
+        acc.push({
+          key: groupKey,
+          labelVi: meta.groupLabelVi || groupKey,
+          labelEn: meta.groupLabelEn || groupKey,
+        });
+      }
+      return acc;
+    },
+    []
+  );
+
   const renderMetaValue = (meta) => {
     if (meta.dataType === "boolean") {
       return meta.value ? (
@@ -534,63 +537,63 @@ const SellerVariantDetailPage = () => {
     );
   };
 
-  const metadataCollapseItems = METADATA_GROUPS.filter(
-    (group) => groupedMetadata[group.key]?.length > 0
-  ).map((group) => ({
-    key: group.key,
-    label: (
-      <div className={styles.groupHeader}>
-        <span className={styles.groupTitle}>{group.labelVi}</span>
-        <Tag color="blue">{groupedMetadata[group.key]?.length || 0}</Tag>
-      </div>
-    ),
-    children: (
-      <div className={styles.metadataList}>
-        {groupedMetadata[group.key]?.map((meta) => (
-          <div key={meta.key} className={styles.metadataItem}>
-            <div className={styles.metadataInfo}>
-              <div className={styles.metadataLabel}>
-                {meta.labelVi}
-                {meta.showInList && (
-                  <Tooltip title="Hiển thị trong danh sách">
-                    <Tag color="green" className={styles.showTag}>
-                      Hiển thị
-                    </Tag>
-                  </Tooltip>
-                )}
+  const metadataCollapseItems = allMetadataGroups
+    .filter((group) => groupedMetadata[group.key]?.length > 0)
+    .map((group) => ({
+      key: group.key,
+      label: (
+        <div className={styles.groupHeader}>
+          <span className={styles.groupTitle}>{group.labelVi}</span>
+          <Tag color="blue">{groupedMetadata[group.key]?.length || 0}</Tag>
+        </div>
+      ),
+      children: (
+        <div className={styles.metadataList}>
+          {groupedMetadata[group.key]?.map((meta) => (
+            <div key={meta.key} className={styles.metadataItem}>
+              <div className={styles.metadataInfo}>
+                <div className={styles.metadataLabel}>
+                  {meta.labelVi}
+                  {meta.showInList && (
+                    <Tooltip title="Hiển thị trong danh sách">
+                      <Tag color="green" className={styles.showTag}>
+                        Hiển thị
+                      </Tag>
+                    </Tooltip>
+                  )}
+                </div>
+                <div className={styles.metadataValue}>
+                  {renderMetaValue(meta)}
+                </div>
               </div>
-              <div className={styles.metadataValue}>
-                {renderMetaValue(meta)}
-              </div>
-            </div>
-            <div className={styles.metadataActions}>
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => handleOpenMetadataModal(meta.key)}
-                className={styles.editBtn}
-              />
-              <Popconfirm
-                title="Xóa metadata này?"
-                description="Thao tác này không thể hoàn tác"
-                onConfirm={() => handleDeleteMetadata(meta.key)}
-                okText="Xóa"
-                cancelText="Hủy"
-                okButtonProps={{ danger: true }}
-              >
+              <div className={styles.metadataActions}>
                 <Button
                   type="text"
-                  icon={<DeleteOutlined />}
-                  danger
-                  className={styles.deleteBtn}
+                  icon={<EditOutlined />}
+                  onClick={() => handleOpenMetadataModal(meta.key)}
+                  className={styles.editBtn}
                 />
-              </Popconfirm>
+                <Popconfirm
+                  title="Xóa metadata này?"
+                  description="Thao tác này không thể hoàn tác"
+                  onConfirm={() => handleDeleteMetadata(meta.key)}
+                  okText="Xóa"
+                  cancelText="Hủy"
+                  okButtonProps={{ danger: true }}
+                >
+                  <Button
+                    type="text"
+                    icon={<DeleteOutlined />}
+                    danger
+                    className={styles.deleteBtn}
+                  />
+                </Popconfirm>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-    ),
-  }));
+          ))}
+        </div>
+      ),
+    }));
 
   if (loading) {
     return (
@@ -1154,16 +1157,11 @@ const SellerVariantDetailPage = () => {
             <Form.Item
               label="Nhóm"
               name="group"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: "Vui lòng nhập tên nhóm" }]}
               className={styles.formCol}
+              tooltip="Nhập tên nhóm để phân loại thông số (VD: Màn hình, Camera, Pin & Sạc, Hiệu năng, Thiết kế, Kết nối...)"
             >
-              <Select>
-                {METADATA_GROUPS.map((group) => (
-                  <Option key={group.key} value={group.key}>
-                    {group.labelVi}
-                  </Option>
-                ))}
-              </Select>
+              <Input placeholder="VD: Màn hình, Camera, Pin & Sạc, Hiệu năng..." />
             </Form.Item>
 
             <Form.Item

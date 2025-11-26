@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Button,
   Modal,
@@ -31,27 +31,6 @@ import styles from "./ProductSpecsSection.module.css";
 const { Option } = Select;
 const { TextArea } = Input;
 
-// Predefined spec groups with translations
-const SPEC_GROUPS = [
-  {
-    key: "overview",
-    labelEn: "General Information",
-    labelVi: "Thông tin chung",
-  },
-  { key: "display", labelEn: "Display", labelVi: "Màn hình" },
-  { key: "performance", labelEn: "Performance", labelVi: "Hiệu năng" },
-  { key: "camera", labelEn: "Camera", labelVi: "Camera" },
-  { key: "battery", labelEn: "Battery & Charging", labelVi: "Pin & Sạc" },
-  { key: "design", labelEn: "Design", labelVi: "Thiết kế" },
-  { key: "connectivity", labelEn: "Connectivity", labelVi: "Kết nối" },
-  {
-    key: "features",
-    labelEn: "Special Features",
-    labelVi: "Tính năng đặc biệt",
-  },
-  { key: "other", labelEn: "Other", labelVi: "Khác" },
-];
-
 // Data types
 const DATA_TYPES = [
   { value: "string", label: "Văn bản" },
@@ -66,6 +45,23 @@ const ProductSpecsSection = ({ productId }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSpec, setEditingSpec] = useState(null);
   const [form] = Form.useForm();
+
+  // Lấy tất cả các nhóm từ specs hiện có
+  const allGroups = useMemo(() => {
+    const groupsMap = new Map();
+
+    Object.values(specs).forEach((spec) => {
+      if (spec.group && !groupsMap.has(spec.group)) {
+        groupsMap.set(spec.group, {
+          key: spec.group,
+          labelVi: spec.groupLabelVi || spec.group,
+          labelEn: spec.groupLabelEn || spec.group,
+        });
+      }
+    });
+
+    return Array.from(groupsMap.values());
+  }, [specs]);
 
   useEffect(() => {
     if (productId) {
@@ -131,7 +127,7 @@ const ProductSpecsSection = ({ productId }) => {
         unit: spec.unit || "",
         displayOrder: spec.displayOrder || 1,
         showInList: spec.showInList !== false,
-        group: spec.group || "other",
+        group: spec.groupLabelVi || spec.group || "Khác",
       });
     } else {
       // Add new spec
@@ -141,7 +137,7 @@ const ProductSpecsSection = ({ productId }) => {
         dataType: "string",
         displayOrder: Object.keys(specs).length + 1,
         showInList: false,
-        group: "other",
+        group: "",
       });
     }
     setIsModalOpen(true);
@@ -154,7 +150,15 @@ const ProductSpecsSection = ({ productId }) => {
   };
 
   const handleSubmitSpec = async (values) => {
-    const selectedGroup = SPEC_GROUPS.find((g) => g.key === values.group);
+    // Tạo key từ tên nhóm
+    const groupKey = values.group
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/[^a-z0-9]/g, "_")
+      .replace(/_+/g, "_")
+      .replace(/^_|_$/g, "");
 
     const specData = {
       key: values.key,
@@ -170,9 +174,9 @@ const ProductSpecsSection = ({ productId }) => {
       unit: values.unit || undefined,
       displayOrder: values.displayOrder,
       showInList: values.showInList,
-      group: values.group,
-      groupLabelEn: selectedGroup?.labelEn || "Other",
-      groupLabelVi: selectedGroup?.labelVi || "Khác",
+      group: groupKey,
+      groupLabelEn: values.group,
+      groupLabelVi: values.group,
     };
 
     const updatedSpecs = { ...specs };
@@ -238,61 +242,68 @@ const ProductSpecsSection = ({ productId }) => {
     );
   };
 
-  const collapseItems = SPEC_GROUPS.filter(
-    (group) => groupedSpecs[group.key]?.length > 0
-  ).map((group) => ({
-    key: group.key,
-    label: (
-      <div className={styles.groupHeader}>
-        <span className={styles.groupTitle}>{group.labelVi}</span>
-        <Tag color="blue">{groupedSpecs[group.key]?.length || 0}</Tag>
-      </div>
-    ),
-    children: (
-      <div className={styles.specsList}>
-        {groupedSpecs[group.key]?.map((spec) => (
-          <div key={spec.key} className={styles.specItem}>
-            <div className={styles.specInfo}>
-              <div className={styles.specLabel}>
-                {spec.labelVi}
-                {spec.showInList && (
-                  <Tooltip title="Hiển thị trong danh sách">
-                    <Tag color="green" className={styles.showTag}>
-                      Hiển thị
-                    </Tag>
-                  </Tooltip>
-                )}
+  const collapseItems = allGroups
+    .filter((group) => groupedSpecs[group.key]?.length > 0)
+    .map((group) => ({
+      key: group.key,
+      label: (
+        <div className={styles.groupHeader}>
+          <span className={styles.groupTitle}>
+            {group.labelVi}
+            {group.isCustom && (
+              <Tag color="purple" className={styles.customTag}>
+                Tùy chỉnh
+              </Tag>
+            )}
+          </span>
+          <Tag color="blue">{groupedSpecs[group.key]?.length || 0}</Tag>
+        </div>
+      ),
+      children: (
+        <div className={styles.specsList}>
+          {groupedSpecs[group.key]?.map((spec) => (
+            <div key={spec.key} className={styles.specItem}>
+              <div className={styles.specInfo}>
+                <div className={styles.specLabel}>
+                  {spec.labelVi}
+                  {spec.showInList && (
+                    <Tooltip title="Hiển thị trong danh sách">
+                      <Tag color="green" className={styles.showTag}>
+                        Hiển thị
+                      </Tag>
+                    </Tooltip>
+                  )}
+                </div>
+                <div className={styles.specValue}>{renderSpecValue(spec)}</div>
               </div>
-              <div className={styles.specValue}>{renderSpecValue(spec)}</div>
-            </div>
-            <div className={styles.specActions}>
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => handleOpenModal(spec.key)}
-                className={styles.editBtn}
-              />
-              <Popconfirm
-                title="Xóa thông số này?"
-                description="Thao tác này không thể hoàn tác"
-                onConfirm={() => handleDeleteSpec(spec.key)}
-                okText="Xóa"
-                cancelText="Hủy"
-                okButtonProps={{ danger: true }}
-              >
+              <div className={styles.specActions}>
                 <Button
                   type="text"
-                  icon={<DeleteOutlined />}
-                  danger
-                  className={styles.deleteBtn}
+                  icon={<EditOutlined />}
+                  onClick={() => handleOpenModal(spec.key)}
+                  className={styles.editBtn}
                 />
-              </Popconfirm>
+                <Popconfirm
+                  title="Xóa thông số này?"
+                  description="Thao tác này không thể hoàn tác"
+                  onConfirm={() => handleDeleteSpec(spec.key)}
+                  okText="Xóa"
+                  cancelText="Hủy"
+                  okButtonProps={{ danger: true }}
+                >
+                  <Button
+                    type="text"
+                    icon={<DeleteOutlined />}
+                    danger
+                    className={styles.deleteBtn}
+                  />
+                </Popconfirm>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
-    ),
-  }));
+          ))}
+        </div>
+      ),
+    }));
 
   return (
     <div className={styles.specsSection}>
@@ -476,16 +487,11 @@ const ProductSpecsSection = ({ productId }) => {
             <Form.Item
               label="Nhóm"
               name="group"
-              rules={[{ required: true }]}
+              rules={[{ required: true, message: "Vui lòng nhập tên nhóm" }]}
               className={styles.formCol}
+              tooltip="Nhập tên nhóm để phân loại thông số (VD: Màn hình, Camera, Pin & Sạc, Hiệu năng, Thiết kế, Kết nối...)"
             >
-              <Select>
-                {SPEC_GROUPS.map((group) => (
-                  <Option key={group.key} value={group.key}>
-                    {group.labelVi}
-                  </Option>
-                ))}
-              </Select>
+              <Input placeholder="VD: Màn hình, Camera, Pin & Sạc, Hiệu năng..." />
             </Form.Item>
 
             <Form.Item
