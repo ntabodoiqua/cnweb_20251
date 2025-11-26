@@ -65,6 +65,8 @@ const SellerProductDetailPage = () => {
     if (productId) {
       fetchProductDetail();
       fetchFormData();
+      // Scroll to top when navigating to this page
+      window.scrollTo(0, 0);
     }
   }, [productId]);
 

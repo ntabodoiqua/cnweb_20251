@@ -59,6 +59,8 @@ export const PROTECTED_ROUTES = {
   // Seller routes
   SELLER_DASHBOARD: "/seller",
   SELLER_PRODUCTS: "/seller/products",
+  SELLER_PRODUCT_DETAIL: "/seller/products/:productId",
+  SELLER_VARIANT_DETAIL: "/seller/products/:productId/variants/:variantId",
   SELLER_ORDERS: "/seller/orders",
   SELLER_CATEGORIES: "/seller/categories",
   SELLER_PRODUCT_ATTRIBUTES: "/seller/product-attributes",
@@ -113,6 +115,8 @@ export const ROUTE_TITLES = {
   [PROTECTED_ROUTES.USER_CHECKOUT]: "Đặt hàng",
   [PROTECTED_ROUTES.SELLER_DASHBOARD]: "Kênh Người Bán",
   [PROTECTED_ROUTES.SELLER_PRODUCTS]: "Quản lý sản phẩm",
+  [PROTECTED_ROUTES.SELLER_PRODUCT_DETAIL]: "Chi tiết sản phẩm",
+  [PROTECTED_ROUTES.SELLER_VARIANT_DETAIL]: "Chi tiết biến thể",
   [PROTECTED_ROUTES.SELLER_ORDERS]: "Quản lý đơn hàng",
   [PROTECTED_ROUTES.SELLER_CATEGORIES]: "Danh mục sản phẩm",
   [PROTECTED_ROUTES.SELLER_PRODUCT_ATTRIBUTES]: "Thuộc tính sản phẩm",

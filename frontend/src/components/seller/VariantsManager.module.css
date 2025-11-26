@@ -397,6 +397,17 @@
   box-shadow: 0 4px 12px rgba(82, 196, 26, 0.4);
 }
 
+/* Detail button special style */
+.actions :global(.ant-btn-primary):first-of-type {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+}
+
+.actions :global(.ant-btn-primary):first-of-type:hover {
+  background: linear-gradient(135deg, #096dd9 0%, #1890ff 100%);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+}
+
 .actions :global(.ant-btn-default) {
   border: 2px solid #e8e8e8;
 }
