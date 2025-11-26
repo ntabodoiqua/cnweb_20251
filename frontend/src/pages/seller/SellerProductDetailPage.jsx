@@ -35,6 +35,7 @@ import {
 } from "../../util/api";
 import NoImages from "../../assets/NoImages.webp";
 import ProductVariantsSection from "../../components/seller/ProductVariantsSection";
+import ProductSpecsSection from "../../components/seller/ProductSpecsSection";
 import styles from "./SellerProductDetailPage.module.css";
 
 const { TextArea } = Input;
@@ -912,6 +913,9 @@ const SellerProductDetailPage = () => {
         categoryId={product?.category?.parentId}
         onUpdate={fetchVariants}
       />
+
+      {/* Product Specifications Section */}
+      <ProductSpecsSection productId={productId} />
     </div>
   );
 };

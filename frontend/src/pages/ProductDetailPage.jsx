@@ -489,9 +489,10 @@ const ProductDetailPage = () => {
       );
     }
 
-    // String value
+    // String value - support multiline
+    const hasNewlines = typeof value === "string" && value.includes("\n");
     return (
-      <Text>
+      <Text style={hasNewlines ? { whiteSpace: "pre-line" } : undefined}>
         {value}
         {unit ? ` ${unit}` : ""}
       </Text>

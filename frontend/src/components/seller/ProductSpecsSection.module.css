@@ -1,0 +1,322 @@
+/* ========================================
+   Product Specs Section Styles
+   Quản lý thông số kỹ thuật sản phẩm
+   ======================================== */
+
+.specsSection {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+  margin-top: 24px;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.1);
+}
+
+.titleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.icon {
+  font-size: 24px;
+  color: #ee4d2d;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.addBtn {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  border: none;
+  height: 40px;
+  padding: 0 24px;
+  font-weight: 600;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+  transition: all 0.3s ease;
+}
+
+.addBtn:hover {
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(238, 77, 45, 0.4);
+}
+
+/* Content */
+.content {
+  min-height: 200px;
+}
+
+.empty {
+  padding: 60px 20px;
+}
+
+/* Collapse */
+.specsCollapse {
+  background: transparent;
+  border: none;
+}
+
+.specsCollapse :global(.ant-collapse-item) {
+  margin-bottom: 12px;
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  border-radius: 10px !important;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.specsCollapse :global(.ant-collapse-item):hover {
+  border-color: rgba(238, 77, 45, 0.25);
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.1);
+}
+
+.specsCollapse :global(.ant-collapse-item-active) {
+  border-color: #ee4d2d;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.15);
+}
+
+.specsCollapse :global(.ant-collapse-header) {
+  padding: 16px 20px !important;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.03) 0%,
+    rgba(255, 107, 53, 0.03) 100%
+  );
+}
+
+.specsCollapse
+  :global(.ant-collapse-item-active)
+  :global(.ant-collapse-header) {
+  background: linear-gradient(135deg, #fff5f2 0%, #ffe8e0 100%);
+}
+
+.specsCollapse :global(.ant-collapse-content) {
+  border-top: none;
+}
+
+.specsCollapse :global(.ant-collapse-content-box) {
+  padding: 0 !important;
+}
+
+/* Group Header */
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.groupTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Specs List */
+.specsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.specItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f5f5f5;
+  transition: all 0.3s ease;
+}
+
+.specItem:last-child {
+  border-bottom: none;
+}
+
+.specItem:hover {
+  background: rgba(238, 77, 45, 0.02);
+}
+
+.specInfo {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 1;
+}
+
+.specLabel {
+  min-width: 200px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.showTag {
+  font-size: 11px;
+  padding: 0 6px;
+  border-radius: 4px;
+}
+
+.specValue {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Multiline value display */
+.multilineValue {
+  white-space: pre-line;
+  line-height: 1.6;
+}
+
+.unit {
+  color: #999;
+  font-weight: 400;
+}
+
+.specActions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.specItem:hover .specActions {
+  opacity: 1;
+}
+
+.editBtn {
+  color: #1890ff;
+}
+
+.editBtn:hover {
+  color: #40a9ff;
+  background: rgba(24, 144, 255, 0.1);
+}
+
+.deleteBtn:hover {
+  background: rgba(255, 77, 79, 0.1);
+}
+
+/* Modal */
+.specModal :global(.ant-modal-header) {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+.specModal :global(.ant-modal-title) {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.specModal :global(.ant-modal-body) {
+  padding: 24px;
+}
+
+/* Form */
+.specForm :global(.ant-form-item-label > label) {
+  font-weight: 600;
+  color: #333;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.formCol {
+  margin-bottom: 0;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .specsSection {
+    padding: 20px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .addBtn {
+    width: 100%;
+  }
+
+  .specInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .specLabel {
+    min-width: auto;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .specActions {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 18px;
+  }
+
+  .specItem {
+    padding: 12px 16px;
+  }
+
+  .specLabel {
+    font-size: 13px;
+  }
+
+  .specValue {
+    font-size: 13px;
+  }
+}

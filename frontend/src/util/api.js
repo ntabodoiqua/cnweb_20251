@@ -650,10 +650,33 @@ const getPublicProductSpecsApi = (productId) => {
   });
 };
 
+// Get product specifications for seller (authenticated)
+const getProductSpecsApi = (productId) => {
+  const URL_API = `/api/product/products/${productId}/specs`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Update product specifications (seller)
+const updateProductSpecsApi = (productId, specsData) => {
+  const URL_API = `/api/product/products/${productId}/specs`;
+  return axios.put(URL_API, specsData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
 const getProductsByStoreApi = (storeId, page = 0, size = 20) => {
-  const URL_API = `/api/product/products/by-store/${storeId}`;
+  const URL_API = `/api/product/products`;
   return axios.get(URL_API, {
     params: {
+      storeId,
       page,
       size,
       sort: "createdAt,desc",
@@ -1533,6 +1556,8 @@ export {
   getPublicProductVariantOptionsApi,
   findVariantByAttributesApi,
   getPublicProductSpecsApi,
+  getProductSpecsApi,
+  updateProductSpecsApi,
   getProductsByStoreApi,
   getProductDetailApi,
   updateProductApi,
