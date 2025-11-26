@@ -193,6 +193,41 @@ public class PublicProductController {
     }
 
     /**
+     * Lấy thông số kỹ thuật của sản phẩm
+     * GET /public/products/{productId}/specs
+     */
+    @GetMapping("/{productId}/specs")
+    public ApiResponse<ProductSpecsResponse> getProductSpecifications(
+            @PathVariable String productId) {
+        log.info("Public: Fetching specifications for product: {}", productId);
+
+        ProductSpecsResponse response = productService.getProductSpecs(productId);
+
+        return ApiResponse.<ProductSpecsResponse>builder()
+                .message("Fetch product specifications successfully")
+                .result(response)
+                .build();
+    }
+
+    /**
+     * Lấy metadata của một variant cụ thể
+     * GET /public/products/{productId}/variants/{variantId}/metadata
+     */
+    @GetMapping("/{productId}/variants/{variantId}/metadata")
+    public ApiResponse<VariantMetadataResponse> getVariantMetadata(
+            @PathVariable String productId,
+            @PathVariable String variantId) {
+        log.info("Public: Fetching metadata for variant: {} of product: {}", variantId, productId);
+
+        VariantMetadataResponse response = productService.getVariantMetadata(productId, variantId);
+
+        return ApiResponse.<VariantMetadataResponse>builder()
+                .message("Fetch variant metadata successfully")
+                .result(response)
+                .build();
+    }
+
+    /**
      * Lấy thông tin để chọn variant (Màu sắc, Size, ...)
      * GET /public/products/{productId}/variant-options
      *
