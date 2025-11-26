@@ -1218,4 +1218,153 @@ public class ProductServiceImpl implements ProductService {
 
         return result;
     }
+
+    // ========== Specs & Metadata Management ==========
+
+    @Override
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @Transactional
+    public ProductSpecsResponse updateProductSpecs(String productId, ProductSpecsUpdateRequest request) {
+        log.info("Updating specs for product: {}", productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // Authorization check
+        checkProductAccess(product);
+
+        // Update specs
+        product.setSpecs(request.getSpecs());
+        productRepository.save(product);
+
+        // Evict cache
+        cacheEvictService.evictProductCaches(productId);
+
+        return ProductSpecsResponse.builder()
+                .productId(product.getId())
+                .specs(product.getSpecs())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = "productSpecs", key = "#productId")
+    public ProductSpecsResponse getProductSpecs(String productId) {
+        log.info("Getting specs for product: {}", productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        return ProductSpecsResponse.builder()
+                .productId(product.getId())
+                .specs(product.getSpecs())
+                .build();
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @Transactional
+    public void deleteProductSpecs(String productId) {
+        log.info("Deleting specs for product: {}", productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // Authorization check
+        checkProductAccess(product);
+
+        // Delete specs (set to null or empty map)
+        product.setSpecs(null);
+        productRepository.save(product);
+
+        // Evict cache
+        cacheEvictService.evictProductCaches(productId);
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @Transactional
+    public VariantMetadataResponse updateVariantMetadata(String productId, String variantId, 
+                                                         VariantMetadataUpdateRequest request) {
+        log.info("Updating metadata for variant: {} of product: {}", variantId, productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        ProductVariant variant = variantRepository.findById(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+
+        // Verify variant belongs to product
+        if (!variant.getProduct().getId().equals(productId)) {
+            throw new AppException(ErrorCode.VARIANT_NOT_BELONG_TO_PRODUCT);
+        }
+
+        // Authorization check
+        checkProductAccess(product);
+
+        // Update metadata
+        variant.setMetadata(request.getMetadata());
+        variantRepository.save(variant);
+
+        // Evict cache
+        cacheEvictService.evictVariantCaches(variantId);
+
+        return VariantMetadataResponse.builder()
+                .variantId(variant.getId())
+                .productId(productId)
+                .metadata(variant.getMetadata())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = "variantSpecs", key = "#variantId")
+    public VariantMetadataResponse getVariantMetadata(String productId, String variantId) {
+        log.info("Getting metadata for variant: {} of product: {}", variantId, productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        ProductVariant variant = variantRepository.findById(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+
+        // Verify variant belongs to product
+        if (!variant.getProduct().getId().equals(productId)) {
+            throw new AppException(ErrorCode.VARIANT_NOT_BELONG_TO_PRODUCT);
+        }
+
+        return VariantMetadataResponse.builder()
+                .variantId(variant.getId())
+                .productId(productId)
+                .metadata(variant.getMetadata())
+                .build();
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @Transactional
+    public void deleteVariantMetadata(String productId, String variantId) {
+        log.info("Deleting metadata for variant: {} of product: {}", variantId, productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        ProductVariant variant = variantRepository.findById(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+
+        // Verify variant belongs to product
+        if (!variant.getProduct().getId().equals(productId)) {
+            throw new AppException(ErrorCode.VARIANT_NOT_BELONG_TO_PRODUCT);
+        }
+
+        // Authorization check
+        checkProductAccess(product);
+
+        // Delete metadata (set to null or empty map)
+        variant.setMetadata(null);
+        variantRepository.save(variant);
+
+        // Evict cache
+        cacheEvictService.evictVariantCaches(variantId);
+    }
 }

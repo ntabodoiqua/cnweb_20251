@@ -395,4 +395,101 @@ public class ProductManagementController {
                 .result(response)
                 .build();
     }
+
+    // ========== Specs & Metadata Management ==========
+
+    /**
+     * Cập nhật thông tin đặc tả kỹ thuật (specs) của Product
+     * PUT /products/{productId}/specs
+     * Required: SELLER (owner) hoặc ADMIN role
+     */
+    @PutMapping("/{productId}/specs")
+    public ApiResponse<ProductSpecsResponse> updateProductSpecs(
+            @PathVariable String productId,
+            @Valid @RequestBody ProductSpecsUpdateRequest request) {
+        log.info("Updating specs for product: {}", productId);
+        ProductSpecsResponse response = productService.updateProductSpecs(productId, request);
+        return ApiResponse.<ProductSpecsResponse>builder()
+                .message("Product specs updated successfully")
+                .result(response)
+                .build();
+    }
+
+    /**
+     * Lấy thông tin đặc tả kỹ thuật (specs) của Product
+     * GET /products/{productId}/specs
+     */
+    @GetMapping("/{productId}/specs")
+    public ApiResponse<ProductSpecsResponse> getProductSpecs(@PathVariable String productId) {
+        log.info("Fetching specs for product: {}", productId);
+        ProductSpecsResponse response = productService.getProductSpecs(productId);
+        return ApiResponse.<ProductSpecsResponse>builder()
+                .result(response)
+                .build();
+    }
+
+    /**
+     * Xóa toàn bộ specs của Product
+     * DELETE /products/{productId}/specs
+     * Required: SELLER (owner) hoặc ADMIN role
+     */
+    @DeleteMapping("/{productId}/specs")
+    public ApiResponse<String> deleteProductSpecs(@PathVariable String productId) {
+        log.info("Deleting specs for product: {}", productId);
+        productService.deleteProductSpecs(productId);
+        return ApiResponse.<String>builder()
+                .message("Product specs deleted successfully")
+                .result("Specs for product " + productId + " have been removed")
+                .build();
+    }
+
+    /**
+     * Cập nhật metadata của ProductVariant
+     * PUT /products/{productId}/variants/{variantId}/metadata
+     * Required: SELLER (owner) hoặc ADMIN role
+     */
+    @PutMapping("/{productId}/variants/{variantId}/metadata")
+    public ApiResponse<VariantMetadataResponse> updateVariantMetadata(
+            @PathVariable String productId,
+            @PathVariable String variantId,
+            @Valid @RequestBody VariantMetadataUpdateRequest request) {
+        log.info("Updating metadata for variant: {} of product: {}", variantId, productId);
+        VariantMetadataResponse response = productService.updateVariantMetadata(productId, variantId, request);
+        return ApiResponse.<VariantMetadataResponse>builder()
+                .message("Variant metadata updated successfully")
+                .result(response)
+                .build();
+    }
+
+    /**
+     * Lấy metadata của ProductVariant
+     * GET /products/{productId}/variants/{variantId}/metadata
+     */
+    @GetMapping("/{productId}/variants/{variantId}/metadata")
+    public ApiResponse<VariantMetadataResponse> getVariantMetadata(
+            @PathVariable String productId,
+            @PathVariable String variantId) {
+        log.info("Fetching metadata for variant: {} of product: {}", variantId, productId);
+        VariantMetadataResponse response = productService.getVariantMetadata(productId, variantId);
+        return ApiResponse.<VariantMetadataResponse>builder()
+                .result(response)
+                .build();
+    }
+
+    /**
+     * Xóa toàn bộ metadata của ProductVariant
+     * DELETE /products/{productId}/variants/{variantId}/metadata
+     * Required: SELLER (owner) hoặc ADMIN role
+     */
+    @DeleteMapping("/{productId}/variants/{variantId}/metadata")
+    public ApiResponse<String> deleteVariantMetadata(
+            @PathVariable String productId,
+            @PathVariable String variantId) {
+        log.info("Deleting metadata for variant: {} of product: {}", variantId, productId);
+        productService.deleteVariantMetadata(productId, variantId);
+        return ApiResponse.<String>builder()
+                .message("Variant metadata deleted successfully")
+                .result("Metadata for variant " + variantId + " have been removed")
+                .build();
+    }
 }
