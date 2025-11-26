@@ -19,6 +19,7 @@ import {
   UploadOutlined,
   BranchesOutlined,
 } from "@ant-design/icons";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { notification, Form, Input, Select, Button, Upload, Modal } from "antd";
 import {
   getProductDetailApi,
@@ -35,6 +36,7 @@ import {
 } from "../../util/api";
 import NoImages from "../../assets/NoImages.webp";
 import ProductVariantsSection from "../../components/seller/ProductVariantsSection";
+import ProductSpecsSection from "../../components/seller/ProductSpecsSection";
 import styles from "./SellerProductDetailPage.module.css";
 
 const { TextArea } = Input;
@@ -63,6 +65,8 @@ const SellerProductDetailPage = () => {
     if (productId) {
       fetchProductDetail();
       fetchFormData();
+      // Scroll to top when navigating to this page
+      window.scrollTo(0, 0);
     }
   }, [productId]);
 
@@ -433,10 +437,7 @@ const SellerProductDetailPage = () => {
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <LoadingOutlined style={{ fontSize: 48, color: "#ee4d2d" }} />
-        <p>Đang tải thông tin sản phẩm...</p>
-      </div>
+      <LoadingSpinner tip="Đang tải thông tin sản phẩm..." fullScreen={false} />
     );
   }
 
@@ -912,6 +913,9 @@ const SellerProductDetailPage = () => {
         categoryId={product?.category?.parentId}
         onUpdate={fetchVariants}
       />
+
+      {/* Product Specifications Section */}
+      <ProductSpecsSection productId={productId} />
     </div>
   );
 };

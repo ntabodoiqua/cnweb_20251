@@ -5,8 +5,8 @@ import {
   SearchOutlined,
   EyeOutlined,
   ShopOutlined,
-  LoadingOutlined,
 } from "@ant-design/icons";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { notification, Modal, Switch } from "antd";
 import AddProductModal from "../../components/seller/AddProductModal";
 import {
@@ -494,8 +494,7 @@ const SellerProductsPage = () => {
       <div className={styles.sellerTableContainer}>
         {loading && (
           <div className={styles.loadingOverlay}>
-            <LoadingOutlined style={{ fontSize: 48, color: "#ee4d2d" }} />
-            <p>Đang tải sản phẩm...</p>
+            <LoadingSpinner tip="Đang tải sản phẩm..." fullScreen={false} />
           </div>
         )}
         <table className={styles.sellerTable}>

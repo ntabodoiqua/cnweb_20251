@@ -1,0 +1,852 @@
+/* ========================================
+   Seller Variant Detail Page Styles
+   Giao diện trang chi tiết biến thể
+   ======================================== */
+
+.variantDetail {
+  animation: fadeInUp 0.5s ease-out;
+  padding: 0;
+  margin: 0;
+  max-width: 100%;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== Loading Container ==================== */
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+  gap: 16px;
+}
+
+.loadingContainer p {
+  font-size: 16px;
+  color: #666;
+  font-weight: 600;
+}
+
+/* ==================== Header Section ==================== */
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.backBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  background: white;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.backBtn:hover {
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+  background: rgba(238, 77, 45, 0.05);
+}
+
+.headerInfo {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 200px;
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.productName {
+  font-size: 14px;
+  color: #666;
+}
+
+.headerActions {
+  display: flex;
+  gap: 12px;
+}
+
+.editBtn,
+.saveBtn,
+.cancelBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.editBtn {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+}
+
+.editBtn:hover {
+  background: linear-gradient(135deg, #3da80e 0%, #5fb82b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.4);
+}
+
+.saveBtn {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #3da80e 0%, #5fb82b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.4);
+}
+
+.saveBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cancelBtn {
+  background: linear-gradient(135deg, #999 0%, #bbb 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #888 0%, #aaa 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.cancelBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ==================== Content Wrapper ==================== */
+
+.contentWrapper {
+  display: grid;
+  grid-template-columns: 300px 1fr;
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+/* ==================== Image Section ==================== */
+
+.imageSection {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+  max-height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.imageContainer {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 2px solid #f0f0f0;
+  background: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.variantImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.variantImage:hover {
+  transform: scale(1.05);
+}
+
+.noImageOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(250, 250, 250, 0.9);
+  color: #999;
+}
+
+.noImageOverlay :global(.anticon) {
+  font-size: 48px;
+}
+
+.uploadBtn {
+  border-radius: 8px;
+  height: 40px;
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+}
+
+.uploadBtn:hover {
+  background: rgba(238, 77, 45, 0.1) !important;
+  border-color: #ee4d2d !important;
+  color: #ee4d2d !important;
+}
+
+.statusSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.statusLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* ==================== Info Section ==================== */
+
+.infoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.variantHeader {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.variantName {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+  line-height: 1.3;
+  flex: 1;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.statusActive {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(82, 196, 26, 0.3);
+}
+
+.statusInactive {
+  background: linear-gradient(135deg, #999 0%, #bbb 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* ==================== Price Section ==================== */
+
+.priceSection {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.05) 0%,
+    rgba(255, 107, 53, 0.05) 100%
+  );
+  border-radius: 12px;
+  padding: 20px 24px;
+  border: 2px solid rgba(238, 77, 45, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.priceLabel {
+  font-size: 14px;
+  color: #666;
+  font-weight: 600;
+  min-width: 80px;
+}
+
+.priceValue {
+  font-size: 28px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.originalPrice {
+  font-size: 18px;
+  font-weight: 600;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.discountTag {
+  margin-left: 8px;
+}
+
+/* ==================== Info Grid ==================== */
+
+.infoGrid {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.infoLabel {
+  font-size: 13px;
+  color: #999;
+  font-weight: 500;
+}
+
+.infoValue {
+  font-size: 15px;
+  color: #333;
+  font-weight: 600;
+}
+
+.inStock {
+  color: #52c41a;
+}
+
+.lowStock {
+  color: #ff4d4f;
+}
+
+/* ==================== Attributes Section ==================== */
+
+.attributesSection {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.sectionHeader h3 {
+  flex: 1;
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.sectionIcon {
+  font-size: 20px;
+  color: #ee4d2d;
+}
+
+.attributesList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.attributeItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.attributeTag {
+  font-size: 14px;
+  padding: 6px 12px;
+  border-radius: 8px;
+}
+
+.emptyAttributes {
+  color: #999;
+  font-size: 14px;
+  text-align: center;
+  padding: 20px;
+}
+
+.addAttributeForm {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px dashed #e8e8e8;
+}
+
+/* ==================== Metadata Section ==================== */
+
+.metadataSection {
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+}
+
+.metadataSection .sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.15);
+}
+
+.titleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.titleWrapper .icon {
+  font-size: 24px;
+  color: #ee4d2d;
+}
+
+.sectionTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  margin: 0;
+}
+
+.addMetaBtn {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+}
+
+.addMetaBtn:hover {
+  background: linear-gradient(135deg, #d4402a 0%, #e55a2b 100%) !important;
+  transform: translateY(-2px);
+}
+
+.metadataContent {
+  min-height: 100px;
+}
+
+.metadataCollapse {
+  background: transparent;
+  border: none;
+}
+
+.metadataCollapse :global(.ant-collapse-item) {
+  background: white;
+  border: 1px solid #f0f0f0;
+  border-radius: 8px !important;
+  margin-bottom: 12px;
+  overflow: hidden;
+}
+
+.metadataCollapse :global(.ant-collapse-header) {
+  padding: 16px 20px !important;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.02) 0%,
+    rgba(255, 107, 53, 0.02) 100%
+  );
+}
+
+.metadataCollapse :global(.ant-collapse-content-box) {
+  padding: 0 !important;
+}
+
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.groupTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.metadataList {
+  padding: 8px 0;
+}
+
+.metadataItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  transition: background 0.2s ease;
+}
+
+.metadataItem:hover {
+  background: rgba(238, 77, 45, 0.02);
+}
+
+.metadataItem:not(:last-child) {
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.metadataInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metadataLabel {
+  font-size: 13px;
+  color: #999;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.showTag {
+  font-size: 11px;
+}
+
+.metadataValue {
+  font-size: 15px;
+  color: #333;
+  font-weight: 600;
+}
+
+.unit {
+  color: #999;
+  font-weight: 400;
+}
+
+.metadataActions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.metadataItem:hover .metadataActions {
+  opacity: 1;
+}
+
+.editBtn,
+.deleteBtn {
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.editBtn:hover,
+.deleteBtn:hover {
+  opacity: 1;
+}
+
+.empty {
+  padding: 40px 20px;
+}
+
+/* ==================== Edit Form Styles ==================== */
+
+.editForm {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+}
+
+.editForm :global(.ant-form-item-label > label) {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+}
+
+.editForm :global(.ant-input),
+.editForm :global(.ant-input-number),
+.editForm :global(.ant-select-selector) {
+  border-radius: 8px;
+  border: 1px solid #e8e8e8;
+  transition: all 0.3s ease;
+}
+
+.editForm :global(.ant-input:focus),
+.editForm :global(.ant-input-number-focused),
+.editForm :global(.ant-select-focused .ant-select-selector) {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 2px rgba(238, 77, 45, 0.1);
+}
+
+.editForm :global(.ant-input:hover),
+.editForm :global(.ant-input-number:hover),
+.editForm :global(.ant-select-selector:hover) {
+  border-color: #ee4d2d;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.formCol {
+  flex: 1;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* ==================== Metadata Modal ==================== */
+
+.metadataModal :global(.ant-modal-content) {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.metadataModal :global(.ant-modal-header) {
+  padding: 20px 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.05) 0%,
+    rgba(255, 107, 53, 0.05) 100%
+  );
+  border-bottom: 2px solid rgba(238, 77, 45, 0.15);
+}
+
+.metadataModal :global(.ant-modal-title) {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+}
+
+.metadataModal :global(.ant-modal-body) {
+  padding: 24px;
+}
+
+.metadataFormModal :global(.ant-form-item-label > label) {
+  font-weight: 600;
+  color: #333;
+}
+
+.metadataFormModal :global(.ant-input),
+.metadataFormModal :global(.ant-input-number),
+.metadataFormModal :global(.ant-select-selector),
+.metadataFormModal :global(.ant-input-textarea) {
+  border-radius: 8px;
+}
+
+.metadataFormModal :global(.ant-input:focus),
+.metadataFormModal :global(.ant-input-number-focused),
+.metadataFormModal :global(.ant-select-focused .ant-select-selector),
+.metadataFormModal :global(.ant-input-textarea:focus) {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 2px rgba(238, 77, 45, 0.1);
+}
+
+/* ==================== Responsive Design ==================== */
+
+@media (max-width: 1200px) {
+  .contentWrapper {
+    grid-template-columns: 280px 1fr;
+    gap: 24px;
+  }
+
+  .infoGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .contentWrapper {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .imageSection {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+
+  .infoGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .backBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .headerInfo {
+    text-align: center;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+
+  .headerActions {
+    width: 100%;
+  }
+
+  .editBtn,
+  .saveBtn,
+  .cancelBtn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .variantHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .variantName {
+    font-size: 22px;
+  }
+
+  .priceValue {
+    font-size: 24px;
+  }
+
+  .infoGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .metadataSection {
+    padding: 20px;
+  }
+
+  .metadataSection .sectionHeader {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .addMetaBtn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .attributesList {
+    flex-direction: column;
+  }
+
+  .addAttributeForm {
+    flex-direction: column;
+  }
+
+  .addAttributeForm > * {
+    width: 100% !important;
+  }
+
+  .metadataItem {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .metadataActions {
+    opacity: 1;
+    width: 100%;
+    justify-content: flex-end;
+  }
+}

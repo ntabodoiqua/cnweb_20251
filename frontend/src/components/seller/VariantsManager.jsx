@@ -10,10 +10,7 @@ import {
 } from "antd";
 import {
   createVariantApi,
-  updateVariantApi,
-  deleteVariantApi,
   addAttributeToVariantApi,
-  removeAttributeFromVariantApi,
   getProductAttributesByCategoryApi,
   getProductAttributeByIdApi,
   updateVariantStatusApi,
@@ -27,14 +24,11 @@ const { Option } = Select;
 const VariantsManager = memo(
   ({ variants, productId, categoryId, onUpdate }) => {
     const [expandedRows, setExpandedRows] = useState([]);
-    const [editingRow, setEditingRow] = useState(null);
-    const [editingData, setEditingData] = useState({});
     const [showCreateForm, setShowCreateForm] = useState(false);
     const [createFormData, setCreateFormData] = useState({});
     const [attributes, setAttributes] = useState([]);
     const [attributeDetails, setAttributeDetails] = useState({});
     const [editingAttributes, setEditingAttributes] = useState({});
-    const [addingAttribute, setAddingAttribute] = useState({});
     const [selectedVariants, setSelectedVariants] = useState([]);
 
     useEffect(() => {
@@ -88,131 +82,6 @@ const VariantsManager = memo(
           : [...prev, variantId]
       );
     }, []);
-
-    const handleEdit = useCallback((variant) => {
-      setEditingRow(variant.id);
-      setEditingData({
-        variantName: variant.variantName,
-        price: variant.price,
-        originalPrice: variant.originalPrice,
-        stockQuantity: variant.stockQuantity,
-      });
-      setAddingAttribute({});
-    }, []);
-
-    const handleCancelEdit = useCallback(() => {
-      setEditingRow(null);
-      setEditingData({});
-      setEditingAttributes({});
-      setAddingAttribute({});
-    }, []);
-
-    const handleSaveEdit = useCallback(
-      async (variantId) => {
-        try {
-          const variantData = {
-            variantName: editingData.variantName,
-            price: editingData.price,
-            originalPrice: editingData.originalPrice,
-            stockQuantity: editingData.stockQuantity,
-          };
-
-          await updateVariantApi(productId, variantId, variantData);
-
-          notification.success({
-            message: "Thành công",
-            description: "Cập nhật biến thể thành công",
-            placement: "topRight",
-          });
-
-          setEditingRow(null);
-          setEditingData({});
-          onUpdate?.();
-        } catch (error) {
-          console.error("Error updating variant:", error);
-          notification.error({
-            message: "Lỗi",
-            description: "Không thể cập nhật biến thể",
-            placement: "topRight",
-          });
-        }
-      },
-      [editingData, productId, onUpdate]
-    );
-
-    const handleDelete = useCallback(
-      async (variantId) => {
-        try {
-          await deleteVariantApi(productId, variantId);
-          notification.success({
-            message: "Thành công",
-            description: "Xóa biến thể thành công",
-            placement: "topRight",
-          });
-          onUpdate?.();
-        } catch (error) {
-          console.error("Error deleting variant:", error);
-          notification.error({
-            message: "Lỗi",
-            description: "Không thể xóa biến thể",
-            placement: "topRight",
-          });
-        }
-      },
-      [productId, onUpdate]
-    );
-
-    const handleAddAttribute = useCallback(
-      async (variantId, attributeId, value) => {
-        try {
-          await addAttributeToVariantApi(productId, variantId, {
-            attributeId,
-            value,
-          });
-          notification.success({
-            message: "Thành công",
-            description: "Thêm thuộc tính thành công",
-            placement: "topRight",
-          });
-          onUpdate?.();
-        } catch (error) {
-          console.error("Error adding attribute:", error);
-          notification.error({
-            message: "Lỗi",
-            description: "Không thể thêm thuộc tính",
-            placement: "topRight",
-          });
-        }
-      },
-      [productId, onUpdate]
-    );
-
-    const handleRemoveAttribute = useCallback(
-      async (variantId, attributeId, value) => {
-        try {
-          await removeAttributeFromVariantApi(
-            productId,
-            variantId,
-            attributeId,
-            value
-          );
-          notification.success({
-            message: "Thành công",
-            description: "Xóa thuộc tính thành công",
-            placement: "topRight",
-          });
-          onUpdate?.();
-        } catch (error) {
-          console.error("Error removing attribute:", error);
-          notification.error({
-            message: "Lỗi",
-            description: "Không thể xóa thuộc tính",
-            placement: "topRight",
-          });
-        }
-      },
-      [productId, onUpdate]
-    );
 
     const handleCreateVariant = useCallback(async () => {
       try {
@@ -531,22 +400,10 @@ const VariantsManager = memo(
               <VariantCard
                 key={variant.id}
                 variant={variant}
+                productId={productId}
                 isExpanded={expandedRows.includes(variant.id)}
-                isEditing={editingRow === variant.id}
-                editingData={editingData}
-                addingAttribute={addingAttribute}
-                attributes={attributes}
-                attributeDetails={attributeDetails}
                 isSelected={selectedVariants.includes(variant.id)}
                 onToggleExpand={toggleExpand}
-                onEdit={handleEdit}
-                onCancelEdit={handleCancelEdit}
-                onSaveEdit={handleSaveEdit}
-                onDelete={handleDelete}
-                onEditingDataChange={setEditingData}
-                onAddAttribute={handleAddAttribute}
-                onRemoveAttribute={handleRemoveAttribute}
-                onAddingAttributeChange={setAddingAttribute}
                 onToggleStatus={handleToggleVariantStatus}
                 onSelect={handleSelectVariant}
               />

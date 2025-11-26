@@ -7,7 +7,7 @@ import {
   Select,
   Button,
   Space,
-  message,
+  notification,
   Divider,
 } from "antd";
 import {
@@ -76,7 +76,11 @@ const AddProductModal = ({ visible, onClose, onSuccess, storeId }) => {
       setStoreCategories(storeCategoriesRes?.result || []);
     } catch (error) {
       console.error("Error fetching data:", error);
-      message.error("Không thể tải dữ liệu danh mục và thương hiệu");
+      notification.error({
+        message: "Lỗi",
+        description: "Không thể tải dữ liệu danh mục và thương hiệu",
+        placement: "topRight",
+      });
     }
   };
 
@@ -101,7 +105,11 @@ const AddProductModal = ({ visible, onClose, onSuccess, storeId }) => {
       }
     } catch (error) {
       console.error("Error fetching subcategories:", error);
-      message.error("Không thể tải danh mục con");
+      notification.error({
+        message: "Lỗi",
+        description: "Không thể tải danh mục con",
+        placement: "topRight",
+      });
     }
   };
 
@@ -119,16 +127,33 @@ const AddProductModal = ({ visible, onClose, onSuccess, storeId }) => {
         variants: values.variants || [],
       };
 
-      await createProductApi(productData);
-      message.success("Tạo sản phẩm thành công!");
-      form.resetFields();
-      onSuccess?.();
-      onClose();
+      const response = await createProductApi(productData);
+
+      // Kiểm tra response code thành công
+      if (response?.code === 1000 || response?.code === 200) {
+        notification.success({
+          message: "Thành công",
+          description: "Tạo sản phẩm thành công!",
+          placement: "topRight",
+        });
+        form.resetFields();
+        onSuccess?.();
+        onClose();
+      } else {
+        // Response không thành công
+        throw new Error(response?.message || "Không thể tạo sản phẩm");
+      }
     } catch (error) {
       console.error("Error creating product:", error);
       const errorMsg =
-        error.response?.data?.message || "Không thể tạo sản phẩm";
-      message.error(errorMsg);
+        error.response?.data?.message ||
+        error.message ||
+        "Không thể tạo sản phẩm";
+      notification.error({
+        message: "Lỗi",
+        description: errorMsg,
+        placement: "topRight",
+      });
     } finally {
       setLoading(false);
     }

@@ -639,10 +639,44 @@ const findVariantByAttributesApi = (productId, attributeValueIds) => {
   );
 };
 
+// Get public product specifications (no authentication required)
+const getPublicProductSpecsApi = (productId) => {
+  const URL_API = `/api/product/public/products/${productId}/specs`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Get product specifications for seller (authenticated)
+const getProductSpecsApi = (productId) => {
+  const URL_API = `/api/product/products/${productId}/specs`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Update product specifications (seller)
+const updateProductSpecsApi = (productId, specsData) => {
+  const URL_API = `/api/product/products/${productId}/specs`;
+  return axios.put(URL_API, specsData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
 const getProductsByStoreApi = (storeId, page = 0, size = 20) => {
-  const URL_API = `/api/product/products/by-store/${storeId}`;
+  const URL_API = `/api/product/products`;
   return axios.get(URL_API, {
     params: {
+      storeId,
       page,
       size,
       sort: "createdAt,desc",
@@ -852,6 +886,28 @@ const initiateOrderPaymentApi = (orderIds, expireDurationSeconds = null) => {
 // Get my orders with filters
 const getMyOrdersApi = (params = {}) => {
   const URL_API = "/api/order/api/v1/orders/my-orders";
+  return axios.get(URL_API, {
+    params: {
+      search: params.search || "",
+      status: params.status || "",
+      paymentStatus: params.paymentStatus || "",
+      startDate: params.startDate || "",
+      endDate: params.endDate || "",
+      minAmount: params.minAmount || "",
+      maxAmount: params.maxAmount || "",
+      page: params.page || 0,
+      size: params.size || 10,
+      sort: params.sort || "createdAt,desc",
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get store orders with filters (for seller)
+const getStoreOrdersApi = (storeId, params = {}) => {
+  const URL_API = `/api/order/api/v1/orders/store/${storeId}`;
   return axios.get(URL_API, {
     params: {
       search: params.search || "",
@@ -1246,6 +1302,40 @@ const removeAttributeFromVariantApi = (
   });
 };
 
+// Variant Metadata APIs
+const getVariantMetadataApi = (productId, variantId) => {
+  const URL_API = `/api/product/products/${productId}/variants/${variantId}/metadata`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const updateVariantMetadataApi = (productId, variantId, metadataData) => {
+  const URL_API = `/api/product/products/${productId}/variants/${variantId}/metadata`;
+  return axios.put(URL_API, metadataData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Upload variant image
+const uploadVariantImageApi = (productId, variantId, file) => {
+  const URL_API = `/api/product/products/${productId}/variants/${variantId}/image`;
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 const updateVariantStatusApi = (productId, variantId, isActive) => {
   const URL_API = `/api/product/products/${productId}/variants/${variantId}/status`;
   return axios.patch(URL_API, null, {
@@ -1521,6 +1611,9 @@ export {
   getPublicProductDetailApi,
   getPublicProductVariantOptionsApi,
   findVariantByAttributesApi,
+  getPublicProductSpecsApi,
+  getProductSpecsApi,
+  updateProductSpecsApi,
   getProductsByStoreApi,
   getProductDetailApi,
   updateProductApi,
@@ -1542,6 +1635,7 @@ export {
   applyCouponToOrdersApi,
   initiateOrderPaymentApi,
   getMyOrdersApi,
+  getStoreOrdersApi,
   // Cart APIs
   getCartApi,
   addToCartApi,
@@ -1573,6 +1667,10 @@ export {
   updateVariantStatusApi,
   bulkUpdateVariantStatusApi,
   bulkUpdateProductStatusApi,
+  // Variant Metadata APIs
+  getVariantMetadataApi,
+  updateVariantMetadataApi,
+  uploadVariantImageApi,
   // Admin APIs
   getUsersAdminApi,
   getUserStatisticsApi,

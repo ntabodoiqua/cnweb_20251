@@ -21,6 +21,7 @@ import {
   Modal,
   Descriptions,
   Spin,
+  Collapse,
 } from "antd";
 import {
   ShoppingCartOutlined,
@@ -34,6 +35,7 @@ import {
   EnvironmentOutlined,
   PhoneOutlined,
   MailOutlined,
+  DownOutlined,
 } from "@ant-design/icons";
 import {
   getPublicProductDetailApi,
@@ -41,7 +43,9 @@ import {
   findVariantByAttributesApi,
   getWardInfoApi,
   addToCartApi,
+  getPublicProductSpecsApi,
 } from "../util/api";
+import { getSpecSectionConfig } from "../constants/productSpecsTranslations";
 import { useCart } from "../contexts/CartContext";
 import LoadingSpinner from "../components/LoadingSpinner";
 import styles from "./ProductDetailPage.module.css";
@@ -64,11 +68,14 @@ const ProductDetailPage = () => {
   const [wardInfo, setWardInfo] = useState(null);
   const [variantLoading, setVariantLoading] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [productSpecs, setProductSpecs] = useState(null);
+  const [specsLoading, setSpecsLoading] = useState(false);
 
   useEffect(() => {
     if (productId) {
       fetchProductDetail();
       fetchVariantOptions();
+      fetchProductSpecs();
     }
   }, [productId]);
 
@@ -131,6 +138,21 @@ const ProductDetailPage = () => {
       }
     } catch (error) {
       console.error("Error fetching ward info:", error);
+    }
+  };
+
+  const fetchProductSpecs = async () => {
+    setSpecsLoading(true);
+    try {
+      const response = await getPublicProductSpecsApi(productId);
+      if (response.code === 1000) {
+        setProductSpecs(response.result?.specs);
+      }
+    } catch (error) {
+      console.error("Error fetching product specs:", error);
+      // Don't show error notification as specs might not exist for all products
+    } finally {
+      setSpecsLoading(false);
     }
   };
 
@@ -350,6 +372,131 @@ const ProductDetailPage = () => {
     if (product?.store?.id) {
       navigate(`/store/${product.store.id}`);
     }
+  };
+
+  // Render detailed product specs sections
+  const renderSpecsSection = (title, specs) => {
+    if (!specs || typeof specs !== "object") return null;
+
+    // Sort by displayOrder
+    const sortedSpecs = Object.entries(specs).sort(
+      ([, a], [, b]) => (a.displayOrder || 999) - (b.displayOrder || 999)
+    );
+
+    return (
+      <div className={styles.specTable}>
+        {sortedSpecs.map(([key, specData]) => {
+          if (
+            !specData ||
+            specData.value === null ||
+            specData.value === undefined
+          )
+            return null;
+
+          // Backend provides labelVi for all specs
+          const label = specData.labelVi || key;
+          const value = specData.value;
+          const unit = specData.unit || "";
+
+          return (
+            <Row key={key} className={styles.specRow}>
+              <Col xs={24} sm={8} className={styles.specLabel}>
+                {label}
+              </Col>
+              <Col xs={24} sm={16} className={styles.specValue}>
+                {renderSpecValue(value, unit, specData.dataType)}
+              </Col>
+            </Row>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderSpecValue = (value, unit = "", dataType = "string") => {
+    if (Array.isArray(value)) {
+      if (value.length === 0) return <Text type="secondary">-</Text>;
+
+      // Check if array contains objects
+      if (typeof value[0] === "object" && value[0] !== null) {
+        return (
+          <Space direction="vertical" size="small" style={{ width: "100%" }}>
+            {value.map((item, index) => (
+              <div key={index} className={styles.nestedSpec}>
+                {Object.entries(item).map(([k, v]) => (
+                  <div key={k} className={styles.nestedSpecItem}>
+                    <Text type="secondary" className={styles.nestedSpecLabel}>
+                      {k}:
+                    </Text>
+                    <Text strong className={styles.nestedSpecValue}>
+                      {v}
+                    </Text>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </Space>
+        );
+      }
+
+      // Simple array of strings/numbers
+      return (
+        <Space wrap size="small">
+          {value.map((item, index) => (
+            <Tag key={index} color="blue">
+              {item}
+            </Tag>
+          ))}
+        </Space>
+      );
+    }
+
+    if (typeof value === "object" && value !== null) {
+      return (
+        <div className={styles.nestedObject}>
+          {Object.entries(value).map(([k, v]) => (
+            <div key={k} className={styles.nestedObjectItem}>
+              <Text type="secondary" className={styles.nestedObjectLabel}>
+                {k}:
+              </Text>
+              <Text strong className={styles.nestedObjectValue}>
+                {renderSpecValue(v)}
+              </Text>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (typeof value === "boolean" || dataType === "boolean") {
+      return value ? (
+        <Tag color="success" icon={<CheckCircleOutlined />}>
+          Có
+        </Tag>
+      ) : (
+        <Tag color="default">Không</Tag>
+      );
+    }
+
+    if (typeof value === "number" || dataType === "number") {
+      const formattedValue =
+        typeof value === "number" ? value.toLocaleString("vi-VN") : value;
+      return (
+        <Text strong>
+          {formattedValue}
+          {unit ? ` ${unit}` : ""}
+        </Text>
+      );
+    }
+
+    // String value - support multiline
+    const hasNewlines = typeof value === "string" && value.includes("\n");
+    return (
+      <Text style={hasNewlines ? { whiteSpace: "pre-line" } : undefined}>
+        {value}
+        {unit ? ` ${unit}` : ""}
+      </Text>
+    );
   };
 
   if (loading) {
@@ -801,6 +948,55 @@ const ProductDetailPage = () => {
                         </Paragraph>
                       ) : (
                         <Empty description="Chưa có mô tả chi tiết" />
+                      )}
+                    </div>
+                  ),
+                },
+                {
+                  key: "detailedSpecs",
+                  label: "Thông số chi tiết",
+                  children: (
+                    <div className={styles.tabContent}>
+                      {specsLoading ? (
+                        <div style={{ textAlign: "center", padding: "40px 0" }}>
+                          <Spin
+                            size="large"
+                            tip="Đang tải thông số chi tiết..."
+                          />
+                        </div>
+                      ) : productSpecs &&
+                        Object.keys(productSpecs).length > 0 ? (
+                        <Collapse
+                          accordion
+                          defaultActiveKey={[
+                            getSpecSectionConfig(productSpecs)[0]?.key,
+                          ]}
+                          expandIcon={({ isActive }) => (
+                            <DownOutlined
+                              rotate={isActive ? 180 : 0}
+                              style={{ fontSize: 12, color: "#ee4d2d" }}
+                            />
+                          )}
+                          className={styles.specsCollapse}
+                          items={getSpecSectionConfig(productSpecs).map(
+                            (section) => ({
+                              key: section.key,
+                              label: (
+                                <div className={styles.collapseHeader}>
+                                  <span className={styles.collapseTitle}>
+                                    {section.label}
+                                  </span>
+                                </div>
+                              ),
+                              children: renderSpecsSection(
+                                section.label,
+                                section.data
+                              ),
+                            })
+                          )}
+                        />
+                      ) : (
+                        <Empty description="Chưa có thông số chi tiết cho sản phẩm này" />
                       )}
                     </div>
                   ),
