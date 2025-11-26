@@ -918,6 +918,295 @@
   border-color: rgba(238, 77, 45, 0.3);
 }
 
+/* Specs Collapse - Đồng bộ với các trang khác */
+.specsCollapse {
+  background: transparent;
+  border: none;
+}
+
+.specsCollapse :global(.ant-collapse-item) {
+  margin-bottom: 16px;
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.specsCollapse :global(.ant-collapse-item):hover {
+  border-color: #ffded6;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.08);
+  transform: translateY(-2px);
+}
+
+.specsCollapse :global(.ant-collapse-item-active) {
+  border-color: #ee4d2d;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.12);
+}
+
+.specsCollapse :global(.ant-collapse-header) {
+  padding: 16px 20px !important;
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%);
+  border-bottom: 1px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.specsCollapse
+  :global(.ant-collapse-item-active)
+  :global(.ant-collapse-header) {
+  background: linear-gradient(135deg, #fff5f2 0%, #ffe8e0 100%);
+  border-bottom-color: #ffded6;
+}
+
+.specsCollapse :global(.ant-collapse-content) {
+  border-top: none;
+  background: white;
+}
+
+.specsCollapse :global(.ant-collapse-content-box) {
+  padding: 0;
+}
+
+.collapseHeader {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.specsCollapse :global(.ant-collapse-item-active) .collapseHeader {
+  color: #ee4d2d;
+}
+
+.collapseTitle {
+  flex: 1;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+}
+
+/* Nested Spec Styles */
+.nestedSpec {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-bottom: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nestedSpec:last-child {
+  margin-bottom: 0;
+}
+
+.nestedSpec:hover {
+  background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+  border-color: #dee2e6;
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.08);
+}
+
+.nestedSpecItem {
+  display: flex;
+  margin-bottom: 6px;
+  gap: 8px;
+}
+
+.nestedSpecItem:last-child {
+  margin-bottom: 0;
+}
+
+.nestedSpecLabel {
+  font-size: 12px;
+  min-width: 120px;
+  flex-shrink: 0;
+}
+
+.nestedSpecValue {
+  font-size: 13px;
+  flex: 1;
+}
+
+/* Nested Object Styles */
+.nestedObject {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nestedObjectItem {
+  display: flex;
+  gap: 8px;
+  padding: 4px 0;
+}
+
+.nestedObjectLabel {
+  font-size: 13px;
+  min-width: 140px;
+  flex-shrink: 0;
+}
+
+.nestedObjectValue {
+  font-size: 13px;
+  flex: 1;
+}
+
+/* Spec Row in Collapse */
+.specsCollapse .specRow {
+  transition: all 0.3s ease;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.specsCollapse .specRow:last-child {
+  border-bottom: none;
+}
+
+.specsCollapse .specRow:hover {
+  background: linear-gradient(90deg, #f8f9fa 0%, #ffffff 100%);
+}
+
+.specsCollapse .specLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  padding: 16px 20px;
+}
+
+.specsCollapse .specRow:hover .specLabel {
+  color: #ee4d2d;
+}
+
+.specsCollapse .specValue {
+  font-size: 14px;
+  padding: 16px 20px;
+}
+
+/* Responsive for detailed specs */
+@media (max-width: 768px) {
+  .specsCollapse :global(.ant-collapse-item) {
+    margin-bottom: 12px;
+  }
+
+  .specsCollapse :global(.ant-collapse-header) {
+    padding: 14px 16px !important;
+  }
+
+  .collapseHeader {
+    font-size: 15px;
+  }
+
+  .collapseTitle {
+    font-size: 14px;
+  }
+
+  .specsCollapse .specLabel,
+  .specsCollapse .specValue {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+
+  .nestedSpec {
+    padding: 10px 12px;
+    margin-bottom: 6px;
+  }
+
+  .nestedSpecLabel {
+    font-size: 11px;
+    min-width: 100px;
+  }
+
+  .nestedSpecValue {
+    font-size: 12px;
+  }
+
+  .nestedObjectLabel {
+    font-size: 12px;
+    min-width: 110px;
+  }
+
+  .nestedObjectValue {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .specsCollapse :global(.ant-collapse-item) {
+    margin-bottom: 10px;
+    border-radius: 8px;
+  }
+
+  .specsCollapse :global(.ant-collapse-header) {
+    padding: 12px 14px !important;
+  }
+
+  .collapseHeader {
+    font-size: 14px;
+  }
+
+  .collapseTitle {
+    font-size: 13px;
+  }
+
+  .specsCollapse .specLabel {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .specsCollapse .specValue {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .specsCollapse .specLabel,
+  .specsCollapse .specValue {
+    display: block;
+    width: 100%;
+  }
+
+  .specsCollapse .specLabel {
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 8px;
+  }
+
+  .specsCollapse .specValue {
+    padding-top: 8px;
+  }
+
+  .nestedSpec {
+    padding: 8px 10px;
+  }
+
+  .nestedSpecItem {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .nestedSpecLabel {
+    min-width: auto;
+    font-size: 11px;
+  }
+
+  .nestedSpecValue {
+    font-size: 12px;
+  }
+
+  .nestedObjectItem {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .nestedObjectLabel {
+    min-width: auto;
+    font-size: 11px;
+  }
+
+  .nestedObjectValue {
+    font-size: 12px;
+  }
+}
+
 /* Animation */
 @keyframes fadeIn {
   from {

@@ -639,6 +639,17 @@ const findVariantByAttributesApi = (productId, attributeValueIds) => {
   );
 };
 
+// Get public product specifications (no authentication required)
+const getPublicProductSpecsApi = (productId) => {
+  const URL_API = `/api/product/public/products/${productId}/specs`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
 const getProductsByStoreApi = (storeId, page = 0, size = 20) => {
   const URL_API = `/api/product/products/by-store/${storeId}`;
   return axios.get(URL_API, {
@@ -1521,6 +1532,7 @@ export {
   getPublicProductDetailApi,
   getPublicProductVariantOptionsApi,
   findVariantByAttributesApi,
+  getPublicProductSpecsApi,
   getProductsByStoreApi,
   getProductDetailApi,
   updateProductApi,
