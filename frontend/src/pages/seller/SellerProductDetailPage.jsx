@@ -19,6 +19,7 @@ import {
   UploadOutlined,
   BranchesOutlined,
 } from "@ant-design/icons";
+import LoadingSpinner from "../../components/LoadingSpinner";
 import { notification, Form, Input, Select, Button, Upload, Modal } from "antd";
 import {
   getProductDetailApi,
@@ -434,10 +435,7 @@ const SellerProductDetailPage = () => {
 
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <LoadingOutlined style={{ fontSize: 48, color: "#ee4d2d" }} />
-        <p>Đang tải thông tin sản phẩm...</p>
-      </div>
+      <LoadingSpinner tip="Đang tải thông tin sản phẩm..." fullScreen={false} />
     );
   }
 
