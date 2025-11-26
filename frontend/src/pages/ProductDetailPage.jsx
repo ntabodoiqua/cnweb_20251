@@ -45,10 +45,7 @@ import {
   addToCartApi,
   getPublicProductSpecsApi,
 } from "../util/api";
-import {
-  getTranslatedKey,
-  getSpecSectionConfig,
-} from "../constants/productSpecsTranslations";
+import { getSpecSectionConfig } from "../constants/productSpecsTranslations";
 import { useCart } from "../contexts/CartContext";
 import LoadingSpinner from "../components/LoadingSpinner";
 import styles from "./ProductDetailPage.module.css";
@@ -378,15 +375,28 @@ const ProductDetailPage = () => {
   };
 
   // Render detailed product specs sections
-  const renderSpecsSection = (title, data) => {
-    if (!data || typeof data !== "object") return null;
+  const renderSpecsSection = (title, specs) => {
+    if (!specs || typeof specs !== "object") return null;
+
+    // Sort by displayOrder
+    const sortedSpecs = Object.entries(specs).sort(
+      ([, a], [, b]) => (a.displayOrder || 999) - (b.displayOrder || 999)
+    );
 
     return (
       <div className={styles.specTable}>
-        {Object.entries(data).map(([key, value]) => {
-          if (value === null || value === undefined) return null;
+        {sortedSpecs.map(([key, specData]) => {
+          if (
+            !specData ||
+            specData.value === null ||
+            specData.value === undefined
+          )
+            return null;
 
-          const label = getTranslatedKey(key);
+          // Backend provides labelVi for all specs
+          const label = specData.labelVi || key;
+          const value = specData.value;
+          const unit = specData.unit || "";
 
           return (
             <Row key={key} className={styles.specRow}>
@@ -394,7 +404,7 @@ const ProductDetailPage = () => {
                 {label}
               </Col>
               <Col xs={24} sm={16} className={styles.specValue}>
-                {renderSpecValue(value)}
+                {renderSpecValue(value, unit, specData.dataType)}
               </Col>
             </Row>
           );
@@ -403,7 +413,7 @@ const ProductDetailPage = () => {
     );
   };
 
-  const renderSpecValue = (value) => {
+  const renderSpecValue = (value, unit = "", dataType = "string") => {
     if (Array.isArray(value)) {
       if (value.length === 0) return <Text type="secondary">-</Text>;
 
@@ -416,7 +426,7 @@ const ProductDetailPage = () => {
                 {Object.entries(item).map(([k, v]) => (
                   <div key={k} className={styles.nestedSpecItem}>
                     <Text type="secondary" className={styles.nestedSpecLabel}>
-                      {getTranslatedKey(k)}:
+                      {k}:
                     </Text>
                     <Text strong className={styles.nestedSpecValue}>
                       {v}
@@ -447,7 +457,7 @@ const ProductDetailPage = () => {
           {Object.entries(value).map(([k, v]) => (
             <div key={k} className={styles.nestedObjectItem}>
               <Text type="secondary" className={styles.nestedObjectLabel}>
-                {getTranslatedKey(k)}:
+                {k}:
               </Text>
               <Text strong className={styles.nestedObjectValue}>
                 {renderSpecValue(v)}
@@ -458,7 +468,7 @@ const ProductDetailPage = () => {
       );
     }
 
-    if (typeof value === "boolean") {
+    if (typeof value === "boolean" || dataType === "boolean") {
       return value ? (
         <Tag color="success" icon={<CheckCircleOutlined />}>
           Có
@@ -468,11 +478,24 @@ const ProductDetailPage = () => {
       );
     }
 
-    if (typeof value === "number") {
-      return <Text strong>{value.toLocaleString("vi-VN")}</Text>;
+    if (typeof value === "number" || dataType === "number") {
+      const formattedValue =
+        typeof value === "number" ? value.toLocaleString("vi-VN") : value;
+      return (
+        <Text strong>
+          {formattedValue}
+          {unit ? ` ${unit}` : ""}
+        </Text>
+      );
     }
 
-    return <Text>{value}</Text>;
+    // String value
+    return (
+      <Text>
+        {value}
+        {unit ? ` ${unit}` : ""}
+      </Text>
+    );
   };
 
   if (loading) {
