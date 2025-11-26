@@ -116,3 +116,4 @@ volumes:
   loki_data:
   grafana_data:
   prometheus_data:
+# Trigger deployment workflow: .github/workflows/deploy-monitoring.yml
