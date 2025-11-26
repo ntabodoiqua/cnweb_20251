@@ -55,3 +55,30 @@ app:
 internal:
   service:
     secret: ${INTERNAL_SERVICE_SECRET:InT3rn@l-S3rv1c3-S3cr3t-K3y-2025-VDT}
+
+# Management endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+
+# Logging configuration for Loki
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
+  level:
+    root: INFO
+    com.amazonaws: DEBUG

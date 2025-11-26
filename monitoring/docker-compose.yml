@@ -28,6 +28,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - monitoring
+      - app-network
     depends_on:
       - loki
     restart: unless-stopped
@@ -46,11 +47,12 @@ services:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--storage.tsdb.retention.time=15d' # Xóa metrics cũ sau 15 ngày
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=15d" # Xóa metrics cũ sau 15 ngày
     networks:
       - monitoring
+      - app-network
     restart: unless-stopped
     deploy:
       resources:
@@ -62,7 +64,7 @@ services:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
     ports:
-      - "8080:8080"
+      - "9091:8080"
     volumes:
       - /:/rootfs:ro
       - /var/run:/var/run:ro
@@ -106,6 +108,9 @@ services:
 networks:
   monitoring:
     driver: bridge
+  app-network:
+    name: app-network
+    external: true
 
 volumes:
   loki_data:

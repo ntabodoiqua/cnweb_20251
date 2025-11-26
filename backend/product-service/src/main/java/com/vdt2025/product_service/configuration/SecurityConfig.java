@@ -37,7 +37,11 @@ public class SecurityConfig {
         "/actuator/health",
         "/actuator/health/**",
         "/actuator/info",
-        "/actuator/info/**"
+        "/actuator/info/**",
+        "/actuator/prometheus",
+        "/actuator/prometheus/**",
+        "/actuator/metrics",
+        "/actuator/metrics/**"
 }; 
 
     private static final String[] PUBLIC_POST_ENDPOINTS = {

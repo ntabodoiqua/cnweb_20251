@@ -54,3 +54,30 @@ timeout:
   order: 15 # minutes (đồng bộ với frontend - 15 phút)
 payment:
   redirect-url: ${PAYMENT_REDIRECT_URL:http://localhost:5173/payment/result}
+
+# Management endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+
+# Logging configuration for Loki
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
+  level:
+    root: INFO
+    org.springframework.data.jpa: DEBUG
