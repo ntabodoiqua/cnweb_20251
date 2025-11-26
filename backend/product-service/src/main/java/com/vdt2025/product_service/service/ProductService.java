@@ -174,7 +174,35 @@ public interface ProductService {
      */
     List<VariantValidationDTO> validateVariants(List<String> variantIds);
 
+    // ========== Specs & Metadata Management ==========
+
     /**
-     *
+     * Cập nhật thông tin đặc tả kỹ thuật (specs) của Product
      */
+    ProductSpecsResponse updateProductSpecs(String productId, ProductSpecsUpdateRequest request);
+
+    /**
+     * Lấy thông tin đặc tả kỹ thuật (specs) của Product
+     */
+    ProductSpecsResponse getProductSpecs(String productId);
+
+    /**
+     * Xóa toàn bộ specs của Product
+     */
+    void deleteProductSpecs(String productId);
+
+    /**
+     * Cập nhật metadata của ProductVariant
+     */
+    VariantMetadataResponse updateVariantMetadata(String productId, String variantId, VariantMetadataUpdateRequest request);
+
+    /**
+     * Lấy metadata của ProductVariant
+     */
+    VariantMetadataResponse getVariantMetadata(String productId, String variantId);
+
+    /**
+     * Xóa toàn bộ metadata của ProductVariant
+     */
+    void deleteVariantMetadata(String productId, String variantId);
 }

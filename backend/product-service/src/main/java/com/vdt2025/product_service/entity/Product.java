@@ -5,12 +5,15 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -115,6 +118,11 @@ public class Product {
     // Người tạo sản phẩm
     @Column(name = "created_by")
     String createdBy;
+
+    // Thông tin đặc tả kỹ thuật dưới dạng JSON
+    @JdbcTypeCode(SqlTypes.JSON) // Báo cho Hibernate đây là JSON
+    @Column(name = "specs", columnDefinition = "jsonb") // Mapping với cột jsonb trong Postgres
+    private Map<String, Object> specs;
 
 
 }
