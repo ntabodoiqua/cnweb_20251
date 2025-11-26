@@ -103,6 +103,23 @@ public interface ProductService {
      */
     VariantResponse removeVariantAttribute(String productId, String variantId, VariantAttributeRequest request);
 
+    /**
+     * Cập nhật ảnh cho variant
+     * @param productId ID sản phẩm
+     * @param variantId ID variant
+     * @param file File ảnh
+     * @return VariantResponse sau khi cập nhật
+     */
+    VariantResponse updateVariantImage(String productId, String variantId, MultipartFile file);
+
+    /**
+     * Xóa ảnh của variant
+     * @param productId ID sản phẩm
+     * @param variantId ID variant
+     * @return VariantResponse sau khi xóa ảnh
+     */
+    VariantResponse deleteVariantImage(String productId, String variantId);
+
     // ========== Status Management ==========
 
     /**

@@ -668,6 +668,90 @@ public class ProductServiceImpl implements ProductService {
         return mapToVariantResponse(variantRepository.save(variant));
     }
 
+    @Override
+    @Transactional
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    public VariantResponse updateVariantImage(String productId, String variantId, MultipartFile file) {
+        log.info("Updating image for variant {} of product {}", variantId, productId);
+
+        // Validate product exists
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // Authorization check
+        checkProductAccess(product);
+
+        // Validate variant exists and belongs to product
+        ProductVariant variant = variantRepository.findByProductIdAndId(productId, variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+
+        // Validate file type
+        String contentType = file.getContentType();
+        List<String> allowedTypes = Arrays.asList(
+                "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"
+        );
+        if (contentType == null || !allowedTypes.contains(contentType.toLowerCase())) {
+            throw new AppException(ErrorCode.INVALID_IMAGE_TYPE);
+        }
+
+        try {
+            // Upload file to file-service
+            ApiResponse<FileInfoResponse> response = fileServiceClient.uploadPublicFile(file);
+            FileInfoResponse result = response.getResult();
+
+            // Update variant with new image info
+            variant.setImageName(result.getFileName());
+            variant.setImageUrl(result.getFileUrl());
+            variant = variantRepository.save(variant);
+
+            // Evict cache
+            cacheEvictService.evictProductDetails(productId);
+            cacheEvictService.evictVariantCaches(variantId);
+
+            log.info("Variant {} image updated successfully", variantId);
+            return mapToVariantResponse(variant);
+        } catch (Exception e) {
+            log.error("Failed to upload variant image: {}", e.getMessage());
+            throw new AppException(ErrorCode.FILE_CANNOT_STORED);
+        }
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    public VariantResponse deleteVariantImage(String productId, String variantId) {
+        log.info("Deleting image for variant {} of product {}", variantId, productId);
+
+        // Validate product exists
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // Authorization check
+        checkProductAccess(product);
+
+        // Validate variant exists and belongs to product
+        ProductVariant variant = variantRepository.findByProductIdAndId(productId, variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+
+        // Check if variant has image
+        if (variant.getImageUrl() == null && variant.getImageName() == null) {
+            log.warn("Variant {} has no image to delete", variantId);
+            return mapToVariantResponse(variant);
+        }
+
+        // Remove image info from variant
+        variant.setImageName(null);
+        variant.setImageUrl(null);
+        variant = variantRepository.save(variant);
+
+        // Evict cache
+        cacheEvictService.evictProductDetails(productId);
+        cacheEvictService.evictVariantCaches(variantId);
+
+        log.info("Variant {} image deleted successfully", variantId);
+        return mapToVariantResponse(variant);
+    }
+
     // ========== Status Management ==========
 
     @Override

@@ -323,6 +323,41 @@ public class ProductManagementController {
                 .build();
     }
 
+    /**
+     * Cập nhật ảnh cho variant
+     * POST /products/{productId}/variants/{variantId}/image
+     * Required: SELLER (owner) hoặc ADMIN role
+     */
+    @PostMapping("/{productId}/variants/{variantId}/image")
+    public ApiResponse<VariantResponse> updateVariantImage(
+            @PathVariable String productId,
+            @PathVariable String variantId,
+            @RequestParam("file") MultipartFile file) {
+        log.info("Updating image for variant {} of product {}", variantId, productId);
+        VariantResponse response = productService.updateVariantImage(productId, variantId, file);
+        return ApiResponse.<VariantResponse>builder()
+                .message("Variant image updated successfully")
+                .result(response)
+                .build();
+    }
+
+    /**
+     * Xóa ảnh của variant
+     * DELETE /products/{productId}/variants/{variantId}/image
+     * Required: SELLER (owner) hoặc ADMIN role
+     */
+    @DeleteMapping("/{productId}/variants/{variantId}/image")
+    public ApiResponse<VariantResponse> deleteVariantImage(
+            @PathVariable String productId,
+            @PathVariable String variantId) {
+        log.info("Deleting image for variant {} of product {}", variantId, productId);
+        VariantResponse response = productService.deleteVariantImage(productId, variantId);
+        return ApiResponse.<VariantResponse>builder()
+                .message("Variant image deleted successfully")
+                .result(response)
+                .build();
+    }
+
     // ========== Status Management ==========
 
     /**
