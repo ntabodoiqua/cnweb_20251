@@ -9,6 +9,7 @@ services:
       - "443:443"
     networks:
       - frontend-network
+      - monitoring_net
     restart: unless-stopped
     environment:
       - NODE_ENV=production
@@ -54,3 +55,7 @@ services:
 networks:
   frontend-network:
     driver: bridge
+  monitoring_net:
+    external: true
+    name: monitoring_monitoring
+
