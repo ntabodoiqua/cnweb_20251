@@ -72,4 +72,13 @@ public class CacheEvictServiceImpl implements CacheEvictService{
             redisTemplate.delete(keys);
         }
     }
+    
+    @Override
+    public void evictProductSelectionConfig(String productId) {
+        String pattern = "productSelectionConfig::" + productId + "*";
+        Set<String> keys = redisTemplate.keys(pattern);
+        if (keys != null && !keys.isEmpty()) {
+            redisTemplate.delete(keys);
+        }
+    }
 }

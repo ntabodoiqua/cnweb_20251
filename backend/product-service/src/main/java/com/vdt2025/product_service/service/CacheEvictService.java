@@ -17,4 +17,9 @@ public interface CacheEvictService {
      * Được gọi khi thêm/xóa sản phẩm để đảm bảo kết quả tìm kiếm luôn chính xác
      */
     void evictProductSearchCache();
+    
+    /**
+     * Xóa cache selection config của product (seller-defined selections)
+     */
+    void evictProductSelectionConfig(String productId);
 }
