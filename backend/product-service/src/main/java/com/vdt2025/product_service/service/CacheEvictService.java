@@ -7,6 +7,12 @@ public interface CacheEvictService {
     void evictVariantCaches(String variantId);
     
     /**
+     * Xóa cache variant selection khi thêm/sửa/xóa variant
+     * Bao gồm: variantSelectionOptions và variantByAttributes
+     */
+    void evictVariantSelectionCaches(String productId);
+    
+    /**
      * Xóa toàn bộ cache tìm kiếm sản phẩm
      * Được gọi khi thêm/xóa sản phẩm để đảm bảo kết quả tìm kiếm luôn chính xác
      */
