@@ -12,6 +12,7 @@ import AddProductModal from "../../components/seller/AddProductModal";
 import {
   getProductsByStoreApi,
   bulkUpdateProductStatusApi,
+  getMyStoresApi,
 } from "../../util/api";
 import NoImages from "../../assets/NoImages.webp";
 import styles from "./SellerProductsPage.module.css";
@@ -25,11 +26,11 @@ const SellerProductsPage = () => {
   const [filterCategory, setFilterCategory] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [selectedStoreId, setSelectedStoreId] = useState(
-    "61127fcd-8c22-4e3e-9419-93c7c05d9f83"
-  );
+  const [stores, setStores] = useState([]);
+  const [selectedStoreId, setSelectedStoreId] = useState(null);
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [storeLoading, setStoreLoading] = useState(true);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [pagination, setPagination] = useState({
     page: 0,
@@ -38,9 +39,39 @@ const SellerProductsPage = () => {
     totalPages: 0,
   });
 
+  // Fetch stores của người bán hiện tại
+  useEffect(() => {
+    const fetchMyStores = async () => {
+      try {
+        setStoreLoading(true);
+        const response = await getMyStoresApi(0, 100);
+        if (response && response.result && response.result.content) {
+          const myStores = response.result.content;
+          setStores(myStores);
+          // Tự động chọn store đầu tiên nếu có
+          if (myStores.length > 0 && !selectedStoreId) {
+            setSelectedStoreId(myStores[0].id);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching my stores:", error);
+        notification.error({
+          message: "Lỗi tải dữ liệu",
+          description: "Không thể tải danh sách cửa hàng của bạn",
+          placement: "topRight",
+        });
+      } finally {
+        setStoreLoading(false);
+      }
+    };
+    fetchMyStores();
+  }, []);
+
   // Fetch products from API
   useEffect(() => {
-    fetchProducts();
+    if (selectedStoreId) {
+      fetchProducts();
+    }
   }, [selectedStoreId]);
 
   const fetchProducts = async () => {
@@ -413,6 +444,28 @@ const SellerProductsPage = () => {
       }
     }
   };
+
+  // Loading khi đang fetch stores
+  if (storeLoading) {
+    return (
+      <div className={styles.sellerProducts}>
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
+  // Chưa có cửa hàng nào
+  if (!stores || stores.length === 0) {
+    return (
+      <div className={styles.sellerProducts}>
+        <div className={styles.emptyState}>
+          <ShopOutlined className={styles.emptyIcon} />
+          <h3>Bạn chưa có cửa hàng nào</h3>
+          <p>Vui lòng tạo cửa hàng trước khi quản lý sản phẩm</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.sellerProducts}>
