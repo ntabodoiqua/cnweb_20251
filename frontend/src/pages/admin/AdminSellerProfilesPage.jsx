@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   ShopOutlined,
   SearchOutlined,
@@ -43,6 +43,7 @@ const AdminSellerProfilesPage = () => {
     verificationStatus: "",
     page: 0,
     size: 10,
+    sort: "createdAt,desc", // Mặc định sắp xếp theo ngày tạo mới nhất
   });
 
   const [showFilters, setShowFilters] = useState(false);
@@ -56,10 +57,21 @@ const AdminSellerProfilesPage = () => {
   const [rejectionReason, setRejectionReason] = useState("");
   const [profileToReject, setProfileToReject] = useState(null);
 
+  // Ref để theo dõi khi cần scroll lên đầu
+  const shouldScrollToTop = useRef(false);
+
   // Fetch profiles from API
   useEffect(() => {
     fetchProfiles();
-  }, [filters.page, filters.size, filters.verificationStatus]);
+  }, [filters.page, filters.size, filters.verificationStatus, filters.sort]);
+
+  // Scroll lên đầu sau khi loading hoàn tất
+  useEffect(() => {
+    if (!loading && shouldScrollToTop.current) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      shouldScrollToTop.current = false;
+    }
+  }, [loading]);
 
   const fetchProfiles = async () => {
     try {
@@ -104,11 +116,13 @@ const AdminSellerProfilesPage = () => {
       verificationStatus: "",
       page: 0,
       size: 10,
+      sort: "createdAt,desc",
     });
     setTimeout(() => fetchProfiles(), 0);
   };
 
   const handlePageChange = (newPage) => {
+    shouldScrollToTop.current = true;
     setFilters((prev) => ({ ...prev, page: newPage }));
   };
 
@@ -307,6 +321,19 @@ const AdminSellerProfilesPage = () => {
               <option value="PENDING">Đang chờ duyệt</option>
               <option value="VERIFIED">Đã duyệt</option>
               <option value="REJECTED">Đã từ chối</option>
+            </select>
+          </div>
+          <div className={styles.adminSearchBox}>
+            <CalendarOutlined className={styles.searchIcon} />
+            <select
+              value={filters.sort}
+              onChange={(e) => handleFilterChange("sort", e.target.value)}
+              className={styles.adminSearchSelect}
+            >
+              <option value="createdAt,desc">Ngày tạo: Mới nhất</option>
+              <option value="createdAt,asc">Ngày tạo: Cũ nhất</option>
+              <option value="updatedAt,desc">Cập nhật: Mới nhất</option>
+              <option value="updatedAt,asc">Cập nhật: Cũ nhất</option>
             </select>
           </div>
           <div className={styles.toolbarActions}>
