@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { notification } from "antd";
+import { notification, Modal } from "antd";
 import {
   SearchOutlined,
   PlusOutlined,
@@ -189,28 +189,33 @@ const AdminStoresPage = () => {
   };
 
   const handleToggleStatus = async (storeId) => {
-    if (!confirm("Bạn có chắc chắn muốn thay đổi trạng thái cửa hàng này?"))
-      return;
-
-    try {
-      await toggleStoreStatusApi(storeId);
-      notification.success({
-        message: "Thành công",
-        description: "Cập nhật trạng thái thành công!",
-        placement: "topRight",
-        duration: 3,
-      });
-      fetchStores();
-    } catch (error) {
-      console.error("Error toggling store status:", error);
-      notification.error({
-        message: "Lỗi cập nhật trạng thái",
-        description:
-          error.response?.data?.message || "Không thể cập nhật trạng thái",
-        placement: "topRight",
-        duration: 3,
-      });
-    }
+    Modal.confirm({
+      title: "Xác nhận",
+      content: "Bạn có chắc chắn muốn thay đổi trạng thái cửa hàng này?",
+      okText: "Xác nhận",
+      cancelText: "Hủy",
+      onOk: async () => {
+        try {
+          await toggleStoreStatusApi(storeId);
+          notification.success({
+            message: "Thành công",
+            description: "Cập nhật trạng thái thành công!",
+            placement: "topRight",
+            duration: 3,
+          });
+          fetchStores();
+        } catch (error) {
+          console.error("Error toggling store status:", error);
+          notification.error({
+            message: "Lỗi cập nhật trạng thái",
+            description:
+              error.response?.data?.message || "Không thể cập nhật trạng thái",
+            placement: "topRight",
+            duration: 3,
+          });
+        }
+      },
+    });
   };
 
   return (

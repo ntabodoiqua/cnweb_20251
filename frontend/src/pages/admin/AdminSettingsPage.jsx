@@ -1,5 +1,6 @@
 import { SettingOutlined, SaveOutlined } from "@ant-design/icons";
 import { useState } from "react";
+import { notification } from "antd";
 
 /**
  * AdminSettingsPage - Trang cài đặt hệ thống
@@ -24,7 +25,11 @@ const AdminSettingsPage = () => {
 
   const handleSave = () => {
     console.log("Saving settings:", settings);
-    alert("Cài đặt đã được lưu!");
+    notification.success({
+      message: "Thành công",
+      description: "Cài đặt đã được lưu!",
+      placement: "topRight",
+    });
   };
 
   return (
