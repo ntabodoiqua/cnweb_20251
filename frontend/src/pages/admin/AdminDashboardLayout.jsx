@@ -13,6 +13,8 @@ import {
   SettingOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
+  ControlOutlined,
+  SolutionOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../../constants/routes";
 import "./admin-dashboard.css";
@@ -52,10 +54,22 @@ const AdminDashboardLayout = () => {
       path: PROTECTED_ROUTES.ADMIN_STORES,
     },
     {
+      key: "seller-profiles",
+      icon: <SolutionOutlined />,
+      label: "Hồ sơ người bán",
+      path: PROTECTED_ROUTES.ADMIN_SELLER_PROFILES,
+    },
+    {
       key: "categories",
       icon: <AppstoreOutlined />,
       label: "Quản lý danh mục sàn",
       path: PROTECTED_ROUTES.ADMIN_CATEGORIES,
+    },
+    {
+      key: "product-attributes",
+      icon: <ControlOutlined />,
+      label: "Thuộc tính sản phẩm",
+      path: PROTECTED_ROUTES.ADMIN_PRODUCT_ATTRIBUTES,
     },
     {
       key: "products",

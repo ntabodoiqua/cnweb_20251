@@ -131,11 +131,6 @@ const AddProductModal = ({ visible, onClose, onSuccess, storeId }) => {
 
       // Kiểm tra response code thành công
       if (response?.code === 1000 || response?.code === 200) {
-        notification.success({
-          message: "Thành công",
-          description: "Tạo sản phẩm thành công!",
-          placement: "topRight",
-        });
         form.resetFields();
         onSuccess?.();
         onClose();

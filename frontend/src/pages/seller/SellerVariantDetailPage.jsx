@@ -861,8 +861,18 @@ const SellerVariantDetailPage = () => {
                             )
                         )
                         .map((attr) => (
-                          <Option key={attr.id} value={attr.id}>
+                          <Option
+                            key={attr.id}
+                            value={attr.id}
+                            disabled={!attr.isActive}
+                            style={
+                              !attr.isActive
+                                ? { opacity: 0.5, backgroundColor: "#f5f5f5" }
+                                : {}
+                            }
+                          >
                             {attr.name}
+                            {!attr.isActive && " (Không hoạt động)"}
                           </Option>
                         ))}
                     </Select>

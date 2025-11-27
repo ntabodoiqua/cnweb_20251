@@ -344,8 +344,25 @@ const VariantsManager = memo(
                 <h5>Thuộc tính biến thể</h5>
                 <div className={styles.attributesGrid}>
                   {attributes.map((attr) => (
-                    <div key={attr.id} className={styles.formGroup}>
-                      <label>{attr.name}</label>
+                    <div
+                      key={attr.id}
+                      className={styles.formGroup}
+                      style={!attr.isActive ? { opacity: 0.6 } : {}}
+                    >
+                      <label>
+                        {attr.name}
+                        {!attr.isActive && (
+                          <span
+                            style={{
+                              color: "#ff4d4f",
+                              fontSize: "12px",
+                              marginLeft: "8px",
+                            }}
+                          >
+                            (Không hoạt động)
+                          </span>
+                        )}
+                      </label>
                       <Select
                         placeholder={`Chọn ${attr.name}`}
                         value={editingAttributes[attr.id]}
@@ -356,6 +373,7 @@ const VariantsManager = memo(
                           })
                         }
                         allowClear
+                        disabled={!attr.isActive}
                       >
                         {(attributeDetails[attr.id]?.values || []).map(
                           (valueObj) => (
