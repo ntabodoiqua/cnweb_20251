@@ -131,6 +131,26 @@
   box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
 }
 
+.filterInput {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  outline: none;
+  background-color: #fff;
+}
+
+.filterInput:focus {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+}
+
+.filterInput::placeholder {
+  color: #999;
+}
+
 .adminTableContainer {
   overflow-x: auto;
   overflow-y: visible;
