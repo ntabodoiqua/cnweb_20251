@@ -538,6 +538,30 @@
   box-shadow: 0 4px 12px rgba(238, 77, 45, 0.15);
 }
 
+.admin-btn-success {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+}
+
+.admin-btn-success:hover {
+  background: linear-gradient(135deg, #389e0d 0%, #52c41a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.4);
+}
+
+.admin-btn-danger {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3);
+}
+
+.admin-btn-danger:hover {
+  background: linear-gradient(135deg, #cf1322 0%, #ff4d4f 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 77, 79, 0.4);
+}
+
 .admin-btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;

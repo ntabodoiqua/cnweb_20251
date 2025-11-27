@@ -86,8 +86,14 @@ const AdminOverviewPage = lazy(() =>
 const AdminUsersPage = lazy(() => import("../pages/admin/AdminUsersPage"));
 const AdminBrandsPage = lazy(() => import("../pages/admin/AdminBrandsPage"));
 const AdminStoresPage = lazy(() => import("../pages/admin/AdminStoresPage"));
+const AdminSellerProfilesPage = lazy(() =>
+  import("../pages/admin/AdminSellerProfilesPage")
+);
 const AdminCategoriesPage = lazy(() =>
   import("../pages/admin/AdminCategoriesPage")
+);
+const AdminProductAttributesPage = lazy(() =>
+  import("../pages/admin/AdminProductAttributesPage")
 );
 const AdminProductsPage = lazy(() =>
   import("../pages/admin/AdminProductsPage")
@@ -480,10 +486,26 @@ const router = createBrowserRouter([
             ),
           },
           {
+            path: PROTECTED_ROUTES.ADMIN_SELLER_PROFILES,
+            element: (
+              <SuspenseWrapper>
+                <AdminSellerProfilesPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
             path: PROTECTED_ROUTES.ADMIN_CATEGORIES,
             element: (
               <SuspenseWrapper>
                 <AdminCategoriesPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_PRODUCT_ATTRIBUTES,
+            element: (
+              <SuspenseWrapper>
+                <AdminProductAttributesPage />
               </SuspenseWrapper>
             ),
           },

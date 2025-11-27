@@ -478,8 +478,26 @@ const VariantManagementModal = ({
                         {attributes.map((attr) => (
                           <Form.Item
                             key={attr.id}
-                            label={attr.name}
+                            label={
+                              <span
+                                style={!attr.isActive ? { opacity: 0.6 } : {}}
+                              >
+                                {attr.name}
+                                {!attr.isActive && (
+                                  <span
+                                    style={{
+                                      color: "#ff4d4f",
+                                      fontSize: "12px",
+                                      marginLeft: "8px",
+                                    }}
+                                  >
+                                    (Không hoạt động)
+                                  </span>
+                                )}
+                              </span>
+                            }
                             className={styles.attributeItem}
+                            style={!attr.isActive ? { opacity: 0.6 } : {}}
                           >
                             <Select
                               placeholder={`Chọn ${attr.name}`}
@@ -488,6 +506,7 @@ const VariantManagementModal = ({
                                 handleAttributeChange(attr.id, value)
                               }
                               allowClear
+                              disabled={!attr.isActive}
                             >
                               {(attributeDetails[attr.id]?.values || []).map(
                                 (valueObj) => (

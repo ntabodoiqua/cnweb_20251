@@ -1395,6 +1395,15 @@ const getUsersAdminApi = (params) => {
   });
 };
 
+const getUserByIdAdminApi = (userId) => {
+  const URL_API = `/api/user/admin/${userId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 const getUserStatisticsApi = () => {
   const URL_API = "/api/user/admin/statistic/users";
   return axios.get(URL_API, {
@@ -1521,6 +1530,56 @@ const deleteCategoryAdminApi = (categoryId) => {
 const toggleCategoryStatusApi = (categoryId) => {
   const URL_API = `/api/product/admin/categories/${categoryId}/toggle-status`;
   return axios.put(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// ============================================
+// Seller Profile Management APIs (Admin)
+// ============================================
+
+const getSellerProfilesAdminApi = (params = {}) => {
+  const URL_API = "/api/user/seller-profiles";
+  return axios.get(URL_API, {
+    params: {
+      page: params.page || 0,
+      size: params.size || 20,
+      ...params,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const approveSellerProfileApi = (profileId) => {
+  const URL_API = `/api/user/seller-profiles/${profileId}/approve`;
+  return axios.patch(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const rejectSellerProfileApi = (profileId, rejectionReason) => {
+  const URL_API = `/api/user/seller-profiles/${profileId}/reject`;
+  return axios.patch(
+    URL_API,
+    { rejectionReason },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+const getSellerDocumentAdminApi = (sellerProfileId) => {
+  const URL_API = `/api/user/seller-profiles/admin/${sellerProfileId}/document`;
+  return axios.get(URL_API, {
     headers: {
       "Accept-Language": "vi",
     },
@@ -1673,6 +1732,7 @@ export {
   uploadVariantImageApi,
   // Admin APIs
   getUsersAdminApi,
+  getUserByIdAdminApi,
   getUserStatisticsApi,
   // Brand Management APIs
   getBrandsAdminApi,
@@ -1691,5 +1751,10 @@ export {
   deleteCategoryAdminApi,
   toggleCategoryStatusApi,
   uploadCategoryImageAdminApi,
+  // Seller Profile Management APIs
+  getSellerProfilesAdminApi,
+  approveSellerProfileApi,
+  rejectSellerProfileApi,
+  getSellerDocumentAdminApi,
   // Cart bulk remove API
 };
