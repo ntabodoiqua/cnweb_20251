@@ -19,4 +19,6 @@ public interface OrderService {
     Page<OrderResponse> getMyOrders(String username, OrderFilterRequest filter, Pageable pageable);
 
     Page<OrderResponse> getStoreOrders(String requesterUsername, String storeId, OrderFilterRequest filter, Pageable pageable);
+
+    Page<OrderResponse> getAllOrdersForAdmin(OrderFilterRequest filter, Pageable pageable);
 }

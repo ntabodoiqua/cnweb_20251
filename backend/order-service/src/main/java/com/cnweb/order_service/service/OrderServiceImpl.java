@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -405,6 +406,14 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
         }
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public Page<OrderResponse> getAllOrdersForAdmin(OrderFilterRequest filter, Pageable pageable) {
+        Specification<Order> spec = OrderSpecification.getOrdersByFilter(filter, null, null);
+        Page<Order> orders = orderRepository.findAll(spec, pageable);
+        return orders.map(orderMapper::toOrderResponse);
     }
 
     private java.math.BigDecimal calculateDiscount(CouponResponse coupon, java.math.BigDecimal amount) {

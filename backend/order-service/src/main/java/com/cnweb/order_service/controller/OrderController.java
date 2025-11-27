@@ -116,4 +116,17 @@ public class OrderController {
                 .result(response)
                 .build());
     }
+
+    @GetMapping("/admin")
+    @Operation(summary = "Get all orders (admin)", description = "Get list of all orders with filtering and pagination for admin users")
+    public ResponseEntity<ApiResponse<Page<OrderResponse>>> getAllOrdersForAdmin(
+            @ModelAttribute OrderFilterRequest filter,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<OrderResponse> response = orderService.getAllOrdersForAdmin(filter, pageable);
+        return ResponseEntity.ok(ApiResponse.<Page<OrderResponse>>builder()
+                .code(200)
+                .message("All orders retrieved successfully")
+                .result(response)
+                .build());
+    }
 }
