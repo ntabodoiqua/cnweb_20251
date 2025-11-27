@@ -1,6 +1,7 @@
 package com.cnweb2025.user_service.service;
 
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileCreationRequest;
+import com.cnweb2025.user_service.dto.request.seller.SellerProfileFilterRequest;
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileUpdateRequest;
 import com.cnweb2025.user_service.dto.response.SellerProfileResponse;
 import com.vdt2025.common_dto.dto.response.FileInfoResponse;
@@ -19,6 +20,8 @@ public interface SellerProfileService {
     SellerProfileResponse getSpecificSellerProfileOfCurrentUser(String sellerProfileId);
 
     Page<SellerProfileResponse> getAllSellerProfiles(Pageable pageable);
+
+    Page<SellerProfileResponse> getAllSellerProfiles(SellerProfileFilterRequest filter, Pageable pageable);
 
     SellerProfileResponse getSellerProfileById(String sellerProfileId);
 
