@@ -622,6 +622,11 @@ public class ProductServiceImpl implements ProductService {
                     attributeValue.getValue(), productCategory.getName());
             throw new AppException(ErrorCode.ATTRIBUTE_NOT_APPLICABLE_TO_PRODUCT_CATEGORY);
         }
+        // Kiểm tra attributes hoặc value còn active không
+        if (!attributeValue.getAttribute().isActive() || !attributeValue.isActive()) {
+            log.warn("Attribute value {} or its attribute is inactive", attributeValue.getValue());
+            throw new AppException(ErrorCode.ATTRIBUTE_VALUE_INACTIVE);
+        }
 
         // Nếu variant đã có attributeValue → bỏ qua
         if (variant.getAttributeValues().stream()

@@ -130,6 +130,18 @@ public class SellerProfileServiceImp implements SellerProfileService{
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public SellerProfileResponse getSellerProfileById(String sellerProfileId) {
+        var sellerProfile = sellerProfileRepository.findById(sellerProfileId)
+                .orElseThrow(() -> {
+                    log.error("Seller profile not found with ID: {}", sellerProfileId);
+                    return new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+                });
+        log.info("Retrieved seller profile with ID: {}", sellerProfileId);
+        return sellerProfileMapper.toSellerResponse(sellerProfile);
+    }
+
+    @Override
     @Transactional
     public String sendToReview(String sellerProfileId, Locale locale) {
         var sellerProfile = sellerProfileRepository.findById(sellerProfileId)

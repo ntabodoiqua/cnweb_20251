@@ -80,6 +80,21 @@ public class SellerProfileController {
                 .build();
     }
 
+    @GetMapping("/admin/{sellerProfileId}/document")
+    public ApiResponse<FileInfoResponse> adminGetSellerDocument(@PathVariable String sellerProfileId, Locale locale) {
+        var sellerProfileResponse = sellerProfileService.getSellerProfileById(sellerProfileId);
+        var url = sellerProfileService.getTempLinkForSellerDocument(sellerProfileId, locale).getFileUrl();
+        var result = FileInfoResponse.builder()
+                .fileName(sellerProfileResponse.getDocumentName())
+                .uploadedAt(sellerProfileResponse.getDocumentUploadedAt())
+                .fileUrl(url)
+                .build();
+        return ApiResponse.<FileInfoResponse>builder()
+                .result(result)
+                .message(messageSource.getMessage("success.sellerProfile.document.retrieved", null, locale))
+                .build();
+    }
+
     @PatchMapping("/{sellerProfileId}/sendToReview")
     public ApiResponse<String> sendToReviewSellerProfile(@PathVariable String sellerProfileId, Locale locale) {
         var result = sellerProfileService.sendToReview(sellerProfileId, locale);

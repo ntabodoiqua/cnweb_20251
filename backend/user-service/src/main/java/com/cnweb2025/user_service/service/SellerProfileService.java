@@ -20,6 +20,8 @@ public interface SellerProfileService {
 
     Page<SellerProfileResponse> getAllSellerProfiles(Pageable pageable);
 
+    SellerProfileResponse getSellerProfileById(String sellerProfileId);
+
     String sendToReview(String sellerProfileId, Locale locale);
 
     String approveSellerProfile(String sellerProfileId, Locale locale);
