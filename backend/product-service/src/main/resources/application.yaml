@@ -25,6 +25,12 @@ spring:
       password: AVNS_N-gwsyNb6xBC3fXPdQp
       ssl:
         enabled: true
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
+    username: ${ELASTICSEARCH_USERNAME:}
+    password: ${ELASTICSEARCH_PASSWORD:}
+    connection-timeout: 5s
+    socket-timeout: 30s
   rabbitmq:
     addresses: amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
     username: xqjmojji
@@ -89,3 +95,13 @@ logging:
   level:
     root: INFO
     org.springframework.data.redis: DEBUG
+    org.springframework.data.elasticsearch: DEBUG
+    co.elastic.clients: WARN
+
+# Elasticsearch configuration
+elasticsearch:
+  index:
+    products:
+      name: products
+      shards: 1
+      replicas: 0

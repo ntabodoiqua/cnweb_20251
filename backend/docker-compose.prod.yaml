@@ -1,6 +1,51 @@
 version: "3.8"
 
 services:
+  # Elasticsearch for product search - Optimized for 8GB RAM server
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.name=cnweb-cluster
+      - bootstrap.memory_lock=true
+      - indices.memory.index_buffer_size=10%
+      - indices.queries.cache.size=5%
+      - thread_pool.write.queue_size=500
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'curl -s http://localhost:9200/_cluster/health | grep -vq ''"status":"red"''',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
   # Discovery Service - Must start first
   discovery-service:
     build:
@@ -111,7 +156,7 @@ services:
       retries: 5
       start_period: 60s
 
-  # Product Service - Depends on Discovery Service
+  # Product Service - Depends on Discovery Service and Elasticsearch
   product-service:
     build:
       context: .
@@ -137,10 +182,13 @@ services:
       - SPRING_RABBITMQ_VIRTUAL_HOST=xqjmojji
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
       - JWT_SIGNERKEY=cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2
+      - ELASTICSEARCH_URIS=http://elasticsearch:9200
     volumes:
       - product-uploads:/app/uploads
     depends_on:
       discovery-service:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -358,4 +406,6 @@ volumes:
   user-uploads:
     driver: local
   product-uploads:
+    driver: local
+  elasticsearch-data:
     driver: local
