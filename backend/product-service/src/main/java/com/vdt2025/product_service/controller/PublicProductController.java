@@ -3,12 +3,14 @@ package com.vdt2025.product_service.controller;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import com.vdt2025.product_service.dto.request.FindVariantRequest;
 import com.vdt2025.product_service.dto.request.product.ProductFilterRequest;
+import com.vdt2025.product_service.dto.request.selection.FindVariantBySelectionRequest;
 import com.vdt2025.product_service.dto.response.ProductResponse;
 import com.vdt2025.product_service.dto.response.ProductSummaryResponse;
 import com.vdt2025.product_service.dto.response.VariantResponse;
 import com.vdt2025.product_service.dto.response.*;
 import com.vdt2025.product_service.facade.ProductDetailFacade;
 import com.vdt2025.product_service.facade.ProductSearchFacade;
+import com.vdt2025.product_service.facade.SelectionVariantDetailFacade;
 import com.vdt2025.product_service.facade.VariantDetailFacade;
 import com.vdt2025.product_service.service.ProductService;
 import jakarta.validation.Valid;
@@ -45,6 +47,7 @@ public class PublicProductController {
     ProductSearchFacade productSearchFacade;
     ProductDetailFacade productDetailFacade;
     VariantDetailFacade variantDetailFacade;
+    SelectionVariantDetailFacade selectionVariantDetailFacade;
 
     /**
      * Tìm kiếm/xem danh sách sản phẩm (chỉ hiển thị sản phẩm active)
@@ -320,6 +323,127 @@ public class PublicProductController {
 
         return ApiResponse.<VariantResponse>builder()
                 .message("Found variant successfully")
+                .result(response)
+                .build();
+    }
+
+    // ========== Product Selection APIs (Seller-defined selections) ==========
+
+    /**
+     * Lấy cấu hình Selection cho UI
+     * GET /public/products/{productId}/selection-config
+     *
+     * Use case:
+     * - User vào trang chi tiết sản phẩm
+     * - Frontend call API này để lấy danh sách selection groups và options
+     * - User chọn từng option từ mỗi group (Mẫu điện thoại: iPhone 15 Pro, Kiểu vỏ: Carbon)
+     * - Frontend call API findVariantBySelections để lấy variant tương ứng
+     *
+     * Response structure:
+     * {
+     *   "productId": "prod-123",
+     *   "productName": "Ốp điện thoại cao cấp",
+     *   "selectionGroups": [
+     *     {
+     *       "groupId": "grp-1",
+     *       "groupName": "Mẫu điện thoại",
+     *       "required": true,
+     *       "options": [
+     *         {"optionId": "opt-1", "value": "iPhone 15 Pro", "available": true},
+     *         {"optionId": "opt-2", "value": "iPhone 14", "available": true}
+     *       ]
+     *     },
+     *     {
+     *       "groupId": "grp-2",
+     *       "groupName": "Kiểu vỏ",
+     *       "required": true,
+     *       "options": [
+     *         {"optionId": "opt-3", "value": "Trong suốt", "available": true},
+     *         {"optionId": "opt-4", "value": "Carbon", "available": true}
+     *       ]
+     *     }
+     *   ],
+     *   "selectionMatrix": {
+     *     "opt-1,opt-3": "variant-1",
+     *     "opt-1,opt-4": "variant-2",
+     *     "opt-2,opt-3": "variant-3"
+     *   },
+     *   "basePrice": 199000,
+     *   "totalVariants": 4
+     * }
+     */
+    @GetMapping("/{productId}/selection-config")
+    public ApiResponse<ProductSelectionConfigResponse> getProductSelectionConfig(
+            @PathVariable String productId) {
+        log.info("Public: Fetching selection config for product: {}", productId);
+
+        // Sử dụng facade để lấy config với thông tin tồn kho realtime
+        ProductSelectionConfigResponse response = selectionVariantDetailFacade.getSelectionConfigWithRealtimeStock(productId);
+
+        return ApiResponse.<ProductSelectionConfigResponse>builder()
+                .message("Fetch selection config successfully")
+                .result(response)
+                .build();
+    }
+
+    /**
+     * Tìm Variant theo Options đã chọn (Selection-based)
+     * POST /public/products/{productId}/find-variant-by-selection
+     *
+     * Use case:
+     * - User đã chọn xong tất cả options từ các selection groups
+     * - Frontend call API này để lấy thông tin variant tương ứng
+     * - Hiển thị giá, số lượng tồn, ảnh của variant đó
+     *
+     * Request body:
+     * {
+     *   "optionIds": ["opt-1", "opt-4"]  // iPhone 15 Pro + Carbon
+     * }
+     *
+     * Response: VariantResponse với đầy đủ thông tin variant
+     */
+    @PostMapping("/{productId}/find-variant-by-selection")
+    public ApiResponse<VariantResponse> findVariantBySelections(
+            @PathVariable String productId,
+            @Valid @RequestBody FindVariantBySelectionRequest request) {
+        log.info("Public: Finding variant by selections for product {} with options: {}",
+                productId, request.getOptionIds());
+
+        // Sử dụng facade để lấy variant với thông tin tồn kho realtime
+        VariantResponse response = selectionVariantDetailFacade.findVariantBySelectionsWithStock(productId, request);
+
+        return ApiResponse.<VariantResponse>builder()
+                .message("Found variant successfully")
+                .result(response)
+                .build();
+    }
+
+    /**
+     * Lấy Options khả dụng dựa trên selections hiện tại
+     * GET /public/products/{productId}/available-options
+     *
+     * Use case:
+     * - User đã chọn một số options (VD: Mẫu điện thoại = iPhone 15 Pro)
+     * - Frontend call API này để biết những options nào còn available
+     * - Disable/làm mờ các options không có variant tương ứng
+     *
+     * Query params:
+     * - selectedOptionIds: danh sách option IDs đã chọn
+     *
+     * Response: ProductSelectionConfigResponse với trạng thái available được cập nhật
+     */
+    @GetMapping("/{productId}/available-options")
+    public ApiResponse<ProductSelectionConfigResponse> getAvailableOptions(
+            @PathVariable String productId,
+            @RequestParam(required = false) List<String> selectedOptionIds) {
+        log.info("Public: Getting available options for product {} with selections: {}",
+                productId, selectedOptionIds);
+
+        // Sử dụng facade để lấy available options với thông tin tồn kho realtime
+        ProductSelectionConfigResponse response = selectionVariantDetailFacade.getAvailableOptionsWithRealtimeStock(productId, selectedOptionIds);
+
+        return ApiResponse.<ProductSelectionConfigResponse>builder()
+                .message("Fetch available options successfully")
                 .result(response)
                 .build();
     }

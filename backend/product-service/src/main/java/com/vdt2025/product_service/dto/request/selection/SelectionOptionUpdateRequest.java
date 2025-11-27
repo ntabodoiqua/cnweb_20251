@@ -4,8 +4,6 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
-
 /**
  * Request để cập nhật Selection Option
  */
@@ -40,20 +38,10 @@ public class SelectionOptionUpdateRequest {
     Integer displayOrder;
     
     /**
-     * Điều chỉnh giá mới (optional)
-     */
-    BigDecimal priceAdjustment;
-    
-    /**
      * Mã màu mới (optional)
      */
     @Size(max = 10, message = "COLOR_CODE_TOO_LONG")
     String colorCode;
-    
-    /**
-     * Số lượng tồn kho mới (optional)
-     */
-    Integer stockQuantity;
     
     /**
      * Có available không (optional)

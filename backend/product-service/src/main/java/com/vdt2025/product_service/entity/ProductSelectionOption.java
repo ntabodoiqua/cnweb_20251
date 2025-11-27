@@ -7,7 +7,6 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,8 +21,9 @@ import java.util.List;
  * 
  * Mỗi option có thể có:
  * - Hình ảnh riêng (hiển thị preview)
- * - Điều chỉnh giá (tăng/giảm so với giá gốc)
  * - Liên kết với các variants tương ứng
+ * 
+ * Lưu ý: Giá và tồn kho được lấy trực tiếp từ variant liên kết
  */
 @Getter
 @Setter
@@ -86,26 +86,11 @@ public class ProductSelectionOption {
     String imageUrl;
     
     /**
-     * Điều chỉnh giá khi chọn option này
-     * Ví dụ: +50000 VNĐ cho vỏ carbon cao cấp
-     * null hoặc 0 = không thay đổi giá
-     */
-    @Column(name = "price_adjustment", precision = 19, scale = 2)
-    BigDecimal priceAdjustment;
-    
-    /**
      * Mã màu HEX nếu option là màu sắc
      * Ví dụ: "#FF0000" cho màu đỏ
      */
     @Column(name = "color_code", length = 10)
     String colorCode;
-    
-    /**
-     * Số lượng tồn kho riêng (optional)
-     * Nếu null, sử dụng stock của variant
-     */
-    @Column(name = "stock_quantity")
-    Integer stockQuantity;
     
     /**
      * Có available không (còn hàng, còn bán)

@@ -25,6 +25,8 @@ public interface SelectionMapper {
     @Mapping(target = "productId", source = "product.id")
     @Mapping(target = "options", source = "options", qualifiedByName = "mapOptions")
     @Mapping(target = "totalOptions", expression = "java(group.getOptions() != null ? group.getOptions().size() : 0)")
+    @Mapping(target = "isRequired", source = "required")
+    @Mapping(target = "isActive", source = "active")
     SelectionGroupResponse toGroupResponse(ProductSelectionGroup group);
     
     /**
@@ -32,6 +34,8 @@ public interface SelectionMapper {
      */
     @Mapping(target = "linkedVariantIds", source = "variants", qualifiedByName = "extractVariantIds")
     @Mapping(target = "linkedVariantCount", expression = "java(option.getVariants() != null ? option.getVariants().size() : 0)")
+    @Mapping(target = "isAvailable", source = "available")
+    @Mapping(target = "isActive", source = "active")
     SelectionOptionResponse toOptionResponse(ProductSelectionOption option);
     
     /**

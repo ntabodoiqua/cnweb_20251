@@ -27,8 +27,8 @@ import java.util.Map;
  *       "groupName": "Mẫu điện thoại",
  *       "required": true,
  *       "options": [
- *         {"optionId": "opt-1", "value": "iPhone 15 Pro", "available": true, "priceAdjustment": 0},
- *         {"optionId": "opt-2", "value": "iPhone 14", "available": true, "priceAdjustment": -20000}
+ *         {"optionId": "opt-1", "value": "iPhone 15 Pro", "available": true},
+ *         {"optionId": "opt-2", "value": "iPhone 14", "available": true}
  *       ]
  *     },
  *     {
@@ -37,7 +37,7 @@ import java.util.Map;
  *       "required": true,
  *       "options": [
  *         {"optionId": "opt-3", "value": "Trong suốt", "available": true},
- *         {"optionId": "opt-4", "value": "Carbon", "available": true, "priceAdjustment": 50000}
+ *         {"optionId": "opt-4", "value": "Carbon", "available": true}
  *       ]
  *     }
  *   ],
@@ -87,7 +87,7 @@ public class ProductSelectionConfigResponse {
     List<OutOfStockInfo> outOfStockCombinations;
     
     /**
-     * Giá cơ bản (dùng để tính giá khi có priceAdjustment)
+     * Giá cơ bản (min price của product)
      */
     BigDecimal basePrice;
     
@@ -128,9 +128,7 @@ public class ProductSelectionConfigResponse {
         String label;
         String imageUrl;
         String colorCode;
-        BigDecimal priceAdjustment;
         boolean available;
-        Integer stockQuantity;
     }
     
     /**

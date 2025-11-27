@@ -5,8 +5,6 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
-
 /**
  * Request để tạo mới Selection Option
  */
@@ -43,20 +41,9 @@ public class SelectionOptionCreateRequest {
     Integer displayOrder;
     
     /**
-     * Điều chỉnh giá (optional)
-     * Ví dụ: +50000 cho vỏ cao cấp
-     */
-    BigDecimal priceAdjustment;
-    
-    /**
      * Mã màu HEX nếu là màu sắc (optional)
      * Ví dụ: "#FF0000"
      */
     @Size(max = 10, message = "COLOR_CODE_TOO_LONG")
     String colorCode;
-    
-    /**
-     * Số lượng tồn kho riêng (optional)
-     */
-    Integer stockQuantity;
 }

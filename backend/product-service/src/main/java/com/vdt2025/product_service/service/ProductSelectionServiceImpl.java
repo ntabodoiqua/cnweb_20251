@@ -295,14 +295,8 @@ public class ProductSelectionServiceImpl implements ProductSelectionService {
         if (request.getDisplayOrder() != null) {
             option.setDisplayOrder(request.getDisplayOrder());
         }
-        if (request.getPriceAdjustment() != null) {
-            option.setPriceAdjustment(request.getPriceAdjustment());
-        }
         if (request.getColorCode() != null) {
             option.setColorCode(request.getColorCode());
-        }
-        if (request.getStockQuantity() != null) {
-            option.setStockQuantity(request.getStockQuantity());
         }
         if (request.getIsAvailable() != null) {
             option.setAvailable(request.getIsAvailable());
@@ -533,9 +527,7 @@ public class ProductSelectionServiceImpl implements ProductSelectionService {
                                     .label(opt.getDisplayLabel())
                                     .imageUrl(opt.getImageUrl())
                                     .colorCode(opt.getColorCode())
-                                    .priceAdjustment(opt.getPriceAdjustment())
                                     .available(opt.isAvailable() && !opt.getVariants().isEmpty())
-                                    .stockQuantity(opt.getStockQuantity())
                                     .build())
                             .collect(Collectors.toList());
             
@@ -732,9 +724,7 @@ public class ProductSelectionServiceImpl implements ProductSelectionService {
                 .description(request.getDescription())
                 .displayOrder(displayOrder != null ? displayOrder : 
                         (request.getDisplayOrder() != null ? request.getDisplayOrder() : 0))
-                .priceAdjustment(request.getPriceAdjustment())
                 .colorCode(request.getColorCode())
-                .stockQuantity(request.getStockQuantity())
                 .isAvailable(true)
                 .isActive(true)
                 .selectionGroup(group)

@@ -16,9 +16,9 @@ Sản phẩm: **Ốp điện thoại cao cấp**
 │  └── Samsung Galaxy S24 Ultra                               │
 │                                                             │
 │  Selection Group 2: "Kiểu vỏ" (Bắt buộc chọn)              │
-│  ├── Trong suốt (+ 0đ)                                      │
-│  ├── Carbon đen (+ 50,000đ)                                 │
-│  └── Holographic (+ 80,000đ)                                │
+│  ├── Trong suốt                                              │
+│  ├── Carbon đen                                              │
+│  └── Holographic                                             │
 └─────────────────────────────────────────────────────────────┘
 
 User chọn: iPhone 15 Pro Max + Carbon đen → Variant tương ứng
@@ -83,15 +83,12 @@ POST /api/products/{productId}/selections/groups
       "label": "iPhone 15 Pro Max",
       "description": "Phiên bản mới nhất",
       "displayOrder": 1,
-      "priceAdjustment": 0,
-      "colorCode": null,
-      "stockQuantity": null
+      "colorCode": null
     },
     {
       "value": "iPhone 15 Pro",
       "label": "iPhone 15 Pro",
-      "displayOrder": 2,
-      "priceAdjustment": -20000
+      "displayOrder": 2
     }
   ]
 }
@@ -111,15 +108,13 @@ POST /api/products/{productId}/selections/groups
 
 **Option Fields:**
 
-| Field           | Type    | Required | Default | Description                    |
-| --------------- | ------- | -------- | ------- | ------------------------------ |
-| value           | string  | ✅       | -       | Giá trị option (max 100 ký tự) |
-| label           | string  | ❌       | value   | Nhãn hiển thị                  |
-| description     | string  | ❌       | null    | Mô tả chi tiết (max 500 ký tự) |
-| displayOrder    | integer | ❌       | auto    | Thứ tự hiển thị                |
-| priceAdjustment | decimal | ❌       | 0       | Điều chỉnh giá (+/-)           |
-| colorCode       | string  | ❌       | null    | Mã màu HEX (#FF0000)           |
-| stockQuantity   | integer | ❌       | null    | Số lượng tồn kho riêng         |
+| Field        | Type    | Required | Default | Description                    |
+| ------------ | ------- | -------- | ------- | ------------------------------ |
+| value        | string  | ✅       | -       | Giá trị option (max 100 ký tự) |
+| label        | string  | ❌       | value   | Nhãn hiển thị                  |
+| description  | string  | ❌       | null    | Mô tả chi tiết (max 500 ký tự) |
+| displayOrder | integer | ❌       | auto    | Thứ tự hiển thị                |
+| colorCode    | string  | ❌       | null    | Mã màu HEX (#FF0000)           |
 
 **Response (201 Created):**
 
@@ -142,7 +137,6 @@ POST /api/products/{productId}/selections/groups
         "value": "iPhone 15 Pro Max",
         "label": "iPhone 15 Pro Max",
         "displayOrder": 1,
-        "priceAdjustment": 0,
         "isAvailable": true,
         "isActive": true,
         "linkedVariantIds": [],
@@ -233,7 +227,6 @@ GET /api/products/{productId}/selections/groups/{groupId}
         "value": "iPhone 15 Pro Max",
         "label": "iPhone 15 Pro Max",
         "imageUrl": "https://...",
-        "priceAdjustment": 0,
         "isAvailable": true,
         "linkedVariantIds": ["var-1", "var-3"],
         "linkedVariantCount": 2
@@ -305,9 +298,7 @@ POST /api/products/{productId}/selections/groups/{groupId}/options
   "label": "Samsung S24 Ultra",
   "description": "Flagship Samsung 2024",
   "displayOrder": 4,
-  "priceAdjustment": 0,
-  "colorCode": null,
-  "stockQuantity": 100
+  "colorCode": null
 }
 ```
 
@@ -324,9 +315,7 @@ POST /api/products/{productId}/selections/groups/{groupId}/options
     "displayOrder": 4,
     "imageName": null,
     "imageUrl": null,
-    "priceAdjustment": 0,
     "colorCode": null,
-    "stockQuantity": 100,
     "isAvailable": true,
     "isActive": true,
     "linkedVariantIds": [],
@@ -353,7 +342,6 @@ GET /api/products/{productId}/selections/groups/{groupId}/options
       "id": "opt-1",
       "value": "iPhone 15 Pro Max",
       "displayOrder": 1,
-      "priceAdjustment": 0,
       "isAvailable": true,
       "linkedVariantCount": 2
     },
@@ -361,7 +349,6 @@ GET /api/products/{productId}/selections/groups/{groupId}/options
       "id": "opt-2",
       "value": "iPhone 15 Pro",
       "displayOrder": 2,
-      "priceAdjustment": -20000,
       "isAvailable": true,
       "linkedVariantCount": 2
     }
@@ -383,7 +370,6 @@ PUT /api/products/{productId}/selections/groups/{groupId}/options/{optionId}
 {
   "value": "iPhone 15 Pro Max (256GB)",
   "label": "iPhone 15 Pro Max",
-  "priceAdjustment": 50000,
   "colorCode": "#1a1a1a",
   "isAvailable": true,
   "isActive": true
@@ -529,16 +515,13 @@ GET /api/products/{productId}/selections/config
             "label": "iPhone 15 Pro Max",
             "imageUrl": "https://...",
             "colorCode": null,
-            "priceAdjustment": 0,
-            "available": true,
-            "stockQuantity": null
+            "available": true
           },
           {
             "optionId": "opt-2",
             "value": "iPhone 15 Pro",
             "label": "iPhone 15 Pro",
             "imageUrl": null,
-            "priceAdjustment": -20000,
             "available": true
           },
           {
@@ -558,20 +541,17 @@ GET /api/products/{productId}/selections/config
           {
             "optionId": "opt-4",
             "value": "Trong suốt",
-            "priceAdjustment": 0,
             "available": true
           },
           {
             "optionId": "opt-5",
             "value": "Carbon đen",
             "colorCode": "#1a1a1a",
-            "priceAdjustment": 50000,
             "available": true
           },
           {
             "optionId": "opt-6",
             "value": "Holographic",
-            "priceAdjustment": 80000,
             "available": true
           }
         ]
@@ -636,9 +616,9 @@ function isOptionDisabled(currentSelection, optionToCheck) {
   return outOfStockKeys.has(testCombination);
 }
 
-// 4. Tính giá cuối cùng
-const finalPrice = basePrice + opt1.priceAdjustment + opt5.priceAdjustment;
-// 199000 + 0 + 50000 = 249000
+// 4. Lấy giá từ variant response (sau khi chọn đủ options)
+const variantPrice = variantResponse.price;
+// Giá được lấy trực tiếp từ variant, không cần tính từ priceAdjustment
 
 // 5. Check required groups
 const canAddToCart =
@@ -809,14 +789,14 @@ Cache sẽ tự động bị xóa khi:
 1. **Đặt tên rõ ràng**: Tên group và option nên dễ hiểu với người dùng
 2. **Sử dụng displayOrder**: Đảm bảo thứ tự hiển thị hợp lý
 3. **Liên kết đầy đủ**: Mỗi option nên được liên kết với ít nhất 1 variant
-4. **Sử dụng priceAdjustment**: Để điều chỉnh giá theo options (VD: +50k cho vỏ cao cấp)
+4. **Thiết lập giá variant**: Giá của mỗi variant được lấy trực tiếp từ variant, không cần điều chỉnh theo option
 
 ### Cho Frontend Developer
 
 1. **Cache selectionMatrix**: Không cần gọi /find-variant mỗi lần user chọn
 2. **Validate required groups**: Kiểm tra user đã chọn đủ options trước khi Add to Cart
 3. **Handle available=false**: Disable hoặc ẩn options không khả dụng
-4. **Show priceAdjustment**: Hiển thị (+50,000đ) bên cạnh option
+4. **Lấy giá từ variant**: Giá sản phẩm được lấy trực tiếp từ variant response
 
 ---
 

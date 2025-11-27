@@ -3,7 +3,6 @@ package com.vdt2025.product_service.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -24,9 +23,7 @@ public class SelectionOptionResponse {
     Integer displayOrder;
     String imageName;
     String imageUrl;
-    BigDecimal priceAdjustment;
     String colorCode;
-    Integer stockQuantity;
     boolean isAvailable;
     boolean isActive;
     LocalDateTime createdAt;
