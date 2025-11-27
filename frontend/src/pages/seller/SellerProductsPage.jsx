@@ -91,9 +91,12 @@ const SellerProductsPage = () => {
         const transformedProducts = content.map((product) => ({
           id: product.id,
           name: product.name,
+          shortDescription: product.shortDescription,
           sku: `SKU-${product.id.substring(0, 8).toUpperCase()}`,
           category: product.platformCategoryName || "Chưa phân loại",
-          storeCategories: product.storeCategoryName || [], // Mảng các danh mục shop
+          storeCategories: product.storeCategoryName || null,
+          storeName: product.storeName,
+          storeId: product.storeId,
           price: `₫${product.minPrice.toLocaleString("vi-VN")}${
             product.maxPrice > product.minPrice
               ? ` - ₫${product.maxPrice.toLocaleString("vi-VN")}`
@@ -101,13 +104,13 @@ const SellerProductsPage = () => {
           }`,
           minPrice: product.minPrice,
           maxPrice: product.maxPrice,
-          stock: 0, // API doesn't provide stock info
-          sold: product.soldCount,
+          stock: product.totalAvailableStock || 0,
+          sold: product.soldCount || 0,
           status: product.active ? "active" : "inactive",
           image: product.thumbnailImage || NoImages,
           brandName: product.brandName,
           rating: product.averageRating,
-          ratingCount: product.ratingCount,
+          ratingCount: product.ratingCount || 0,
           createdAt: product.createdAt,
         }));
 
@@ -569,6 +572,7 @@ const SellerProductsPage = () => {
               <th>Danh mục Platform</th>
               <th>Thương hiệu</th>
               <th>Giá bán</th>
+              <th>Tồn kho</th>
               <th>Đã bán</th>
               <th>Đánh giá</th>
               <th>Trạng thái</th>
@@ -642,6 +646,21 @@ const SellerProductsPage = () => {
                     <strong style={{ color: "#ee4d2d" }}>
                       {product.price}
                     </strong>
+                  </td>
+                  <td>
+                    <span
+                      style={{
+                        color:
+                          product.stock === 0
+                            ? "#ff4d4f"
+                            : product.stock < 10
+                            ? "#faad14"
+                            : "#52c41a",
+                        fontWeight: "500",
+                      }}
+                    >
+                      {product.stock}
+                    </span>
                   </td>
                   <td>{product.sold}</td>
                   <td>
