@@ -44,6 +44,11 @@ const AdminSellerProfilesPage = () => {
     page: 0,
     size: 10,
     sort: "createdAt,desc", // Mặc định sắp xếp theo ngày tạo mới nhất
+    storeName: "",
+    createdFrom: "",
+    createdTo: "",
+    updatedFrom: "",
+    updatedTo: "",
   });
 
   const [showFilters, setShowFilters] = useState(false);
@@ -63,7 +68,17 @@ const AdminSellerProfilesPage = () => {
   // Fetch profiles from API
   useEffect(() => {
     fetchProfiles();
-  }, [filters.page, filters.size, filters.verificationStatus, filters.sort]);
+  }, [
+    filters.page,
+    filters.size,
+    filters.verificationStatus,
+    filters.sort,
+    filters.storeName,
+    filters.createdFrom,
+    filters.createdTo,
+    filters.updatedFrom,
+    filters.updatedTo,
+  ]);
 
   // Scroll lên đầu sau khi loading hoàn tất
   useEffect(() => {
@@ -117,6 +132,11 @@ const AdminSellerProfilesPage = () => {
       page: 0,
       size: 10,
       sort: "createdAt,desc",
+      storeName: "",
+      createdFrom: "",
+      createdTo: "",
+      updatedFrom: "",
+      updatedTo: "",
     });
     setTimeout(() => fetchProfiles(), 0);
   };
@@ -367,6 +387,62 @@ const AdminSellerProfilesPage = () => {
         {showFilters && (
           <div className={styles.adminFilters}>
             <div className={styles.filterGrid}>
+              <div className={styles.filterItem}>
+                <label>Tìm theo tên cửa hàng</label>
+                <input
+                  type="text"
+                  value={filters.storeName}
+                  onChange={(e) =>
+                    handleFilterChange("storeName", e.target.value)
+                  }
+                  placeholder="Nhập tên cửa hàng..."
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterItem}>
+                <label>Ngày tạo từ</label>
+                <input
+                  type="datetime-local"
+                  value={filters.createdFrom}
+                  onChange={(e) =>
+                    handleFilterChange("createdFrom", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterItem}>
+                <label>Ngày tạo đến</label>
+                <input
+                  type="datetime-local"
+                  value={filters.createdTo}
+                  onChange={(e) =>
+                    handleFilterChange("createdTo", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterItem}>
+                <label>Cập nhật từ</label>
+                <input
+                  type="datetime-local"
+                  value={filters.updatedFrom}
+                  onChange={(e) =>
+                    handleFilterChange("updatedFrom", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
+              <div className={styles.filterItem}>
+                <label>Cập nhật đến</label>
+                <input
+                  type="datetime-local"
+                  value={filters.updatedTo}
+                  onChange={(e) =>
+                    handleFilterChange("updatedTo", e.target.value)
+                  }
+                  className={styles.filterInput}
+                />
+              </div>
               <div className={styles.filterItem}>
                 <label>Số kết quả/trang</label>
                 <select
