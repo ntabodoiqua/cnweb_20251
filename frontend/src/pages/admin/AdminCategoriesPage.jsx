@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { notification, Modal } from "antd";
 import {
   AppstoreOutlined,
   SearchOutlined,
@@ -54,6 +55,7 @@ const AdminCategoriesPage = () => {
   });
 
   const [imagePreview, setImagePreview] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
 
   // Fetch categories from API
   useEffect(() => {
@@ -70,7 +72,11 @@ const AdminCategoriesPage = () => {
       }
     } catch (error) {
       console.error("Error fetching categories:", error);
-      alert("Lỗi khi tải danh sách danh mục!");
+      notification.error({
+        message: "Lỗi",
+        description: "Lỗi khi tải danh sách danh mục!",
+        placement: "topRight",
+      });
     } finally {
       setLoading(false);
     }
@@ -129,18 +135,34 @@ const AdminCategoriesPage = () => {
   };
 
   const handleDeleteCategory = async (categoryId, categoryName) => {
-    if (confirm(`Bạn có chắc chắn muốn xóa danh mục "${categoryName}"?`)) {
-      try {
-        const response = await deleteCategoryAdminApi(categoryId);
-        if (response && response.code === 1000) {
-          alert("Xóa danh mục thành công!");
-          fetchCategories();
+    Modal.confirm({
+      title: "Xác nhận xóa",
+      content: `Bạn có chắc chắn muốn xóa danh mục "${categoryName}"?`,
+      okText: "Xóa",
+      cancelText: "Hủy",
+      okType: "danger",
+      onOk: async () => {
+        try {
+          const response = await deleteCategoryAdminApi(categoryId);
+          if (response && response.code === 1000) {
+            notification.success({
+              message: "Thành công",
+              description: "Xóa danh mục thành công!",
+              placement: "topRight",
+            });
+            fetchCategories();
+          }
+        } catch (error) {
+          console.error("Error deleting category:", error);
+          notification.error({
+            message: "Lỗi",
+            description:
+              error.response?.data?.message || "Lỗi khi xóa danh mục!",
+            placement: "topRight",
+          });
         }
-      } catch (error) {
-        console.error("Error deleting category:", error);
-        alert(error.response?.data?.message || "Lỗi khi xóa danh mục!");
-      }
-    }
+      },
+    });
   };
 
   const handleToggleStatus = async (
@@ -148,31 +170,39 @@ const AdminCategoriesPage = () => {
     categoryName,
     currentStatus
   ) => {
-    if (
-      confirm(
-        `Bạn có chắc chắn muốn ${
-          currentStatus ? "vô hiệu hóa" : "kích hoạt"
-        } danh mục "${categoryName}"?`
-      )
-    ) {
-      try {
-        const response = await toggleCategoryStatusApi(categoryId);
-        if (response && response.code === 1000) {
-          alert(
-            `${
-              currentStatus ? "Vô hiệu hóa" : "Kích hoạt"
-            } danh mục thành công!`
-          );
-          fetchCategories();
+    Modal.confirm({
+      title: "Xác nhận",
+      content: `Bạn có chắc chắn muốn ${
+        currentStatus ? "vô hiệu hóa" : "kích hoạt"
+      } danh mục "${categoryName}"?`,
+      okText: currentStatus ? "Vô hiệu hóa" : "Kích hoạt",
+      cancelText: "Hủy",
+      okType: currentStatus ? "danger" : "primary",
+      onOk: async () => {
+        try {
+          const response = await toggleCategoryStatusApi(categoryId);
+          if (response && response.code === 1000) {
+            notification.success({
+              message: "Thành công",
+              description: `${
+                currentStatus ? "Vô hiệu hóa" : "Kích hoạt"
+              } danh mục thành công!`,
+              placement: "topRight",
+            });
+            fetchCategories();
+          }
+        } catch (error) {
+          console.error("Error toggling category status:", error);
+          notification.error({
+            message: "Lỗi",
+            description:
+              error.response?.data?.message ||
+              "Lỗi khi thay đổi trạng thái danh mục!",
+            placement: "topRight",
+          });
         }
-      } catch (error) {
-        console.error("Error toggling category status:", error);
-        alert(
-          error.response?.data?.message ||
-            "Lỗi khi thay đổi trạng thái danh mục!"
-        );
-      }
-    }
+      },
+    });
   };
 
   const handleOpenCreateForm = () => {
@@ -228,10 +258,15 @@ const AdminCategoriesPage = () => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      alert("Vui lòng nhập tên danh mục!");
+      notification.warning({
+        message: "Cảnh báo",
+        description: "Vui lòng nhập tên danh mục!",
+        placement: "topRight",
+      });
       return;
     }
 
+    setSubmitting(true);
     try {
       const categoryData = {
         name: formData.name.trim(),
@@ -260,20 +295,35 @@ const AdminCategoriesPage = () => {
             await uploadCategoryImageAdminApi(categoryId, formData.imageFile);
           } catch (imageError) {
             console.error("Error uploading image:", imageError);
-            alert("Danh mục đã được lưu nhưng có lỗi khi tải ảnh lên!");
+            notification.warning({
+              message: "Cảnh báo",
+              description: "Danh mục đã được lưu nhưng có lỗi khi tải ảnh lên!",
+              placement: "topRight",
+            });
           }
         }
 
-        alert(`${isEditMode ? "Cập nhật" : "Tạo"} danh mục thành công!`);
+        notification.success({
+          message: "Thành công",
+          description: `${
+            isEditMode ? "Cập nhật" : "Tạo"
+          } danh mục thành công!`,
+          placement: "topRight",
+        });
         setShowCategoryForm(false);
         fetchCategories();
       }
     } catch (error) {
       console.error("Error saving category:", error);
-      alert(
-        error.response?.data?.message ||
-          `Lỗi khi ${isEditMode ? "cập nhật" : "tạo"} danh mục!`
-      );
+      notification.error({
+        message: "Lỗi",
+        description:
+          error.response?.data?.message ||
+          `Lỗi khi ${isEditMode ? "cập nhật" : "tạo"} danh mục!`,
+        placement: "topRight",
+      });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -767,11 +817,20 @@ const AdminCategoriesPage = () => {
                     type="button"
                     className="admin-btn admin-btn-secondary"
                     onClick={() => setShowCategoryForm(false)}
+                    disabled={submitting}
                   >
                     Hủy
                   </button>
-                  <button type="submit" className="admin-btn admin-btn-primary">
-                    {isEditMode ? "Cập nhật" : "Tạo mới"}
+                  <button
+                    type="submit"
+                    className="admin-btn admin-btn-primary"
+                    disabled={submitting}
+                  >
+                    {submitting
+                      ? "Đang xử lý..."
+                      : isEditMode
+                      ? "Cập nhật"
+                      : "Tạo mới"}
                   </button>
                 </div>
               </form>

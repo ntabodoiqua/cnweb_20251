@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { notification, Modal } from "antd";
 import {
   UserOutlined,
   SearchOutlined,
@@ -152,23 +153,45 @@ const AdminUsersPage = () => {
   };
 
   const handleDeleteUser = (userId) => {
-    if (confirm("Bạn có chắc chắn muốn xóa người dùng này?")) {
-      // TODO: Call API to delete user
-      console.log("Delete user:", userId);
-    }
+    Modal.confirm({
+      title: "Xác nhận xóa",
+      content: "Bạn có chắc chắn muốn xóa người dùng này?",
+      okText: "Xóa",
+      cancelText: "Hủy",
+      okType: "danger",
+      onOk: () => {
+        // TODO: Call API to delete user
+        console.log("Delete user:", userId);
+        notification.success({
+          message: "Thành công",
+          description: "Xóa người dùng thành công!",
+          placement: "topRight",
+        });
+      },
+    });
   };
 
   const handleToggleStatus = (userId, currentStatus) => {
-    if (
-      confirm(
-        `Bạn có chắc chắn muốn ${
-          currentStatus ? "khóa" : "mở khóa"
-        } tài khoản này?`
-      )
-    ) {
-      // TODO: Call API to toggle user status
-      console.log("Toggle status for user:", userId);
-    }
+    Modal.confirm({
+      title: "Xác nhận",
+      content: `Bạn có chắc chắn muốn ${
+        currentStatus ? "khóa" : "mở khóa"
+      } tài khoản này?`,
+      okText: currentStatus ? "Khóa" : "Mở khóa",
+      cancelText: "Hủy",
+      okType: currentStatus ? "danger" : "primary",
+      onOk: () => {
+        // TODO: Call API to toggle user status
+        console.log("Toggle status for user:", userId);
+        notification.success({
+          message: "Thành công",
+          description: `${
+            currentStatus ? "Khóa" : "Mở khóa"
+          } tài khoản thành công!`,
+          placement: "topRight",
+        });
+      },
+    });
   };
 
   return (

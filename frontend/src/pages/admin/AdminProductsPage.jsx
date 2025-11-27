@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { notification, Modal } from "antd";
 import {
   ShopOutlined,
   SearchOutlined,
@@ -113,16 +114,31 @@ const AdminProductsPage = () => {
   };
 
   const handleDeleteProduct = async (productId) => {
-    if (confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) {
-      try {
-        await axios.delete(`/api/product/products/${productId}`);
-        alert("Xóa sản phẩm thành công!");
-        fetchProducts(currentPage);
-      } catch (err) {
-        console.error("Error deleting product:", err);
-        alert("Không thể xóa sản phẩm. Vui lòng thử lại.");
-      }
-    }
+    Modal.confirm({
+      title: "Xác nhận xóa",
+      content: "Bạn có chắc chắn muốn xóa sản phẩm này?",
+      okText: "Xóa",
+      cancelText: "Hủy",
+      okType: "danger",
+      onOk: async () => {
+        try {
+          await axios.delete(`/api/product/products/${productId}`);
+          notification.success({
+            message: "Thành công",
+            description: "Xóa sản phẩm thành công!",
+            placement: "topRight",
+          });
+          fetchProducts(currentPage);
+        } catch (err) {
+          console.error("Error deleting product:", err);
+          notification.error({
+            message: "Lỗi",
+            description: "Không thể xóa sản phẩm. Vui lòng thử lại.",
+            placement: "topRight",
+          });
+        }
+      },
+    });
   };
 
   const handleFilterChange = (key, value) => {

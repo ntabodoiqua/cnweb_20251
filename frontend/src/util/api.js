@@ -1587,7 +1587,7 @@ const getSellerDocumentAdminApi = (sellerProfileId) => {
 };
 
 const uploadCategoryImageAdminApi = (categoryId, file) => {
-  const URL_API = `/api/product/admin/categories/${categoryId}/image`;
+  const URL_API = `/api/product/admin/categories/${categoryId}/thumbnail`;
   const formData = new FormData();
   formData.append("file", file);
   return axios.post(URL_API, formData, {

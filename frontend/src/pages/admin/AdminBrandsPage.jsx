@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { notification } from "antd";
+import { notification, Modal } from "antd";
 import {
   SearchOutlined,
   PlusOutlined,
@@ -51,6 +51,7 @@ const AdminBrandsPage = () => {
     description: "",
     isActive: true,
   });
+  const [submitting, setSubmitting] = useState(false);
 
   // Fetch brands from API
   useEffect(() => {
@@ -154,27 +155,34 @@ const AdminBrandsPage = () => {
   };
 
   const handleDeleteBrand = async (brandId) => {
-    if (!confirm("Bạn có chắc chắn muốn xóa thương hiệu này?")) return;
-
-    try {
-      await deleteBrandApi(brandId);
-      notification.success({
-        message: "Thành công",
-        description: "Xóa thương hiệu thành công!",
-        placement: "topRight",
-        duration: 3,
-      });
-      fetchBrands();
-    } catch (error) {
-      console.error("Error deleting brand:", error);
-      notification.error({
-        message: "Lỗi xóa thương hiệu",
-        description:
-          error.response?.data?.message || "Không thể xóa thương hiệu",
-        placement: "topRight",
-        duration: 3,
-      });
-    }
+    Modal.confirm({
+      title: "Xác nhận xóa",
+      content: "Bạn có chắc chắn muốn xóa thương hiệu này?",
+      okText: "Xóa",
+      cancelText: "Hủy",
+      okType: "danger",
+      onOk: async () => {
+        try {
+          await deleteBrandApi(brandId);
+          notification.success({
+            message: "Thành công",
+            description: "Xóa thương hiệu thành công!",
+            placement: "topRight",
+            duration: 3,
+          });
+          fetchBrands();
+        } catch (error) {
+          console.error("Error deleting brand:", error);
+          notification.error({
+            message: "Lỗi xóa thương hiệu",
+            description:
+              error.response?.data?.message || "Không thể xóa thương hiệu",
+            placement: "topRight",
+            duration: 3,
+          });
+        }
+      },
+    });
   };
 
   const handleToggleStatus = async (brandId) => {
@@ -232,6 +240,7 @@ const AdminBrandsPage = () => {
   const handleSubmitForm = async (e) => {
     e.preventDefault();
 
+    setSubmitting(true);
     try {
       // Cả create và update đều chỉ gửi name và description
       const brandData = {
@@ -271,6 +280,8 @@ const AdminBrandsPage = () => {
         placement: "topRight",
         duration: 3,
       });
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -652,11 +663,20 @@ const AdminBrandsPage = () => {
                     type="button"
                     className="admin-btn admin-btn-secondary"
                     onClick={() => setShowBrandForm(false)}
+                    disabled={submitting}
                   >
                     Hủy
                   </button>
-                  <button type="submit" className="admin-btn admin-btn-primary">
-                    {selectedBrand ? "Cập nhật" : "Tạo mới"}
+                  <button
+                    type="submit"
+                    className="admin-btn admin-btn-primary"
+                    disabled={submitting}
+                  >
+                    {submitting
+                      ? "Đang xử lý..."
+                      : selectedBrand
+                      ? "Cập nhật"
+                      : "Tạo mới"}
                   </button>
                 </div>
               </form>
