@@ -23,6 +23,7 @@ import {
   getUserByIdAdminApi,
   getSellerDocumentAdminApi,
 } from "../../util/api";
+import { notification, Modal } from "antd";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import styles from "./AdminSellerProfilesPage.module.css";
 
@@ -200,22 +201,37 @@ const AdminSellerProfilesPage = () => {
   };
 
   const handleApprove = async (profileId) => {
-    if (!confirm("Bạn có chắc chắn muốn phê duyệt hồ sơ này?")) return;
-
-    try {
-      setActionLoading(true);
-      const response = await approveSellerProfileApi(profileId);
-      if (response && response.code === 1000) {
-        alert("Phê duyệt hồ sơ thành công!");
-        fetchProfiles();
-        setShowProfileDetail(false);
-      }
-    } catch (error) {
-      console.error("Error approving profile:", error);
-      alert("Có lỗi xảy ra khi phê duyệt hồ sơ!");
-    } finally {
-      setActionLoading(false);
-    }
+    Modal.confirm({
+      title: "Xác nhận phê duyệt",
+      content: "Bạn có chắc chắn muốn phê duyệt hồ sơ này?",
+      okText: "Phê duyệt",
+      cancelText: "Hủy",
+      okType: "primary",
+      onOk: async () => {
+        try {
+          setActionLoading(true);
+          const response = await approveSellerProfileApi(profileId);
+          if (response && response.code === 1000) {
+            notification.success({
+              message: "Thành công",
+              description: "Phê duyệt hồ sơ thành công!",
+              placement: "topRight",
+            });
+            fetchProfiles();
+            setShowProfileDetail(false);
+          }
+        } catch (error) {
+          console.error("Error approving profile:", error);
+          notification.error({
+            message: "Lỗi",
+            description: "Có lỗi xảy ra khi phê duyệt hồ sơ!",
+            placement: "topRight",
+          });
+        } finally {
+          setActionLoading(false);
+        }
+      },
+    });
   };
 
   const openRejectModal = (profile) => {
@@ -226,7 +242,11 @@ const AdminSellerProfilesPage = () => {
 
   const handleReject = async () => {
     if (!rejectionReason.trim()) {
-      alert("Vui lòng nhập lý do từ chối!");
+      notification.warning({
+        message: "Cảnh báo",
+        description: "Vui lòng nhập lý do từ chối!",
+        placement: "topRight",
+      });
       return;
     }
 
@@ -237,7 +257,11 @@ const AdminSellerProfilesPage = () => {
         rejectionReason
       );
       if (response && response.code === 1000) {
-        alert("Từ chối hồ sơ thành công!");
+        notification.success({
+          message: "Thành công",
+          description: "Từ chối hồ sơ thành công!",
+          placement: "topRight",
+        });
         fetchProfiles();
         setShowRejectModal(false);
         setShowProfileDetail(false);
@@ -246,18 +270,22 @@ const AdminSellerProfilesPage = () => {
       }
     } catch (error) {
       console.error("Error rejecting profile:", error);
-      alert("Có lỗi xảy ra khi từ chối hồ sơ!");
+      notification.error({
+        message: "Lỗi",
+        description: "Có lỗi xảy ra khi từ chối hồ sơ!",
+        placement: "topRight",
+      });
     } finally {
       setActionLoading(false);
     }
   };
 
   const canApprove = (status) => {
-    return status === "PENDING" || status === "CREATED";
+    return status === "PENDING";
   };
 
   const canReject = (status) => {
-    return status === "PENDING" || status === "CREATED";
+    return status === "PENDING";
   };
 
   return (
