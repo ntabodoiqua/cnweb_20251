@@ -128,6 +128,14 @@ public enum ErrorCode {
     INVALID_STOCK_QUANTITY(1906, "error.1906", HttpStatus.BAD_REQUEST),
     INVENTORY_STOCK_ALREADY_EXISTS(1907, "error.1907", HttpStatus.CONFLICT),
 
+    // Lỗi đánh giá sản phẩm (20xx)
+    RATING_NOT_FOUND(2001, "error.2001", HttpStatus.NOT_FOUND),
+    RATING_ALREADY_EXISTS(2002, "error.2002", HttpStatus.CONFLICT),
+    RATING_UNAUTHORIZED(2003, "error.2003", HttpStatus.FORBIDDEN),
+    RATING_INVALID(2004, "error.2004", HttpStatus.BAD_REQUEST),
+    PURCHASE_NOT_VERIFIED(2005, "error.2005", HttpStatus.FORBIDDEN),
+    RATING_IMAGE_LIMIT_EXCEEDED(2006, "error.2006", HttpStatus.BAD_REQUEST),
+    ORDER_SERVICE_ERROR(2007, "error.2007", HttpStatus.INTERNAL_SERVER_ERROR),
 
     // Lỗi khác (99xx)
     UNCATEGORIZED_EXCEPTION(9999, "error.9999", HttpStatus.INTERNAL_SERVER_ERROR),

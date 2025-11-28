@@ -29,4 +29,25 @@ public interface OrderRepository extends JpaRepository<Order, String>, JpaSpecif
      * Tìm các đơn hàng theo trạng thái và thời gian tạo trước một mốc thời gian
      */
     List<Order> findByStatusAndCreatedAtBefore(OrderStatus status, LocalDateTime dateTime);
+
+    /**
+     * Kiểm tra user đã mua sản phẩm (đơn hàng DELIVERED) chưa
+     */
+    @Query("SELECT COUNT(o) > 0 FROM Order o JOIN o.items i " +
+           "WHERE o.username = :username AND i.productId = :productId AND o.status = :status")
+    boolean existsByUsernameAndProductIdAndStatus(
+            @Param("username") String username,
+            @Param("productId") String productId,
+            @Param("status") OrderStatus status);
+
+    /**
+     * Lấy orderId của đơn hàng DELIVERED chứa sản phẩm mà user đã mua
+     */
+    @Query("SELECT o.id FROM Order o JOIN o.items i " +
+           "WHERE o.username = :username AND i.productId = :productId AND o.status = :status " +
+           "ORDER BY o.createdAt DESC")
+    List<String> findOrderIdsByUsernameAndProductIdAndStatus(
+            @Param("username") String username,
+            @Param("productId") String productId,
+            @Param("status") OrderStatus status);
 }
