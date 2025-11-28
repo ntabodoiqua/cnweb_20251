@@ -1,6 +1,51 @@
 version: "3.8"
 
 services:
+  # Elasticsearch for product search - Optimized for 8GB RAM server
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - xpack.security.enrollment.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - cluster.name=cnweb-cluster
+      - bootstrap.memory_lock=true
+      - indices.memory.index_buffer_size=10%
+      - indices.queries.cache.size=5%
+      - thread_pool.write.queue_size=500
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    ports:
+      - "9200:9200"
+    networks:
+      - microservices-network
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'curl -s http://localhost:9200/_cluster/health | grep -vq ''"status":"red"''',
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
   # Discovery Service - Must start first
   discovery-service:
     build:
@@ -111,7 +156,7 @@ services:
       retries: 5
       start_period: 60s
 
-  # Product Service - Depends on Discovery Service
+  # Product Service - Depends on Discovery Service and Elasticsearch
   product-service:
     build:
       context: .
@@ -137,10 +182,13 @@ services:
       - SPRING_RABBITMQ_VIRTUAL_HOST=xqjmojji
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
       - JWT_SIGNERKEY=cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2
+      - ELASTICSEARCH_URIS=http://elasticsearch:9200
     volumes:
       - product-uploads:/app/uploads
     depends_on:
       discovery-service:
+        condition: service_healthy
+      elasticsearch:
         condition: service_healthy
     restart: unless-stopped
     healthcheck:
@@ -245,6 +293,55 @@ services:
       retries: 5
       start_period: 60s
 
+  # Order Service - Depends on Discovery Service
+  order-service:
+    build:
+      context: .
+      dockerfile: order-service/Dockerfile
+    container_name: order-service
+    image: ghcr.io/ntabodoiqua/cnweb-order-service:${TAG:-latest}
+    ports:
+      - "8085:8085"
+    networks:
+      - microservices-network
+    environment:
+      - TZ=Asia/Ho_Chi_Minh
+      - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Ho_Chi_Minh
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25061/order_service?sslmode=require
+      - SPRING_DATASOURCE_USERNAME=doadmin
+      - SPRING_DATASOURCE_PASSWORD=AVNS_yX_L2SKXt73ktjTiGbU
+      - SPRING_DATA_REDIS_HOST=db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
+      - SPRING_DATA_REDIS_PORT=25061
+      - SPRING_DATA_REDIS_USERNAME=default
+      - SPRING_DATA_REDIS_PASSWORD=AVNS_N-gwsyNb6xBC3fXPdQp
+      - SPRING_DATA_REDIS_SSL_ENABLED=true
+      - SPRING_RABBITMQ_ADDRESSES=amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
+      - SPRING_RABBITMQ_USERNAME=xqjmojji
+      - SPRING_RABBITMQ_PASSWORD=hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH
+      - SPRING_RABBITMQ_VIRTUAL_HOST=xqjmojji
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - JWT_SIGNERKEY=cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2
+      - INTERNAL_SERVICE_SECRET=${INTERNAL_SERVICE_SECRET:-InT3rn@l-S3rv1c3-S3cr3t-K3y-2025-VDT}
+      - PAYMENT_REDIRECT_URL=${PAYMENT_REDIRECT_URL:-https://nguyentheanh-nta.id.vn/payment/result}
+    depends_on:
+      discovery-service:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--quiet",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8085/actuator/health",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
   # Payment Service - Depends on Discovery Service
   payment-service:
     build:
@@ -302,10 +399,13 @@ services:
 
 networks:
   microservices-network:
+    name: app-network
     driver: bridge
 
 volumes:
   user-uploads:
     driver: local
   product-uploads:
+    driver: local
+  elasticsearch-data:
     driver: local

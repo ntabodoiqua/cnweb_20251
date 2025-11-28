@@ -122,6 +122,13 @@
 		<artifactId>spring-boot-starter-actuator</artifactId>
 	</dependency>
 
+	<!-- Micrometer Prometheus for Metrics -->
+	<dependency>
+		<groupId>io.micrometer</groupId>
+		<artifactId>micrometer-registry-prometheus</artifactId>
+		<scope>runtime</scope>
+	</dependency>
+
 	<!-- Lombok -->
 	<dependency>
 		<groupId>org.projectlombok</groupId>
@@ -142,6 +149,13 @@
 			<version>${lombok-mapstruct-binding.version}</version>
 			<scope>provided</scope>
 		</dependency>
+
+        <!-- Google OAuth2 Client -->
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>2.2.0</version>
+        </dependency>
 
 		<!-- Testing -->
 		<dependency>

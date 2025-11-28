@@ -1,0 +1,122 @@
+.adminPayments {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.adminSection {
+  margin-bottom: 24px;
+}
+
+.adminSectionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adminSectionTitle::before {
+  content: "";
+  width: 4px;
+  height: 24px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  border-radius: 2px;
+}
+
+.filtersContainer {
+  background: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  margin-bottom: 20px;
+}
+
+.filtersRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.filtersRow:last-child {
+  margin-bottom: 0;
+}
+
+.statusBadge {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.statusCompleted {
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+}
+
+.statusPending {
+  background: rgba(250, 173, 20, 0.1);
+  color: #faad14;
+}
+
+.statusFailed {
+  background: rgba(255, 77, 79, 0.1);
+  color: #ff4d4f;
+}
+
+.statusExpired {
+  background: rgba(140, 140, 140, 0.1);
+  color: #8c8c8c;
+}
+
+.adminTableContainer {
+  overflow-x: auto;
+}
+
+.adminTable {
+  position: relative;
+}
+
+.stickyCol {
+  position: sticky;
+  right: 0;
+  background: #fff;
+  box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+thead .stickyCol {
+  background: #fafafa;
+  z-index: 2;
+}
+
+tbody tr:hover .stickyCol {
+  background: #f5f5f5;
+}
+
+.adminActionBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.adminActionBtn.view {
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+}
+
+.adminActionBtn.view:hover {
+  background: #52c41a;
+  color: white;
+  transform: scale(1.1);
+}

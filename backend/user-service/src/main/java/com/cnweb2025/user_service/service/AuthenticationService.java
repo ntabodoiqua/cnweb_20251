@@ -23,7 +23,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -42,6 +41,9 @@ import java.util.UUID;
 public class AuthenticationService {
     final UserRepository userRepository;
     final InvalidatedTokenRepository invalidatedTokenRepository;
+    final GoogleOAuthService googleOAuthService;
+    final UserService userService;
+    final PasswordEncoder passwordEncoder;
 
     @NonFinal
     @Value("${jwt.signerKey}")
@@ -101,8 +103,6 @@ public class AuthenticationService {
 
     // Service xác thực người dùng và tạo JWT cho họ
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-
         // lấy người dùng từ cơ sở dữ liệu
         var user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
@@ -213,5 +213,39 @@ public class AuthenticationService {
                 .token(token)
                 .authenticated(true)
                 .build();
+    }
+
+    // Service xác thực người dùng qua Google OAuth
+    public AuthenticationResponse authenticateWithGoogle(String googleToken) {
+        try {
+            // Verify Google token
+            var payload = googleOAuthService.verifyToken(googleToken);
+
+            String email = payload.getEmail();
+            String name = (String) payload.get("name");
+            String picture = (String) payload.get("picture");
+
+            log.info("Google login attempt for email: {}", email);
+
+            // Find or create user
+            User user = userService.findOrCreateGoogleUser(email, name, picture);
+
+            // Generate JWT token
+            String token = generateToken(user);
+
+            log.info("Google login successful for user: {}", user.getUsername());
+
+            return AuthenticationResponse.builder()
+                    .token(token)
+                    .authenticated(true)
+                    .username(user.getUsername())
+                    .build();
+        } catch (AppException e) {
+            log.error("Google authentication failed: {}", e.getMessage());
+            throw e;
+        } catch (Exception e) {
+            log.error("Unexpected error during Google authentication: {}", e.getMessage());
+            throw new AppException(ErrorCode.INVALID_GOOGLE_TOKEN);
+        }
     }
 }

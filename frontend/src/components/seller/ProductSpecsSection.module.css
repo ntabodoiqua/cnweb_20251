@@ -1,0 +1,521 @@
+/* ========================================
+   Product Specs Section Styles
+   Quản lý thông số kỹ thuật sản phẩm
+   ======================================== */
+
+.specsSection {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e8ecf0;
+  margin-top: 24px;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e8ecf0;
+}
+
+.titleWrapper {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.icon {
+  font-size: 24px;
+  color: white;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  padding: 12px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.25);
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.addBtn {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  border: none;
+  height: 42px;
+  padding: 0 28px;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(82, 196, 26, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.addBtn:hover {
+  background: linear-gradient(135deg, #3da80e 0%, #5fb82b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(82, 196, 26, 0.4);
+}
+
+/* Content */
+.content {
+  min-height: 200px;
+}
+
+.empty {
+  padding: 60px 20px;
+}
+
+/* Collapse */
+.specsCollapse {
+  background: transparent;
+  border: none;
+}
+
+.specsCollapse :global(.ant-collapse-item) {
+  margin-bottom: 12px;
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  border-radius: 10px !important;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s ease;
+}
+
+.specsCollapse :global(.ant-collapse-item):hover {
+  border-color: rgba(238, 77, 45, 0.25);
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.1);
+}
+
+.specsCollapse :global(.ant-collapse-item-active) {
+  border-color: #ee4d2d;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.15);
+}
+
+.specsCollapse :global(.ant-collapse-header) {
+  padding: 16px 20px !important;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.03) 0%,
+    rgba(255, 107, 53, 0.03) 100%
+  );
+}
+
+.specsCollapse
+  :global(.ant-collapse-item-active)
+  :global(.ant-collapse-header) {
+  background: linear-gradient(135deg, #fff5f2 0%, #ffe8e0 100%);
+}
+
+.specsCollapse :global(.ant-collapse-content) {
+  border-top: none;
+}
+
+.specsCollapse :global(.ant-collapse-content-box) {
+  padding: 0 !important;
+}
+
+/* Group Header */
+.groupHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.groupTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.customTag {
+  font-size: 10px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+/* Add Group Container */
+.addGroupContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.03) 0%,
+    rgba(255, 107, 53, 0.03) 100%
+  );
+  border-radius: 8px;
+  margin: 4px 8px 8px 8px;
+}
+
+.addGroupLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.addGroupInputRow {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.addGroupInput {
+  flex: 1;
+  min-width: 180px;
+  border-radius: 8px;
+  border: 2px solid #e8ecf0;
+  padding: 8px 12px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.addGroupInput:focus {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+  outline: none;
+}
+
+.addGroupInput::placeholder {
+  color: #999;
+}
+
+.addGroupBtn {
+  color: white;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  padding: 8px 16px;
+  border-radius: 8px;
+  height: 38px;
+  border: none;
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.25);
+  transition: all 0.3s ease;
+}
+
+.addGroupBtn:hover {
+  color: white !important;
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.35);
+}
+
+/* Group Option in Select */
+.groupOption {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Specs List */
+.specsList {
+  display: flex;
+  flex-direction: column;
+}
+
+.specItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #f5f5f5;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 8px;
+  margin-bottom: 2px;
+}
+
+.specItem:last-child {
+  border-bottom: none;
+  margin-bottom: 0;
+}
+
+.specItem:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.03) 0%,
+    rgba(255, 107, 53, 0.03) 100%
+  );
+  transform: translateX(4px);
+}
+
+.specInfo {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex: 1;
+}
+
+.specLabel {
+  min-width: 200px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.showTag {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+
+.specValue {
+  font-size: 14px;
+  color: #1a1a2e;
+  font-weight: 500;
+}
+
+/* Multiline value display */
+.multilineValue {
+  white-space: pre-line;
+  line-height: 1.6;
+}
+
+.unit {
+  color: #999;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.specActions {
+  display: flex;
+  gap: 6px;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.specItem:hover .specActions {
+  opacity: 1;
+}
+
+.editBtn {
+  color: #1890ff;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.editBtn:hover {
+  color: #40a9ff;
+  background: rgba(24, 144, 255, 0.1);
+}
+
+.deleteBtn {
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.deleteBtn:hover {
+  background: rgba(255, 77, 79, 0.1);
+}
+
+/* Modal */
+.specModal :global(.ant-modal-content) {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.specModal :global(.ant-modal-header) {
+  border-bottom: none;
+  padding: 24px 28px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 50%, #ff8c42 100%);
+}
+
+.specModal :global(.ant-modal-title) {
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
+.specModal :global(.ant-modal-close) {
+  top: 16px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.specModal :global(.ant-modal-close:hover) {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+.specModal :global(.ant-modal-body) {
+  padding: 28px;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+}
+
+/* Form */
+.specForm {
+  background: white;
+  padding: 24px;
+  border-radius: 14px;
+  border: 1px solid #e8ecf0;
+}
+
+.specForm :global(.ant-form-item-label > label) {
+  font-weight: 600;
+  color: #1a1a2e;
+  font-size: 14px;
+}
+
+.specForm :global(.ant-input),
+.specForm :global(.ant-input-number),
+.specForm :global(textarea.ant-input) {
+  border-radius: 10px;
+  border: 2px solid #e8ecf0;
+  padding: 10px 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.specForm :global(.ant-input:hover),
+.specForm :global(.ant-input-number:hover),
+.specForm :global(textarea.ant-input:hover) {
+  border-color: rgba(238, 77, 45, 0.4);
+}
+
+.specForm :global(.ant-input:focus),
+.specForm :global(.ant-input-number-focused),
+.specForm :global(textarea.ant-input:focus) {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+}
+
+.specForm :global(.ant-select-selector) {
+  border-radius: 10px !important;
+  border: 2px solid #e8ecf0 !important;
+  min-height: 42px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.specForm :global(.ant-select-focused .ant-select-selector) {
+  border-color: #ee4d2d !important;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1) !important;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.formCol {
+  margin-bottom: 0;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid #e8ecf0;
+}
+
+.formActions :global(.ant-btn) {
+  height: 42px;
+  padding: 0 24px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.formActions :global(.ant-btn-primary) {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+}
+
+.formActions :global(.ant-btn-primary:hover) {
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
+  box-shadow: 0 6px 16px rgba(238, 77, 45, 0.4);
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .specsSection {
+    padding: 20px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .addBtn {
+    width: 100%;
+  }
+
+  .specInfo {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .specLabel {
+    min-width: auto;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .specActions {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 480px) {
+  .title {
+    font-size: 18px;
+  }
+
+  .specItem {
+    padding: 12px 16px;
+  }
+
+  .specLabel {
+    font-size: 13px;
+  }
+
+  .specValue {
+    font-size: 13px;
+  }
+}

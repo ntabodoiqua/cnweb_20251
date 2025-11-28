@@ -1,0 +1,1536 @@
+.productDetailPage {
+  min-height: calc(100vh - 120px);
+  background: linear-gradient(135deg, #f5f7fa 0%, #fef5f1 100%);
+  padding: 24px 0;
+  animation: pageLoad 0.6s ease-out;
+}
+
+@keyframes pageLoad {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+/* Breadcrumb */
+.breadcrumbCard {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  background: white;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.breadcrumbCard:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.breadcrumbCard :global(.ant-breadcrumb) {
+  font-size: 14px;
+}
+
+.breadcrumbCard :global(.ant-breadcrumb-link) {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #666;
+  position: relative;
+  padding: 2px 0;
+}
+
+.breadcrumbCard :global(.ant-breadcrumb-link)::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, #ee4d2d 0%, #ff6347 100%);
+  transition: width 0.3s ease;
+}
+
+.breadcrumbCard :global(.ant-breadcrumb-link):hover::after {
+  width: 100%;
+}
+
+.breadcrumbCard :global(.ant-breadcrumb-link):hover {
+  color: #ee4d2d;
+}
+
+.breadcrumbCard :global(.ant-breadcrumb-separator) {
+  color: #bfbfbf;
+}
+
+/* Image Card */
+.imageCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  position: sticky;
+  top: 90px;
+  background: white;
+  border: 1px solid #f0f0f0;
+}
+
+.imageCard:hover {
+  box-shadow: 0 6px 24px rgba(238, 77, 45, 0.15);
+  transform: translateY(-2px);
+}
+
+.mainImageWrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  background: #f5f5f5;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.mainImageWrapper :global(.ant-image) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.mainImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.mainImageWrapper:hover .mainImage {
+  transform: scale(1.05);
+}
+
+.discountBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6347 100%);
+  color: white;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.4);
+  z-index: 1;
+}
+
+.thumbnailWrapper {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  overflow-x: auto;
+  padding: 4px 0;
+}
+
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  position: relative;
+}
+
+.thumbnail::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0) 0%,
+    rgba(238, 77, 45, 0.15) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.thumbnail:hover::after {
+  opacity: 1;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.thumbnail:hover img {
+  transform: scale(1.1);
+}
+
+.thumbnail:hover {
+  border-color: #ee4d2d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.25);
+}
+
+.thumbnail.active {
+  border-color: #ee4d2d;
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+}
+
+.thumbnail.active::after {
+  opacity: 0.5;
+}
+
+.actionButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.actionButtons button {
+  flex: 1;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #d9d9d9;
+  position: relative;
+  overflow: hidden;
+}
+
+.actionButtons button::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(238, 77, 45, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.actionButtons button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.actionButtons button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.2);
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+}
+
+/* Info Card */
+.infoCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-bottom: 24px;
+  background: white;
+  border: 1px solid #f0f0f0;
+}
+
+.infoCard:hover {
+  box-shadow: 0 6px 24px rgba(238, 77, 45, 0.12);
+}
+
+.productName {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.statsRow {
+  margin-bottom: 8px;
+  padding: 12px 0;
+  border-radius: 8px;
+}
+
+.statsRow :global(.ant-space-item) {
+  display: flex;
+  align-items: center;
+  transition: transform 0.3s ease;
+}
+
+.statsRow :global(.ant-space-item):hover {
+  transform: scale(1.05);
+}
+
+.statsRow :global(.ant-rate) {
+  transition: transform 0.3s ease;
+}
+
+.statsRow :global(.ant-rate):hover {
+  transform: scale(1.1);
+}
+
+/* Price Section */
+.priceSection {
+  background: linear-gradient(135deg, #fff5f2 0%, #ffe8e0 100%);
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 2px solid #ffded6;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.priceSection::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(238, 77, 45, 0.1) 0%,
+    transparent 70%
+  );
+  animation: pulse 3s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.8;
+  }
+}
+
+.priceSection:hover {
+  border-color: #ee4d2d;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.2);
+}
+
+.currentPrice {
+  font-size: 32px;
+  font-weight: 800;
+  color: #ee4d2d;
+  line-height: 1;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 4px rgba(238, 77, 45, 0.1);
+}
+
+.originalPrice {
+  font-size: 18px;
+  color: #999;
+  text-decoration: line-through;
+  position: relative;
+  z-index: 1;
+}
+
+.priceRange {
+  font-size: 28px;
+  font-weight: 700;
+  color: #ee4d2d;
+  position: relative;
+  z-index: 1;
+  text-shadow: 0 2px 4px rgba(238, 77, 45, 0.1);
+}
+
+/* Variant Selection */
+.variantSection {
+  padding: 16px 0;
+}
+
+.attributeGroup {
+  margin-bottom: 20px;
+}
+
+.attributeLabel {
+  display: block;
+  margin-bottom: 12px;
+  font-size: 15px;
+  color: #333;
+}
+
+.attributeOptions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.attributeButton {
+  min-width: 80px;
+  height: 40px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid #d9d9d9;
+  background: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.attributeButton::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.05) 0%,
+    rgba(238, 77, 45, 0.1) 100%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.attributeButton:hover:not(.disabled)::before {
+  opacity: 1;
+}
+
+.attributeButton:hover:not(.disabled) {
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.2);
+}
+
+.attributeButton.selected {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6347 100%);
+  border-color: #ee4d2d;
+  color: white;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+}
+
+.attributeButton.selected::before {
+  background: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+}
+
+.attributeButton.selected:hover {
+  background: linear-gradient(135deg, #d73211 0%, #ff4d2d 100%);
+  color: white;
+  box-shadow: 0 6px 16px rgba(238, 77, 45, 0.4);
+}
+
+.attributeButton.disabled {
+  background: #f5f5f5;
+  border-color: #d9d9d9;
+  color: #bfbfbf;
+  cursor: not-allowed;
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+
+.variantInfo {
+  margin-top: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e6f7ff 100%);
+  border-radius: 12px;
+  border-left: 4px solid #1890ff;
+  border: 1px solid #91d5ff;
+  animation: slideIn 0.4s ease-out;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Variant Modal */
+.variantModal :global(.ant-modal-header) {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.variantModal :global(.ant-modal-title) {
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.variantModal :global(.ant-modal-close) {
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.variantModal :global(.ant-modal-close):hover {
+  color: rgba(255, 255, 255, 0.8);
+  transform: rotate(90deg);
+}
+
+.variantModal :global(.ant-modal-body) {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.variantModal :global(.ant-modal-body)::-webkit-scrollbar {
+  width: 8px;
+}
+
+.variantModal :global(.ant-modal-body)::-webkit-scrollbar-track {
+  background: #f0f0f0;
+  border-radius: 4px;
+}
+
+.variantModal :global(.ant-modal-body)::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 4px;
+}
+
+.variantModal :global(.ant-modal-body)::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+}
+
+.variantModalContent {
+  padding: 8px 0;
+}
+
+.variantModalContent :global(.ant-descriptions-item-label) {
+  font-weight: 600;
+  background: #fafafa;
+  width: 180px;
+}
+
+.variantModalContent :global(.ant-descriptions-item-content) {
+  background: white;
+}
+
+/* Short Description */
+.shortDescription {
+  padding: 12px 0;
+}
+
+.shortDescription :global(.ant-typography) {
+  color: #666;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+/* Meta Info */
+.metaInfo {
+  padding: 12px 0;
+}
+
+/* Quantity Section */
+.quantitySection {
+  padding: 16px 0;
+}
+
+.quantitySection :global(.ant-input-number) {
+  border-radius: 8px;
+  border: 2px solid #d9d9d9;
+  transition: all 0.3s ease;
+}
+
+.quantitySection :global(.ant-input-number):hover {
+  border-color: #ee4d2d;
+}
+
+.quantitySection :global(.ant-input-number-focused) {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 2px rgba(238, 77, 45, 0.1);
+}
+
+.quantitySection :global(.ant-input-number-handler-wrap) {
+  border-radius: 0 6px 6px 0;
+}
+
+.quantitySection :global(.ant-input-number-handler):hover {
+  color: #ee4d2d;
+}
+
+/* Action Section */
+.actionSection {
+  padding-top: 24px;
+}
+
+.addToCartBtn {
+  height: 50px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6347 100%);
+  border: none;
+  font-weight: 700;
+  font-size: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.addToCartBtn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.addToCartBtn:hover:not(:disabled)::before {
+  width: 400px;
+  height: 400px;
+}
+
+.addToCartBtn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d73211 0%, #ff4d2d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(238, 77, 45, 0.4);
+}
+
+.addToCartBtn:disabled {
+  background: #d9d9d9;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Store Card */
+.storeCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+  border: 1px solid #f0f0f0;
+}
+
+.storeCard:hover {
+  box-shadow: 0 6px 24px rgba(238, 77, 45, 0.15);
+  transform: translateY(-4px);
+  border-color: #ee4d2d;
+}
+
+.storeAvatar {
+  border: 2px solid #f0f0f0;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.storeCard:hover .storeAvatar {
+  border-color: #ee4d2d;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.2);
+  transform: scale(1.05);
+}
+
+/* Details Card */
+.detailsCard {
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  margin-top: 24px;
+  background: white;
+  border: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.detailsCard:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.detailsCard :global(.ant-tabs-nav) {
+  margin-bottom: 0;
+  padding: 0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
+  border-bottom: 1px solid #e8e8e8;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.detailsCard :global(.ant-tabs-nav)::before {
+  border-bottom: none;
+}
+
+.detailsCard :global(.ant-tabs-nav-wrap) {
+  flex: 1;
+}
+
+.detailsCard :global(.ant-tabs-nav-list) {
+  width: 100%;
+  display: flex;
+}
+
+.detailsCard :global(.ant-tabs-nav-operations) {
+  display: none !important;
+}
+
+.detailsCard :global(.ant-tabs-tab) {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 18px 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 0;
+  margin: 0 !important;
+  border-right: 1px solid #e8e8e8;
+  background: transparent;
+  position: relative;
+  color: #666;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+  text-align: center;
+}
+
+.detailsCard :global(.ant-tabs-tab-btn) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.detailsCard :global(.ant-tabs-tab):last-child {
+  border-right: none;
+}
+
+.detailsCard :global(.ant-tabs-tab):hover {
+  color: #ee4d2d;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.03) 0%,
+    rgba(238, 77, 45, 0.08) 100%
+  );
+}
+
+.detailsCard :global(.ant-tabs-tab-active) {
+  background: white;
+  color: #ee4d2d;
+  position: relative;
+}
+
+.detailsCard :global(.ant-tabs-tab-active)::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ee4d2d 0%, #ff6347 100%);
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.4);
+}
+
+.detailsCard :global(.ant-tabs-ink-bar) {
+  display: none;
+}
+
+.detailsCard :global(.ant-tabs-tab-btn) {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+}
+
+.tabContent {
+  min-height: 200px;
+  padding: 32px;
+  animation: fadeIn 0.4s ease-in-out;
+  background: white;
+  border-radius: 0 0 12px 12px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tabContent :global(.ant-typography) {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #555;
+}
+
+.tabContent :global(.ant-typography-paragraph) {
+  margin-bottom: 16px;
+}
+
+.tabContent :global(.ant-empty) {
+  padding: 60px 0;
+}
+
+.tabContent :global(.ant-empty-description) {
+  font-size: 15px;
+  color: #999;
+}
+
+/* Specification Table */
+.specTable {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 12px rgba(238, 77, 45, 0.08);
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  animation: fadeInUp 0.5s ease-out;
+  background: white;
+}
+
+.specRow {
+  border-bottom: 1px solid rgba(238, 77, 45, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  animation: slideInFromRight 0.4s ease-out;
+  animation-fill-mode: both;
+}
+
+.specRow:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.specRow:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.specRow:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.specRow:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.specRow:nth-child(5) {
+  animation-delay: 0.25s;
+}
+.specRow:nth-child(6) {
+  animation-delay: 0.3s;
+}
+.specRow:nth-child(7) {
+  animation-delay: 0.35s;
+}
+.specRow:nth-child(8) {
+  animation-delay: 0.4s;
+}
+.specRow:nth-child(9) {
+  animation-delay: 0.45s;
+}
+.specRow:nth-child(10) {
+  animation-delay: 0.5s;
+}
+
+.specRow::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(238, 77, 45, 0.06) 0%,
+    rgba(255, 107, 53, 0.04) 100%
+  );
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+}
+
+.specRow:hover::before {
+  width: 100%;
+}
+
+.specRow:hover {
+  border-left: 3px solid #ee4d2d;
+  box-shadow: 0 2px 12px rgba(238, 77, 45, 0.12);
+}
+
+.specRow:last-child {
+  border-bottom: none;
+}
+
+.specLabel {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.03) 0%,
+    rgba(255, 107, 53, 0.03) 100%
+  );
+  padding: 16px 24px;
+  font-weight: 600;
+  color: #555;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+  border-right: 1px solid rgba(238, 77, 45, 0.08);
+}
+
+.specRow:hover .specLabel {
+  color: #ee4d2d;
+  font-weight: 700;
+}
+
+.specValue {
+  padding: 16px 24px;
+  color: #333;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  position: relative;
+  z-index: 1;
+  background: white;
+}
+
+.specValue :global(.ant-tag) {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 4px 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.specValue :global(.ant-tag):hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.2);
+}
+
+/* Animation */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .imageCard {
+    position: static;
+    margin-bottom: 24px;
+  }
+
+  .productName {
+    font-size: 20px;
+  }
+
+  .currentPrice {
+    font-size: 26px;
+  }
+
+  .priceRange {
+    font-size: 24px;
+  }
+
+  .addToCartBtn {
+    height: 46px;
+    font-size: 15px;
+  }
+
+  .actionButtons {
+    flex-direction: column;
+  }
+
+  .actionButtons button {
+    width: 100%;
+  }
+
+  .attributeOptions {
+    gap: 8px;
+  }
+
+  .attributeButton {
+    min-width: 70px;
+    height: 36px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 768px) {
+  .productDetailPage {
+    padding: 16px 0;
+  }
+
+  .container {
+    padding: 0 12px;
+  }
+
+  .breadcrumbCard {
+    margin-bottom: 16px;
+  }
+
+  .productName {
+    font-size: 18px;
+  }
+
+  .currentPrice {
+    font-size: 24px;
+  }
+
+  .originalPrice {
+    font-size: 16px;
+  }
+
+  .priceRange {
+    font-size: 22px;
+  }
+
+  .priceSection {
+    padding: 16px;
+  }
+
+  .storeCard :global(.ant-row) {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .storeCard :global(.ant-col) {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+
+  .detailsCard :global(.ant-tabs-nav-list) {
+    flex-wrap: wrap;
+  }
+
+  .detailsCard :global(.ant-tabs-tab) {
+    font-size: 13px;
+    padding: 14px 12px;
+    flex: 1 1 auto;
+    min-width: 50%;
+    border-bottom: 1px solid #e8e8e8;
+  }
+
+  .detailsCard :global(.ant-tabs-tab):nth-child(2n) {
+    border-right: none;
+  }
+
+  .tabContent {
+    padding: 24px;
+  }
+  .specLabel,
+  .specValue {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+
+  .specLabel {
+    border-right: none;
+    border-bottom: 1px solid rgba(238, 77, 45, 0.08);
+  }
+}
+
+@media (max-width: 576px) {
+  .statsRow {
+    font-size: 12px;
+  }
+
+  .statsRow :global(.ant-space) {
+    gap: 8px !important;
+  }
+
+  .quantitySection {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .quantitySection :global(.ant-space) {
+    width: 100%;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .thumbnailWrapper {
+    gap: 6px;
+  }
+
+  .thumbnail {
+    width: 60px;
+    height: 60px;
+  }
+
+  .detailsCard :global(.ant-tabs-nav-list) {
+    flex-wrap: wrap;
+  }
+
+  .detailsCard :global(.ant-tabs-tab) {
+    font-size: 12px;
+    padding: 12px 8px;
+    flex: 1 1 50%;
+    min-width: 50%;
+    border-bottom: 1px solid #e8e8e8;
+  }
+
+  .detailsCard :global(.ant-tabs-tab):nth-child(2n) {
+    border-right: none;
+  }
+
+  .tabContent {
+    padding: 20px;
+  }
+}
+
+/* Loading and Empty States */
+:global(.ant-spin-nested-loading) {
+  min-height: 400px;
+}
+
+:global(.ant-empty) {
+  padding: 60px 0;
+}
+
+:global(.ant-empty-description) {
+  color: #999;
+  font-size: 15px;
+}
+
+/* Divider Enhancement */
+.productDetailPage :global(.ant-divider) {
+  border-color: rgba(238, 77, 45, 0.1);
+  transition: border-color 0.3s ease;
+}
+
+.productDetailPage :global(.ant-divider):hover {
+  border-color: rgba(238, 77, 45, 0.3);
+}
+
+/* Specs Collapse - Đồng bộ với các trang khác */
+.specsCollapse {
+  background: transparent;
+  border: none;
+}
+
+.specsCollapse :global(.ant-collapse-item) {
+  margin-bottom: 16px;
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  border-radius: 12px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 12px rgba(238, 77, 45, 0.06);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: fadeInUp 0.5s ease-out;
+  animation-fill-mode: both;
+}
+
+.specsCollapse :global(.ant-collapse-item):nth-child(1) {
+  animation-delay: 0.1s;
+}
+.specsCollapse :global(.ant-collapse-item):nth-child(2) {
+  animation-delay: 0.2s;
+}
+.specsCollapse :global(.ant-collapse-item):nth-child(3) {
+  animation-delay: 0.3s;
+}
+.specsCollapse :global(.ant-collapse-item):nth-child(4) {
+  animation-delay: 0.4s;
+}
+
+.specsCollapse :global(.ant-collapse-item):hover {
+  border-color: rgba(238, 77, 45, 0.3);
+  box-shadow: 0 4px 20px rgba(238, 77, 45, 0.12);
+  transform: translateY(-4px);
+}
+
+.specsCollapse :global(.ant-collapse-item-active) {
+  border-color: #ee4d2d;
+  box-shadow: 0 6px 24px rgba(238, 77, 45, 0.15);
+}
+
+.specsCollapse :global(.ant-collapse-header) {
+  padding: 18px 24px !important;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.03) 0%,
+    rgba(255, 107, 53, 0.03) 100%
+  );
+  border-bottom: 1px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.specsCollapse :global(.ant-collapse-header):hover {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.06) 0%,
+    rgba(255, 107, 53, 0.06) 100%
+  );
+}
+
+.specsCollapse
+  :global(.ant-collapse-item-active)
+  :global(.ant-collapse-header) {
+  background: linear-gradient(135deg, #fff5f2 0%, #ffe8e0 100%);
+  border-bottom-color: rgba(238, 77, 45, 0.15);
+}
+
+.specsCollapse :global(.ant-collapse-content) {
+  border-top: none;
+  background: white;
+}
+
+.specsCollapse :global(.ant-collapse-content-box) {
+  padding: 0;
+}
+
+.collapseHeader {
+  display: flex;
+  align-items: center;
+  font-size: 16px;
+  font-weight: 600;
+  color: #555;
+  gap: 10px;
+  transition: color 0.3s ease;
+}
+
+.specsCollapse :global(.ant-collapse-item-active) .collapseHeader {
+  color: #ee4d2d;
+  font-weight: 700;
+}
+
+.specsCollapse :global(.ant-collapse-header):hover .collapseHeader {
+  color: #ee4d2d;
+}
+
+.collapseTitle {
+  flex: 1;
+  font-size: 15px;
+  letter-spacing: 0.3px;
+}
+
+/* Nested Spec Styles */
+.nestedSpec {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.02) 0%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  border-radius: 8px;
+  padding: 14px 18px;
+  margin-bottom: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.nestedSpec::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: linear-gradient(180deg, #ee4d2d 0%, #ff6b35 100%);
+  border-radius: 8px 0 0 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.nestedSpec:hover::before {
+  opacity: 1;
+}
+
+.nestedSpec:last-child {
+  margin-bottom: 0;
+}
+
+.nestedSpec:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.05) 0%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  border-color: rgba(238, 77, 45, 0.25);
+  transform: translateX(6px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.1);
+}
+
+.nestedSpecItem {
+  display: flex;
+  margin-bottom: 8px;
+  gap: 12px;
+  align-items: center;
+}
+
+.nestedSpecItem:last-child {
+  margin-bottom: 0;
+}
+
+.nestedSpecLabel {
+  font-size: 13px;
+  min-width: 130px;
+  flex-shrink: 0;
+  font-weight: 600;
+  color: #666;
+}
+
+.nestedSpecValue {
+  font-size: 13px;
+  flex: 1;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Nested Object Styles */
+.nestedObject {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nestedObjectItem {
+  display: flex;
+  gap: 12px;
+  padding: 6px 0;
+  align-items: center;
+}
+
+.nestedObjectLabel {
+  font-size: 13px;
+  min-width: 140px;
+  flex-shrink: 0;
+  font-weight: 600;
+  color: #666;
+}
+
+.nestedObjectValue {
+  font-size: 13px;
+  flex: 1;
+  color: #333;
+  font-weight: 500;
+}
+
+/* Spec Row in Collapse */
+.specsCollapse .specRow {
+  transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(238, 77, 45, 0.08);
+  animation: none;
+}
+
+.specsCollapse .specRow:last-child {
+  border-bottom: none;
+}
+
+.specsCollapse .specRow::before {
+  background: linear-gradient(
+    90deg,
+    rgba(238, 77, 45, 0.04) 0%,
+    rgba(255, 107, 53, 0.02) 100%
+  );
+}
+
+.specsCollapse .specRow:hover {
+  border-left: 3px solid #ee4d2d;
+}
+
+.specsCollapse .specLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+  padding: 14px 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.02) 0%,
+    rgba(255, 107, 53, 0.02) 100%
+  );
+  border-right: 1px solid rgba(238, 77, 45, 0.08);
+}
+
+.specsCollapse .specRow:hover .specLabel {
+  color: #ee4d2d;
+  font-weight: 700;
+}
+
+.specsCollapse .specValue {
+  font-size: 14px;
+  padding: 14px 24px;
+  font-weight: 500;
+  color: #333;
+}
+
+/* Responsive for detailed specs */
+@media (max-width: 768px) {
+  .specsCollapse :global(.ant-collapse-item) {
+    margin-bottom: 12px;
+  }
+
+  .specsCollapse :global(.ant-collapse-header) {
+    padding: 14px 16px !important;
+  }
+
+  .collapseHeader {
+    font-size: 15px;
+  }
+
+  .collapseTitle {
+    font-size: 14px;
+  }
+
+  .specsCollapse .specLabel,
+  .specsCollapse .specValue {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+
+  .nestedSpec {
+    padding: 10px 12px;
+    margin-bottom: 6px;
+  }
+
+  .nestedSpecLabel {
+    font-size: 11px;
+    min-width: 100px;
+  }
+
+  .nestedSpecValue {
+    font-size: 12px;
+  }
+
+  .nestedObjectLabel {
+    font-size: 12px;
+    min-width: 110px;
+  }
+
+  .nestedObjectValue {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 576px) {
+  .specsCollapse :global(.ant-collapse-item) {
+    margin-bottom: 10px;
+    border-radius: 8px;
+  }
+
+  .specsCollapse :global(.ant-collapse-header) {
+    padding: 12px 14px !important;
+  }
+
+  .collapseHeader {
+    font-size: 14px;
+  }
+
+  .collapseTitle {
+    font-size: 13px;
+  }
+
+  .specsCollapse .specLabel {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .specsCollapse .specValue {
+    padding: 10px 14px;
+    font-size: 12px;
+  }
+
+  .specsCollapse .specLabel,
+  .specsCollapse .specValue {
+    display: block;
+    width: 100%;
+  }
+
+  .specsCollapse .specLabel {
+    background: #fafafa;
+    border-bottom: 1px solid #f0f0f0;
+    padding-bottom: 8px;
+  }
+
+  .specsCollapse .specValue {
+    padding-top: 8px;
+  }
+
+  .nestedSpec {
+    padding: 8px 10px;
+  }
+
+  .nestedSpecItem {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .nestedSpecLabel {
+    min-width: auto;
+    font-size: 11px;
+  }
+
+  .nestedSpecValue {
+    font-size: 12px;
+  }
+
+  .nestedObjectItem {
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .nestedObjectLabel {
+    min-width: auto;
+    font-size: 11px;
+  }
+
+  .nestedObjectValue {
+    font-size: 12px;
+  }
+}
+
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.imageCard,
+.infoCard,
+.storeCard,
+.detailsCard {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.infoCard {
+  animation-delay: 0.1s;
+}
+
+.storeCard {
+  animation-delay: 0.2s;
+}
+
+.detailsCard {
+  animation-delay: 0.3s;
+}

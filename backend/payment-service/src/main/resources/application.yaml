@@ -43,11 +43,6 @@ jwt:
   valid-duration: 3600
   refreshable-duration: 86400
 
-logging:
-  level:
-    org.springframework.data.redis: DEBUG
-    io.lettuce.core: DEBUG
-
 # ZaloPay Configuration
 zalopay:
   # App ID được cấp bởi ZaloPay (Sandbox)
@@ -78,3 +73,31 @@ zalopay:
   redirect-url: ${ZALOPAY_REDIRECT_URL:http://localhost:3000/payment/result}
   # Thời gian hết hạn đơn hàng (giây) - 15 phút
   expire-duration-seconds: 900
+
+# Management endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+
+# Logging configuration for Loki
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
+  level:
+    root: INFO
+    org.springframework.data.redis: DEBUG
+    io.lettuce.core: DEBUG

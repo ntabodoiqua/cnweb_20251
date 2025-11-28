@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title th:text="${subject}"></title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            color: #333;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #c8102e;
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            color: #c8102e;
+            margin-bottom: 10px;
+        }
+        .logo-subtitle {
+            font-size: 12px;
+            color: #666;
+            font-weight: normal;
+        }
+        .content {
+            padding: 20px 0;
+            line-height: 1.6;
+            color: #555555;
+        }
+        .welcome-box {
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe8e8 100%);
+            border: 2px solid #c8102e;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .welcome-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .welcome-message {
+            font-size: 20px;
+            font-weight: bold;
+            color: #c8102e;
+            margin: 10px 0;
+        }
+        .info-box {
+            background-color: #f8f9fa;
+            border-left: 4px solid #c8102e;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .info-box ul {
+            margin: 10px 0;
+            padding-left: 20px;
+        }
+        .info-box li {
+            margin: 5px 0;
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .feature-item {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .feature-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        .feature-text {
+            font-size: 14px;
+            color: #555;
+        }
+        .cta-button {
+            display: inline-block;
+            background-color: #c8102e;
+            color: #ffffff;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #999999;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+        }
+        .footer-brand {
+            color: #c8102e;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div class="logo">
+            🛒 HUSTBuy
+            <div class="logo-subtitle">Sàn Thương Mại Điện Tử - Đại học Bách Khoa Hà Nội</div>
+        </div>
+        <h2 th:text="${subject}">Chào mừng đến với HUSTBuy!</h2>
+    </div>
+    <div class="content">
+        <p>Xin chào <strong th:text="${username}">Bạn</strong>,</p>
+        <p>
+            Chúng mình rất vui mừng chào đón bạn đến với <strong>HUSTBuy</strong> - nền tảng
+            thương mại điện tử dành riêng cho cộng đồng sinh viên Bách Khoa Hà Nội!
+        </p>
+
+        <div class="welcome-box">
+            <div class="welcome-icon">🎉</div>
+            <p class="welcome-message">Tài khoản của bạn đã được kích hoạt thành công!</p>
+            <p style="margin: 10px 0; color: #666;">
+                Bạn đã đăng nhập bằng tài khoản Google và sẵn sàng để bắt đầu mua sắm ngay bây giờ.
+            </p>
+        </div>
+
+        <div class="info-box">
+            <p><strong>✨ Những điều bạn có thể làm trên HUSTBuy:</strong></p>
+            <ul>
+                <li>Mua sắm các sản phẩm từ sinh viên và dành cho sinh viên HUST</li>
+                <li>Đăng bán sản phẩm của riêng bạn một cách dễ dàng</li>
+                <li>Kết nối và giao dịch an toàn trong cộng đồng Bách Khoa</li>
+                <li>Tìm kiếm deals và sản phẩm hấp dẫn mỗi ngày</li>
+            </ul>
+        </div>
+
+        <div class="feature-grid">
+            <div class="feature-item">
+                <div class="feature-icon">🔒</div>
+                <div class="feature-text"><strong>Bảo mật cao</strong><br/>Đăng nhập Google an toàn</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">⚡</div>
+                <div class="feature-text"><strong>Nhanh chóng</strong><br/>Giao dịch thuận tiện</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">👥</div>
+                <div class="feature-text"><strong>Cộng đồng</strong><br/>Chỉ dành cho HUSTer</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">💯</div>
+                <div class="feature-text"><strong>Tin cậy</strong><br/>Xác thực sinh viên</div>
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="https://nguyentheanh-nta.id.vn/" class="cta-button">Bắt đầu mua sắm ngay! 🛍️</a>
+        </div>
+
+        <p>
+            Nếu bạn có bất kỳ câu hỏi nào hoặc cần hỗ trợ, đội ngũ của chúng mình
+            luôn sẵn sàng giúp đỡ bạn.
+        </p>
+        <p>Chúc bạn có trải nghiệm mua sắm tuyệt vời trên HUSTBuy! 🎉</p>
+        <p>
+            Trân trọng,<br />
+            <strong>Đội ngũ phát triển HUSTBuy</strong><br />
+            <em>Đại học Bách Khoa Hà Nội</em>
+        </p>
+    </div>
+    <div class="footer">
+        <p class="footer-brand">HUSTBuy</p>
+        <p>Dự án Thương mại Điện tử - Đại học Bách Khoa Hà Nội</p>
+        <p>&copy; 2025 HUSTBuy. Đồ án sinh viên HUST.</p>
+    </div>
+</div>
+</body>
+</html>

@@ -41,6 +41,8 @@ jobs:
             path: user-service
           - name: product-service
             path: product-service
+          - name: order-service
+            path: order-service
           - name: notification-service
             path: notification-service
           - name: file-service
@@ -98,8 +100,8 @@ jobs:
             cd /opt/cnweb2025_1 || exit 1
 
             # Pull latest changes
-            git pull origin be/test
-            git checkout be/test
+            git pull origin be/dev
+            git checkout be/dev
 
             # Login to GitHub Container Registry
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
@@ -129,7 +131,11 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             # Wait for services to be healthy
-            sleep 120
+            sleep 150
+
+            # Check Elasticsearch health first (required by product-service)
+            echo "Checking Elasticsearch..."
+            curl -f http://localhost:9200/_cluster/health || echo "Warning: Elasticsearch not ready"
 
             # Check service health
             echo "Checking Discovery Service..."
@@ -144,11 +150,18 @@ jobs:
             echo "Checking Product Service..."
             curl -f http://localhost:8082/actuator/health || exit 1
 
+            # Verify Elasticsearch search endpoint
+            echo "Checking Product Search Health..."
+            curl -f http://localhost:8082/api/products/v1/search/health || echo "Warning: Product search not ready"
+
             echo "Checking Notification Service..."
             curl -f http://localhost:8084/actuator/health || exit 1
 
             echo "Checking File Service..."
             curl -f http://localhost:8083/actuator/health || exit 1
+
+            echo "Checking Order Service..."
+            curl -f http://localhost:8085/actuator/health || exit 1
 
             echo "Checking Payment Service..."
             curl -f http://localhost:8086/actuator/health || exit 1
@@ -159,7 +172,7 @@ jobs:
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Deployment successful for tag ${{ needs.prepare.outputs.tag }}"
+            echo "Deployment successful for tag ${{ needs.prepare.outputs.tag }}"
           else
-            echo "❌ Deployment failed for tag ${{ needs.prepare.outputs.tag }}"
+            echo "Deployment failed for tag ${{ needs.prepare.outputs.tag }}"
           fi
