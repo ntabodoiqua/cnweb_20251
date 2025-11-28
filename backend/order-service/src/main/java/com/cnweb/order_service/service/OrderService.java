@@ -21,4 +21,32 @@ public interface OrderService {
     Page<OrderResponse> getStoreOrders(String requesterUsername, String storeId, OrderFilterRequest filter, Pageable pageable);
 
     Page<OrderResponse> getAllOrdersForAdmin(OrderFilterRequest filter, Pageable pageable);
+
+    // ==================== Order Status Management ====================
+
+    /**
+     * Lấy chi tiết đơn hàng theo ID
+     */
+    OrderResponse getOrderById(String username, String orderId);
+
+    /**
+     * Seller xác nhận đơn hàng (PAID -> CONFIRMED)
+     */
+    OrderResponse confirmOrder(String sellerUsername, String orderId);
+
+    /**
+     * Seller chuyển đơn hàng sang trạng thái đang vận chuyển (CONFIRMED -> SHIPPING)
+     */
+    OrderResponse shipOrder(String sellerUsername, String orderId);
+
+    /**
+     * Customer xác nhận đã nhận hàng (SHIPPING -> DELIVERED)
+     */
+    OrderResponse deliverOrder(String customerUsername, String orderId);
+
+    /**
+     * Hủy đơn hàng (PENDING/PAID -> CANCELLED)
+     * Có thể do customer hoặc seller thực hiện
+     */
+    OrderResponse cancelOrder(String username, String orderId, String cancelReason);
 }

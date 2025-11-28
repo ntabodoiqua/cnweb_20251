@@ -11,6 +11,8 @@ import com.cnweb.order_service.dto.response.OrderResponse;
 import com.cnweb.order_service.entity.Order;
 import com.cnweb.order_service.entity.OrderItem;
 import com.cnweb.order_service.enums.OrderStatus;
+import com.cnweb.order_service.exception.AppException;
+import com.cnweb.order_service.exception.ErrorCode;
 import com.cnweb.order_service.mapper.OrderMapper;
 import com.cnweb.order_service.repository.OrderRepository;
 import com.cnweb.order_service.specification.OrderSpecification;
@@ -438,5 +440,174 @@ public class OrderServiceImpl implements OrderService {
 
     private String generateOrderNumber() {
         return "ORD-" + System.currentTimeMillis() + "-" + (int)(Math.random() * 1000);
+    }
+
+    // ==================== Order Status Management ====================
+
+    @Override
+    public OrderResponse getOrderById(String username, String orderId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Check authorization: customer hoặc seller của store đó
+        boolean isCustomer = order.getUsername().equals(username);
+        boolean isSeller = validateStoreOwnership(order.getStoreId(), username);
+
+        if (!isCustomer && !isSeller) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse confirmOrder(String sellerUsername, String orderId) {
+        log.info("Seller {} confirming order {}", sellerUsername, orderId);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Validate seller owns the store
+        if (!validateStoreOwnership(order.getStoreId(), sellerUsername)) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        // Validate order can be confirmed
+        if (!order.canBeConfirmed()) {
+            throw new AppException(ErrorCode.ORDER_CANNOT_BE_CONFIRMED);
+        }
+
+        // Update status
+        order.setStatus(OrderStatus.CONFIRMED);
+        order.setConfirmedAt(LocalDateTime.now());
+
+        order = orderRepository.save(order);
+        log.info("Order {} confirmed by seller {}", orderId, sellerUsername);
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse shipOrder(String sellerUsername, String orderId) {
+        log.info("Seller {} shipping order {}", sellerUsername, orderId);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Validate seller owns the store
+        if (!validateStoreOwnership(order.getStoreId(), sellerUsername)) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        // Validate order can be shipped
+        if (!order.canBeShipped()) {
+            throw new AppException(ErrorCode.ORDER_CANNOT_BE_SHIPPED);
+        }
+
+        // Update status
+        order.setStatus(OrderStatus.SHIPPING);
+        order.setShippingAt(LocalDateTime.now());
+
+        order = orderRepository.save(order);
+        log.info("Order {} is now shipping, set by seller {}", orderId, sellerUsername);
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse deliverOrder(String customerUsername, String orderId) {
+        log.info("Customer {} confirming delivery of order {}", customerUsername, orderId);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Validate customer owns the order
+        if (!order.getUsername().equals(customerUsername)) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        // Validate order can be delivered
+        if (!order.canBeDelivered()) {
+            throw new AppException(ErrorCode.ORDER_CANNOT_BE_DELIVERED);
+        }
+
+        // Update status
+        order.setStatus(OrderStatus.DELIVERED);
+        order.setDeliveredAt(LocalDateTime.now());
+
+        order = orderRepository.save(order);
+        log.info("Order {} delivered, confirmed by customer {}", orderId, customerUsername);
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse cancelOrder(String username, String orderId, String cancelReason) {
+        log.info("User {} cancelling order {} with reason: {}", username, orderId, cancelReason);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Check authorization: customer hoặc seller của store đó
+        boolean isCustomer = order.getUsername().equals(username);
+        boolean isSeller = validateStoreOwnership(order.getStoreId(), username);
+
+        if (!isCustomer && !isSeller) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        // Validate order can be cancelled
+        if (!order.canBeCancelled()) {
+            throw new AppException(ErrorCode.ORDER_CANNOT_BE_CANCELLED);
+        }
+
+        // Validate cancel reason
+        if (cancelReason == null || cancelReason.trim().isEmpty()) {
+            throw new AppException(ErrorCode.CANCEL_REASON_REQUIRED);
+        }
+
+        // Release reserved inventory
+        List<InventoryChangeRequest> inventoryChanges = order.getItems().stream()
+                .map(item -> InventoryChangeRequest.builder()
+                        .variantId(item.getVariantId())
+                        .quantity(item.getQuantity())
+                        .build())
+                .toList();
+
+        try {
+            productClient.releaseBatch(BatchInventoryChangeRequest.builder()
+                    .items(inventoryChanges)
+                    .build());
+        } catch (Exception e) {
+            log.error("Failed to release inventory for cancelled order {}: {}", orderId, e.getMessage());
+            // Continue with cancellation even if inventory release fails
+        }
+
+        // Update status
+        order.setStatus(OrderStatus.CANCELLED);
+        order.setCancelReason(cancelReason);
+        order.setCancelledBy(username);
+        order.setCancelledAt(LocalDateTime.now());
+
+        order = orderRepository.save(order);
+        log.info("Order {} cancelled by {}", orderId, username);
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    // ==================== Helper Methods ====================
+
+    private boolean validateStoreOwnership(String storeId, String username) {
+        try {
+            ApiResponse<Boolean> response = productClient.validateStoreOwner(storeId, username);
+            return response.getResult() != null && response.getResult();
+        } catch (Exception e) {
+            log.error("Error validating store ownership: {}", e.getMessage());
+            return false;
+        }
     }
 }

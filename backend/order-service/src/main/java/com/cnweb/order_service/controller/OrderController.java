@@ -1,5 +1,6 @@
 package com.cnweb.order_service.controller;
 
+import com.cnweb.order_service.dto.request.CancelOrderRequest;
 import com.cnweb.order_service.dto.request.OrderCreationRequest;
 import com.cnweb.order_service.dto.request.OrderFilterRequest;
 import com.cnweb.order_service.dto.response.OrderPaymentResponse;
@@ -100,6 +101,19 @@ public class OrderController {
                 .build());
     }
 
+    @GetMapping("/{orderId}")
+    @Operation(summary = "Get order by ID", description = "Get order details by ID (for customer or seller)")
+    public ResponseEntity<ApiResponse<OrderResponse>> getOrderById(@PathVariable String orderId) {
+        String username = getCurrentUsername();
+        OrderResponse response = orderService.getOrderById(username, orderId);
+        
+        return ResponseEntity.ok(ApiResponse.<OrderResponse>builder()
+                .code(200)
+                .message("Order retrieved successfully")
+                .result(response)
+                .build());
+    }
+
     @GetMapping("/store/{storeId}")
     @Operation(summary = "Get store orders", description = "Get list of orders for a specific store with filtering and pagination")
     public ResponseEntity<ApiResponse<Page<OrderResponse>>> getStoreOrders(
@@ -126,6 +140,62 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.<Page<OrderResponse>>builder()
                 .code(200)
                 .message("All orders retrieved successfully")
+                .result(response)
+                .build());
+    }
+
+    // ==================== Order Status Management ====================
+
+    @PutMapping("/{orderId}/confirm")
+    @Operation(summary = "Confirm order (Seller)", description = "Seller confirms the order after payment. Changes status from PAID to CONFIRMED.")
+    public ResponseEntity<ApiResponse<OrderResponse>> confirmOrder(@PathVariable String orderId) {
+        String username = getCurrentUsername();
+        OrderResponse response = orderService.confirmOrder(username, orderId);
+        
+        return ResponseEntity.ok(ApiResponse.<OrderResponse>builder()
+                .code(200)
+                .message("Order confirmed successfully")
+                .result(response)
+                .build());
+    }
+
+    @PutMapping("/{orderId}/ship")
+    @Operation(summary = "Ship order (Seller)", description = "Seller marks the order as shipping. Changes status from CONFIRMED to SHIPPING.")
+    public ResponseEntity<ApiResponse<OrderResponse>> shipOrder(@PathVariable String orderId) {
+        String username = getCurrentUsername();
+        OrderResponse response = orderService.shipOrder(username, orderId);
+        
+        return ResponseEntity.ok(ApiResponse.<OrderResponse>builder()
+                .code(200)
+                .message("Order is now shipping")
+                .result(response)
+                .build());
+    }
+
+    @PutMapping("/{orderId}/deliver")
+    @Operation(summary = "Confirm delivery (Customer)", description = "Customer confirms they have received the order. Changes status from SHIPPING to DELIVERED.")
+    public ResponseEntity<ApiResponse<OrderResponse>> deliverOrder(@PathVariable String orderId) {
+        String username = getCurrentUsername();
+        OrderResponse response = orderService.deliverOrder(username, orderId);
+        
+        return ResponseEntity.ok(ApiResponse.<OrderResponse>builder()
+                .code(200)
+                .message("Order delivered successfully")
+                .result(response)
+                .build());
+    }
+
+    @PutMapping("/{orderId}/cancel")
+    @Operation(summary = "Cancel order", description = "Cancel an order. Can be done by customer or seller when order is PENDING or PAID.")
+    public ResponseEntity<ApiResponse<OrderResponse>> cancelOrder(
+            @PathVariable String orderId,
+            @Valid @RequestBody CancelOrderRequest request) {
+        String username = getCurrentUsername();
+        OrderResponse response = orderService.cancelOrder(username, orderId, request.getCancelReason());
+        
+        return ResponseEntity.ok(ApiResponse.<OrderResponse>builder()
+                .code(200)
+                .message("Order cancelled successfully")
                 .result(response)
                 .build());
     }

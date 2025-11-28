@@ -138,6 +138,12 @@ public class Order {
     @Column(name = "paid_at")
     LocalDateTime paidAt;
 
+    @Column(name = "shipping_at")
+    LocalDateTime shippingAt;
+
+    @Column(name = "delivered_at")
+    LocalDateTime deliveredAt;
+
     // Relationships
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
@@ -168,6 +174,7 @@ public class Order {
 
     /**
      * Kiểm tra đơn hàng có thể hủy được không
+     * Chỉ có thể hủy khi đang PENDING hoặc PAID (chưa xác nhận)
      */
     public boolean canBeCancelled() {
         return status == OrderStatus.PENDING || status == OrderStatus.PAID;
@@ -175,8 +182,25 @@ public class Order {
 
     /**
      * Kiểm tra đơn hàng có thể xác nhận được không
+     * Chỉ có thể xác nhận khi đã PAID
      */
     public boolean canBeConfirmed() {
-        return status == OrderStatus.PENDING;
+        return status == OrderStatus.PAID;
+    }
+
+    /**
+     * Kiểm tra đơn hàng có thể chuyển sang đang vận chuyển không
+     * Chỉ có thể khi đã CONFIRMED
+     */
+    public boolean canBeShipped() {
+        return status == OrderStatus.CONFIRMED;
+    }
+
+    /**
+     * Kiểm tra đơn hàng có thể xác nhận đã giao không
+     * Chỉ có thể khi đang SHIPPING
+     */
+    public boolean canBeDelivered() {
+        return status == OrderStatus.SHIPPING;
     }
 }
