@@ -8,8 +8,8 @@ import com.vdt2025.product_service.dto.request.FindVariantRequest;
 import com.vdt2025.product_service.dto.request.product.*;
 import com.vdt2025.product_service.dto.response.*;
 import com.vdt2025.product_service.entity.*;
-import com.vdt2025.product_service.event.ProductChangedEvent;
 import com.vdt2025.product_service.exception.AppException;
+import com.vdt2025.product_service.messaging.ProductEventPublisher;
 import com.vdt2025.product_service.exception.ErrorCode;
 import com.vdt2025.product_service.mapper.BrandMapper;
 import com.vdt2025.product_service.mapper.CategoryMapper;
@@ -26,7 +26,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -66,7 +65,7 @@ public class ProductServiceImpl implements ProductService {
     CategoryManagementService categoryManagementService;
     private final CacheEvictService cacheEvictService;
     private final InventoryService inventoryService;
-    private final ApplicationEventPublisher eventPublisher;
+    private final ProductEventPublisher productEventPublisher;
 
     @Value("${product-images.max-per-product:5}")
     @NonFinal
@@ -182,11 +181,8 @@ public class ProductServiceImpl implements ProductService {
         // Evict product search cache khi thêm sản phẩm mới
         cacheEvictService.evictProductSearchCache();
         
-        // Publish event để sync với Elasticsearch
-        eventPublisher.publishEvent(ProductChangedEvent.builder()
-                .productId(product.getId())
-                .changeType(ProductChangedEvent.ChangeType.CREATED)
-                .build());
+        // Publish event qua RabbitMQ để sync với Elasticsearch
+        productEventPublisher.publishProductCreated(product.getId());
         
         log.info("Product {} created successfully with ID: {}", product.getName(), product.getId());
         return mapToProductResponse(product);
@@ -283,11 +279,8 @@ public class ProductServiceImpl implements ProductService {
         product = productRepository.save(product);
         log.info("Product {} updated successfully", product.getName());
         
-        // Publish event để sync với Elasticsearch
-        eventPublisher.publishEvent(ProductChangedEvent.builder()
-                .productId(product.getId())
-                .changeType(ProductChangedEvent.ChangeType.UPDATED)
-                .build());
+        // Publish event qua RabbitMQ để sync với Elasticsearch
+        productEventPublisher.publishProductUpdated(product.getId());
         
         return mapToProductResponse(product);
     }
@@ -317,11 +310,8 @@ public class ProductServiceImpl implements ProductService {
         // Evict product search cache khi xóa sản phẩm
         cacheEvictService.evictProductSearchCache();
         
-        // Publish event để sync với Elasticsearch
-        eventPublisher.publishEvent(ProductChangedEvent.builder()
-                .productId(id)
-                .changeType(ProductChangedEvent.ChangeType.DELETED)
-                .build());
+        // Publish event qua RabbitMQ để sync với Elasticsearch
+        productEventPublisher.publishProductDeleted(id);
         
         log.info("Product {} soft deleted successfully", product.getName());
     }
@@ -817,11 +807,8 @@ public class ProductServiceImpl implements ProductService {
             log.info("All variants of product {} have been deactivated", product.getName());
         }
         
-        // Publish event để sync với Elasticsearch
-        eventPublisher.publishEvent(ProductChangedEvent.builder()
-                .productId(product.getId())
-                .changeType(ProductChangedEvent.ChangeType.STATUS_CHANGED)
-                .build());
+        // Publish event qua RabbitMQ để sync với Elasticsearch
+        productEventPublisher.publishProductStatusChanged(product.getId());
         
         log.info("Product {} status updated to {}", product.getName(), isActive);
         return mapToProductResponse(product);
