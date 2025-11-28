@@ -9,25 +9,23 @@ services:
       - "443:443"
     networks:
       - frontend-network
+      - monitoring_net # <-- Nối dây mạng vào Grafana
     restart: unless-stopped
     environment:
       - NODE_ENV=production
     volumes:
+      # Certbot Volumes
       - ./certbot/conf:/etc/letsencrypt:ro
       - ./certbot/var:/var/lib/letsencrypt:ro
       - ./certbot/www:/var/www/certbot:ro
+      # NGINX Config Volume (Quan trọng: Đè file config chuẩn vào container)
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      
     depends_on:
       - certbot
+    # Healthcheck gọi vào Port 80 (đã được Nginx cấu hình trả về 200)
     healthcheck:
-      test:
-        [
-          "CMD",
-          "wget",
-          "--quiet",
-          "--tries=1",
-          "--spider",
-          "http://localhost/health",
-        ]
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -45,7 +43,6 @@ services:
       - ./certbot/www:/var/www/certbot
     networks:
       - frontend-network
-    # Run certbot in webroot mode for certificate renewal
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot --webroot-path=/var/www/certbot --quiet; sleep 12h & wait $${!}; done;'"
     restart: unless-stopped
     labels:
@@ -54,3 +51,7 @@ services:
 networks:
   frontend-network:
     driver: bridge
+  # Định nghĩa mạng ngoài
+  monitoring_net:
+    external: true
+    name: monitoring_monitoring # Tên mạng thực tế trên server
