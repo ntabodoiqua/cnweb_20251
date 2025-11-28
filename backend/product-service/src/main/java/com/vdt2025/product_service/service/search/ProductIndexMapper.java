@@ -65,6 +65,13 @@ public class ProductIndexMapper {
         String specsText = buildSpecsText(product.getSpecs());
         List<SpecEntry> specsEntries = buildSpecsEntries(product.getSpecs());
 
+        // Build selection groups and searchable text
+        List<SelectionGroupDocument> selectionGroupDocs = mapSelectionGroups(product.getSelectionGroups());
+        String selectionOptionsText = buildSelectionOptionsText(product.getSelectionGroups());
+
+        // Calculate total available stock
+        Integer totalAvailableStock = calculateTotalAvailableStock(variants);
+
         // Build completion suggestions
         Completion suggest = buildSuggestion(product);
 
@@ -98,6 +105,9 @@ public class ProductIndexMapper {
                 .storeCategoryIds(storeCategoryIds)
                 .storeCategoryNames(storeCategoryNames)
                 .createdBy(product.getCreatedBy())
+                .selectionGroups(selectionGroupDocs)
+                .selectionOptionsText(selectionOptionsText)
+                .totalAvailableStock(totalAvailableStock)
                 .suggest(suggest)
                 .build();
     }
@@ -299,5 +309,120 @@ public class ProductIndexMapper {
         }
 
         return Math.min(weight, 100); // Cap at 100
+    }
+
+    // ========== Selection Groups Mapping ==========
+
+    /**
+     * Map SelectionGroups entities sang documents
+     */
+    private List<SelectionGroupDocument> mapSelectionGroups(List<ProductSelectionGroup> groups) {
+        if (groups == null || groups.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return groups.stream()
+                .filter(ProductSelectionGroup::isActive)
+                .map(this::mapSelectionGroup)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Map một SelectionGroup entity sang document
+     */
+    private SelectionGroupDocument mapSelectionGroup(ProductSelectionGroup group) {
+        List<SelectionOptionDocument> optionDocs = new ArrayList<>();
+        
+        if (group.getOptions() != null) {
+            optionDocs = group.getOptions().stream()
+                    .filter(ProductSelectionOption::isActive)
+                    .map(this::mapSelectionOption)
+                    .collect(Collectors.toList());
+        }
+
+        return SelectionGroupDocument.builder()
+                .id(group.getId())
+                .name(group.getName())
+                .description(group.getDescription())
+                .displayOrder(group.getDisplayOrder())
+                .isRequired(group.isRequired())
+                .affectsVariant(group.isAffectsVariant())
+                .options(optionDocs)
+                .build();
+    }
+
+    /**
+     * Map một SelectionOption entity sang document
+     */
+    private SelectionOptionDocument mapSelectionOption(ProductSelectionOption option) {
+        List<String> linkedVariantIds = new ArrayList<>();
+        
+        if (option.getVariants() != null) {
+            linkedVariantIds = option.getVariants().stream()
+                    .filter(v -> !v.isDeleted() && v.isActive())
+                    .map(ProductVariant::getId)
+                    .collect(Collectors.toList());
+        }
+
+        return SelectionOptionDocument.builder()
+                .id(option.getId())
+                .value(option.getValue())
+                .label(option.getLabel())
+                .displayOrder(option.getDisplayOrder())
+                .imageUrl(option.getImageUrl())
+                .colorCode(option.getColorCode())
+                .isAvailable(option.isAvailable())
+                .linkedVariantIds(linkedVariantIds)
+                .build();
+    }
+
+    /**
+     * Build searchable text từ tất cả selection options
+     * Cho phép full-text search theo tên option
+     * Ví dụ: "iPhone 15 Pro, iPhone 14, Samsung S24, Đen Carbon, Trong suốt"
+     */
+    private String buildSelectionOptionsText(List<ProductSelectionGroup> groups) {
+        if (groups == null || groups.isEmpty()) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        
+        for (ProductSelectionGroup group : groups) {
+            if (!group.isActive() || group.getOptions() == null) continue;
+            
+            // Add group name
+            sb.append(group.getName()).append(": ");
+            
+            // Add all option values
+            List<String> optionValues = group.getOptions().stream()
+                    .filter(ProductSelectionOption::isActive)
+                    .map(opt -> {
+                        String label = opt.getLabel();
+                        String value = opt.getValue();
+                        return (label != null && !label.isBlank()) ? label : value;
+                    })
+                    .collect(Collectors.toList());
+            
+            sb.append(String.join(", ", optionValues)).append(". ");
+        }
+
+        return sb.length() > 0 ? sb.toString().trim() : null;
+    }
+
+    /**
+     * Calculate total available stock across all active variants
+     */
+    private Integer calculateTotalAvailableStock(List<ProductVariant> variants) {
+        if (variants == null || variants.isEmpty()) {
+            return 0;
+        }
+
+        return variants.stream()
+                .filter(v -> !v.isDeleted() && v.isActive())
+                .mapToInt(v -> Optional.ofNullable(v.getInventoryStock())
+                        .map(InventoryStock::getAvailableQuantity)
+                        .orElse(0))
+                .sum();
     }
 }

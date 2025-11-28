@@ -290,7 +290,11 @@ public class ProductSearchServiceImpl implements ProductSearchService {
                             "categoryName",
                             "specsText",              // Tìm kiếm trong specs
                             "variants.metadataText",  // Tìm kiếm trong variant metadata
-                            "variants.variantName"    // Tìm kiếm trong tên variant
+                            "variants.variantName",   // Tìm kiếm trong tên variant
+                            "selectionOptionsText",   // Tìm kiếm trong selection options (VD: iPhone 15 Pro, Samsung S24)
+                            "selectionGroups.name",   // Tìm kiếm theo tên nhóm selection
+                            "selectionGroups.options.value",  // Tìm kiếm theo giá trị option
+                            "selectionGroups.options.label"   // Tìm kiếm theo label option
                     ))
                     .type(TextQueryType.BestFields)
                     .fuzziness(Boolean.TRUE.equals(request.getEnableFuzzy()) ? "AUTO" : "0")
@@ -543,6 +547,7 @@ public class ProductSearchServiceImpl implements ProductSearchService {
                 .platformCategoryName(doc.getCategoryName())
                 .brandName(doc.getBrandName())
                 .createdAt(doc.getCreatedAt())
+                .totalAvailableStock(doc.getTotalAvailableStock())
                 .build();
     }
 

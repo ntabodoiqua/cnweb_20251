@@ -148,6 +148,22 @@ public class ProductDocument {
     @CompletionField(analyzer = "simple", searchAnalyzer = "simple", maxInputLength = 100)
     Completion suggest;
 
+    // ========== Seller-defined Selection Groups ==========
+    /**
+     * Các nhóm lựa chọn mà seller tự định nghĩa cho sản phẩm
+     * Ví dụ: "Mẫu điện thoại", "Kiểu vỏ", "Màu sắc"...
+     */
+    @Field(type = FieldType.Nested)
+    List<SelectionGroupDocument> selectionGroups;
+
+    // Selection groups as searchable text - flatten tất cả options thành text để full-text search
+    @Field(type = FieldType.Text, analyzer = "vietnamese_analyzer")
+    String selectionOptionsText;
+
+    // Total available stock across all variants
+    @Field(type = FieldType.Integer)
+    Integer totalAvailableStock;
+
     /**
      * Nested document cho Variant
      */
@@ -240,5 +256,80 @@ public class ProductDocument {
     public static class Completion {
         String[] input;
         Integer weight;
+    }
+
+    /**
+     * Nested document cho Selection Group
+     * Đại diện cho nhóm lựa chọn mà Seller tự định nghĩa
+     * Ví dụ: "Mẫu điện thoại", "Kiểu vỏ"
+     */
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SelectionGroupDocument {
+        @Field(type = FieldType.Keyword)
+        String id;
+
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "vietnamese_analyzer"),
+                otherFields = @InnerField(suffix = "keyword", type = FieldType.Keyword)
+        )
+        String name;
+
+        @Field(type = FieldType.Text, analyzer = "vietnamese_analyzer")
+        String description;
+
+        @Field(type = FieldType.Integer)
+        Integer displayOrder;
+
+        @Field(type = FieldType.Boolean)
+        boolean isRequired;
+
+        @Field(type = FieldType.Boolean)
+        boolean affectsVariant;
+
+        @Field(type = FieldType.Nested)
+        List<SelectionOptionDocument> options;
+    }
+
+    /**
+     * Nested document cho Selection Option
+     * Đại diện cho một lựa chọn cụ thể trong SelectionGroup
+     * Ví dụ: "iPhone 15 Pro", "Đen Carbon"
+     */
+    @Getter
+    @Setter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class SelectionOptionDocument {
+        @Field(type = FieldType.Keyword)
+        String id;
+
+        @MultiField(
+                mainField = @Field(type = FieldType.Text, analyzer = "vietnamese_analyzer"),
+                otherFields = @InnerField(suffix = "keyword", type = FieldType.Keyword)
+        )
+        String value;
+
+        @Field(type = FieldType.Text, analyzer = "vietnamese_analyzer")
+        String label;
+
+        @Field(type = FieldType.Integer)
+        Integer displayOrder;
+
+        @Field(type = FieldType.Keyword, index = false)
+        String imageUrl;
+
+        @Field(type = FieldType.Keyword)
+        String colorCode;
+
+        @Field(type = FieldType.Boolean)
+        boolean isAvailable;
+
+        @Field(type = FieldType.Keyword)
+        List<String> linkedVariantIds;
     }
 }
