@@ -21,6 +21,7 @@
     "axios": "1.7.2",
     "dayjs": "^1.11.19",
     "dompurify": "^3.3.0",
+    "quill-blot-formatter": "^1.0.5",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-helmet-async": "^2.0.5",
