@@ -298,6 +298,53 @@
   box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.3);
 }
 
+/* Image Toolbar - appears when clicking on image */
+.imageToolbar {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  background: #fff;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  transform: translateX(-50%);
+}
+
+.imageToolbarBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #555;
+  font-size: 16px;
+  transition: all 0.2s ease;
+}
+
+.imageToolbarBtn:hover {
+  background: rgba(238, 77, 45, 0.1);
+  color: #ee4d2d;
+}
+
+.imageToolbarBtn.deleteBtn:hover {
+  background: rgba(255, 77, 79, 0.1);
+  color: #ff4d4f;
+}
+
+.imageToolbarDivider {
+  width: 1px;
+  height: 20px;
+  background: #e8e8e8;
+  margin: 0 4px;
+}
+
 /* Custom Resize Overlay */
 .resizeOverlay {
   position: absolute;

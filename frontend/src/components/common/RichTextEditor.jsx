@@ -1,5 +1,6 @@
 import { useMemo, useRef, useCallback, useState, useEffect } from "react";
-import ReactQuill, { Quill } from "react-quill-new";
+import ReactQuill from "react-quill-new";
+import Quill from "quill";
 import {
   message,
   Modal,
@@ -15,17 +16,22 @@ import {
   AlignLeftOutlined,
   AlignCenterOutlined,
   AlignRightOutlined,
+  DeleteOutlined,
+  SettingOutlined,
 } from "@ant-design/icons";
 import "react-quill-new/dist/quill.snow.css";
 import { uploadMediaApi } from "../../util/api";
 import styles from "./RichTextEditor.module.css";
 
-// Import and register BlotFormatter module for image/video resizing
-import BlotFormatter from "quill-blot-formatter";
-Quill.register("modules/blotFormatter", BlotFormatter);
+// Import BlotFormatter - must be imported after Quill (compatible with Quill 2.x)
+import BlotFormatter from "@enzedonline/quill-blot-formatter2";
+import "@enzedonline/quill-blot-formatter2/dist/css/quill-blot-formatter2.css";
+
+// Get BlockEmbed from Quill - must be done before registering modules
+const BlockEmbed = Quill.import("blots/block/embed");
+const Image = Quill.import("formats/image");
 
 // Custom Video Blot to support styling
-const BlockEmbed = Quill.import("blots/block/embed");
 class VideoBlot extends BlockEmbed {
   static create(value) {
     const node = super.create();
@@ -68,6 +74,80 @@ VideoBlot.blotName = "video";
 VideoBlot.tagName = "iframe";
 Quill.register(VideoBlot, true);
 
+// Custom Image Blot to support styling
+class ImageBlot extends Image {
+  static create(value) {
+    const url = typeof value === "object" ? value.url : value;
+    const node = super.create(url);
+    if (typeof value === "object") {
+      if (value.width) node.setAttribute("width", value.width);
+      if (value.height) node.setAttribute("height", value.height);
+      if (value.style) node.setAttribute("style", value.style);
+    }
+    return node;
+  }
+
+  static value(node) {
+    return {
+      url: node.getAttribute("src"),
+      width: node.getAttribute("width"),
+      height: node.getAttribute("height"),
+      style: node.getAttribute("style"),
+    };
+  }
+}
+ImageBlot.blotName = "image";
+ImageBlot.tagName = "img";
+Quill.register(ImageBlot, true);
+
+// --- Config Inline Styles (Font, Size, Align, Color...) ---
+// Giúp giữ nguyên style khi hiển thị ở nơi khác mà không cần file CSS của Quill
+const DirectionAttribute = Quill.import("attributors/style/direction");
+Quill.register(DirectionAttribute, true);
+
+const AlignAttribute = Quill.import("attributors/style/align");
+Quill.register(AlignAttribute, true);
+
+const BackgroundAttribute = Quill.import("attributors/style/background");
+Quill.register(BackgroundAttribute, true);
+
+const ColorAttribute = Quill.import("attributors/style/color");
+Quill.register(ColorAttribute, true);
+
+const FontAttribute = Quill.import("attributors/style/font");
+const FONT_WHITELIST = [
+  "arial",
+  "comic-sans",
+  "courier-new",
+  "georgia",
+  "helvetica",
+  "lucida",
+  "roboto",
+  "times-new-roman",
+  "verdana",
+];
+FontAttribute.whitelist = FONT_WHITELIST;
+Quill.register(FontAttribute, true);
+
+const SizeAttribute = Quill.import("attributors/style/size");
+const SIZE_WHITELIST = [
+  "10px",
+  "12px",
+  "14px",
+  "16px",
+  "18px",
+  "20px",
+  "24px",
+  "32px",
+  "48px",
+];
+SizeAttribute.whitelist = SIZE_WHITELIST;
+Quill.register(SizeAttribute, true);
+// -----------------------------------------------------------
+
+// Register BlotFormatter module for image/video resizing
+Quill.register("modules/blotFormatter", BlotFormatter);
+
 const RichTextEditor = ({
   value,
   onChange,
@@ -79,6 +159,11 @@ const RichTextEditor = ({
   const quillRef = useRef(null);
   const [mediaModalVisible, setMediaModalVisible] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState(null);
+  const [imageToolbar, setImageToolbar] = useState({
+    visible: false,
+    element: null,
+    position: { top: 0, left: 0 },
+  });
   const [mediaSettings, setMediaSettings] = useState({
     width: 100,
     widthUnit: "%",
@@ -87,6 +172,107 @@ const RichTextEditor = ({
     borderRadius: 8,
     shadow: "none",
   });
+
+  // Handle image alignment from toolbar
+  const handleImageAlign = (align) => {
+    const el = imageToolbar.element;
+    if (!el) return;
+
+    const quill = quillRef.current?.getEditor();
+    const blot = Quill.find(el);
+
+    if (blot) {
+      const index = quill.getIndex(blot);
+
+      // Get current styles
+      const currentStyle = el.getAttribute("style") || "";
+      const styleObj = currentStyle.split(";").reduce((acc, rule) => {
+        const [key, val] = rule.split(":");
+        if (key && val) acc[key.trim()] = val.trim();
+        return acc;
+      }, {});
+
+      // Update alignment
+      styleObj.float = "none";
+      styleObj.display = "block";
+
+      if (align === "center") {
+        styleObj["margin-left"] = "auto";
+        styleObj["margin-right"] = "auto";
+      } else if (align === "left") {
+        styleObj["margin-left"] = "0";
+        styleObj["margin-right"] = "auto";
+      } else if (align === "right") {
+        styleObj["margin-left"] = "auto";
+        styleObj["margin-right"] = "0";
+      }
+
+      const newStyle = Object.entries(styleObj)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join("; ");
+
+      const value = blot.value();
+      const valueObj = typeof value === "object" ? value : { url: value };
+      const newValue = { ...valueObj, style: newStyle };
+
+      quill.deleteText(index, 1);
+      quill.insertEmbed(index, "image", newValue);
+      quill.setSelection(index + 1);
+
+      setImageToolbar((prev) => ({ ...prev, visible: false }));
+
+      message.success(
+        `Đã căn ${
+          align === "left" ? "trái" : align === "right" ? "phải" : "giữa"
+        }`
+      );
+    }
+  };
+
+  // Setup click handler for image toolbar
+  useEffect(() => {
+    const quill = quillRef.current?.getEditor();
+    if (!quill || readOnly) return;
+
+    const handleClick = (e) => {
+      const target = e.target;
+      if (target.tagName === "IMG" || target.tagName === "IFRAME") {
+        const rect = target.getBoundingClientRect();
+        const editorRect = quill.root.getBoundingClientRect();
+
+        setImageToolbar({
+          visible: true,
+          element: target,
+          position: {
+            top: rect.top - editorRect.top - 45,
+            left: rect.left - editorRect.left + rect.width / 2,
+          },
+        });
+      } else if (!e.target.closest(`.${styles.imageToolbar}`)) {
+        setImageToolbar((prev) => ({ ...prev, visible: false }));
+      }
+    };
+
+    const editor = quill.root;
+    editor.addEventListener("click", handleClick);
+
+    // Close toolbar when clicking outside
+    const handleOutsideClick = (e) => {
+      if (
+        !e.target.closest(`.${styles.imageToolbar}`) &&
+        e.target.tagName !== "IMG" &&
+        e.target.tagName !== "IFRAME"
+      ) {
+        setImageToolbar((prev) => ({ ...prev, visible: false }));
+      }
+    };
+    document.addEventListener("click", handleOutsideClick);
+
+    return () => {
+      editor.removeEventListener("click", handleClick);
+      document.removeEventListener("click", handleOutsideClick);
+    };
+  }, [readOnly, onChange]);
 
   // Setup double-click handler for modal
   useEffect(() => {
@@ -174,22 +360,12 @@ const RichTextEditor = ({
           const quill = quillRef.current?.getEditor();
           if (quill) {
             const range = quill.getSelection(true);
-            quill.insertEmbed(range.index, "image", imageUrl);
+            quill.insertEmbed(range.index, "image", {
+              url: imageUrl,
+              style:
+                "display: block; margin: 8px auto; max-width: 100%; height: auto; border-radius: 8px; cursor: pointer;",
+            });
             quill.setSelection(range.index + 1);
-
-            // Auto-style the inserted image
-            setTimeout(() => {
-              const images = quill.root.querySelectorAll("img");
-              const lastImage = images[images.length - 1];
-              if (lastImage && lastImage.src === imageUrl) {
-                lastImage.style.maxWidth = "100%";
-                lastImage.style.height = "auto";
-                lastImage.style.display = "block";
-                lastImage.style.margin = "8px auto";
-                lastImage.style.borderRadius = "8px";
-                lastImage.style.cursor = "pointer";
-              }
-            }, 100);
           }
           message.success({
             content:
@@ -245,52 +421,73 @@ const RichTextEditor = ({
     const { width, widthUnit, height, align, borderRadius, shadow } =
       mediaSettings;
 
-    // Set width
-    el.style.width = `${width}${widthUnit}`;
-    el.style.maxWidth = "100%";
-
-    // Set height
-    if (height === "auto") {
-      el.style.height = "auto";
-    } else {
-      el.style.height = `${height}px`;
-    }
-
-    // Set alignment
-    el.style.float = "none";
-    if (align === "center") {
-      el.style.display = "block";
-      el.style.margin = "8px auto";
-    } else if (align === "left") {
-      el.style.display = "block";
-      el.style.margin = "8px auto 8px 0";
-    } else if (align === "right") {
-      el.style.display = "block";
-      el.style.margin = "8px 0 8px auto";
-    }
-
-    // Set border radius
-    el.style.borderRadius = `${borderRadius}px`;
-
-    // Set shadow
-    if (shadow === "none") {
-      el.style.boxShadow = "none";
-    } else if (shadow === "light") {
-      el.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.1)";
-    } else if (shadow === "medium") {
-      el.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.15)";
-    } else if (shadow === "heavy") {
-      el.style.boxShadow = "0 8px 24px rgba(0, 0, 0, 0.2)";
-    }
-
-    // Trigger change event
     const quill = quillRef.current?.getEditor();
-    if (quill) {
-      onChange(quill.root.innerHTML);
-    }
+    const blot = Quill.find(el);
 
-    setMediaModalVisible(false);
-    message.success("Đã cập nhật style!");
+    if (blot) {
+      const index = quill.getIndex(blot);
+
+      // Get current styles
+      const currentStyle = el.getAttribute("style") || "";
+      const styleObj = currentStyle.split(";").reduce((acc, rule) => {
+        const [key, val] = rule.split(":");
+        if (key && val) acc[key.trim()] = val.trim();
+        return acc;
+      }, {});
+
+      // Set width
+      styleObj.width = `${width}${widthUnit}`;
+      styleObj["max-width"] = "100%";
+
+      // Set height
+      if (height === "auto") {
+        styleObj.height = "auto";
+      } else {
+        styleObj.height = `${height}px`;
+      }
+
+      // Set alignment
+      styleObj.float = "none";
+      if (align === "center") {
+        styleObj.display = "block";
+        styleObj.margin = "8px auto";
+      } else if (align === "left") {
+        styleObj.display = "block";
+        styleObj.margin = "8px auto 8px 0";
+      } else if (align === "right") {
+        styleObj.display = "block";
+        styleObj.margin = "8px 0 8px auto";
+      }
+
+      // Set border radius
+      styleObj["border-radius"] = `${borderRadius}px`;
+
+      // Set shadow
+      if (shadow === "none") {
+        styleObj["box-shadow"] = "none";
+      } else if (shadow === "light") {
+        styleObj["box-shadow"] = "0 2px 8px rgba(0, 0, 0, 0.1)";
+      } else if (shadow === "medium") {
+        styleObj["box-shadow"] = "0 4px 12px rgba(0, 0, 0, 0.15)";
+      } else if (shadow === "heavy") {
+        styleObj["box-shadow"] = "0 8px 24px rgba(0, 0, 0, 0.2)";
+      }
+
+      const newStyle = Object.entries(styleObj)
+        .map(([k, v]) => `${k}: ${v}`)
+        .join("; ");
+
+      const value = blot.value();
+      const valueObj = typeof value === "object" ? value : { url: value };
+      const newValue = { ...valueObj, style: newStyle };
+
+      quill.deleteText(index, 1);
+      quill.insertEmbed(index, "image", newValue);
+      quill.setSelection(index + 1);
+
+      setMediaModalVisible(false);
+      message.success("Đã cập nhật style!");
+    }
   };
 
   // Toolbar configuration with custom handlers
@@ -299,8 +496,21 @@ const RichTextEditor = ({
       toolbar: {
         container: [
           [{ header: [1, 2, 3, 4, 5, 6, false] }],
-          [{ font: [] }],
-          [{ size: ["small", false, "large", "huge"] }],
+          [{ font: FONT_WHITELIST }],
+          [
+            {
+              size: [
+                "10px",
+                "12px",
+                false,
+                "16px",
+                "18px",
+                "20px",
+                "24px",
+                "32px",
+              ],
+            },
+          ],
           ["bold", "italic", "underline", "strike"],
           [{ color: [] }, { background: [] }],
           [{ script: "sub" }, { script: "super" }],
@@ -366,24 +576,135 @@ const RichTextEditor = ({
 
   const textLength = getTextLength();
 
+  // Handle delete image from toolbar
+  const handleDeleteImage = () => {
+    const el = imageToolbar.element;
+    if (!el) return;
+
+    const quill = quillRef.current?.getEditor();
+    const blot = Quill.find(el);
+    if (blot) {
+      const index = quill.getIndex(blot);
+      quill.deleteText(index, 1);
+    }
+
+    setImageToolbar({
+      visible: false,
+      element: null,
+      position: { top: 0, left: 0 },
+    });
+
+    message.success("Đã xóa ảnh");
+  };
+
+  // Open settings modal from toolbar
+  const handleOpenSettings = () => {
+    const el = imageToolbar.element;
+    if (!el) return;
+
+    setSelectedMedia({
+      element: el,
+      type: el.tagName === "IMG" ? "image" : "video",
+    });
+
+    // Parse current styles
+    const currentWidth = el.style.width || el.getAttribute("width") || "100%";
+    const currentHeight =
+      el.style.height || el.getAttribute("height") || "auto";
+
+    let currentAlign = "center";
+    if (el.style.marginLeft === "0px" || el.style.marginLeft === "0") {
+      currentAlign = "left";
+    } else if (el.style.marginRight === "0px" || el.style.marginRight === "0") {
+      currentAlign = "right";
+    }
+
+    setMediaSettings({
+      width: parseInt(currentWidth) || 100,
+      widthUnit: currentWidth.includes("%") ? "%" : "px",
+      height:
+        currentHeight === "auto" ? "auto" : parseInt(currentHeight) || "auto",
+      align: currentAlign,
+      borderRadius: parseInt(el.style.borderRadius) || 8,
+      shadow:
+        el.style.boxShadow && el.style.boxShadow !== "none" ? "medium" : "none",
+    });
+
+    setImageToolbar({
+      visible: false,
+      element: null,
+      position: { top: 0, left: 0 },
+    });
+    setMediaModalVisible(true);
+  };
+
   return (
     <div className={styles.editorWrapper}>
-      <ReactQuill
-        ref={quillRef}
-        theme="snow"
-        value={value || ""}
-        onChange={handleChange}
-        modules={modules}
-        formats={formats}
-        placeholder={placeholder}
-        readOnly={readOnly}
-        style={{ minHeight }}
-        className={styles.editor}
-      />
+      <div style={{ position: "relative" }}>
+        <ReactQuill
+          ref={quillRef}
+          theme="snow"
+          value={value || ""}
+          onChange={handleChange}
+          modules={modules}
+          formats={formats}
+          placeholder={placeholder}
+          readOnly={readOnly}
+          style={{ minHeight }}
+          className={styles.editor}
+        />
+
+        {/* Image Toolbar */}
+        {imageToolbar.visible && (
+          <div
+            className={styles.imageToolbar}
+            style={{
+              top: imageToolbar.position.top,
+              left: imageToolbar.position.left,
+            }}
+          >
+            <button
+              className={styles.imageToolbarBtn}
+              onClick={() => handleImageAlign("left")}
+              title="Căn trái"
+            >
+              <AlignLeftOutlined />
+            </button>
+            <button
+              className={styles.imageToolbarBtn}
+              onClick={() => handleImageAlign("center")}
+              title="Căn giữa"
+            >
+              <AlignCenterOutlined />
+            </button>
+            <button
+              className={styles.imageToolbarBtn}
+              onClick={() => handleImageAlign("right")}
+              title="Căn phải"
+            >
+              <AlignRightOutlined />
+            </button>
+            <div className={styles.imageToolbarDivider} />
+            <button
+              className={styles.imageToolbarBtn}
+              onClick={handleOpenSettings}
+              title="Cài đặt chi tiết"
+            >
+              <SettingOutlined />
+            </button>
+            <button
+              className={`${styles.imageToolbarBtn} ${styles.deleteBtn}`}
+              onClick={handleDeleteImage}
+              title="Xóa"
+            >
+              <DeleteOutlined />
+            </button>
+          </div>
+        )}
+      </div>
       <div className={styles.footer}>
         <span className={styles.hint}>
-          💡 Click vào ảnh để resize bằng cách kéo góc. Double-click để mở cài
-          đặt chi tiết.
+          💡 Click vào ảnh để hiện thanh công cụ căn chỉnh.
         </span>
         <span
           className={`${styles.counter} ${
