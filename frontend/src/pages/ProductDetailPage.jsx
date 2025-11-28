@@ -414,7 +414,9 @@ const ProductDetailPage = () => {
     try {
       const response = await getPublicVariantMetadataApi(productId, variantId);
       if (response.code === 1000) {
-        setVariantMetadata(response.result?.specs || response.result);
+        setVariantMetadata(
+          response.result?.metadata || response.result?.specs || response.result
+        );
       }
     } catch (error) {
       console.error("Error fetching variant metadata:", error);
