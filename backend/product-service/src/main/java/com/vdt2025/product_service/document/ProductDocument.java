@@ -1,5 +1,6 @@
 package com.vdt2025.product_service.document;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
@@ -22,6 +23,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ProductDocument {
 
     @Id
@@ -172,6 +174,7 @@ public class ProductDocument {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class VariantDocument {
         @Field(type = FieldType.Keyword)
         String id;
@@ -211,6 +214,7 @@ public class ProductDocument {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SearchableAttribute {
         @Field(type = FieldType.Keyword)
         String attributeId;
@@ -234,6 +238,7 @@ public class ProductDocument {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SpecEntry {
         @Field(type = FieldType.Keyword)
         String key;
@@ -257,6 +262,7 @@ public class ProductDocument {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SelectionGroupDocument {
         @Field(type = FieldType.Keyword)
         String id;
@@ -293,6 +299,7 @@ public class ProductDocument {
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class SelectionOptionDocument {
         @Field(type = FieldType.Keyword)
         String id;
