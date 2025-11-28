@@ -3,6 +3,7 @@ package com.vdt2025.product_service.controller;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import com.vdt2025.product_service.dto.request.search.ProductSearchRequest;
 import com.vdt2025.product_service.dto.response.search.ProductSearchResponse;
+import com.vdt2025.product_service.facade.ProductSearchFacade;
 import com.vdt2025.product_service.service.search.ElasticsearchSyncService;
 import com.vdt2025.product_service.service.search.ProductSearchService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +34,7 @@ public class ProductSearchController {
 
     ProductSearchService productSearchService;
     ElasticsearchSyncService syncService;
+    ProductSearchFacade productSearchFacade;
 
     /**
      * Tìm kiếm sản phẩm với full-text search và filtering
@@ -49,7 +51,7 @@ public class ProductSearchController {
         log.info("Search request: keyword={}, page={}, size={}", request.getKeyword(), page, size);
 
         Pageable pageable = PageRequest.of(page, Math.min(size, 100));
-        ProductSearchResponse response = productSearchService.search(request, pageable);
+        ProductSearchResponse response = productSearchFacade.searchWithRealtimeStock(request, pageable);
 
         return ApiResponse.<ProductSearchResponse>builder()
                 .code(1000)
@@ -104,7 +106,7 @@ public class ProductSearchController {
                 .build();
 
         Pageable pageable = PageRequest.of(page, Math.min(size, 100));
-        ProductSearchResponse response = productSearchService.search(request, pageable);
+        ProductSearchResponse response = productSearchFacade.searchWithRealtimeStock(request, pageable);
 
         return ApiResponse.<ProductSearchResponse>builder()
                 .code(1000)
