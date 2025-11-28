@@ -650,6 +650,56 @@ const getPublicProductSpecsApi = (productId) => {
   });
 };
 
+// Get selection config for product (no authentication required)
+const getSelectionConfigApi = (productId) => {
+  const URL_API = `/api/product/public/products/${productId}/selection-config`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Find variant by selection options (no authentication required)
+const findVariantBySelectionApi = (productId, optionIds) => {
+  const URL_API = `/api/product/public/products/${productId}/find-variant-by-selection`;
+  return axios.post(
+    URL_API,
+    {
+      optionIds: optionIds,
+    },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+// Get available options based on current selections (no authentication required)
+const getAvailableOptionsApi = (productId, selectedOptionIds = []) => {
+  const URL_API = `/api/product/public/products/${productId}/available-options`;
+
+  // Build query string manually for array params (Spring Boot format)
+  const params = new URLSearchParams();
+  if (selectedOptionIds && selectedOptionIds.length > 0) {
+    selectedOptionIds.forEach((id) => {
+      params.append("selectedOptionIds", id);
+    });
+  }
+
+  const queryString = params.toString();
+  const fullUrl = queryString ? `${URL_API}?${queryString}` : URL_API;
+
+  return axios.get(fullUrl, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // Get product specifications for seller (authenticated)
 const getProductSpecsApi = (productId) => {
   const URL_API = `/api/product/products/${productId}/specs`;
@@ -1716,6 +1766,9 @@ export {
   getPublicProductVariantOptionsApi,
   findVariantByAttributesApi,
   getPublicProductSpecsApi,
+  getSelectionConfigApi,
+  findVariantBySelectionApi,
+  getAvailableOptionsApi,
   getProductSpecsApi,
   updateProductSpecsApi,
   getProductsByStoreApi,

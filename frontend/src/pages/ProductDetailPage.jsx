@@ -44,6 +44,9 @@ import {
   getWardInfoApi,
   addToCartApi,
   getPublicProductSpecsApi,
+  getSelectionConfigApi,
+  findVariantBySelectionApi,
+  getAvailableOptionsApi,
 } from "../util/api";
 import { getSpecSectionConfig } from "../constants/productSpecsTranslations";
 import { useCart } from "../contexts/CartContext";
@@ -71,17 +74,31 @@ const ProductDetailPage = () => {
   const [productSpecs, setProductSpecs] = useState(null);
   const [specsLoading, setSpecsLoading] = useState(false);
 
+  // Selection config states
+  const [selectionConfig, setSelectionConfig] = useState(null);
+  const [selectedOptions, setSelectedOptions] = useState({});
+  const [availableOptionsLoading, setAvailableOptionsLoading] = useState(false);
+
   useEffect(() => {
     if (productId) {
       fetchProductDetail();
       fetchVariantOptions();
       fetchProductSpecs();
+      fetchSelectionConfig();
     }
   }, [productId]);
 
-  // Fetch variant options when selected attributes change
+  // Fetch variant when selected options change (for selection config)
   useEffect(() => {
-    if (productId && variantOptions) {
+    if (productId && selectionConfig) {
+      findVariantBySelection();
+      fetchAvailableOptions();
+    }
+  }, [selectedOptions]);
+
+  // Fetch variant options when selected attributes change (for legacy variant options)
+  useEffect(() => {
+    if (productId && variantOptions && !selectionConfig) {
       findMatchingVariant();
     }
   }, [selectedAttributes]);
@@ -156,6 +173,103 @@ const ProductDetailPage = () => {
     }
   };
 
+  const fetchSelectionConfig = async () => {
+    try {
+      const response = await getSelectionConfigApi(productId);
+      if (response.code === 1000) {
+        setSelectionConfig(response.result);
+      }
+    } catch (error) {
+      console.error("Error fetching selection config:", error);
+      // Selection config might not exist for all products
+    }
+  };
+
+  // Fetch available options based on current selections (realtime stock check)
+  const fetchAvailableOptions = async () => {
+    if (!selectionConfig) return;
+
+    const selectedOptionIds = Object.values(selectedOptions).filter(Boolean);
+
+    // Skip if no selections made yet
+    if (selectedOptionIds.length === 0) return;
+
+    setAvailableOptionsLoading(true);
+    try {
+      const response = await getAvailableOptionsApi(
+        productId,
+        selectedOptionIds
+      );
+      if (response.code === 1000) {
+        // Update selectionConfig with new available states
+        setSelectionConfig(response.result);
+      }
+    } catch (error) {
+      console.error("Error fetching available options:", error);
+    } finally {
+      setAvailableOptionsLoading(false);
+    }
+  };
+
+  const findVariantBySelection = async () => {
+    if (!selectionConfig) return;
+
+    // Get all selected option IDs
+    const selectedOptionIds = Object.values(selectedOptions).filter(Boolean);
+
+    // Check if all required groups are selected
+    const requiredGroups =
+      selectionConfig.selectionGroups?.filter((g) => g.required) || [];
+    const allRequiredSelected = requiredGroups.every(
+      (group) => selectedOptions[group.groupId]
+    );
+
+    if (!allRequiredSelected || selectedOptionIds.length === 0) {
+      setSelectedVariant(null);
+      return;
+    }
+
+    // Check if combination exists in selectionMatrix
+    const combinationKey = selectedOptionIds.sort().join(",");
+    const variantId = selectionConfig.selectionMatrix?.[combinationKey];
+
+    if (!variantId) {
+      setSelectedVariant(null);
+      return;
+    }
+
+    setVariantLoading(true);
+    try {
+      const response = await findVariantBySelectionApi(
+        productId,
+        selectedOptionIds
+      );
+      if (response.code === 1000) {
+        const variant = response.result;
+        setSelectedVariant(variant);
+
+        // Update quantity max if needed
+        if (variant && quantity > variant.availableStock) {
+          setQuantity(1);
+        }
+      }
+    } catch (error) {
+      console.error("Error finding variant by selection:", error);
+      setSelectedVariant(null);
+
+      if (error.response?.status === 404) {
+        notification.warning({
+          message: "Không tìm thấy phiên bản",
+          description:
+            "Không có phiên bản sản phẩm nào phù hợp với lựa chọn này.",
+          placement: "topRight",
+        });
+      }
+    } finally {
+      setVariantLoading(false);
+    }
+  };
+
   const findMatchingVariant = async () => {
     if (!variantOptions) return;
 
@@ -224,6 +338,31 @@ const ProductDetailPage = () => {
     });
   };
 
+  // Handle selection option select (for selection config)
+  const handleSelectionOptionSelect = (groupId, optionId) => {
+    setSelectedOptions((prev) => {
+      // If clicking the same option, deselect it
+      if (prev[groupId] === optionId) {
+        const newOptions = { ...prev };
+        delete newOptions[groupId];
+        return newOptions;
+      }
+      // Otherwise, select the new option
+      return {
+        ...prev,
+        [groupId]: optionId,
+      };
+    });
+  };
+
+  // Check if a selection option is available based on current selections
+  // Uses the available status from API response which includes realtime stock check
+  const isSelectionOptionAvailable = (groupId, optionId, option) => {
+    // The available status is updated by fetchAvailableOptions API
+    // which checks realtime stock and valid combinations
+    return option.available !== false;
+  };
+
   // Check if an attribute option is available based on current selections
   const isOptionAvailable = (attributeId, valueId) => {
     if (!variantOptions || !variantOptions.variantMatrix) return true;
@@ -269,6 +408,27 @@ const ProductDetailPage = () => {
   };
 
   const handleAddToCart = async () => {
+    // Check if selection config exists and all required selections are made
+    if (selectionConfig && selectionConfig.selectionGroups?.length > 0) {
+      const requiredGroups = selectionConfig.selectionGroups.filter(
+        (g) => g.required
+      );
+      const missingSelections = requiredGroups.filter(
+        (group) => !selectedOptions[group.groupId]
+      );
+
+      if (missingSelections.length > 0) {
+        notification.warning({
+          message: "Chưa chọn đủ tùy chọn",
+          description: `Vui lòng chọn: ${missingSelections
+            .map((g) => g.groupName)
+            .join(", ")}`,
+          placement: "topRight",
+        });
+        return;
+      }
+    }
+
     if (!selectedVariant) {
       notification.warning({
         message: "Chưa chọn phiên bản",
@@ -670,6 +830,13 @@ const ProductDetailPage = () => {
                         </div>
                       )}
                     </>
+                  ) : selectionConfig?.basePrice ? (
+                    <div className={styles.priceRange}>
+                      <Text type="secondary" style={{ fontSize: 14 }}>
+                        Từ{" "}
+                      </Text>
+                      {formatPrice(selectionConfig.basePrice)}
+                    </div>
                   ) : (
                     <div className={styles.priceRange}>
                       {product.minPrice === product.maxPrice
@@ -719,8 +886,153 @@ const ProductDetailPage = () => {
 
                 <Divider />
 
-                {/* Variant Attributes Selection */}
-                {variantOptions &&
+                {/* Selection Groups (Priority) */}
+                {selectionConfig &&
+                  selectionConfig.selectionGroups &&
+                  selectionConfig.selectionGroups.length > 0 && (
+                    <>
+                      <div className={styles.variantSection}>
+                        {selectionConfig.selectionGroups
+                          .sort((a, b) => a.displayOrder - b.displayOrder)
+                          .map((group) => (
+                            <div
+                              key={group.groupId}
+                              className={styles.attributeGroup}
+                            >
+                              <Text strong className={styles.attributeLabel}>
+                                {group.groupName}:
+                                {group.required && (
+                                  <span
+                                    style={{ color: "#ff4d4f", marginLeft: 4 }}
+                                  >
+                                    *
+                                  </span>
+                                )}
+                              </Text>
+                              {group.description && (
+                                <Text
+                                  type="secondary"
+                                  style={{
+                                    display: "block",
+                                    marginBottom: 8,
+                                    fontSize: 12,
+                                  }}
+                                >
+                                  {group.description}
+                                </Text>
+                              )}
+                              <div className={styles.attributeOptions}>
+                                {group.options.map((option) => {
+                                  const isAvailable =
+                                    isSelectionOptionAvailable(
+                                      group.groupId,
+                                      option.optionId,
+                                      option
+                                    );
+                                  const isSelected =
+                                    selectedOptions[group.groupId] ===
+                                    option.optionId;
+
+                                  return (
+                                    <Button
+                                      key={option.optionId}
+                                      type={isSelected ? "primary" : "default"}
+                                      className={`${styles.attributeButton} ${
+                                        isSelected ? styles.selected : ""
+                                      } ${!isAvailable ? styles.disabled : ""}`}
+                                      onClick={() =>
+                                        handleSelectionOptionSelect(
+                                          group.groupId,
+                                          option.optionId
+                                        )
+                                      }
+                                      disabled={!isAvailable}
+                                      style={
+                                        option.colorCode
+                                          ? {
+                                              borderColor: isSelected
+                                                ? option.colorCode
+                                                : undefined,
+                                              position: "relative",
+                                            }
+                                          : undefined
+                                      }
+                                    >
+                                      {option.colorCode && (
+                                        <span
+                                          style={{
+                                            display: "inline-block",
+                                            width: 14,
+                                            height: 14,
+                                            borderRadius: "50%",
+                                            backgroundColor: option.colorCode,
+                                            marginRight: 6,
+                                            border: "1px solid #d9d9d9",
+                                            verticalAlign: "middle",
+                                          }}
+                                        />
+                                      )}
+                                      {option.label || option.value}
+                                    </Button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          ))}
+                        {(variantLoading || availableOptionsLoading) && (
+                          <div className={styles.variantInfo}>
+                            <Space>
+                              <Spin size="small" />
+                              <Text type="secondary">
+                                {variantLoading
+                                  ? "Đang tải thông tin phiên bản..."
+                                  : "Đang cập nhật tùy chọn..."}
+                              </Text>
+                            </Space>
+                          </div>
+                        )}
+                        {!variantLoading &&
+                          !availableOptionsLoading &&
+                          selectedVariant && (
+                            <div className={styles.variantInfo}>
+                              <Space split={<Divider type="vertical" />} wrap>
+                                <Text type="secondary">
+                                  <CheckCircleOutlined
+                                    style={{ color: "#52c41a" }}
+                                  />{" "}
+                                  {selectedVariant.variantName}
+                                </Text>
+                                <Text type="secondary">
+                                  Giá:{" "}
+                                  <Text strong style={{ color: "#ee4d2d" }}>
+                                    {formatPrice(selectedVariant.price)}
+                                  </Text>
+                                </Text>
+                                <Text type="secondary">
+                                  Kho:{" "}
+                                  <Text strong>
+                                    {selectedVariant.availableStock}
+                                  </Text>
+                                </Text>
+                                <Button
+                                  type="link"
+                                  size="small"
+                                  onClick={showVariantDetails}
+                                  style={{ padding: 0 }}
+                                >
+                                  Xem chi tiết →
+                                </Button>
+                              </Space>
+                            </div>
+                          )}
+                      </div>
+                      <Divider />
+                    </>
+                  )}
+
+                {/* Fallback: Variant Attributes Selection (when no selection config) */}
+                {!selectionConfig &&
+                  variantOptions &&
                   variantOptions.attributeGroups &&
                   variantOptions.attributeGroups.length > 0 && (
                     <>
@@ -850,9 +1162,7 @@ const ProductDetailPage = () => {
                     icon={<ShoppingCartOutlined />}
                     onClick={handleAddToCart}
                     className={styles.addToCartBtn}
-                    disabled={
-                      !product.active || !selectedVariant || addingToCart
-                    }
+                    disabled={!product.active || addingToCart}
                     loading={addingToCart}
                     block
                   >
@@ -864,6 +1174,15 @@ const ProductDetailPage = () => {
                     </div>
                   )}
                   {!selectedVariant &&
+                    selectionConfig?.selectionGroups?.length > 0 && (
+                      <div style={{ marginTop: 12 }}>
+                        <Text type="warning">
+                          Vui lòng chọn đầy đủ các tùy chọn để thêm vào giỏ hàng
+                        </Text>
+                      </div>
+                    )}
+                  {!selectedVariant &&
+                    !selectionConfig &&
                     variantOptions &&
                     variantOptions.attributeGroups?.length > 0 && (
                       <div style={{ marginTop: 12 }}>
