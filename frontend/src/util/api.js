@@ -841,6 +841,30 @@ const queryPaymentStatusApi = (appTransId) => {
   );
 };
 
+// Admin Transaction History API
+const getAdminTransactionHistoryApi = (params = {}) => {
+  const URL_API = "/api/payment/v1/transactions/admin/history";
+  return axios.get(URL_API, {
+    params: {
+      appUser: params.appUser || "",
+      status: params.status || "",
+      startDate: params.startDate || "",
+      endDate: params.endDate || "",
+      minAmount: params.minAmount || "",
+      maxAmount: params.maxAmount || "",
+      bankCode: params.bankCode || "",
+      searchKeyword: params.searchKeyword || "",
+      page: params.page ?? 0,
+      size: params.size ?? 10,
+      sortBy: params.sortBy || "createdAt",
+      sortDirection: params.sortDirection || "DESC",
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // Order APIs
 const createOrderApi = (orderData) => {
   const URL_API = "/api/order/api/v1/orders";
@@ -920,6 +944,27 @@ const getStoreOrdersApi = (storeId, params = {}) => {
       page: params.page || 0,
       size: params.size || 10,
       sort: params.sort || "createdAt,desc",
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Admin Orders API - Get all orders for admin
+const getAdminOrdersApi = (params = {}) => {
+  const URL_API = "/api/order/api/v1/orders/admin";
+  return axios.get(URL_API, {
+    params: {
+      search: params.search || "",
+      status: params.status || "",
+      paymentStatus: params.paymentStatus || "",
+      startDate: params.startDate || "",
+      endDate: params.endDate || "",
+      minAmount: params.minAmount || "",
+      maxAmount: params.maxAmount || "",
+      page: params.page || 0,
+      size: params.size || 10,
     },
     headers: {
       "Accept-Language": "vi",
@@ -1689,12 +1734,14 @@ export {
   // Payment APIs
   createZaloPayOrderApi,
   queryPaymentStatusApi,
+  getAdminTransactionHistoryApi,
   // Order APIs
   createOrderApi,
   applyCouponToOrdersApi,
   initiateOrderPaymentApi,
   getMyOrdersApi,
   getStoreOrdersApi,
+  getAdminOrdersApi,
   // Cart APIs
   getCartApi,
   addToCartApi,
