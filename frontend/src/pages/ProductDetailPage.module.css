@@ -460,65 +460,259 @@
   }
 }
 
-/* Variant Modal */
-.variantModal :global(.ant-modal-header) {
+/* Variant Drawer */
+.variantDrawer :global(.ant-drawer-header) {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px 12px 0 0;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  border-bottom: none;
+  padding: 16px 24px;
 }
 
-.variantModal :global(.ant-modal-title) {
-  color: white;
-  font-weight: 600;
-  font-size: 18px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+.variantDrawer :global(.ant-drawer-header-title) {
+  flex-direction: row-reverse;
 }
 
-.variantModal :global(.ant-modal-close) {
+.variantDrawer :global(.ant-drawer-close) {
   color: white;
+  margin-right: 0;
+  margin-left: 12px;
   transition: all 0.3s ease;
 }
 
-.variantModal :global(.ant-modal-close):hover {
+.variantDrawer :global(.ant-drawer-close):hover {
   color: rgba(255, 255, 255, 0.8);
   transform: rotate(90deg);
 }
 
-.variantModal :global(.ant-modal-body) {
-  max-height: 70vh;
+.variantDrawer :global(.ant-drawer-extra) button {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white;
+  font-weight: 600;
+}
+
+.variantDrawer :global(.ant-drawer-extra) button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: white;
+}
+
+.variantDrawer :global(.ant-drawer-body) {
+  padding: 0;
   overflow-y: auto;
 }
 
-.variantModal :global(.ant-modal-body)::-webkit-scrollbar {
+.variantDrawer :global(.ant-drawer-body)::-webkit-scrollbar {
   width: 8px;
 }
 
-.variantModal :global(.ant-modal-body)::-webkit-scrollbar-track {
+.variantDrawer :global(.ant-drawer-body)::-webkit-scrollbar-track {
   background: #f0f0f0;
   border-radius: 4px;
 }
 
-.variantModal :global(.ant-modal-body)::-webkit-scrollbar-thumb {
+.variantDrawer :global(.ant-drawer-body)::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 4px;
 }
 
-.variantModal :global(.ant-modal-body)::-webkit-scrollbar-thumb:hover {
+.variantDrawer :global(.ant-drawer-body)::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 
-.variantModalContent {
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.drawerIcon {
+  font-size: 20px;
+}
+
+.variantDrawerContent {
+  height: 100%;
+}
+
+/* Variant Drawer Tabs */
+.variantTabs {
+  height: 100%;
+}
+
+.variantTabs :global(.ant-tabs-nav) {
+  padding: 0 24px;
+  margin-bottom: 0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.variantTabs :global(.ant-tabs-tab) {
+  padding: 16px 0;
+  font-weight: 600;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.variantTabs :global(.ant-tabs-tab):hover {
+  color: #667eea;
+}
+
+.variantTabs :global(.ant-tabs-tab-active) {
+  color: #667eea;
+}
+
+.variantTabs :global(.ant-tabs-tab) span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.variantTabs :global(.ant-tabs-ink-bar) {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+}
+
+.variantTabs :global(.ant-tabs-content-holder) {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Variant Basic Info */
+.variantBasicInfo {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.variantHeaderSection {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.variantImageWrapper {
+  flex-shrink: 0;
+}
+
+.variantImage {
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.variantImage:hover {
+  transform: scale(1.02);
+}
+
+.variantTitleSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.variantTitle {
+  margin: 0 !important;
+  color: #333;
+  font-size: 20px !important;
+  line-height: 1.3 !important;
+}
+
+.skuTag {
+  align-self: flex-start;
+  font-size: 13px;
+  padding: 4px 12px;
+}
+
+/* Variant Price Section */
+.variantPriceSection {
+  background: linear-gradient(135deg, #fff5f2 0%, #ffe8e0 100%);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #ffded6;
+}
+
+.variantPriceRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.variantCurrentPrice {
+  font-size: 28px !important;
+  font-weight: 800 !important;
+  color: #ee4d2d !important;
+}
+
+.variantOriginalPrice {
+  font-size: 18px;
+}
+
+.discountTag {
+  font-weight: 600;
+}
+
+/* Stock Cards */
+.variantStockRow {
+  margin-top: 8px;
+}
+
+.stockCard {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.stockCard:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
+.stockCard > span:first-child {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.stockNumber {
+  font-size: 24px !important;
+  display: block;
+}
+
+/* Variant Attributes */
+.variantAttributesSection {
   padding: 8px 0;
 }
 
-.variantModalContent :global(.ant-descriptions-item-label) {
-  font-weight: 600;
-  background: #fafafa;
-  width: 180px;
+.attributeTag {
+  padding: 6px 14px !important;
+  font-size: 14px;
+  border-radius: 6px;
 }
 
-.variantModalContent :global(.ant-descriptions-item-content) {
-  background: white;
+/* Variant Descriptions */
+.variantDescriptions :global(.ant-descriptions-item-label) {
+  font-weight: 600;
+  color: #666;
+  width: 120px;
+}
+
+/* Variant Specs Content */
+.variantSpecsContent {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.variantSpecsLoading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
 }
 
 /* Short Description */
@@ -1501,6 +1695,87 @@
 
   .nestedObjectValue {
     font-size: 12px;
+  }
+
+  /* Variant Drawer Responsive */
+  .variantDrawer :global(.ant-drawer-content-wrapper) {
+    max-width: 100vw !important;
+  }
+
+  .variantHeaderSection {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .variantTitleSection {
+    align-items: center;
+  }
+
+  .variantPriceRow {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .variantCurrentPrice {
+    font-size: 24px !important;
+  }
+
+  .stockCard {
+    padding: 12px;
+  }
+
+  .stockNumber {
+    font-size: 20px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .variantDrawer :global(.ant-drawer-header) {
+    padding: 12px 16px;
+  }
+
+  .drawerHeader {
+    font-size: 16px;
+  }
+
+  .drawerIcon {
+    font-size: 18px;
+  }
+
+  .variantTabs :global(.ant-tabs-nav) {
+    padding: 0 16px;
+  }
+
+  .variantTabs :global(.ant-tabs-tab) {
+    padding: 12px 0;
+    font-size: 14px;
+  }
+
+  .variantTabs :global(.ant-tabs-content-holder) {
+    padding: 16px;
+  }
+
+  .variantImage {
+    width: 120px !important;
+  }
+
+  .variantTitle {
+    font-size: 18px !important;
+  }
+
+  .variantPriceSection {
+    padding: 16px;
+  }
+
+  .variantCurrentPrice {
+    font-size: 22px !important;
+  }
+
+  .variantStockRow :global(.ant-col) {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 8px;
   }
 }
 

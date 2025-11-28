@@ -18,7 +18,7 @@ import {
   Tabs,
   Avatar,
   Empty,
-  Modal,
+  Drawer,
   Descriptions,
   Spin,
   Collapse,
@@ -36,6 +36,9 @@ import {
   PhoneOutlined,
   MailOutlined,
   DownOutlined,
+  InfoCircleOutlined,
+  AppstoreOutlined,
+  CloseOutlined,
 } from "@ant-design/icons";
 import {
   getPublicProductDetailApi,
@@ -47,6 +50,7 @@ import {
   getSelectionConfigApi,
   findVariantBySelectionApi,
   getAvailableOptionsApi,
+  getPublicVariantMetadataApi,
 } from "../util/api";
 import { getSpecSectionConfig } from "../constants/productSpecsTranslations";
 import { useCart } from "../contexts/CartContext";
@@ -67,12 +71,16 @@ const ProductDetailPage = () => {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedAttributes, setSelectedAttributes] = useState({});
   const [variantOptions, setVariantOptions] = useState(null);
-  const [isVariantModalOpen, setIsVariantModalOpen] = useState(false);
+  const [isVariantDrawerOpen, setIsVariantDrawerOpen] = useState(false);
   const [wardInfo, setWardInfo] = useState(null);
   const [variantLoading, setVariantLoading] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [productSpecs, setProductSpecs] = useState(null);
   const [specsLoading, setSpecsLoading] = useState(false);
+
+  // Variant metadata states
+  const [variantMetadata, setVariantMetadata] = useState(null);
+  const [variantMetadataLoading, setVariantMetadataLoading] = useState(false);
 
   // Selection config states
   const [selectionConfig, setSelectionConfig] = useState(null);
@@ -397,14 +405,35 @@ const ProductDetailPage = () => {
     return variantOptions.variantMatrix.hasOwnProperty(testCombination);
   };
 
-  const showVariantDetails = () => {
-    if (selectedVariant) {
-      setIsVariantModalOpen(true);
+  // Fetch variant metadata
+  const fetchVariantMetadata = async (variantId) => {
+    if (!productId || !variantId) return;
+
+    setVariantMetadataLoading(true);
+    try {
+      const response = await getPublicVariantMetadataApi(productId, variantId);
+      if (response.code === 1000) {
+        setVariantMetadata(response.result?.specs || response.result);
+      }
+    } catch (error) {
+      console.error("Error fetching variant metadata:", error);
+      // Không hiển thị lỗi vì metadata có thể không có cho tất cả variant
+      setVariantMetadata(null);
+    } finally {
+      setVariantMetadataLoading(false);
     }
   };
 
-  const handleModalClose = () => {
-    setIsVariantModalOpen(false);
+  const showVariantDetails = () => {
+    if (selectedVariant) {
+      setIsVariantDrawerOpen(true);
+      fetchVariantMetadata(selectedVariant.id);
+    }
+  };
+
+  const handleDrawerClose = () => {
+    setIsVariantDrawerOpen(false);
+    setVariantMetadata(null);
   };
 
   const formatPrice = (price) => {
@@ -1556,156 +1585,292 @@ const ProductDetailPage = () => {
           </Card>
         </div>
 
-        {/* Variant Details Modal */}
-        <Modal
-          title="Thông tin chi tiết phiên bản"
-          open={isVariantModalOpen}
-          onCancel={handleModalClose}
-          footer={[
-            <Button key="close" type="primary" onClick={handleModalClose}>
+        {/* Variant Details Drawer */}
+        <Drawer
+          title={
+            <div className={styles.drawerHeader}>
+              <AppstoreOutlined className={styles.drawerIcon} />
+              <span>Thông tin chi tiết phiên bản</span>
+            </div>
+          }
+          placement="right"
+          onClose={handleDrawerClose}
+          open={isVariantDrawerOpen}
+          width={680}
+          className={styles.variantDrawer}
+          closeIcon={<CloseOutlined />}
+          extra={
+            <Button type="primary" onClick={handleDrawerClose}>
               Đóng
-            </Button>,
-          ]}
-          width={700}
-          className={styles.variantModal}
+            </Button>
+          }
         >
           {selectedVariant && (
-            <div className={styles.variantModalContent}>
-              <Descriptions bordered column={1} size="middle">
-                <Descriptions.Item label="Tên phiên bản">
-                  <Text strong>{selectedVariant.variantName}</Text>
-                </Descriptions.Item>
-
-                <Descriptions.Item label="SKU">
-                  <Tag color="blue">{selectedVariant.sku}</Tag>
-                </Descriptions.Item>
-
-                <Descriptions.Item label="Giá bán">
-                  <Space>
-                    <Text strong style={{ fontSize: 18, color: "#ee4d2d" }}>
-                      {formatPrice(selectedVariant.price)}
-                    </Text>
-                    {selectedVariant.originalPrice > selectedVariant.price && (
-                      <>
-                        <Text delete type="secondary">
-                          {formatPrice(selectedVariant.originalPrice)}
-                        </Text>
-                        <Tag color="red">
-                          -
-                          {calculateDiscount(
-                            selectedVariant.originalPrice,
-                            selectedVariant.price
+            <div className={styles.variantDrawerContent}>
+              <Tabs
+                defaultActiveKey="basic"
+                className={styles.variantTabs}
+                items={[
+                  {
+                    key: "basic",
+                    label: (
+                      <span>
+                        <InfoCircleOutlined />
+                        Thông tin cơ bản
+                      </span>
+                    ),
+                    children: (
+                      <div className={styles.variantBasicInfo}>
+                        {/* Variant Header */}
+                        <div className={styles.variantHeaderSection}>
+                          {selectedVariant.imageUrl && (
+                            <div className={styles.variantImageWrapper}>
+                              <Image
+                                src={selectedVariant.imageUrl}
+                                alt={selectedVariant.variantName}
+                                width={180}
+                                className={styles.variantImage}
+                              />
+                            </div>
                           )}
-                          %
-                        </Tag>
-                      </>
-                    )}
-                  </Space>
-                </Descriptions.Item>
+                          <div className={styles.variantTitleSection}>
+                            <Title level={4} className={styles.variantTitle}>
+                              {selectedVariant.variantName}
+                            </Title>
+                            <Tag color="blue" className={styles.skuTag}>
+                              SKU: {selectedVariant.sku}
+                            </Tag>
+                            {selectedVariant.active ? (
+                              <Tag
+                                color="success"
+                                icon={<CheckCircleOutlined />}
+                              >
+                                Đang kinh doanh
+                              </Tag>
+                            ) : (
+                              <Tag color="error">Ngừng kinh doanh</Tag>
+                            )}
+                          </div>
+                        </div>
 
-                <Descriptions.Item label="Tồn kho">
-                  <Space>
-                    <Text
-                      strong
-                      style={{
-                        fontSize: 16,
-                        color:
-                          selectedVariant.availableStock > 10
-                            ? "#52c41a"
-                            : "#faad14",
-                      }}
-                    >
-                      {selectedVariant.availableStock}
-                    </Text>
-                    <Text type="secondary">sản phẩm có sẵn</Text>
-                  </Space>
-                </Descriptions.Item>
+                        <Divider />
 
-                {selectedVariant.reservedStock > 0 && (
-                  <Descriptions.Item label="Đang giữ chỗ">
-                    <Text type="warning">
-                      {selectedVariant.reservedStock} sản phẩm
-                    </Text>
-                  </Descriptions.Item>
-                )}
+                        {/* Price Section */}
+                        <div className={styles.variantPriceSection}>
+                          <Text type="secondary">Giá bán</Text>
+                          <div className={styles.variantPriceRow}>
+                            <Text className={styles.variantCurrentPrice}>
+                              {formatPrice(selectedVariant.price)}
+                            </Text>
+                            {selectedVariant.originalPrice >
+                              selectedVariant.price && (
+                              <>
+                                <Text
+                                  delete
+                                  type="secondary"
+                                  className={styles.variantOriginalPrice}
+                                >
+                                  {formatPrice(selectedVariant.originalPrice)}
+                                </Text>
+                                <Tag color="red" className={styles.discountTag}>
+                                  -
+                                  {calculateDiscount(
+                                    selectedVariant.originalPrice,
+                                    selectedVariant.price
+                                  )}
+                                  %
+                                </Tag>
+                              </>
+                            )}
+                          </div>
+                        </div>
 
-                <Descriptions.Item label="Đã bán">
-                  <Text>{selectedVariant.soldQuantity || 0} sản phẩm</Text>
-                </Descriptions.Item>
+                        <Divider />
 
-                {selectedVariant.weight && (
-                  <Descriptions.Item label="Trọng lượng">
-                    <Text>{selectedVariant.weight} gram</Text>
-                  </Descriptions.Item>
-                )}
+                        {/* Stock Info */}
+                        <Row
+                          gutter={[16, 16]}
+                          className={styles.variantStockRow}
+                        >
+                          <Col span={8}>
+                            <div className={styles.stockCard}>
+                              <Text type="secondary">Có sẵn</Text>
+                              <Text
+                                strong
+                                className={styles.stockNumber}
+                                style={{
+                                  color:
+                                    selectedVariant.availableStock > 10
+                                      ? "#52c41a"
+                                      : "#faad14",
+                                }}
+                              >
+                                {selectedVariant.availableStock}
+                              </Text>
+                            </div>
+                          </Col>
+                          {selectedVariant.reservedStock > 0 && (
+                            <Col span={8}>
+                              <div className={styles.stockCard}>
+                                <Text type="secondary">Đang giữ</Text>
+                                <Text
+                                  strong
+                                  className={styles.stockNumber}
+                                  style={{ color: "#faad14" }}
+                                >
+                                  {selectedVariant.reservedStock}
+                                </Text>
+                              </div>
+                            </Col>
+                          )}
+                          <Col span={8}>
+                            <div className={styles.stockCard}>
+                              <Text type="secondary">Đã bán</Text>
+                              <Text
+                                strong
+                                className={styles.stockNumber}
+                                style={{ color: "#1890ff" }}
+                              >
+                                {selectedVariant.soldQuantity || 0}
+                              </Text>
+                            </div>
+                          </Col>
+                        </Row>
 
-                {selectedVariant.attributeValues &&
-                  selectedVariant.attributeValues.length > 0 && (
-                    <Descriptions.Item label="Thuộc tính">
-                      <Space wrap>
-                        {selectedVariant.attributeValues.map((attr) => (
-                          <Tag key={attr.id} color="purple">
-                            {attr.attributeName}: {attr.value}
-                          </Tag>
-                        ))}
-                      </Space>
-                    </Descriptions.Item>
-                  )}
+                        <Divider />
 
-                <Descriptions.Item label="Trạng thái">
-                  {selectedVariant.active ? (
-                    <Tag color="success" icon={<CheckCircleOutlined />}>
-                      Đang kinh doanh
-                    </Tag>
-                  ) : (
-                    <Tag color="error">Ngừng kinh doanh</Tag>
-                  )}
-                </Descriptions.Item>
+                        {/* Attributes */}
+                        {selectedVariant.attributeValues &&
+                          selectedVariant.attributeValues.length > 0 && (
+                            <>
+                              <div className={styles.variantAttributesSection}>
+                                <Text
+                                  strong
+                                  style={{ marginBottom: 12, display: "block" }}
+                                >
+                                  Thuộc tính
+                                </Text>
+                                <Space wrap size="small">
+                                  {selectedVariant.attributeValues.map(
+                                    (attr) => (
+                                      <Tag
+                                        key={attr.id}
+                                        color="purple"
+                                        className={styles.attributeTag}
+                                      >
+                                        {attr.attributeName}: {attr.value}
+                                      </Tag>
+                                    )
+                                  )}
+                                </Space>
+                              </div>
+                              <Divider />
+                            </>
+                          )}
 
-                {selectedVariant.imageUrl && (
-                  <Descriptions.Item label="Hình ảnh">
-                    <Image
-                      src={selectedVariant.imageUrl}
-                      alt={selectedVariant.variantName}
-                      width={200}
-                      style={{ borderRadius: 8 }}
-                    />
-                  </Descriptions.Item>
-                )}
-
-                <Descriptions.Item label="Ngày tạo">
-                  <Text type="secondary">
-                    {new Date(selectedVariant.createdAt).toLocaleDateString(
-                      "vi-VN",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }
-                    )}
-                  </Text>
-                </Descriptions.Item>
-
-                <Descriptions.Item label="Cập nhật lần cuối">
-                  <Text type="secondary">
-                    {new Date(selectedVariant.updatedAt).toLocaleDateString(
-                      "vi-VN",
-                      {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      }
-                    )}
-                  </Text>
-                </Descriptions.Item>
-              </Descriptions>
+                        {/* Additional Info */}
+                        <Descriptions
+                          column={1}
+                          size="small"
+                          className={styles.variantDescriptions}
+                        >
+                          {selectedVariant.weight && (
+                            <Descriptions.Item label="Trọng lượng">
+                              <Text>{selectedVariant.weight} gram</Text>
+                            </Descriptions.Item>
+                          )}
+                          <Descriptions.Item label="Ngày tạo">
+                            <Text type="secondary">
+                              {new Date(
+                                selectedVariant.createdAt
+                              ).toLocaleDateString("vi-VN", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </Text>
+                          </Descriptions.Item>
+                          <Descriptions.Item label="Cập nhật">
+                            <Text type="secondary">
+                              {new Date(
+                                selectedVariant.updatedAt
+                              ).toLocaleDateString("vi-VN", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </Text>
+                          </Descriptions.Item>
+                        </Descriptions>
+                      </div>
+                    ),
+                  },
+                  {
+                    key: "specs",
+                    label: (
+                      <span>
+                        <AppstoreOutlined />
+                        Thông số chi tiết
+                      </span>
+                    ),
+                    children: (
+                      <div className={styles.variantSpecsContent}>
+                        {variantMetadataLoading ? (
+                          <div className={styles.variantSpecsLoading}>
+                            <Spin
+                              size="large"
+                              tip="Đang tải thông số chi tiết..."
+                            />
+                          </div>
+                        ) : variantMetadata &&
+                          Object.keys(variantMetadata).length > 0 ? (
+                          <Collapse
+                            accordion
+                            defaultActiveKey={[
+                              getSpecSectionConfig(variantMetadata)[0]?.key,
+                            ]}
+                            expandIcon={({ isActive }) => (
+                              <DownOutlined
+                                rotate={isActive ? 180 : 0}
+                                style={{ fontSize: 12, color: "#ee4d2d" }}
+                              />
+                            )}
+                            className={styles.specsCollapse}
+                            items={getSpecSectionConfig(variantMetadata).map(
+                              (section) => ({
+                                key: section.key,
+                                label: (
+                                  <div className={styles.collapseHeader}>
+                                    <span className={styles.collapseTitle}>
+                                      {section.label}
+                                    </span>
+                                  </div>
+                                ),
+                                children: renderSpecsSection(
+                                  section.label,
+                                  section.data
+                                ),
+                              })
+                            )}
+                          />
+                        ) : (
+                          <Empty
+                            description="Chưa có thông số chi tiết cho phiên bản này"
+                            image={Empty.PRESENTED_IMAGE_SIMPLE}
+                          />
+                        )}
+                      </div>
+                    ),
+                  },
+                ]}
+              />
             </div>
           )}
-        </Modal>
+        </Drawer>
       </div>
     </>
   );

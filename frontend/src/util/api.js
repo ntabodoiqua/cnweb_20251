@@ -698,6 +698,17 @@ const findVariantBySelectionApi = (productId, optionIds) => {
   );
 };
 
+// Get variant metadata/specifications (no authentication required - public API)
+const getPublicVariantMetadataApi = (productId, variantId) => {
+  const URL_API = `/api/product/public/products/${productId}/variants/${variantId}/metadata`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
 // Get available options based on current selections (no authentication required)
 const getAvailableOptionsApi = (productId, selectedOptionIds = []) => {
   const URL_API = `/api/product/public/products/${productId}/available-options`;
@@ -1884,6 +1895,7 @@ export {
   getSelectionConfigApi,
   findVariantBySelectionApi,
   getAvailableOptionsApi,
+  getPublicVariantMetadataApi,
   getProductSpecsApi,
   updateProductSpecsApi,
   getProductsByStoreApi,
