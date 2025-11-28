@@ -76,17 +76,24 @@ const ProductDetailPage = () => {
 
   // Selection config states
   const [selectionConfig, setSelectionConfig] = useState(null);
+  const [selectionConfigLoaded, setSelectionConfigLoaded] = useState(false);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [availableOptionsLoading, setAvailableOptionsLoading] = useState(false);
 
   useEffect(() => {
     if (productId) {
       fetchProductDetail();
-      fetchVariantOptions();
       fetchProductSpecs();
       fetchSelectionConfig();
     }
   }, [productId]);
+
+  // Only fetch legacy variant options if no selection config exists
+  useEffect(() => {
+    if (productId && selectionConfigLoaded && !selectionConfig) {
+      fetchVariantOptions();
+    }
+  }, [productId, selectionConfigLoaded, selectionConfig]);
 
   // Fetch variant when selected options change (for selection config)
   useEffect(() => {
@@ -182,6 +189,8 @@ const ProductDetailPage = () => {
     } catch (error) {
       console.error("Error fetching selection config:", error);
       // Selection config might not exist for all products
+    } finally {
+      setSelectionConfigLoaded(true);
     }
   };
 
@@ -191,8 +200,11 @@ const ProductDetailPage = () => {
 
     const selectedOptionIds = Object.values(selectedOptions).filter(Boolean);
 
-    // Skip if no selections made yet
-    if (selectedOptionIds.length === 0) return;
+    // If no selections made, reset by fetching original selection config
+    if (selectedOptionIds.length === 0) {
+      await fetchSelectionConfig();
+      return;
+    }
 
     setAvailableOptionsLoading(true);
     try {

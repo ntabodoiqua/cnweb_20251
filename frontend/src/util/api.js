@@ -1339,6 +1339,99 @@ const getProductVariantsApi = (productId) => {
   });
 };
 
+// Selection Groups APIs (for seller)
+const getSelectionGroupsApi = (productId) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const createSelectionGroupApi = (productId, groupData) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups`;
+  return axios.post(URL_API, groupData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const updateSelectionGroupApi = (productId, groupId, groupData) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups/${groupId}`;
+  return axios.put(URL_API, groupData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const deleteSelectionGroupApi = (productId, groupId) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups/${groupId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const getSelectionGroupDetailApi = (productId, groupId) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups/${groupId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Link variants to selection option
+const linkVariantsToOptionApi = (productId, groupId, optionId, variantIds) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups/${groupId}/options/${optionId}/link-variants`;
+  return axios.post(
+    URL_API,
+    { variantIds },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+// Unlink variants from selection option
+const unlinkVariantsFromOptionApi = (
+  productId,
+  groupId,
+  optionId,
+  variantIds
+) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups/${groupId}/options/${optionId}/unlink-variants`;
+  return axios.post(
+    URL_API,
+    { variantIds },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+// Get linked variants for an option
+const getLinkedVariantsApi = (productId, groupId, optionId) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups/${groupId}/options/${optionId}/variants`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 const createVariantApi = (productId, variantData) => {
   const URL_API = `/api/product/products/${productId}/variants`;
   return axios.post(URL_API, variantData, {
@@ -1826,6 +1919,16 @@ export {
   updateVariantStatusApi,
   bulkUpdateVariantStatusApi,
   bulkUpdateProductStatusApi,
+  // Selection Groups APIs
+  getSelectionGroupsApi,
+  createSelectionGroupApi,
+  updateSelectionGroupApi,
+  deleteSelectionGroupApi,
+  getSelectionGroupDetailApi,
+  // Link variants to options APIs
+  linkVariantsToOptionApi,
+  unlinkVariantsFromOptionApi,
+  getLinkedVariantsApi,
   // Variant Metadata APIs
   getVariantMetadataApi,
   updateVariantMetadataApi,
