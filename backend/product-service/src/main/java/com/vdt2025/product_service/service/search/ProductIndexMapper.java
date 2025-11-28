@@ -3,6 +3,7 @@ package com.vdt2025.product_service.service.search;
 import com.vdt2025.product_service.document.ProductDocument;
 import com.vdt2025.product_service.document.ProductDocument.*;
 import com.vdt2025.product_service.entity.*;
+import com.vdt2025.product_service.repository.CategoryRepository;
 import com.vdt2025.product_service.repository.InventoryStockRepository;
 import com.vdt2025.product_service.repository.ProductImageRepository;
 import com.vdt2025.product_service.repository.ProductVariantRepository;
@@ -28,6 +29,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ProductIndexMapper {
 
+    CategoryRepository categoryRepository;
     ProductVariantRepository variantRepository;
     ProductImageRepository productImageRepository;
     InventoryStockRepository inventoryStockRepository;
@@ -118,14 +120,34 @@ public class ProductIndexMapper {
 
     /**
      * Xây dựng category path cho hierarchy search
+     * Load fresh category với parent hierarchy từ DB để tránh LazyInitializationException
      */
     private List<String> buildCategoryPath(Category category) {
         List<String> path = new ArrayList<>();
-        Category current = category;
+        if (category == null) {
+            return path;
+        }
 
-        while (current != null) {
-            path.add(0, current.getId()); // Add to beginning
-            current = current.getParentCategory();
+        try {
+            // Load category với parent hierarchy từ DB
+            Category fullCategory = categoryRepository.findByIdWithParentHierarchy(category.getId())
+                    .orElse(category);
+            
+            Category current = fullCategory;
+            int maxDepth = 10; // Prevent infinite loop
+            int depth = 0;
+            
+            while (current != null && depth < maxDepth) {
+                path.add(0, current.getId()); // Add to beginning
+                // Get parent safely - since we loaded with JOIN FETCH, this should work
+                Category parent = current.getParentCategory();
+                current = parent;
+                depth++;
+            }
+        } catch (Exception e) {
+            log.warn("Error building category path for category {}: {}", category.getId(), e.getMessage());
+            // Fallback: just add current category id
+            path.add(category.getId());
         }
 
         return path;
