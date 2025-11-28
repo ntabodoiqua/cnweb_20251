@@ -1,6 +1,7 @@
 package com.vdt2025.product_service.document;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
@@ -103,9 +104,11 @@ public class ProductDocument {
 
     // Status
     @Field(type = FieldType.Boolean)
+    @JsonProperty("isActive")
     boolean isActive;
 
     @Field(type = FieldType.Boolean)
+    @JsonProperty("isDeleted")
     boolean isDeleted;
 
     // Image URL for display

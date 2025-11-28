@@ -358,9 +358,8 @@ public class ProductSearchServiceImpl implements ProductSearchService {
         }
 
         // Status filters
-        if (request.getIsActive() == null || request.getIsActive()) {
-            filterQueries.add(buildTermQuery("isActive", true));
-        }
+        // Luôn lọc sản phẩm active và chưa xóa để đảm bảo không trả về sản phẩm không hợp lệ
+        filterQueries.add(buildTermQuery("isActive", true));
         filterQueries.add(buildTermQuery("isDeleted", false));
 
         // Attribute filters (nested query)
@@ -518,7 +517,7 @@ public class ProductSearchServiceImpl implements ProductSearchService {
                 .currentPage(pageable.getPageNumber())
                 .pageSize(pageable.getPageSize())
                 .took(response.took())
-                .maxScore(hitsMetadata.maxScore() != null ? hitsMetadata.maxScore().floatValue() : null);
+                .maxScore(hitsMetadata.maxScore() != null && !Double.isNaN(hitsMetadata.maxScore()) ? hitsMetadata.maxScore().floatValue() : null);
 
         // Map aggregations if present
         if (Boolean.TRUE.equals(request.getEnableAggregation()) && response.aggregations() != null) {
@@ -542,7 +541,7 @@ public class ProductSearchServiceImpl implements ProductSearchService {
 
         return ProductSearchHit.builder()
                 .id(hit.id())
-                .score(hit.score() != null ? hit.score().floatValue() : null)
+                .score(hit.score() != null && !Double.isNaN(hit.score()) ? hit.score().floatValue() : null)
                 .product(mapToSummary(doc))
                 .highlights(highlights)
                 .build();
