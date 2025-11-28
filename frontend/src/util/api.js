@@ -1853,6 +1853,20 @@ const uploadMediaApi = (file) => {
   });
 };
 
+// Search Suggest API for autocomplete
+const getSearchSuggestApi = (query, size = 5) => {
+  const URL_API = "/api/product/products/search/suggest";
+  return axios.get(URL_API, {
+    params: {
+      q: query,
+      size: size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -2008,4 +2022,6 @@ export {
   getSellerDocumentAdminApi,
   // Media upload API for Rich Text Editor
   uploadMediaApi,
+  // Search Suggest API
+  getSearchSuggestApi,
 };

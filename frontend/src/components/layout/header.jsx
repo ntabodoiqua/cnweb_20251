@@ -20,10 +20,19 @@ import {
   AppstoreOutlined,
   BellOutlined,
 } from "@ant-design/icons";
-import { Dropdown, Space, Drawer, Menu, Input, notification } from "antd";
+import {
+  Dropdown,
+  Space,
+  Drawer,
+  Menu,
+  Input,
+  notification,
+  AutoComplete,
+} from "antd";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
 import { useCart } from "../../contexts/CartContext";
+import { getSearchSuggestApi } from "../../util/api";
 import { getRoleName, ROLES, getHighestRole } from "../../constants/roles";
 import styles from "./header.module.css";
 import logo from "../../assets/logo.png";
@@ -37,6 +46,37 @@ const Header = () => {
   const [searchValue, setSearchValue] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const [notificationCount, setNotificationCount] = useState(0); // State cho số lượng thông báo
+  const [options, setOptions] = useState([]);
+  const [searchTimeout, setSearchTimeout] = useState(null);
+
+  const handleSearchChange = (value) => {
+    setSearchValue(value);
+    if (!value.trim()) {
+      setOptions([]);
+      return;
+    }
+
+    if (searchTimeout) {
+      clearTimeout(searchTimeout);
+    }
+
+    const timeout = setTimeout(async () => {
+      try {
+        const response = await getSearchSuggestApi(value);
+        if (response && response.result) {
+          const newOptions = response.result.map((item) => ({
+            value: item,
+            label: item,
+          }));
+          setOptions(newOptions);
+        }
+      } catch (error) {
+        console.error("Error fetching suggestions:", error);
+      }
+    }, 150);
+
+    setSearchTimeout(timeout);
+  };
 
   const handleLogout = async () => {
     // Ngăn chặn click nhiều lần
@@ -367,20 +407,30 @@ const Header = () => {
 
           {/* Search Bar */}
           <div className={styles.headerSearch}>
-            <Input.Search
-              placeholder="Tìm kiếm sản phẩm, danh mục..."
-              size="large"
+            <AutoComplete
+              style={{ width: "100%" }}
+              options={options}
+              onSelect={(value) => {
+                setSearchValue(value);
+                handleSearch(value);
+              }}
+              onSearch={handleSearchChange}
               value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              onSearch={handleSearch}
-              enterButton={
-                <button className={styles.searchButton}>
-                  <SearchOutlined />
-                  Tìm kiếm
-                </button>
-              }
-              className={styles.searchInput}
-            />
+              popupClassName={styles.searchDropdown}
+              popupMatchSelectWidth={true}
+            >
+              <Input.Search
+                placeholder="Tìm kiếm sản phẩm, danh mục..."
+                size="large"
+                onSearch={handleSearch}
+                enterButton={
+                  <button className={styles.searchButton}>
+                    <SearchOutlined />
+                  </button>
+                }
+                className={styles.searchInput}
+              />
+            </AutoComplete>
           </div>
 
           {/* Actions */}
