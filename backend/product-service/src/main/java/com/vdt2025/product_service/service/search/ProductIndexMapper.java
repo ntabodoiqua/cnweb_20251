@@ -10,9 +10,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
+import org.hibernate.LazyInitializationException;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -44,16 +47,16 @@ public class ProductIndexMapper {
                 .orElse(null);
 
         // Get category path for hierarchy search
-        List<String> categoryPath = buildCategoryPath(product.getCategory());
+        Category category = safeGet(() -> product.getCategory());
+        List<String> categoryPath = buildCategoryPath(category);
 
-        // Get store categories
+        // Get store categories - safe access for lazy loaded collection
         List<String> storeCategoryIds = new ArrayList<>();
         List<String> storeCategoryNames = new ArrayList<>();
-        if (product.getStoreCategories() != null) {
-            for (Category cat : product.getStoreCategories()) {
-                storeCategoryIds.add(cat.getId());
-                storeCategoryNames.add(cat.getName());
-            }
+        List<Category> storeCategories = safeGetList(() -> product.getStoreCategories());
+        for (Category cat : storeCategories) {
+            storeCategoryIds.add(cat.getId());
+            storeCategoryNames.add(cat.getName());
         }
 
         // Get variants with attributes
@@ -65,9 +68,10 @@ public class ProductIndexMapper {
         String specsText = buildSpecsText(product.getSpecs());
         List<SpecEntry> specsEntries = buildSpecsEntries(product.getSpecs());
 
-        // Build selection groups and searchable text
-        List<SelectionGroupDocument> selectionGroupDocs = mapSelectionGroups(product.getSelectionGroups());
-        String selectionOptionsText = buildSelectionOptionsText(product.getSelectionGroups());
+        // Build selection groups and searchable text - safe access for lazy loaded
+        List<ProductSelectionGroup> selectionGroups = safeGetList(() -> product.getSelectionGroups());
+        List<SelectionGroupDocument> selectionGroupDocs = mapSelectionGroups(selectionGroups);
+        String selectionOptionsText = buildSelectionOptionsText(selectionGroups);
 
         // Calculate total available stock
         Integer totalAvailableStock = calculateTotalAvailableStock(variants);
@@ -80,8 +84,8 @@ public class ProductIndexMapper {
                 .name(product.getName())
                 .description(product.getDescription())
                 .shortDescription(product.getShortDescription())
-                .categoryId(product.getCategory() != null ? product.getCategory().getId() : null)
-                .categoryName(product.getCategory() != null ? product.getCategory().getName() : null)
+                .categoryId(category != null ? category.getId() : null)
+                .categoryName(category != null ? category.getName() : null)
                 .categoryPath(categoryPath)
                 .storeId(product.getStore() != null ? product.getStore().getId() : null)
                 .storeName(product.getStore() != null ? product.getStore().getStoreName() : null)
@@ -315,6 +319,7 @@ public class ProductIndexMapper {
 
     /**
      * Map SelectionGroups entities sang documents
+     * Note: groups đã được safe-access trước khi truyền vào
      */
     private List<SelectionGroupDocument> mapSelectionGroups(List<ProductSelectionGroup> groups) {
         if (groups == null || groups.isEmpty()) {
@@ -333,8 +338,9 @@ public class ProductIndexMapper {
     private SelectionGroupDocument mapSelectionGroup(ProductSelectionGroup group) {
         List<SelectionOptionDocument> optionDocs = new ArrayList<>();
         
-        if (group.getOptions() != null) {
-            optionDocs = group.getOptions().stream()
+        List<ProductSelectionOption> options = safeGetList(() -> group.getOptions());
+        if (!options.isEmpty()) {
+            optionDocs = options.stream()
                     .filter(ProductSelectionOption::isActive)
                     .map(this::mapSelectionOption)
                     .collect(Collectors.toList());
@@ -357,8 +363,9 @@ public class ProductIndexMapper {
     private SelectionOptionDocument mapSelectionOption(ProductSelectionOption option) {
         List<String> linkedVariantIds = new ArrayList<>();
         
-        if (option.getVariants() != null) {
-            linkedVariantIds = option.getVariants().stream()
+        List<ProductVariant> variants = safeGetList(() -> option.getVariants());
+        if (!variants.isEmpty()) {
+            linkedVariantIds = variants.stream()
                     .filter(v -> !v.isDeleted() && v.isActive())
                     .map(ProductVariant::getId)
                     .collect(Collectors.toList());
@@ -380,6 +387,7 @@ public class ProductIndexMapper {
      * Build searchable text từ tất cả selection options
      * Cho phép full-text search theo tên option
      * Ví dụ: "iPhone 15 Pro, iPhone 14, Samsung S24, Đen Carbon, Trong suốt"
+     * Note: groups đã được safe-access trước khi truyền vào
      */
     private String buildSelectionOptionsText(List<ProductSelectionGroup> groups) {
         if (groups == null || groups.isEmpty()) {
@@ -389,13 +397,14 @@ public class ProductIndexMapper {
         StringBuilder sb = new StringBuilder();
         
         for (ProductSelectionGroup group : groups) {
-            if (!group.isActive() || group.getOptions() == null) continue;
+            List<ProductSelectionOption> options = safeGetList(() -> group.getOptions());
+            if (!group.isActive() || options.isEmpty()) continue;
             
             // Add group name
             sb.append(group.getName()).append(": ");
             
             // Add all option values
-            List<String> optionValues = group.getOptions().stream()
+            List<String> optionValues = options.stream()
                     .filter(ProductSelectionOption::isActive)
                     .map(opt -> {
                         String label = opt.getLabel();
@@ -424,5 +433,39 @@ public class ProductIndexMapper {
                         .map(InventoryStock::getAvailableQuantity)
                         .orElse(0))
                 .sum();
+    }
+
+    // ========== Safe Lazy Loading Helpers ==========
+
+    /**
+     * Safely access a lazy-loaded collection, returning empty list if not initialized
+     */
+    private <T> List<T> safeGetList(Supplier<List<T>> supplier) {
+        try {
+            List<T> list = supplier.get();
+            if (list != null && Hibernate.isInitialized(list)) {
+                return list;
+            }
+            return new ArrayList<>();
+        } catch (LazyInitializationException e) {
+            log.warn("LazyInitializationException when accessing collection: {}", e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Safely access a lazy-loaded entity, returning null if not initialized
+     */
+    private <T> T safeGet(Supplier<T> supplier) {
+        try {
+            T entity = supplier.get();
+            if (entity != null && Hibernate.isInitialized(entity)) {
+                return entity;
+            }
+            return null;
+        } catch (LazyInitializationException e) {
+            log.warn("LazyInitializationException when accessing entity: {}", e.getMessage());
+            return null;
+        }
     }
 }

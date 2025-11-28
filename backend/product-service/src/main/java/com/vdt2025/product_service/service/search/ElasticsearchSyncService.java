@@ -41,7 +41,7 @@ public class ElasticsearchSyncService {
     ProductSearchService productSearchService;
 
     AtomicBoolean isSyncing = new AtomicBoolean(false);
-    static final int BATCH_SIZE = 100;
+    static final int BATCH_SIZE = 50; // Smaller batch size to avoid memory issues
 
     /**
      * Auto-sync khi application khởi động (nếu index trống)
@@ -103,9 +103,10 @@ public class ElasticsearchSyncService {
 
     /**
      * Full sync - reindex tất cả products
+     * Note: Không dùng @Transactional ở đây vì method này là async
+     * Thay vào đó, gọi đến method có transaction riêng
      */
     @Async("elasticsearchTaskExecutor")
-    @Transactional(readOnly = true)
     public void syncAll() {
         if (isSyncing.compareAndSet(false, true)) {
             try {
@@ -116,21 +117,16 @@ public class ElasticsearchSyncService {
                 productSearchRepository.deleteAll();
                 log.info("Cleared existing index");
 
-                // Sync in batches
+                // Sync in batches using transactional method
                 int page = 0;
                 long totalSynced = 0;
 
                 while (true) {
-                    Page<Product> productPage = productRepository.findAll(PageRequest.of(page, BATCH_SIZE));
+                    List<ProductDocument> documents = fetchAndMapProductsBatch(page, BATCH_SIZE);
 
-                    if (productPage.isEmpty()) {
+                    if (documents.isEmpty()) {
                         break;
                     }
-
-                    List<ProductDocument> documents = productPage.getContent().stream()
-                            .filter(p -> !p.isDeleted())
-                            .map(productIndexMapper::toDocument)
-                            .collect(Collectors.toList());
 
                     productSearchRepository.saveAll(documents);
                     totalSynced += documents.size();
@@ -153,69 +149,91 @@ public class ElasticsearchSyncService {
     }
 
     /**
-     * Sync một product cụ thể
+     * Fetch và map products trong transaction riêng
+     * Đảm bảo Hibernate session còn mở khi access lazy relations
      */
     @Transactional(readOnly = true)
+    public List<ProductDocument> fetchAndMapProductsBatch(int page, int size) {
+        Page<Product> productPage = productRepository.findAllForElasticsearchSync(PageRequest.of(page, size));
+        
+        if (productPage.isEmpty()) {
+            return List.of();
+        }
+
+        return productPage.getContent().stream()
+                .map(productIndexMapper::toDocument)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Sync một product cụ thể
+     */
     public void syncProduct(String productId) {
         try {
-            productRepository.findById(productId).ifPresentOrElse(
-                    product -> {
-                        if (product.isDeleted()) {
-                            productSearchRepository.deleteById(productId);
-                            log.debug("Deleted product {} from index", productId);
-                        } else {
-                            ProductDocument document = productIndexMapper.toDocument(product);
-                            productSearchRepository.save(document);
-                            log.debug("Synced product {} to index", productId);
-                        }
-                    },
-                    () -> {
-                        // Product not found in DB, remove from index
-                        productSearchRepository.deleteById(productId);
-                        log.debug("Product {} not found in DB, removed from index", productId);
-                    }
-            );
+            ProductDocument document = fetchAndMapSingleProduct(productId);
+            if (document != null) {
+                productSearchRepository.save(document);
+                log.debug("Synced product {} to index", productId);
+            } else {
+                // Product not found or deleted, remove from index
+                productSearchRepository.deleteById(productId);
+                log.debug("Product {} removed from index (not found or deleted)", productId);
+            }
         } catch (Exception e) {
             log.error("Error syncing product {}: {}", productId, e.getMessage());
         }
     }
 
     /**
+     * Fetch và map single product trong transaction
+     */
+    @Transactional(readOnly = true)
+    public ProductDocument fetchAndMapSingleProduct(String productId) {
+        return productRepository.findByIdForElasticsearch(productId)
+                .filter(p -> !p.isDeleted())
+                .map(productIndexMapper::toDocument)
+                .orElse(null);
+    }
+
+    /**
      * Sync nhiều products
      */
     @Async("elasticsearchTaskExecutor")
-    @Transactional(readOnly = true)
     public void syncProducts(List<String> productIds) {
         log.info("Syncing {} products to Elasticsearch", productIds.size());
 
-        List<Product> products = productRepository.findAllById(productIds);
+        List<ProductDocument> documents = fetchAndMapProducts(productIds);
+        
+        if (!documents.isEmpty()) {
+            productSearchRepository.saveAll(documents);
+        }
 
-        List<ProductDocument> documents = products.stream()
-                .filter(p -> !p.isDeleted())
-                .map(productIndexMapper::toDocument)
+        // Remove products not in documents from index
+        List<String> indexedIds = documents.stream()
+                .map(ProductDocument::getId)
+                .collect(Collectors.toList());
+        
+        List<String> toRemove = productIds.stream()
+                .filter(id -> !indexedIds.contains(id))
                 .collect(Collectors.toList());
 
-        productSearchRepository.saveAll(documents);
-
-        // Remove deleted products from index
-        List<String> foundIds = products.stream().map(Product::getId).collect(Collectors.toList());
-        List<String> deletedIds = products.stream()
-                .filter(Product::isDeleted)
-                .map(Product::getId)
-                .collect(Collectors.toList());
-
-        // Products in request but not in DB
-        List<String> notFoundIds = productIds.stream()
-                .filter(id -> !foundIds.contains(id))
-                .collect(Collectors.toList());
-
-        deletedIds.addAll(notFoundIds);
-
-        for (String id : deletedIds) {
+        for (String id : toRemove) {
             productSearchRepository.deleteById(id);
         }
 
-        log.info("Synced {} products, removed {} from index", documents.size(), deletedIds.size());
+        log.info("Synced {} products, removed {} from index", documents.size(), toRemove.size());
+    }
+
+    /**
+     * Fetch và map multiple products trong transaction
+     */
+    @Transactional(readOnly = true)
+    public List<ProductDocument> fetchAndMapProducts(List<String> productIds) {
+        return productIds.stream()
+                .map(id -> productRepository.findByIdForElasticsearch(id).orElse(null))
+                .filter(p -> p != null && !p.isDeleted())
+                .map(productIndexMapper::toDocument)
+                .collect(Collectors.toList());
     }
 
     /**
