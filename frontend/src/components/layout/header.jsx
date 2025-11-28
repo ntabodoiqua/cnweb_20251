@@ -1,4 +1,10 @@
-import React, { useContext, useState } from "react";
+import React, {
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import {
   UserOutlined,
   HomeOutlined,
@@ -19,6 +25,8 @@ import {
   DownOutlined,
   AppstoreOutlined,
   BellOutlined,
+  TagOutlined,
+  RightOutlined,
 } from "@ant-design/icons";
 import {
   Dropdown,
@@ -28,11 +36,16 @@ import {
   Input,
   notification,
   AutoComplete,
+  Spin,
 } from "antd";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../context/auth.context";
 import { useCart } from "../../contexts/CartContext";
-import { getSearchSuggestApi } from "../../util/api";
+import {
+  getSearchSuggestApi,
+  getPublicPlatformCategoriesApi,
+  getBrandsApi,
+} from "../../util/api";
 import { getRoleName, ROLES, getHighestRole } from "../../constants/roles";
 import styles from "./header.module.css";
 import logo from "../../assets/logo.png";
@@ -48,6 +61,45 @@ const Header = () => {
   const [notificationCount, setNotificationCount] = useState(0); // State cho số lượng thông báo
   const [options, setOptions] = useState([]);
   const [searchTimeout, setSearchTimeout] = useState(null);
+
+  // Categories and Brands from API
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingBrands, setLoadingBrands] = useState(true);
+
+  // Fetch categories and brands on mount
+  useEffect(() => {
+    const fetchHeaderData = async () => {
+      try {
+        // Fetch categories
+        const categoriesResponse = await getPublicPlatformCategoriesApi();
+        if (categoriesResponse?.code === 1000) {
+          const apiCategories = categoriesResponse.result || [];
+          setCategories(apiCategories.filter((cat) => cat.active));
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      } finally {
+        setLoadingCategories(false);
+      }
+
+      try {
+        // Fetch brands
+        const brandsResponse = await getBrandsApi(0, 10);
+        if (brandsResponse?.code === 1000) {
+          const apiBrands = brandsResponse.result?.content || [];
+          setBrands(apiBrands.filter((brand) => brand.isActive));
+        }
+      } catch (error) {
+        console.error("Error fetching brands:", error);
+      } finally {
+        setLoadingBrands(false);
+      }
+    };
+
+    fetchHeaderData();
+  }, []);
 
   const handleSearchChange = (value) => {
     setSearchValue(value);
@@ -175,89 +227,158 @@ const Header = () => {
     return "";
   };
 
-  // Categories dropdown menu
-  const categoryMenuItems = [
-    {
-      key: "electronics",
-      label: (
-        <Link
-          to="/category/electronics"
-          style={{ display: "flex", alignItems: "center", gap: "12px" }}
-        >
-          <LaptopOutlined />
-          <span>Điện tử</span>
-        </Link>
-      ),
-    },
-    {
-      key: "mobile",
-      label: (
-        <Link
-          to="/category/mobile"
-          style={{ display: "flex", alignItems: "center", gap: "12px" }}
-        >
-          <MobileOutlined />
-          <span>Điện thoại & Phụ kiện</span>
-        </Link>
-      ),
-    },
-    {
-      key: "fashion",
-      label: (
-        <Link
-          to="/category/fashion"
-          style={{ display: "flex", alignItems: "center", gap: "12px" }}
-        >
-          <SkinOutlined />
-          <span>Thời trang</span>
-        </Link>
-      ),
-    },
-    {
-      key: "home",
-      label: (
-        <Link
-          to="/category/home"
-          style={{ display: "flex", alignItems: "center", gap: "12px" }}
-        >
-          <HomeIconOutlined />
-          <span>Nhà cửa & Đời sống</span>
-        </Link>
-      ),
-    },
-    {
-      key: "books",
-      label: (
-        <Link
-          to="/category/books"
-          style={{ display: "flex", alignItems: "center", gap: "12px" }}
-        >
-          <BookOutlined />
-          <span>Sách & Văn phòng phẩm</span>
-        </Link>
-      ),
-    },
-    {
-      type: "divider",
-    },
-    {
-      key: "all",
-      label: (
-        <Link
-          to="/category/all"
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            fontWeight: 600,
-          }}
-        >
-          <ShoppingCartOutlined />
-          <span>Xem tất cả danh mục</span>
-        </Link>
-      ),
-    },
-  ];
+  // Helper function to get category icon
+  const getCategoryIcon = (name) => {
+    const lowerName = name.toLowerCase();
+    if (lowerName.includes("điện tử") || lowerName.includes("thiết bị điện"))
+      return <LaptopOutlined />;
+    if (lowerName.includes("điện thoại") || lowerName.includes("mobile"))
+      return <MobileOutlined />;
+    if (lowerName.includes("thời trang")) return <SkinOutlined />;
+    if (lowerName.includes("nhà") || lowerName.includes("gia dụng"))
+      return <HomeIconOutlined />;
+    if (lowerName.includes("sách") || lowerName.includes("văn phòng"))
+      return <BookOutlined />;
+    if (lowerName.includes("gaming") || lowerName.includes("game"))
+      return <LaptopOutlined />;
+    if (lowerName.includes("giày") || lowerName.includes("dép"))
+      return <SkinOutlined />;
+    if (lowerName.includes("phụ kiện")) return <MobileOutlined />;
+    return <AppstoreOutlined />;
+  };
+
+  // Build dynamic category menu items from API - memoized to prevent re-renders
+  const categoryMenuItems = useMemo(() => {
+    if (loadingCategories) {
+      return [{ key: "loading", label: <Spin size="small" />, disabled: true }];
+    }
+
+    const items = categories.slice(0, 8).map((category) => {
+      const hasSubCategories =
+        category.subCategories && category.subCategories.length > 0;
+
+      if (hasSubCategories) {
+        return {
+          key: `cat-${category.id}`,
+          label: (
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              {getCategoryIcon(category.name)}
+              <span>{category.name}</span>
+            </div>
+          ),
+          children: [
+            {
+              key: `cat-all-${category.id}`,
+              label: (
+                <Link
+                  to={`/category/${category.id}`}
+                  style={{ fontWeight: 600, display: "block" }}
+                >
+                  Xem tất cả {category.name}
+                </Link>
+              ),
+            },
+            { type: "divider" },
+            ...category.subCategories.map((sub) => ({
+              key: `subcat-${sub.id}`,
+              label: <Link to={`/category/${sub.id}`}>{sub.name}</Link>,
+            })),
+          ],
+        };
+      }
+
+      return {
+        key: `cat-${category.id}`,
+        label: (
+          <Link
+            to={`/category/${category.id}`}
+            style={{ display: "flex", alignItems: "center", gap: "12px" }}
+          >
+            {getCategoryIcon(category.name)}
+            <span>{category.name}</span>
+          </Link>
+        ),
+      };
+    });
+
+    return [
+      ...items,
+      { type: "divider", key: "cat-main-divider" },
+      {
+        key: "all-categories",
+        label: (
+          <Link
+            to="/categories"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              fontWeight: 600,
+            }}
+          >
+            <ShoppingCartOutlined />
+            <span>Xem tất cả danh mục</span>
+          </Link>
+        ),
+      },
+    ];
+  }, [categories, loadingCategories]);
+
+  // Build dynamic brand menu items from API - memoized to prevent re-renders
+  const brandMenuItems = useMemo(() => {
+    if (loadingBrands) {
+      return [{ key: "loading", label: <Spin size="small" />, disabled: true }];
+    }
+
+    return [
+      ...brands.slice(0, 8).map((brand) => ({
+        key: `brand-${brand.id}`,
+        label: (
+          <Link
+            to={`/brand/${brand.id}`}
+            style={{ display: "flex", alignItems: "center", gap: "12px" }}
+          >
+            {brand.logoUrl ? (
+              <img
+                src={brand.logoUrl}
+                alt={brand.name}
+                style={{
+                  width: 20,
+                  height: 20,
+                  objectFit: "contain",
+                  borderRadius: 4,
+                }}
+                onError={(e) => {
+                  e.target.style.display = "none";
+                }}
+              />
+            ) : (
+              <TagOutlined />
+            )}
+            <span>{brand.name}</span>
+          </Link>
+        ),
+      })),
+      { type: "divider", key: "brand-main-divider" },
+      {
+        key: "all-brands",
+        label: (
+          <Link
+            to="/brands"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              fontWeight: 600,
+            }}
+          >
+            <TagOutlined />
+            <span>Xem tất cả thương hiệu</span>
+          </Link>
+        ),
+      },
+    ];
+  }, [brands, loadingBrands]);
 
   // Dropdown menu cho user đã đăng nhập
   const userMenuItems = [
@@ -561,7 +682,24 @@ const Header = () => {
                 }`}
               >
                 <AppstoreOutlined />
-                <span>Danh mục sản phẩm</span>
+                <span>Danh mục</span>
+                <DownOutlined style={{ fontSize: "10px", marginLeft: "4px" }} />
+              </div>
+            </Dropdown>
+
+            <Dropdown
+              menu={{ items: brandMenuItems }}
+              trigger={["hover"]}
+              placement="bottomLeft"
+              overlayClassName={styles.categoryDropdownMenu}
+            >
+              <div
+                className={`${styles.navLink} ${
+                  location.pathname.startsWith("/brand") ? styles.active : ""
+                }`}
+              >
+                <TagOutlined />
+                <span>Thương hiệu</span>
                 <DownOutlined style={{ fontSize: "10px", marginLeft: "4px" }} />
               </div>
             </Dropdown>

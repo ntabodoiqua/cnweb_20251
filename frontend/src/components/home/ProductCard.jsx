@@ -1,67 +1,39 @@
-import React from "react";
+import React, { memo, useCallback } from "react";
 import PropTypes from "prop-types";
-import { Rate, Progress, Button, message } from "antd";
-import {
-  ShoppingCartOutlined,
-  HeartOutlined,
-  EyeOutlined,
-} from "@ant-design/icons";
+import { Rate, Progress } from "antd";
+import { ShoppingCartOutlined } from "@ant-design/icons";
+import NoImage from "../../assets/NoImages.webp";
 
 /**
  * Product Card Component
  * Reusable card for displaying product information
  */
-const ProductCard = ({
+const ProductCard = memo(function ProductCard({
   product,
   onProductClick,
   formatPrice,
   showProgress = false,
-  onQuickView,
-  onAddToCart,
-  onAddToWishlist,
-}) => {
-  const handleQuickView = (e) => {
-    e.stopPropagation();
-    if (onQuickView) {
-      onQuickView(product);
-    }
-  };
-
-  const handleAddToCart = (e) => {
-    e.stopPropagation();
-    if (onAddToCart) {
-      onAddToCart(product);
-    } else {
-      message.success("Đã thêm vào giỏ hàng!");
-    }
-  };
-
-  const handleAddToWishlist = (e) => {
-    e.stopPropagation();
-    if (onAddToWishlist) {
-      onAddToWishlist(product);
-    } else {
-      message.success("Đã thêm vào danh sách yêu thích!");
-    }
-  };
+}) {
+  const handleClick = useCallback(() => {
+    onProductClick(product.id);
+  }, [onProductClick, product.id]);
 
   return (
     <div
       className="product-card"
-      onClick={() => onProductClick(product.id)}
+      onClick={handleClick}
       role="button"
       tabIndex={0}
     >
       <div className="product-image-wrapper">
         <img
-          src={
-            product.thumbnailImage ||
-            product.image ||
-            "https://via.placeholder.com/300x300?text=No+Image"
-          }
+          src={product.thumbnailImage || product.image || NoImage}
           alt={product.name}
           className="product-image"
           loading="lazy"
+          onError={(e) => {
+            e.target.src = NoImage;
+          }}
         />
         {product.badge && <div className="product-badge">{product.badge}</div>}
         {product.soldCount > 0 && (
@@ -75,34 +47,6 @@ const ProductCard = ({
         {product.discount > 0 && (
           <div className="product-discount">-{product.discount}%</div>
         )}
-
-        {/* Quick Actions Overlay */}
-        <div className="product-quick-actions">
-          <Button
-            type="default"
-            shape="circle"
-            icon={<EyeOutlined />}
-            onClick={handleQuickView}
-            className="quick-action-btn"
-            title="Xem nhanh"
-          />
-          <Button
-            type="default"
-            shape="circle"
-            icon={<HeartOutlined />}
-            onClick={handleAddToWishlist}
-            className="quick-action-btn"
-            title="Yêu thích"
-          />
-          <Button
-            type="primary"
-            shape="circle"
-            icon={<ShoppingCartOutlined />}
-            onClick={handleAddToCart}
-            className="quick-action-btn"
-            title="Thêm vào giỏ"
-          />
-        </div>
       </div>
       <div className="product-info">
         <h3 className="product-name">{product.name}</h3>
@@ -195,29 +139,37 @@ const ProductCard = ({
       </div>
     </div>
   );
-};
+});
 
 ProductCard.propTypes = {
   product: PropTypes.shape({
-    id: PropTypes.number.isRequired,
+    id: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
     name: PropTypes.string.isRequired,
-    image: PropTypes.string.isRequired,
+    image: PropTypes.string,
+    thumbnailImage: PropTypes.string,
     price: PropTypes.number,
     salePrice: PropTypes.number,
     originalPrice: PropTypes.number,
-    rating: PropTypes.number.isRequired,
-    reviews: PropTypes.number.isRequired,
+    minPrice: PropTypes.number,
+    maxPrice: PropTypes.number,
+    rating: PropTypes.number,
+    averageRating: PropTypes.number,
+    reviews: PropTypes.number,
+    ratingCount: PropTypes.number,
     discount: PropTypes.number,
     badge: PropTypes.string,
     sold: PropTypes.number,
+    soldCount: PropTypes.number,
     stock: PropTypes.number,
+    totalAvailableStock: PropTypes.number,
+    storeName: PropTypes.string,
+    brandName: PropTypes.string,
+    shortDescription: PropTypes.string,
+    active: PropTypes.bool,
   }).isRequired,
   onProductClick: PropTypes.func.isRequired,
   formatPrice: PropTypes.func.isRequired,
   showProgress: PropTypes.bool,
-  onQuickView: PropTypes.func,
-  onAddToCart: PropTypes.func,
-  onAddToWishlist: PropTypes.func,
 };
 
 export default ProductCard;

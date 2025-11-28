@@ -20,17 +20,15 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
  */
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <HelmetProvider>
-      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-        <ErrorBoundary>
-          <AuthWrapper>
-            <CartProvider>
-              <RouterProvider router={router} />
-            </CartProvider>
-          </AuthWrapper>
-        </ErrorBoundary>
-      </GoogleOAuthProvider>
-    </HelmetProvider>
-  </React.StrictMode>
+  <HelmetProvider>
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+      <ErrorBoundary>
+        <AuthWrapper>
+          <CartProvider>
+            <RouterProvider router={router} />
+          </CartProvider>
+        </AuthWrapper>
+      </ErrorBoundary>
+    </GoogleOAuthProvider>
+  </HelmetProvider>
 );
