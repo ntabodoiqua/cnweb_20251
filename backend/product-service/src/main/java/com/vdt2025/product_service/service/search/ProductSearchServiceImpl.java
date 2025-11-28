@@ -90,41 +90,51 @@ public class ProductSearchServiceImpl implements ProductSearchService {
         log.debug("Getting suggestions for prefix: {}", prefix);
 
         try {
+            // Use prefix/match query on name.autocomplete field instead of completion suggester
+            // This is more reliable and doesn't require special completion field mapping
             SearchRequest request = SearchRequest.of(s -> s
                     .index(INDEX_NAME)
-                    .suggest(sg -> sg
-                            .suggesters("product-suggest", fs -> fs
-                                    .prefix(prefix)
-                                    .completion(c -> c
-                                            .field("suggest")
-                                            .size(size)
-                                            .skipDuplicates(true)
-                                            .fuzzy(f -> f
+                    .size(size)
+                    .query(q -> q
+                            .bool(b -> b
+                                    .must(m -> m
+                                            .multiMatch(mm -> mm
+                                                    .query(prefix)
+                                                    .fields(Arrays.asList(
+                                                            "name.autocomplete^3",
+                                                            "name^2",
+                                                            "brandName",
+                                                            "categoryName"
+                                                    ))
+                                                    .type(TextQueryType.BestFields)
                                                     .fuzziness("AUTO")
                                                     .prefixLength(2)
                                             )
                                     )
+                                    .filter(f -> f.term(t -> t.field("isDeleted").value(false)))
+                                    .filter(f -> f.term(t -> t.field("isActive").value(true)))
                             )
                     )
-                    .source(src -> src.fetch(false))
+                    .source(src -> src
+                            .filter(sf -> sf
+                                    .includes(Arrays.asList("name", "brandName", "categoryName"))
+                            )
+                    )
             );
 
             SearchResponse<ProductDocument> response = elasticsearchClient.search(request, ProductDocument.class);
 
-            List<Suggestion<ProductDocument>> suggestions = response.suggest().get("product-suggest");
-            if (suggestions == null || suggestions.isEmpty()) {
-                return Collections.emptyList();
-            }
-
-            return suggestions.stream()
-                    .flatMap(s -> s.completion().options().stream())
-                    .map(option -> option.text())
+            // Extract unique product names from results
+            return response.hits().hits().stream()
+                    .map(hit -> hit.source())
+                    .filter(doc -> doc != null && doc.getName() != null)
+                    .map(ProductDocument::getName)
                     .distinct()
                     .limit(size)
                     .collect(Collectors.toList());
 
-        } catch (IOException e) {
-            log.error("Error getting suggestions: {}", e.getMessage());
+        } catch (Exception e) {
+            log.error("Error getting suggestions: {}", e.getMessage(), e);
             return Collections.emptyList();
         }
     }
