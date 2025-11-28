@@ -1,6 +1,8 @@
 package com.cnweb.order_service.service;
 
 import com.cnweb.order_service.dto.request.OrderCreationRequest;
+import com.cnweb.order_service.dto.request.ProcessReturnRequest;
+import com.cnweb.order_service.dto.request.ReturnOrderRequest;
 import com.cnweb.order_service.dto.response.OrderResponse;
 import com.cnweb.order_service.dto.response.OrderPaymentResponse;
 import com.cnweb.order_service.dto.request.OrderFilterRequest;
@@ -49,4 +51,24 @@ public interface OrderService {
      * Có thể do customer hoặc seller thực hiện
      */
     OrderResponse cancelOrder(String username, String orderId, String cancelReason);
+
+    // ==================== Return & Refund Management ====================
+
+    /**
+     * Customer yêu cầu trả hàng (DELIVERED -> pending return)
+     * Chỉ có thể yêu cầu trong vòng 7 ngày sau khi nhận hàng
+     */
+    OrderResponse requestReturn(String customerUsername, String orderId, ReturnOrderRequest request);
+
+    /**
+     * Seller xử lý yêu cầu trả hàng (approve/reject)
+     * Nếu approve: DELIVERED -> RETURNED và tiến hành refund
+     * Nếu reject: Giữ nguyên DELIVERED
+     */
+    OrderResponse processReturn(String sellerUsername, String orderId, ProcessReturnRequest request);
+
+    /**
+     * Lấy danh sách đơn hàng đang chờ xử lý trả hàng của store
+     */
+    Page<OrderResponse> getPendingReturnOrders(String sellerUsername, String storeId, Pageable pageable);
 }

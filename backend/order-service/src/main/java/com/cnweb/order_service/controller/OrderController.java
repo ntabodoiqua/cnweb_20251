@@ -3,6 +3,8 @@ package com.cnweb.order_service.controller;
 import com.cnweb.order_service.dto.request.CancelOrderRequest;
 import com.cnweb.order_service.dto.request.OrderCreationRequest;
 import com.cnweb.order_service.dto.request.OrderFilterRequest;
+import com.cnweb.order_service.dto.request.ProcessReturnRequest;
+import com.cnweb.order_service.dto.request.ReturnOrderRequest;
 import com.cnweb.order_service.dto.response.OrderPaymentResponse;
 import com.cnweb.order_service.dto.response.OrderResponse;
 import com.cnweb.order_service.service.OrderService;
@@ -196,6 +198,60 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.<OrderResponse>builder()
                 .code(200)
                 .message("Order cancelled successfully")
+                .result(response)
+                .build());
+    }
+
+    // ==================== Return & Refund Management ====================
+
+    @PostMapping("/{orderId}/return")
+    @Operation(summary = "Request return (Customer)", 
+               description = "Customer requests to return an order after delivery. Can only be done within 7 days of delivery.")
+    public ResponseEntity<ApiResponse<OrderResponse>> requestReturn(
+            @PathVariable String orderId,
+            @Valid @RequestBody ReturnOrderRequest request) {
+        String username = getCurrentUsername();
+        OrderResponse response = orderService.requestReturn(username, orderId, request);
+        
+        return ResponseEntity.ok(ApiResponse.<OrderResponse>builder()
+                .code(200)
+                .message("Return request submitted successfully")
+                .result(response)
+                .build());
+    }
+
+    @PutMapping("/{orderId}/return/process")
+    @Operation(summary = "Process return request (Seller)", 
+               description = "Seller approves or rejects a return request. If approved, order status changes to RETURNED and refund is processed.")
+    public ResponseEntity<ApiResponse<OrderResponse>> processReturn(
+            @PathVariable String orderId,
+            @Valid @RequestBody ProcessReturnRequest request) {
+        String username = getCurrentUsername();
+        OrderResponse response = orderService.processReturn(username, orderId, request);
+        
+        String message = request.getApproved() 
+                ? "Return approved and refund initiated" 
+                : "Return request rejected";
+        
+        return ResponseEntity.ok(ApiResponse.<OrderResponse>builder()
+                .code(200)
+                .message(message)
+                .result(response)
+                .build());
+    }
+
+    @GetMapping("/store/{storeId}/pending-returns")
+    @Operation(summary = "Get pending return orders (Seller)", 
+               description = "Get list of orders with pending return requests for a specific store.")
+    public ResponseEntity<ApiResponse<Page<OrderResponse>>> getPendingReturnOrders(
+            @PathVariable String storeId,
+            @PageableDefault(sort = "returnRequestedAt", direction = Sort.Direction.ASC) Pageable pageable) {
+        String username = getCurrentUsername();
+        Page<OrderResponse> response = orderService.getPendingReturnOrders(username, storeId, pageable);
+        
+        return ResponseEntity.ok(ApiResponse.<Page<OrderResponse>>builder()
+                .code(200)
+                .message("Pending return orders retrieved successfully")
                 .result(response)
                 .build());
     }

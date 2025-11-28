@@ -5,17 +5,22 @@ import com.cnweb.order_service.dto.payment.*;
 import com.cnweb.order_service.dto.request.OrderCreationRequest;
 import com.cnweb.order_service.dto.request.OrderFilterRequest;
 import com.cnweb.order_service.dto.request.OrderItemRequest;
+import com.cnweb.order_service.dto.request.ProcessReturnRequest;
+import com.cnweb.order_service.dto.request.ReturnOrderRequest;
 import com.cnweb.order_service.dto.response.CouponResponse;
 import com.cnweb.order_service.dto.response.CouponValidationResponse;
 import com.cnweb.order_service.dto.response.OrderResponse;
 import com.cnweb.order_service.entity.Order;
 import com.cnweb.order_service.entity.OrderItem;
 import com.cnweb.order_service.enums.OrderStatus;
+import com.cnweb.order_service.enums.RefundStatus;
 import com.cnweb.order_service.exception.AppException;
 import com.cnweb.order_service.exception.ErrorCode;
 import com.cnweb.order_service.mapper.OrderMapper;
 import com.cnweb.order_service.repository.OrderRepository;
 import com.cnweb.order_service.specification.OrderSpecification;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +54,7 @@ public class OrderServiceImpl implements OrderService {
     PaymentClient paymentClient;
     OrderMapper orderMapper;
     CouponService couponService;
+    ObjectMapper objectMapper;
     @Value("${payment.redirect-url}")
     @NonFinal
     String paymentRedirectUrl;
@@ -608,6 +614,193 @@ public class OrderServiceImpl implements OrderService {
         } catch (Exception e) {
             log.error("Error validating store ownership: {}", e.getMessage());
             return false;
+        }
+    }
+
+    // ==================== Return & Refund Management ====================
+
+    @Override
+    @Transactional
+    public OrderResponse requestReturn(String customerUsername, String orderId, ReturnOrderRequest request) {
+        log.info("Customer {} requesting return for order {}", customerUsername, orderId);
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Validate customer owns the order
+        if (!order.getUsername().equals(customerUsername)) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        // Check if already requested return
+        if (order.getReturnReason() != null) {
+            throw new AppException(ErrorCode.RETURN_ALREADY_REQUESTED);
+        }
+
+        // Validate order can be returned
+        if (!order.canBeReturned()) {
+            // Check if return period expired
+            if (order.getStatus() == OrderStatus.DELIVERED && order.getDeliveredAt() != null) {
+                LocalDateTime returnDeadline = order.getDeliveredAt().plusDays(7);
+                if (LocalDateTime.now().isAfter(returnDeadline)) {
+                    throw new AppException(ErrorCode.RETURN_PERIOD_EXPIRED);
+                }
+            }
+            throw new AppException(ErrorCode.ORDER_CANNOT_BE_RETURNED);
+        }
+
+        // Validate return reason
+        if (request.getReturnReason() == null) {
+            throw new AppException(ErrorCode.RETURN_REASON_REQUIRED);
+        }
+
+        if (request.getReturnDescription() == null || request.getReturnDescription().trim().isEmpty()) {
+            throw new AppException(ErrorCode.RETURN_DESCRIPTION_REQUIRED);
+        }
+
+        // Update order with return request info
+        order.setReturnReason(request.getReturnReason());
+        order.setReturnDescription(request.getReturnDescription());
+        order.setReturnRequestedAt(LocalDateTime.now());
+
+        // Store return images as JSON
+        if (request.getReturnImages() != null && !request.getReturnImages().isEmpty()) {
+            try {
+                order.setReturnImages(objectMapper.writeValueAsString(request.getReturnImages()));
+            } catch (JsonProcessingException e) {
+                log.error("Error serializing return images: {}", e.getMessage());
+            }
+        }
+
+        order = orderRepository.save(order);
+        log.info("Return request submitted for order {} by customer {}", orderId, customerUsername);
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse processReturn(String sellerUsername, String orderId, ProcessReturnRequest request) {
+        log.info("Seller {} processing return for order {}, approved: {}", sellerUsername, orderId, request.getApproved());
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Validate seller owns the store
+        if (!validateStoreOwnership(order.getStoreId(), sellerUsername)) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        // Check if return was requested
+        if (order.getReturnReason() == null) {
+            throw new AppException(ErrorCode.RETURN_NOT_REQUESTED);
+        }
+
+        // Check if already processed
+        if (order.getReturnProcessedAt() != null) {
+            throw new AppException(ErrorCode.RETURN_ALREADY_PROCESSED);
+        }
+
+        order.setReturnProcessedAt(LocalDateTime.now());
+        order.setReturnProcessedBy(sellerUsername);
+
+        if (request.getApproved()) {
+            // Approve return request
+            order.setStatus(OrderStatus.RETURNED);
+            order.setReturnedAt(LocalDateTime.now());
+
+            // Restore inventory
+            List<InventoryChangeRequest> inventoryChanges = order.getItems().stream()
+                    .map(item -> InventoryChangeRequest.builder()
+                            .variantId(item.getVariantId())
+                            .quantity(item.getQuantity())
+                            .build())
+                    .toList();
+
+            try {
+                productClient.releaseBatch(BatchInventoryChangeRequest.builder()
+                        .items(inventoryChanges)
+                        .build());
+                log.info("Inventory restored for returned order {}", orderId);
+            } catch (Exception e) {
+                log.error("Failed to restore inventory for returned order {}: {}", orderId, e.getMessage());
+                // Continue with return even if inventory restore fails
+            }
+
+            // Process refund if order was paid
+            if (order.getPaymentStatus() == com.cnweb.order_service.enums.PaymentStatus.PAID
+                    && order.getPaymentTransactionId() != null) {
+                processRefund(order);
+            }
+
+            log.info("Return approved for order {} by seller {}", orderId, sellerUsername);
+        } else {
+            // Reject return request
+            if (request.getRejectionReason() == null || request.getRejectionReason().trim().isEmpty()) {
+                throw new AppException(ErrorCode.REJECTION_REASON_REQUIRED);
+            }
+            order.setReturnRejectionReason(request.getRejectionReason());
+            log.info("Return rejected for order {} by seller {}: {}", orderId, sellerUsername, request.getRejectionReason());
+        }
+
+        order = orderRepository.save(order);
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Override
+    public Page<OrderResponse> getPendingReturnOrders(String sellerUsername, String storeId, Pageable pageable) {
+        // Validate store ownership
+        ApiResponse<Boolean> validationResponse = productClient.validateStoreOwner(storeId, sellerUsername);
+        if (validationResponse.getResult() == null || !validationResponse.getResult()) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        // Find orders with pending return requests (return requested but not processed)
+        Specification<Order> spec = (root, query, cb) -> cb.and(
+                cb.equal(root.get("storeId"), storeId),
+                cb.equal(root.get("status"), OrderStatus.DELIVERED),
+                cb.isNotNull(root.get("returnReason")),
+                cb.isNull(root.get("returnProcessedAt"))
+        );
+
+        Page<Order> orders = orderRepository.findAll(spec, pageable);
+        return orders.map(orderMapper::toOrderResponse);
+    }
+
+    /**
+     * Process refund for a returned order
+     */
+    private void processRefund(Order order) {
+        log.info("Processing refund for order {}", order.getId());
+
+        try {
+            order.setRefundStatus(RefundStatus.PROCESSING);
+            order.setRefundAmount(order.getTotalAmount());
+
+            RefundRequest refundRequest = RefundRequest.builder()
+                    .zpTransId(order.getPaymentTransactionId())
+                    .amount(order.getTotalAmount().longValue())
+                    .description("Hoàn tiền cho đơn hàng " + order.getOrderNumber() + " - Lý do: " + order.getReturnReason().name())
+                    .build();
+
+            RefundResponse refundResponse = paymentClient.refundOrder(refundRequest);
+
+            if ("SUCCESS".equals(refundResponse.getStatus()) || "PROCESSING".equals(refundResponse.getStatus())) {
+                order.setRefundTransactionId(refundResponse.getMRefundId());
+                if ("SUCCESS".equals(refundResponse.getStatus())) {
+                    order.setRefundStatus(RefundStatus.COMPLETED);
+                    order.setRefundedAt(LocalDateTime.now());
+                }
+                log.info("Refund initiated successfully for order {}, mRefundId: {}", 
+                        order.getId(), refundResponse.getMRefundId());
+            } else {
+                order.setRefundStatus(RefundStatus.FAILED);
+                log.error("Refund failed for order {}: {}", order.getId(), refundResponse.getMessage());
+            }
+
+        } catch (Exception e) {
+            order.setRefundStatus(RefundStatus.FAILED);
+            log.error("Error processing refund for order {}: {}", order.getId(), e.getMessage());
         }
     }
 }
