@@ -111,7 +111,7 @@ public class ElasticsearchConfig {
         return new ElasticsearchClient(transport);
     }
 
-    @Bean
+    @Bean(name = {"elasticsearchTemplate", "elasticsearchOperations"})
     public ElasticsearchOperations elasticsearchOperations(ElasticsearchClient elasticsearchClient) {
         return new ElasticsearchTemplate(elasticsearchClient);
     }

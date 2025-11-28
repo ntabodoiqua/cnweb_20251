@@ -54,7 +54,16 @@ public class SecurityConfig {
             "/products/public/**",
             "/categories/public/**",
             "/brands/public/**",
-            "/public/**"
+            "/public/**",
+            // Elasticsearch search endpoints - public cho user tìm kiếm
+            "/products/search",
+            "/products/search/suggest",
+            "/products/search/health"
+    };
+
+    private static final String[] PUBLIC_POST_ENDPOINTS_SEARCH = {
+            // POST search endpoint - public cho user tìm kiếm với filters
+            "/products/search"
     };
 
     CustomJwtDecoder customJwtDecoder;
@@ -76,6 +85,8 @@ public class SecurityConfig {
                                 .requestMatchers(AUTH_ENDPOINTS).permitAll()
                                 // Allow POST to create users
                                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                                // Allow POST to search endpoints
+                                .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS_SEARCH).permitAll()
                                 // Allow GET requests to public endpoints
                                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                                 // All other requests need authentication

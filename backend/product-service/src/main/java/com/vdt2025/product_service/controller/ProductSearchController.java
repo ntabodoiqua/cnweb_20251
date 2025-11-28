@@ -24,7 +24,7 @@ import java.util.List;
  * REST Controller cho tìm kiếm sản phẩm với Elasticsearch
  */
 @RestController
-@RequestMapping("/api/products/v1/search")
+@RequestMapping("/products/search")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Tag(name = "Product Search", description = "APIs for product search using Elasticsearch")
