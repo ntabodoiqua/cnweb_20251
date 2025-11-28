@@ -120,4 +120,52 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     int bulkUpdateStatusNative(
             @Param("ids") List<String> ids,
             @Param("status") boolean status);
+
+    /**
+     * Fetch products với tất cả relations cần thiết cho Elasticsearch indexing
+     * Sử dụng JOIN FETCH để tránh LazyInitializationException
+     */
+    @Query("""
+        SELECT DISTINCT p FROM Product p
+        LEFT JOIN FETCH p.category c
+        LEFT JOIN FETCH c.parentCategory
+        LEFT JOIN FETCH p.store
+        LEFT JOIN FETCH p.brand
+        LEFT JOIN FETCH p.storeCategories
+        LEFT JOIN FETCH p.selectionGroups sg
+        LEFT JOIN FETCH sg.options
+        WHERE p.isDeleted = false
+        ORDER BY p.createdAt DESC
+    """)
+    List<Product> findAllForElasticsearchIndexing();
+
+    /**
+     * Fetch products với pagination cho Elasticsearch sync
+     * Note: Cannot use JOIN FETCH with pagination directly, so use EntityGraph
+     */
+    @Query("""
+        SELECT p FROM Product p
+        WHERE p.isDeleted = false
+        ORDER BY p.createdAt DESC
+    """)
+    @org.springframework.data.jpa.repository.EntityGraph(
+        attributePaths = {"category", "store", "brand", "storeCategories"}
+    )
+    Page<Product> findAllForElasticsearchSync(Pageable pageable);
+
+    /**
+     * Fetch single product với tất cả relations cho Elasticsearch
+     */
+    @Query("""
+        SELECT p FROM Product p
+        LEFT JOIN FETCH p.category c
+        LEFT JOIN FETCH c.parentCategory
+        LEFT JOIN FETCH p.store
+        LEFT JOIN FETCH p.brand
+        LEFT JOIN FETCH p.storeCategories
+        LEFT JOIN FETCH p.selectionGroups sg
+        LEFT JOIN FETCH sg.options
+        WHERE p.id = :productId
+    """)
+    java.util.Optional<Product> findByIdForElasticsearch(@Param("productId") String productId);
 }
