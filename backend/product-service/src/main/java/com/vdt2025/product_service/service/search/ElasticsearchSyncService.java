@@ -8,6 +8,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import lombok.experimental.NonFinal;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.domain.Page;
@@ -39,6 +42,11 @@ public class ElasticsearchSyncService {
     ProductSearchRepository productSearchRepository;
     ProductIndexMapper productIndexMapper;
     ProductSearchService productSearchService;
+
+    @Autowired
+    @Lazy
+    @NonFinal
+    ElasticsearchSyncService self;
 
     AtomicBoolean isSyncing = new AtomicBoolean(false);
     static final int BATCH_SIZE = 50; // Smaller batch size to avoid memory issues
@@ -122,7 +130,7 @@ public class ElasticsearchSyncService {
                 long totalSynced = 0;
 
                 while (true) {
-                    List<ProductDocument> documents = fetchAndMapProductsBatch(page, BATCH_SIZE);
+                    List<ProductDocument> documents = self.fetchAndMapProductsBatch(page, BATCH_SIZE);
 
                     if (documents.isEmpty()) {
                         break;
@@ -170,7 +178,7 @@ public class ElasticsearchSyncService {
      */
     public void syncProduct(String productId) {
         try {
-            ProductDocument document = fetchAndMapSingleProduct(productId);
+            ProductDocument document = self.fetchAndMapSingleProduct(productId);
             if (document != null) {
                 productSearchRepository.save(document);
                 log.debug("Synced product {} to index", productId);
@@ -202,7 +210,7 @@ public class ElasticsearchSyncService {
     public void syncProducts(List<String> productIds) {
         log.info("Syncing {} products to Elasticsearch", productIds.size());
 
-        List<ProductDocument> documents = fetchAndMapProducts(productIds);
+        List<ProductDocument> documents = self.fetchAndMapProducts(productIds);
         
         if (!documents.isEmpty()) {
             productSearchRepository.saveAll(documents);
