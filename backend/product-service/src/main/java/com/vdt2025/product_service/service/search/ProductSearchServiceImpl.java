@@ -27,6 +27,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
+import org.springframework.data.elasticsearch.core.IndexOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +50,7 @@ import java.util.stream.Collectors;
 public class ProductSearchServiceImpl implements ProductSearchService {
 
     ElasticsearchClient elasticsearchClient;
+    ElasticsearchOperations elasticsearchOperations;
     ProductSearchRepository productSearchRepository;
     ProductRepository productRepository;
     ProductVariantRepository variantRepository;
@@ -189,8 +192,13 @@ public class ProductSearchServiceImpl implements ProductSearchService {
     public void reindexAll() {
         log.info("Starting full reindex of all products");
 
-        // Delete all existing documents
-        productSearchRepository.deleteAll();
+        // Delete and recreate index to ensure correct mapping
+        IndexOperations indexOps = elasticsearchOperations.indexOps(ProductDocument.class);
+        if (indexOps.exists()) {
+            indexOps.delete();
+        }
+        indexOps.create();
+        indexOps.putMapping(indexOps.createMapping());
 
         // Batch index all products
         int batchSize = 100;

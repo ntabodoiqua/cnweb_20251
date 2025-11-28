@@ -13,6 +13,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Hibernate;
 import org.hibernate.LazyInitializationException;
+import org.springframework.data.elasticsearch.core.suggest.Completion;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -286,6 +287,7 @@ public class ProductIndexMapper {
 
     /**
      * Build completion suggestion for autocomplete
+     * Using Spring Data Elasticsearch's Completion type
      */
     private Completion buildSuggestion(Product product) {
         List<String> inputs = new ArrayList<>();
@@ -307,10 +309,10 @@ public class ProductIndexMapper {
         // Weight based on popularity
         int weight = calculateWeight(product);
 
-        return Completion.builder()
-                .input(inputs.toArray(new String[0]))
-                .weight(weight)
-                .build();
+        // Create Completion object using Spring Data Elasticsearch's Completion
+        Completion completion = new Completion(inputs.toArray(new String[0]));
+        completion.setWeight(weight);
+        return completion;
     }
 
     /**

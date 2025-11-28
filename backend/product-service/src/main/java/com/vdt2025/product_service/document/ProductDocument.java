@@ -4,11 +4,11 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.*;
+import org.springframework.data.elasticsearch.core.suggest.Completion;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Elasticsearch Document cho Product
@@ -144,7 +144,7 @@ public class ProductDocument {
     @Field(type = FieldType.Keyword)
     String createdBy;
 
-    // Suggest field for autocomplete
+    // Suggest field for autocomplete - using Spring Data Elasticsearch's Completion type
     @CompletionField(analyzer = "simple", searchAnalyzer = "simple", maxInputLength = 100)
     Completion suggest;
 
@@ -245,18 +245,7 @@ public class ProductDocument {
         String unit;
     }
 
-    /**
-     * Completion suggestion wrapper
-     */
-    @Getter
-    @Setter
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Completion {
-        String[] input;
-        Integer weight;
-    }
+    // Note: Using org.springframework.data.elasticsearch.core.suggest.Completion for autocomplete
 
     /**
      * Nested document cho Selection Group
