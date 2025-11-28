@@ -104,6 +104,31 @@ public class StoreServiceImp implements StoreService {
     }
 
     @Override
+    public StoreSimpleResponse getPublicStoreById(String storeId) {
+        log.info("Fetching public store by ID: {}", storeId);
+        try {
+            Store store = storeRepository.findById(storeId)
+                    .orElseThrow(() -> {
+                        log.error("Store not found with ID: {}", storeId);
+                        return new AppException(ErrorCode.STORE_NOT_FOUND);
+                    });
+            
+            // Chỉ trả về store đang hoạt động
+            if (!store.isActive()) {
+                log.error("Store is not active: {}", storeId);
+                throw new AppException(ErrorCode.STORE_NOT_FOUND);
+            }
+            
+            return storeMapper.toStoreSimpleResponse(store);
+        } catch (AppException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to fetch public store by ID: {}", storeId, e);
+            throw new AppException(ErrorCode.STORE_FETCH_FAILED);
+        }
+    }
+
+    @Override
     @Transactional
     public void deactivateStoreBySellerProfileId(String sellerProfileId) {
         log.info("Deactivating store for seller profile ID: {}", sellerProfileId);

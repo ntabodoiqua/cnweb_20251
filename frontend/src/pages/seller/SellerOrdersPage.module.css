@@ -1,0 +1,963 @@
+/* ========================================
+   Seller Orders Page Styles
+   Giao diện trang quản lý đơn hàng
+   ======================================== */
+
+.sellerOrders {
+  animation: fadeInUp 0.5s ease-out;
+  padding: 0;
+  margin: 0;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== Stats Grid ==================== */
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  padding: 20px;
+  background: white;
+  border: 2px solid #e8e8e8;
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.statCard:hover,
+.statCard.active {
+  border-color: #ee4d2d;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.05) 0%,
+    rgba(255, 107, 53, 0.05) 100%
+  );
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.15);
+}
+
+.statCount {
+  font-size: 32px;
+  font-weight: 700;
+  color: #ee4d2d;
+  margin-bottom: 8px;
+}
+
+.statLabel {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* ==================== Header Section ==================== */
+
+.sellerOrdersHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 0;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* ==================== Search Box ==================== */
+
+.sellerSearchBox {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 18px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 16px 12px 48px;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background: white;
+  box-sizing: border-box;
+}
+
+.searchInput:hover {
+  border-color: rgba(238, 77, 45, 0.4);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+}
+
+.searchInput::placeholder {
+  color: #bbb;
+}
+
+/* ==================== Filter Group ==================== */
+
+.filterGroup {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filterSelect {
+  padding: 12px 16px;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 180px;
+}
+
+.filterSelect:hover {
+  border-color: #ee4d2d;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+}
+
+/* ==================== Button Styles ==================== */
+
+.btn {
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.btnPrimary {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+}
+
+.btnPrimary:hover {
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(238, 77, 45, 0.4);
+}
+
+.btnSecondary {
+  background: white;
+  color: #666;
+  border: 2px solid #e8e8e8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.btnSecondary:hover {
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ==================== Filters Panel ==================== */
+
+.filtersPanel {
+  background: #f9f9f9;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  border: 1px solid #e8e8e8;
+}
+
+.filtersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.filterItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.filterLabel {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+  font-size: 14px;
+}
+
+.filterItem .filterSelect {
+  width: 100%;
+}
+
+/* ==================== Tabs ==================== */
+
+.tabsContainer {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabBtn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: 2px solid #e8e8e8;
+  background: white;
+  color: #666;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  font-size: 14px;
+}
+
+.tabBtn:hover {
+  border-color: rgba(238, 77, 45, 0.4);
+  color: #ee4d2d;
+}
+
+.tabBtn.active {
+  border-color: #ee4d2d;
+  background: rgba(238, 77, 45, 0.08);
+  color: #ee4d2d;
+  font-weight: 600;
+}
+
+/* ==================== Table Container ==================== */
+
+.tableContainer {
+  background: white;
+  border-radius: 12px;
+  overflow-x: auto;
+  overflow-y: visible;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+  margin-bottom: 24px;
+  position: relative;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tableContainer::-webkit-scrollbar {
+  height: 8px;
+}
+
+.tableContainer::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 0 0 12px 12px;
+}
+
+.tableContainer::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  border-radius: 4px;
+}
+
+/* ==================== Loading Overlay ==================== */
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  gap: 16px;
+  border-radius: 12px;
+  min-height: 300px;
+}
+
+/* ==================== Table Styles ==================== */
+
+.ordersTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 1000px;
+  position: relative;
+}
+
+.ordersTable thead {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.05) 0%,
+    rgba(255, 107, 53, 0.05) 100%
+  );
+}
+
+.ordersTable thead tr th {
+  padding: 16px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.15);
+  white-space: nowrap;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.05) 0%,
+    rgba(255, 107, 53, 0.05) 100%
+  );
+}
+
+.ordersTable thead tr th:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 10;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
+  background: #fef5f3;
+}
+
+.ordersTable tbody tr {
+  transition: all 0.3s ease;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ordersTable tbody tr:hover {
+  background-color: rgba(238, 77, 45, 0.02);
+}
+
+.ordersTable tbody tr td {
+  padding: 16px;
+  font-size: 14px;
+  color: #333;
+  vertical-align: middle;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.ordersTable tbody tr td:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 5;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
+  background: white;
+}
+
+.ordersTable tbody tr:hover td:last-child {
+  background: #fef5f3;
+}
+
+/* ==================== Order Info Cell ==================== */
+
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.orderNumber {
+  font-weight: 700;
+  color: #333;
+  font-size: 14px;
+}
+
+.orderDate {
+  font-size: 12px;
+  color: #888;
+}
+
+/* ==================== Customer Info Cell ==================== */
+
+.customerInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.customerName {
+  font-weight: 600;
+  color: #333;
+}
+
+.customerPhone {
+  font-size: 13px;
+  color: #888;
+}
+
+/* ==================== Product Info Cell ==================== */
+
+.productInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 250px;
+}
+
+.productImage {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #f0f0f0;
+  flex-shrink: 0;
+}
+
+.productDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.productName {
+  font-weight: 600;
+  color: #333;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+}
+
+.productVariant {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+.moreItems {
+  font-size: 12px;
+  color: #ee4d2d;
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+/* ==================== Status Badges ==================== */
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  gap: 6px;
+}
+
+.statusPending {
+  background: rgba(250, 173, 20, 0.1);
+  color: #faad14;
+  border: 1px solid rgba(250, 173, 20, 0.3);
+}
+
+.statusPaid {
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+  border: 1px solid rgba(82, 196, 26, 0.3);
+}
+
+.statusConfirmed {
+  background: rgba(24, 144, 255, 0.1);
+  color: #1890ff;
+  border: 1px solid rgba(24, 144, 255, 0.3);
+}
+
+.statusShipping {
+  background: rgba(114, 46, 209, 0.1);
+  color: #722ed1;
+  border: 1px solid rgba(114, 46, 209, 0.3);
+}
+
+.statusCompleted {
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+  border: 1px solid rgba(82, 196, 26, 0.3);
+}
+
+.statusCancelled {
+  background: rgba(255, 77, 79, 0.1);
+  color: #ff4d4f;
+  border: 1px solid rgba(255, 77, 79, 0.3);
+}
+
+.statusReturned {
+  background: rgba(114, 46, 209, 0.1);
+  color: #722ed1;
+  border: 1px solid rgba(114, 46, 209, 0.3);
+}
+
+/* Payment Status Badges */
+.paymentBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 8px;
+}
+
+.paymentUnpaid {
+  background: rgba(140, 140, 140, 0.1);
+  color: #8c8c8c;
+}
+
+.paymentPending {
+  background: rgba(250, 173, 20, 0.1);
+  color: #d48806;
+}
+
+.paymentPaid {
+  background: rgba(82, 196, 26, 0.1);
+  color: #389e0d;
+}
+
+.paymentFailed {
+  background: rgba(255, 77, 79, 0.1);
+  color: #cf1322;
+}
+
+.paymentRefunded {
+  background: rgba(114, 46, 209, 0.1);
+  color: #531dab;
+}
+
+/* ==================== Price ==================== */
+
+.priceText {
+  font-weight: 600;
+  color: #ee4d2d;
+  font-size: 14px;
+}
+
+/* ==================== Action Buttons ==================== */
+
+.actionButtons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #f5f5f5;
+  color: #666;
+}
+
+.actionBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.viewBtn:hover {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  color: white;
+}
+
+/* ==================== No Data State ==================== */
+
+.noData {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.noDataIcon {
+  font-size: 48px;
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+.noData p {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 12px 0 0;
+  color: #999;
+}
+
+/* ==================== Summary Section ==================== */
+
+.ordersSummary {
+  display: flex;
+  justify-content: flex-end;
+  gap: 32px;
+  padding: 20px 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.02) 0%,
+    rgba(255, 107, 53, 0.02) 100%
+  );
+  border-radius: 12px;
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  flex-wrap: wrap;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  width: 100%;
+}
+
+.summaryItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summaryLabel {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.summaryValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ee4d2d;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ==================== Pagination ==================== */
+
+.pagination {
+  text-align: center;
+  margin-top: 24px;
+  padding: 8px 0;
+}
+
+/* ==================== Order Detail Modal ==================== */
+
+.orderDetailSection {
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.orderDetailTitle {
+  margin: 0 0 12px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.orderDetailGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  font-size: 13px;
+}
+
+.orderDetailItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.orderDetailItem strong {
+  color: #333;
+}
+
+/* ==================== Responsive Design ==================== */
+
+@media (max-width: 1023px) {
+  .sellerOrders {
+    margin: 0;
+    max-width: 100%;
+  }
+
+  .sellerOrdersHeader {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .sellerSearchBox {
+    min-width: 100%;
+  }
+
+  .filterGroup {
+    justify-content: space-between;
+  }
+
+  .filterSelect {
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .tableContainer {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .ordersTable {
+    min-width: 900px;
+  }
+
+  .ordersTable thead tr th,
+  .ordersTable tbody tr td {
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .ordersSummary {
+    margin: 0;
+    width: 100%;
+  }
+}
+
+@media (max-width: 767px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+
+  .statCard {
+    padding: 16px;
+  }
+
+  .statCount {
+    font-size: 24px;
+  }
+
+  .statLabel {
+    font-size: 12px;
+  }
+
+  .sellerOrdersHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .sellerSearchBox {
+    width: 100%;
+    min-width: unset;
+  }
+
+  .filterGroup {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .filterSelect {
+    width: 100%;
+  }
+
+  .tabsContainer {
+    padding-bottom: 12px;
+  }
+
+  .tabBtn {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .tableContainer {
+    border-radius: 8px;
+  }
+
+  .ordersTable {
+    min-width: 800px;
+  }
+
+  .productInfo {
+    min-width: 200px;
+  }
+
+  .productImage {
+    width: 40px;
+    height: 40px;
+  }
+
+  .statusBadge {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+
+  .actionBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .ordersSummary {
+    gap: 20px;
+    padding: 16px 20px;
+  }
+
+  .summaryLabel {
+    font-size: 13px;
+  }
+
+  .summaryValue {
+    font-size: 16px;
+  }
+
+  .filtersGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 639px) {
+  .statsGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .statCard {
+    padding: 12px;
+  }
+
+  .statCount {
+    font-size: 20px;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tableContainer {
+    border-radius: 0;
+  }
+
+  .ordersTable {
+    min-width: 750px;
+  }
+
+  .ordersSummary {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    border-radius: 0;
+  }
+
+  .summaryItem {
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 8px;
+  }
+}
+
+@media (max-width: 479px) {
+  .searchInput {
+    padding: 10px 12px 10px 42px;
+    font-size: 13px;
+  }
+
+  .searchIcon {
+    left: 12px;
+    font-size: 16px;
+  }
+
+  .filterSelect {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  .ordersTable {
+    min-width: 700px;
+  }
+
+  .productImage {
+    width: 36px;
+    height: 36px;
+  }
+
+  .actionBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+}

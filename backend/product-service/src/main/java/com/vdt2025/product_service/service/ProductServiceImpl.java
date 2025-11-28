@@ -462,6 +462,7 @@ public class ProductServiceImpl implements ProductService {
         variant = variantRepository.save(variant);
         log.info("Variant {} updated successfully", variant.getSku());
         cacheEvictService.evictProductDetails(productId);
+        cacheEvictService.evictVariantSelectionCaches(productId);
         return mapToVariantResponse(variant);
     }
 
@@ -593,6 +594,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
         
         variantRepository.delete(variant);
+        cacheEvictService.evictVariantSelectionCaches(productId);
         log.info("Variant {} deleted successfully", variant.getSku());
     }
 

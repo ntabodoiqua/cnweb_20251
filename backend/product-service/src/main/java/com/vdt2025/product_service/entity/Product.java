@@ -125,5 +125,18 @@ public class Product {
     @Column(name = "specs", columnDefinition = "jsonb") // Mapping với cột jsonb trong Postgres
     private Map<String, SpecAttribute> specs;
 
+    // ========== Seller-defined Selection Groups ==========
+    /**
+     * Các nhóm lựa chọn mà seller tự định nghĩa cho sản phẩm
+     * Ví dụ: "Mẫu điện thoại", "Kiểu vỏ", "Màu sắc"...
+     * 
+     * Khác với attributeValues (Admin định nghĩa global theo category),
+     * selectionGroups cho phép seller tự do định nghĩa theo nhu cầu riêng
+     */
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("displayOrder ASC")
+    @Builder.Default
+    List<ProductSelectionGroup> selectionGroups = new ArrayList<>();
+
 
 }

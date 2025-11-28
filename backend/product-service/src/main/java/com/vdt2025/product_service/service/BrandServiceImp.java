@@ -101,6 +101,7 @@ public class BrandServiceImp implements BrandService{
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
+    @CacheEvict(value = "brands", key = "#id")
     public String setBrandThumbnail(String id, MultipartFile file) {
         Brand brand = brandRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
@@ -120,6 +121,7 @@ public class BrandServiceImp implements BrandService{
 
     @Override
     @Transactional
+    @CacheEvict(value = "brands", key = "#brandId")
     public void deleteBrand(String brandId) {
         Brand brand = brandRepository.findById(brandId)
                 .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));

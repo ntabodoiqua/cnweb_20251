@@ -1,0 +1,118 @@
+.product-filters {
+  position: sticky;
+  top: 80px;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.product-filters:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.product-filters .ant-card-head {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6347 100%);
+  color: white;
+  border-radius: 12px 12px 0 0;
+  border-bottom: none;
+}
+
+.product-filters .ant-card-head-title {
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.product-filters .ant-btn-link {
+  color: white;
+  transition: all 0.3s ease;
+}
+
+.product-filters .ant-btn-link:hover {
+  color: rgba(255, 255, 255, 0.85);
+  transform: scale(1.05);
+}
+
+.product-filters .ant-collapse-ghost > .ant-collapse-item {
+  border-bottom: 1px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.product-filters .ant-collapse-ghost > .ant-collapse-item:hover {
+  background: rgba(238, 77, 45, 0.02);
+}
+
+.product-filters .ant-collapse-header {
+  font-weight: 500;
+  color: #333;
+  padding: 12px 0 !important;
+  transition: color 0.3s ease;
+}
+
+.product-filters .ant-collapse-item-active .ant-collapse-header {
+  color: #ee4d2d;
+}
+
+.product-filters .ant-collapse-content-box {
+  padding: 16px 0 !important;
+}
+
+.product-filters .ant-slider {
+  margin: 12px 0;
+}
+
+.product-filters .ant-slider-track {
+  background: linear-gradient(90deg, #ee4d2d 0%, #ff6347 100%);
+}
+
+.product-filters .ant-slider-handle {
+  border-color: #ee4d2d;
+}
+
+.product-filters .ant-slider-handle:hover,
+.product-filters .ant-slider-handle:focus {
+  border-color: #ff6347;
+  box-shadow: 0 0 0 5px rgba(238, 77, 45, 0.12);
+}
+
+.product-filters .ant-input-number,
+.product-filters .ant-select,
+.product-filters .ant-picker {
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.product-filters .ant-input-number:hover,
+.product-filters .ant-select:hover .ant-select-selector,
+.product-filters .ant-picker:hover {
+  border-color: #ee4d2d;
+}
+
+.product-filters .ant-input-number-focused,
+.product-filters .ant-select-focused .ant-select-selector,
+.product-filters .ant-picker-focused {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 2px rgba(238, 77, 45, 0.1);
+}
+
+/* Scrollbar styling */
+.product-filters::-webkit-scrollbar {
+  width: 6px;
+}
+
+.product-filters::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.product-filters::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ee4d2d 0%, #ff6347 100%);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.product-filters::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ff6347 0%, #ee4d2d 100%);
+}

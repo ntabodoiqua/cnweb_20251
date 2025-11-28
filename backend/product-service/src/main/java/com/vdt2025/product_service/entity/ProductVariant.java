@@ -94,4 +94,17 @@ public class ProductVariant {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "metadata", columnDefinition = "jsonb")
     private Map<String, SpecAttribute> metadata;
+    
+    // ========== Seller-defined Selection Options ==========
+    /**
+     * Các selection options được liên kết với variant này
+     * Dùng cho hệ thống selection mới (seller tự định nghĩa)
+     * 
+     * Ví dụ: Variant "Ốp iPhone 15 Pro - Carbon" được liên kết với:
+     * - Option "iPhone 15 Pro" (từ group "Mẫu điện thoại")
+     * - Option "Carbon" (từ group "Kiểu vỏ")
+     */
+    @ManyToMany(mappedBy = "variants")
+    @Builder.Default
+    List<ProductSelectionOption> selectionOptions = new ArrayList<>();
 }

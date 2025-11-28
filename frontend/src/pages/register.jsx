@@ -1,7 +1,8 @@
-import React, { useState } from "react";
-import { Button, Form, Input, notification, DatePicker } from "antd";
-import { createUserApi } from "../util/api";
+import React, { useState, useContext } from "react";
+import { Button, Form, Input, notification, DatePicker, Checkbox } from "antd";
+import { createUserApi, loginWithGoogleApi, getMyInfoApi } from "../util/api";
 import { Link, useNavigate } from "react-router-dom";
+import { AuthContext } from "../components/context/auth.context";
 import {
   UserOutlined,
   LockOutlined,
@@ -10,11 +11,15 @@ import {
   CalendarOutlined,
   GoogleOutlined,
 } from "@ant-design/icons";
-import "./register.css";
+import { getTokenInfo } from "../util/jwt";
+import { GoogleLogin } from "@react-oauth/google";
+import useScrollToTop from "../hooks/useScrollToTop";
+import styles from "./Register.module.css";
 import logo from "../assets/logo.png";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const { setAuth } = useContext(AuthContext);
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState({
@@ -22,6 +27,9 @@ const RegisterPage = () => {
     score: 0,
     color: "",
   });
+
+  // Sử dụng hook để tự động scroll lên đầu trang
+  useScrollToTop();
 
   // Hàm tính độ mạnh mật khẩu
   const calculatePasswordStrength = (password) => {
@@ -192,37 +200,165 @@ const RegisterPage = () => {
     });
   };
 
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setLoading(true);
+      const { credential } = credentialResponse;
+
+      // Gửi token lên backend để xác thực (sử dụng cùng API với login)
+      const res = await loginWithGoogleApi(credential);
+
+      if (res && res.code === 1000) {
+        const { token, authenticated } = res.result;
+
+        if (authenticated && token) {
+          // Lưu token vào localStorage
+          localStorage.setItem("access_token", token);
+
+          // Decode token để lấy thông tin user
+          const tokenInfo = getTokenInfo(token);
+
+          // Gọi API để lấy đầy đủ thông tin user
+          try {
+            const userInfoRes = await getMyInfoApi();
+            if (userInfoRes && userInfoRes.code === 1000) {
+              const userInfo = userInfoRes.result;
+
+              notification.success({
+                message: "Đăng ký thành công!",
+                description: `Chào mừng ${
+                  userInfo.firstName || userInfo.username || "bạn"
+                } đã tham gia HUSTBuy!`,
+                placement: "topRight",
+                duration: 3,
+              });
+
+              // Cập nhật auth context
+              setAuth({
+                isAuthenticated: true,
+                user: {
+                  username: userInfo.username || tokenInfo?.username || "",
+                  role: tokenInfo?.role || "",
+                  firstName: userInfo.firstName || "",
+                  lastName: userInfo.lastName || "",
+                  avatarUrl: userInfo.avatarUrl || userInfo.avatarName || "",
+                  email: userInfo.email || "",
+                },
+              });
+            } else {
+              notification.success({
+                message: "Đăng ký thành công!",
+                description: `Chào mừng ${
+                  tokenInfo?.username || "bạn"
+                } đã tham gia HUSTBuy!`,
+                placement: "topRight",
+                duration: 3,
+              });
+
+              setAuth({
+                isAuthenticated: true,
+                user: {
+                  username: tokenInfo?.username || "",
+                  role: tokenInfo?.role || "",
+                  firstName: "",
+                  lastName: "",
+                  avatarUrl: "",
+                  email: "",
+                },
+              });
+            }
+          } catch (userInfoError) {
+            console.error("Error fetching user info:", userInfoError);
+            notification.success({
+              message: "Đăng ký thành công!",
+              description: `Chào mừng ${
+                tokenInfo?.username || "bạn"
+              } đã tham gia HUSTBuy!`,
+              placement: "topRight",
+              duration: 3,
+            });
+
+            setAuth({
+              isAuthenticated: true,
+              user: {
+                username: tokenInfo?.username || "",
+                role: tokenInfo?.role || "",
+                firstName: "",
+                lastName: "",
+                avatarUrl: "",
+                email: "",
+              },
+            });
+          }
+
+          // Chuyển hướng về trang chủ
+          navigate("/");
+        }
+      } else {
+        notification.error({
+          message: "Đăng ký thất bại",
+          description:
+            res?.message || "Không thể đăng ký bằng Google, vui lòng thử lại.",
+          placement: "topRight",
+          duration: 3,
+        });
+      }
+    } catch (error) {
+      console.error("Google register error:", error);
+      notification.error({
+        message: "Đăng ký thất bại",
+        description:
+          error?.response?.data?.message ||
+          error?.message ||
+          "Không thể đăng ký bằng Google, vui lòng thử lại.",
+        placement: "topRight",
+        duration: 3,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleError = () => {
+    notification.error({
+      message: "Đăng ký thất bại",
+      description: "Đăng ký bằng Google thất bại, vui lòng thử lại.",
+      placement: "topRight",
+      duration: 3,
+    });
+  };
+
   return (
-    <div className="register-container">
-      <div className="register-left">
-        <div className="register-left-content">
-          <img src={logo} alt="Logo" className="register-logo" />
-          <h1 className="register-welcome">Chào mừng đến với HUSTBuy</h1>
-          <p className="register-description">
+    <div className={styles.registerContainer}>
+      <div className={styles.registerLeft}>
+        <div className={styles.registerLeftContent}>
+          <img src={logo} alt="Logo" className={styles.registerLogo} />
+          <h1 className={styles.registerWelcome}>Chào mừng đến với HUSTBuy</h1>
+          <p className={styles.registerDescription}>
             Đăng ký ngay để trải nghiệm mua sắm trực tuyến tuyệt vời với hàng
             triệu sản phẩm chất lượng, giá tốt nhất thị trường.
           </p>
-          <div className="register-features">
-            <div className="feature-item">
-              <div className="feature-icon">✓</div>
-              <div className="feature-text">Miễn phí vận chuyển</div>
+          <div className={styles.registerFeatures}>
+            <div className={styles.featureItem}>
+              <div className={styles.featureIcon}>✓</div>
+              <div className={styles.featureText}>Miễn phí vận chuyển</div>
             </div>
-            <div className="feature-item">
-              <div className="feature-icon">✓</div>
-              <div className="feature-text">Thanh toán an toàn</div>
+            <div className={styles.featureItem}>
+              <div className={styles.featureIcon}>✓</div>
+              <div className={styles.featureText}>Thanh toán an toàn</div>
             </div>
-            <div className="feature-item">
-              <div className="feature-icon">✓</div>
-              <div className="feature-text">Hoàn tiền 100%</div>
+            <div className={styles.featureItem}>
+              <div className={styles.featureIcon}>✓</div>
+              <div className={styles.featureText}>Hoàn tiền 100%</div>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="register-right">
-        <div className="register-form-container">
-          <h2 className="register-title">Đăng ký tài khoản</h2>
-          <p className="register-subtitle">
+      <div className={styles.registerRight}>
+        <div className={styles.registerFormContainer}>
+          <h2 className={styles.registerTitle}>Đăng ký tài khoản</h2>
+          <p className={styles.registerSubtitle}>
             Tạo tài khoản mới để bắt đầu mua sắm
           </p>
 
@@ -232,7 +368,7 @@ const RegisterPage = () => {
             onFinish={onFinish}
             autoComplete="off"
             layout="vertical"
-            className="register-form"
+            className={styles.registerForm}
             requiredMark={false}
           >
             <Form.Item
@@ -255,7 +391,7 @@ const RegisterPage = () => {
               />
             </Form.Item>
 
-            <div className="form-row">
+            <div className={styles.formRow}>
               <Form.Item
                 label="Họ và tên đệm"
                 name="firstName"
@@ -263,7 +399,7 @@ const RegisterPage = () => {
                   { required: true, message: "Vui lòng nhập họ và tên đệm!" },
                 ]}
                 validateTrigger={["onChange", "onBlur"]}
-                className="form-item-half"
+                className={styles.formItemHalf}
               >
                 <Input placeholder="Nhập họ và tên đệm" size="large" />
               </Form.Item>
@@ -273,7 +409,7 @@ const RegisterPage = () => {
                 name="lastName"
                 rules={[{ required: true, message: "Vui lòng nhập tên!" }]}
                 validateTrigger={["onChange", "onBlur"]}
-                className="form-item-half"
+                className={styles.formItemHalf}
               >
                 <Input placeholder="Nhập tên" size="large" />
               </Form.Item>
@@ -295,13 +431,13 @@ const RegisterPage = () => {
               />
             </Form.Item>
 
-            <div className="form-row">
+            <div className={styles.formRow}>
               <Form.Item
                 label="Số điện thoại"
                 name="phone"
                 rules={[{ validator: validatePhone }]}
                 validateTrigger={["onChange", "onBlur"]}
-                className="form-item-half"
+                className={styles.formItemHalf}
               >
                 <Input
                   prefix={<PhoneOutlined />}
@@ -315,7 +451,7 @@ const RegisterPage = () => {
                 name="dob"
                 rules={[{ validator: validateDateOfBirth }]}
                 validateTrigger={["onChange", "onBlur"]}
-                className="form-item-half"
+                className={styles.formItemHalf}
               >
                 <DatePicker
                   placeholder="Chọn ngày sinh"
@@ -349,17 +485,17 @@ const RegisterPage = () => {
             </Form.Item>
 
             {passwordStrength.strength && (
-              <div className="password-strength-container">
-                <div className="password-strength-bar">
+              <div className={styles.passwordStrengthContainer}>
+                <div className={styles.passwordStrengthBar}>
                   <div
-                    className="password-strength-fill"
+                    className={styles.passwordStrengthFill}
                     style={{
                       width: `${passwordStrength.score}%`,
                       backgroundColor: passwordStrength.color,
                     }}
                   ></div>
                 </div>
-                <div className="password-strength-text">
+                <div className={styles.passwordStrengthText}>
                   <span>Độ mạnh mật khẩu: </span>
                   <span
                     style={{ color: passwordStrength.color, fontWeight: 600 }}
@@ -367,30 +503,30 @@ const RegisterPage = () => {
                     {passwordStrength.strength}
                   </span>
                 </div>
-                <div className="password-requirements">
-                  <div className="requirement-item">
+                <div className={styles.passwordRequirements}>
+                  <div className={styles.requirementItem}>
                     {form.getFieldValue("password")?.length >= 8 ? "✓" : "○"}{" "}
                     Tối thiểu 8 ký tự
                   </div>
-                  <div className="requirement-item">
+                  <div className={styles.requirementItem}>
                     {/[a-z]/.test(form.getFieldValue("password") || "")
                       ? "✓"
                       : "○"}{" "}
                     Chữ thường
                   </div>
-                  <div className="requirement-item">
+                  <div className={styles.requirementItem}>
                     {/[A-Z]/.test(form.getFieldValue("password") || "")
                       ? "✓"
                       : "○"}{" "}
                     Chữ hoa
                   </div>
-                  <div className="requirement-item">
+                  <div className={styles.requirementItem}>
                     {/\d/.test(form.getFieldValue("password") || "")
                       ? "✓"
                       : "○"}{" "}
                     Số
                   </div>
-                  <div className="requirement-item">
+                  <div className={styles.requirementItem}>
                     {/[@$!%*?&#]/.test(form.getFieldValue("password") || "")
                       ? "✓"
                       : "○"}{" "}
@@ -426,6 +562,38 @@ const RegisterPage = () => {
               />
             </Form.Item>
 
+            <Form.Item
+              name="agreeTerms"
+              valuePropName="checked"
+              rules={[
+                {
+                  validator: (_, value) =>
+                    value
+                      ? Promise.resolve()
+                      : Promise.reject(
+                          new Error(
+                            "Bạn phải đồng ý với điều khoản sử dụng và chính sách bảo mật!"
+                          )
+                        ),
+                },
+              ]}
+            >
+              <Checkbox className={styles.termsCheckbox}>
+                Tôi đồng ý với{" "}
+                <Link to="/terms" target="_blank" className={styles.termsLink}>
+                  Điều khoản sử dụng
+                </Link>{" "}
+                và{" "}
+                <Link
+                  to="/privacy"
+                  target="_blank"
+                  className={styles.termsLink}
+                >
+                  Chính sách bảo mật
+                </Link>
+              </Checkbox>
+            </Form.Item>
+
             <Form.Item>
               <Button
                 type="primary"
@@ -433,35 +601,41 @@ const RegisterPage = () => {
                 size="large"
                 block
                 loading={loading}
-                className="register-button"
+                className={styles.registerButton}
               >
                 Đăng ký
               </Button>
             </Form.Item>
           </Form>
 
-          <div className="register-divider">
+          <div className={styles.registerDivider}>
             <span>hoặc</span>
           </div>
 
-          <Button
-            size="large"
-            block
-            icon={<GoogleOutlined />}
-            onClick={handleGoogleRegister}
-            className="google-register-button"
-          >
-            Đăng ký với Google
-          </Button>
+          <div className={styles.googleRegisterWrapper}>
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              useOneTap={false}
+              auto_select={false}
+              theme="outline"
+              size="large"
+              text="signup_with"
+              shape="rectangular"
+              logo_alignment="left"
+              width="400"
+              locale="vi"
+            />
+          </div>
 
-          <div className="register-footer">
+          <div className={styles.registerFooter}>
             <span>Đã có tài khoản? </span>
-            <Link to="/login" className="login-link">
+            <Link to="/login" className={styles.loginLink}>
               Đăng nhập ngay
             </Link>
           </div>
 
-          <div className="register-home-link">
+          <div className={styles.registerHomeLink}>
             <Link to="/">← Quay về trang chủ</Link>
           </div>
         </div>
