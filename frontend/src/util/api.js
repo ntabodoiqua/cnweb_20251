@@ -1840,6 +1840,19 @@ const removeCartItemsApi = (variantIds) => {
   });
 };
 
+// Upload media file (image/video) for Rich Text Editor - returns public URL
+const uploadMediaApi = (file) => {
+  const URL_API = "/api/file/files/upload/public";
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -1993,5 +2006,6 @@ export {
   approveSellerProfileApi,
   rejectSellerProfileApi,
   getSellerDocumentAdminApi,
-  // Cart bulk remove API
+  // Media upload API for Rich Text Editor
+  uploadMediaApi,
 };

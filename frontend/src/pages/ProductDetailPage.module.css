@@ -978,6 +978,153 @@
   color: #999;
 }
 
+/* Rich Description Styles */
+.richDescription {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #333;
+}
+
+.richDescription h1 {
+  font-size: 1.8em;
+  margin: 24px 0 16px 0;
+  color: #222;
+  font-weight: 700;
+}
+
+.richDescription h2 {
+  font-size: 1.5em;
+  margin: 20px 0 14px 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.richDescription h3 {
+  font-size: 1.25em;
+  margin: 16px 0 12px 0;
+  color: #444;
+  font-weight: 600;
+}
+
+.richDescription p {
+  margin-bottom: 16px;
+}
+
+.richDescription ul,
+.richDescription ol {
+  padding-left: 24px;
+  margin-bottom: 16px;
+}
+
+.richDescription li {
+  margin-bottom: 8px;
+}
+
+.richDescription strong {
+  font-weight: 600;
+  color: #222;
+}
+
+.richDescription em {
+  font-style: italic;
+}
+
+.richDescription u {
+  text-decoration: underline;
+}
+
+.richDescription s {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.richDescription blockquote {
+  border-left: 4px solid #ee4d2d;
+  padding: 12px 16px;
+  margin: 16px 0;
+  background: #fef5f1;
+  border-radius: 0 8px 8px 0;
+  color: #555;
+  font-style: italic;
+}
+
+.richDescription pre {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: "Fira Code", "Monaco", "Consolas", monospace;
+  font-size: 13px;
+  margin: 16px 0;
+}
+
+.richDescription code {
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: "Fira Code", "Monaco", "Consolas", monospace;
+  font-size: 0.9em;
+  color: #d63384;
+}
+
+.richDescription pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.richDescription a {
+  color: #ee4d2d;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.richDescription a:hover {
+  color: #d4402a;
+  text-decoration: underline;
+}
+
+.richDescription img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 16px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.richDescription iframe {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.richDescription table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.richDescription th,
+.richDescription td {
+  padding: 12px 16px;
+  text-align: left;
+  border: 1px solid #e8e8e8;
+}
+
+.richDescription th {
+  background: #fafafa;
+  font-weight: 600;
+  color: #333;
+}
+
+.richDescription tr:hover {
+  background: #fafafa;
+}
+
 /* Specification Table */
 .specTable {
   border-radius: 12px;

@@ -20,9 +20,11 @@
     "antd": "5.19.0",
     "axios": "1.7.2",
     "dayjs": "^1.11.19",
+    "dompurify": "^3.3.0",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-helmet-async": "^2.0.5",
+    "react-quill-new": "^3.6.0",
     "react-router-dom": "6.24.0"
   },
   "devDependencies": {

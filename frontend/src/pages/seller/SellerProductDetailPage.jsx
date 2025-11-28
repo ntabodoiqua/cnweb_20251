@@ -38,6 +38,7 @@ import NoImages from "../../assets/NoImages.webp";
 import ProductVariantsSection from "../../components/seller/ProductVariantsSection";
 import ProductSpecsSection from "../../components/seller/ProductSpecsSection";
 import ProductSelectionGroupsSection from "../../components/seller/ProductSelectionGroupsSection";
+import RichTextEditor from "../../components/common/RichTextEditor";
 import styles from "./SellerProductDetailPage.module.css";
 
 const { TextArea } = Input;
@@ -99,17 +100,6 @@ const SellerProductDetailPage = () => {
         setSelectedImage(
           primaryImage?.imageUrl || productData.images?.[0]?.imageUrl || null
         );
-
-        // Set form values
-        form.setFieldsValue({
-          name: productData.name,
-          description: productData.description,
-          shortDescription: productData.shortDescription,
-          categoryId: productData.category?.id,
-          brandId: productData.brand?.id,
-          storeCategoryIds:
-            productData.storeCategories?.map((cat) => cat.id) || [],
-        });
       }
     } catch (error) {
       console.error("Error fetching product detail:", error);
@@ -183,6 +173,19 @@ const SellerProductDetailPage = () => {
   const handleEdit = async () => {
     setIsEditing(true);
 
+    // Set form values when entering edit mode
+    // Use setTimeout to ensure form is mounted first
+    setTimeout(() => {
+      form.setFieldsValue({
+        name: product.name,
+        description: product.description,
+        shortDescription: product.shortDescription,
+        categoryId: product.category?.id,
+        brandId: product.brand?.id,
+        storeCategoryIds: product.storeCategories?.map((cat) => cat.id) || [],
+      });
+    }, 0);
+
     // Load store categories
     if (product?.store?.id) {
       await loadStoreCategories(product.store.id);
@@ -191,7 +194,9 @@ const SellerProductDetailPage = () => {
     // Load subcategories if category exists
     if (product?.category?.parentId) {
       await handleParentCategoryChange(product.category.parentId);
-      form.setFieldsValue({ parentCategoryId: product.category.parentId });
+      setTimeout(() => {
+        form.setFieldsValue({ parentCategoryId: product.category.parentId });
+      }, 0);
     }
   };
 
@@ -795,14 +800,13 @@ const SellerProductDetailPage = () => {
                 name="description"
                 rules={[
                   { required: true, message: "Vui lòng nhập mô tả chi tiết" },
-                  { min: 10, max: 5000, message: "Mô tả từ 10-5000 ký tự" },
                 ]}
+                tooltip="Hỗ trợ định dạng văn bản: in đậm, in nghiêng, danh sách, chèn ảnh, video..."
               >
-                <TextArea
-                  rows={4}
-                  placeholder="Nhập mô tả chi tiết"
-                  showCount
-                  maxLength={5000}
+                <RichTextEditor
+                  placeholder="Nhập mô tả chi tiết sản phẩm..."
+                  minHeight={250}
+                  maxLength={10000}
                 />
               </Form.Item>
 

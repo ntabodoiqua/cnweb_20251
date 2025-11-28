@@ -55,6 +55,7 @@ import {
 import { getSpecSectionConfig } from "../constants/productSpecsTranslations";
 import { useCart } from "../contexts/CartContext";
 import LoadingSpinner from "../components/LoadingSpinner";
+import DOMPurify from "dompurify";
 import styles from "./ProductDetailPage.module.css";
 
 const { Title, Text, Paragraph } = Typography;
@@ -1303,9 +1304,61 @@ const ProductDetailPage = () => {
                   children: (
                     <div className={styles.tabContent}>
                       {product.description ? (
-                        <Paragraph style={{ whiteSpace: "pre-wrap" }}>
-                          {product.description}
-                        </Paragraph>
+                        <div
+                          className={styles.richDescription}
+                          dangerouslySetInnerHTML={{
+                            __html: DOMPurify.sanitize(product.description, {
+                              ALLOWED_TAGS: [
+                                "p",
+                                "br",
+                                "strong",
+                                "em",
+                                "u",
+                                "s",
+                                "h1",
+                                "h2",
+                                "h3",
+                                "h4",
+                                "h5",
+                                "h6",
+                                "ul",
+                                "ol",
+                                "li",
+                                "blockquote",
+                                "pre",
+                                "code",
+                                "a",
+                                "img",
+                                "iframe",
+                                "span",
+                                "div",
+                                "table",
+                                "thead",
+                                "tbody",
+                                "tr",
+                                "th",
+                                "td",
+                                "hr",
+                              ],
+                              ALLOWED_ATTR: [
+                                "href",
+                                "target",
+                                "rel",
+                                "src",
+                                "alt",
+                                "width",
+                                "height",
+                                "style",
+                                "class",
+                                "id",
+                                "allow",
+                                "allowfullscreen",
+                                "frameborder",
+                                "scrolling",
+                              ],
+                            }),
+                          }}
+                        />
                       ) : (
                         <Empty description="Chưa có mô tả chi tiết" />
                       )}
