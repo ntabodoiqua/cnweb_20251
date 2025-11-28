@@ -15,6 +15,8 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   DownOutlined,
+  CodeOutlined,
+  CopyOutlined,
 } from "@ant-design/icons";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import {
@@ -32,6 +34,7 @@ import {
   Tooltip,
   Popconfirm,
   Empty,
+  Dropdown,
 } from "antd";
 import {
   getProductDetailApi,
@@ -44,6 +47,7 @@ import {
   addAttributeToVariantApi,
   removeAttributeFromVariantApi,
   updateVariantStatusApi,
+  getProductSpecsApi,
 } from "../../util/api";
 import NoImages from "../../assets/NoImages.webp";
 import styles from "./SellerVariantDetailPage.module.css";
@@ -80,6 +84,13 @@ const SellerVariantDetailPage = () => {
   const [savingMetadata, setSavingMetadata] = useState(false);
   const [isMetadataModalOpen, setIsMetadataModalOpen] = useState(false);
   const [editingMetadata, setEditingMetadata] = useState(null);
+
+  // Import & Copy state
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [jsonInput, setJsonInput] = useState("");
+  const [isCopyModalOpen, setIsCopyModalOpen] = useState(false);
+  const [productSpecs, setProductSpecs] = useState({});
+  const [loadingProductSpecs, setLoadingProductSpecs] = useState(false);
 
   // Attributes state
   const [attributes, setAttributes] = useState([]);
@@ -476,6 +487,134 @@ const SellerVariantDetailPage = () => {
     delete updatedMetadata[metaKey];
     await handleSaveMetadata(updatedMetadata);
   };
+
+  // Import JSON handlers
+  const handleOpenImportModal = () => {
+    setJsonInput("");
+    setIsImportModalOpen(true);
+  };
+
+  const handleCloseImportModal = () => {
+    setIsImportModalOpen(false);
+    setJsonInput("");
+  };
+
+  const handleImportJSON = async () => {
+    try {
+      const parsed = JSON.parse(jsonInput);
+
+      // Validate structure - expect object with keys as metadata keys
+      if (typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new Error("JSON phải là object với các thông số");
+      }
+
+      // Validate each metadata entry
+      for (const [key, value] of Object.entries(parsed)) {
+        if (typeof value !== "object" || !value.labelVi) {
+          throw new Error(`Thông số "${key}" phải có ít nhất labelVi và value`);
+        }
+      }
+
+      // Merge with existing metadata
+      const updatedMetadata = { ...metadata, ...parsed };
+
+      await handleSaveMetadata(updatedMetadata);
+      handleCloseImportModal();
+
+      notification.success({
+        message: "Import thành công",
+        description: `Đã import ${Object.keys(parsed).length} thông số`,
+        placement: "topRight",
+      });
+    } catch (error) {
+      notification.error({
+        message: "Lỗi Import",
+        description:
+          error.message || "JSON không hợp lệ. Vui lòng kiểm tra lại.",
+        placement: "topRight",
+      });
+    }
+  };
+
+  // Copy from Product handlers
+  const handleOpenCopyModal = async () => {
+    setIsCopyModalOpen(true);
+    setLoadingProductSpecs(true);
+    try {
+      const response = await getProductSpecsApi(productId);
+      console.log("Product specs response:", response);
+      if (response && response.result) {
+        // API trả về response.result.specs
+        const specs = response.result.specs || {};
+        setProductSpecs(specs);
+      }
+    } catch (error) {
+      console.error("Error fetching product specs:", error);
+      // Không hiện lỗi nếu product chưa có specs (404)
+      if (error.response?.status !== 404) {
+        notification.error({
+          message: "Lỗi",
+          description: "Không thể tải thông số sản phẩm",
+          placement: "topRight",
+        });
+      }
+      setProductSpecs({});
+    } finally {
+      setLoadingProductSpecs(false);
+    }
+  };
+
+  const handleCloseCopyModal = () => {
+    setIsCopyModalOpen(false);
+    setProductSpecs({});
+  };
+
+  const handleCopyFromProduct = async () => {
+    if (Object.keys(productSpecs).length === 0) {
+      notification.warning({
+        message: "Không có dữ liệu",
+        description: "Sản phẩm không có thông số nào để sao chép",
+        placement: "topRight",
+      });
+      return;
+    }
+
+    // Merge product specs into variant metadata
+    const updatedMetadata = { ...metadata, ...productSpecs };
+
+    await handleSaveMetadata(updatedMetadata);
+    handleCloseCopyModal();
+
+    notification.success({
+      message: "Sao chép thành công",
+      description: `Đã sao chép ${
+        Object.keys(productSpecs).length
+      } thông số từ sản phẩm`,
+      placement: "topRight",
+    });
+  };
+
+  // Menu items for add button dropdown
+  const addMenuItems = [
+    {
+      key: "add",
+      icon: <PlusOutlined />,
+      label: "Thêm thông số",
+      onClick: () => handleOpenMetadataModal(),
+    },
+    {
+      key: "import",
+      icon: <CodeOutlined />,
+      label: "Import từ JSON",
+      onClick: handleOpenImportModal,
+    },
+    {
+      key: "copy",
+      icon: <CopyOutlined />,
+      label: "Sao chép từ sản phẩm",
+      onClick: handleOpenCopyModal,
+    },
+  ];
 
   // Group metadata by their group
   const groupedMetadata = Object.entries(metadata).reduce(
@@ -991,14 +1130,16 @@ const SellerVariantDetailPage = () => {
               Thông số kỹ thuật (Metadata)
             </h3>
           </div>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => handleOpenMetadataModal()}
-            className={styles.addMetaBtn}
-          >
-            Thêm thông số
-          </Button>
+          <Dropdown menu={{ items: addMenuItems }} placement="bottomRight">
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              className={styles.addMetaBtn}
+            >
+              Thêm thông số{" "}
+              <DownOutlined style={{ fontSize: 10, marginLeft: 4 }} />
+            </Button>
+          </Dropdown>
         </div>
 
         <div className={styles.metadataContent}>
@@ -1200,6 +1341,150 @@ const SellerVariantDetailPage = () => {
             </Button>
           </div>
         </Form>
+      </Modal>
+
+      {/* Import JSON Modal */}
+      <Modal
+        title={
+          <div className={styles.importModalTitle}>
+            <CodeOutlined /> Import Metadata từ JSON
+          </div>
+        }
+        open={isImportModalOpen}
+        onCancel={handleCloseImportModal}
+        footer={null}
+        width={700}
+        className={styles.importModal}
+      >
+        <div className={styles.importContent}>
+          <div className={styles.importNote}>
+            <InfoCircleOutlined />
+            <span>
+              Nhập JSON chứa các thông số kỹ thuật. Mỗi key là một thông số với
+              các thuộc tính: labelVi, labelEn, value, dataType, unit, group,
+              groupLabelVi, groupLabelEn, displayOrder, showInList.
+            </span>
+          </div>
+
+          <TextArea
+            rows={12}
+            value={jsonInput}
+            onChange={(e) => setJsonInput(e.target.value)}
+            placeholder={`{
+  "screenSize": {
+    "key": "screenSize",
+    "value": "6.7",
+    "labelVi": "Kích thước màn hình",
+    "labelEn": "Screen Size",
+    "dataType": "number",
+    "unit": "inch",
+    "group": "display",
+    "groupLabelVi": "Màn hình",
+    "groupLabelEn": "Display",
+    "displayOrder": 1,
+    "showInList": true
+  },
+  "batteryCapacity": {
+    "key": "batteryCapacity",
+    "value": 5000,
+    "labelVi": "Dung lượng pin",
+    "labelEn": "Battery Capacity",
+    "dataType": "number",
+    "unit": "mAh",
+    "group": "battery",
+    "groupLabelVi": "Pin & Sạc",
+    "groupLabelEn": "Battery",
+    "displayOrder": 1,
+    "showInList": true
+  }
+}`}
+            className={styles.jsonInput}
+          />
+
+          <div className={styles.importActions}>
+            <Button onClick={handleCloseImportModal}>Hủy</Button>
+            <Button
+              type="primary"
+              onClick={handleImportJSON}
+              disabled={!jsonInput.trim()}
+              loading={savingMetadata}
+            >
+              Import
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Copy from Product Modal */}
+      <Modal
+        title={
+          <div className={styles.copyModalTitle}>
+            <CopyOutlined /> Sao chép thông số từ sản phẩm
+          </div>
+        }
+        open={isCopyModalOpen}
+        onCancel={handleCloseCopyModal}
+        footer={null}
+        width={700}
+        className={styles.copyModal}
+      >
+        <div className={styles.copyContent}>
+          <div className={styles.copyNote}>
+            <InfoCircleOutlined />
+            <span>
+              Sao chép tất cả thông số kỹ thuật từ sản phẩm gốc sang biến thể
+              này. Các thông số trùng key sẽ được ghi đè.
+            </span>
+          </div>
+
+          {loadingProductSpecs ? (
+            <div className={styles.loadingSpecs}>
+              <LoadingSpinner tip="Đang tải thông số sản phẩm..." />
+            </div>
+          ) : Object.keys(productSpecs).length === 0 ? (
+            <Empty
+              description="Sản phẩm chưa có thông số kỹ thuật"
+              className={styles.emptySpecs}
+            />
+          ) : (
+            <div className={styles.specsPreview}>
+              <div className={styles.specsPreviewHeader}>
+                <span>Thông số sẽ được sao chép:</span>
+                <Tag color="blue">
+                  {Object.keys(productSpecs).length} thông số
+                </Tag>
+              </div>
+              <div className={styles.specsList}>
+                {Object.entries(productSpecs).map(([key, spec]) => (
+                  <div key={key} className={styles.specsPreviewItem}>
+                    <span className={styles.specLabel}>
+                      {spec.labelVi || key}:
+                    </span>
+                    <span className={styles.specValue}>
+                      {spec.value}
+                      {spec.unit && ` ${spec.unit}`}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className={styles.copyActions}>
+            <Button onClick={handleCloseCopyModal}>Hủy</Button>
+            <Button
+              type="primary"
+              onClick={handleCopyFromProduct}
+              disabled={
+                loadingProductSpecs || Object.keys(productSpecs).length === 0
+              }
+              loading={savingMetadata}
+              icon={<CopyOutlined />}
+            >
+              Sao chép tất cả
+            </Button>
+          </div>
+        </div>
       </Modal>
     </div>
   );

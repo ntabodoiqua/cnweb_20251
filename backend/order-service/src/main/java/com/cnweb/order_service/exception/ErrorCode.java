@@ -119,6 +119,8 @@ public enum ErrorCode {
     SHIPPING_WARD_REQUIRED(1909, "error.1909", HttpStatus.BAD_REQUEST),
     PAYMENT_METHOD_REQUIRED(1910, "error.1910", HttpStatus.BAD_REQUEST),
     NOTE_MAX_1000(1911, "error.1911", HttpStatus.BAD_REQUEST),
+    ORDER_IDS_REQUIRED(1912, "error.1912", HttpStatus.BAD_REQUEST),
+    EXPIRE_DURATION_INVALID(1913, "error.1913", HttpStatus.BAD_REQUEST),
 
     // Lỗi khác (99xx)
     UNCATEGORIZED_EXCEPTION(9999, "error.9999", HttpStatus.INTERNAL_SERVER_ERROR),

@@ -103,6 +103,23 @@ public interface ProductService {
      */
     VariantResponse removeVariantAttribute(String productId, String variantId, VariantAttributeRequest request);
 
+    /**
+     * Cập nhật ảnh cho variant
+     * @param productId ID sản phẩm
+     * @param variantId ID variant
+     * @param file File ảnh
+     * @return VariantResponse sau khi cập nhật
+     */
+    VariantResponse updateVariantImage(String productId, String variantId, MultipartFile file);
+
+    /**
+     * Xóa ảnh của variant
+     * @param productId ID sản phẩm
+     * @param variantId ID variant
+     * @return VariantResponse sau khi xóa ảnh
+     */
+    VariantResponse deleteVariantImage(String productId, String variantId);
+
     // ========== Status Management ==========
 
     /**
@@ -174,7 +191,35 @@ public interface ProductService {
      */
     List<VariantValidationDTO> validateVariants(List<String> variantIds);
 
+    // ========== Specs & Metadata Management ==========
+
     /**
-     *
+     * Cập nhật thông tin đặc tả kỹ thuật (specs) của Product
      */
+    ProductSpecsResponse updateProductSpecs(String productId, ProductSpecsUpdateRequest request);
+
+    /**
+     * Lấy thông tin đặc tả kỹ thuật (specs) của Product
+     */
+    ProductSpecsResponse getProductSpecs(String productId);
+
+    /**
+     * Xóa toàn bộ specs của Product
+     */
+    void deleteProductSpecs(String productId);
+
+    /**
+     * Cập nhật metadata của ProductVariant
+     */
+    VariantMetadataResponse updateVariantMetadata(String productId, String variantId, VariantMetadataUpdateRequest request);
+
+    /**
+     * Lấy metadata của ProductVariant
+     */
+    VariantMetadataResponse getVariantMetadata(String productId, String variantId);
+
+    /**
+     * Xóa toàn bộ metadata của ProductVariant
+     */
+    void deleteVariantMetadata(String productId, String variantId);
 }

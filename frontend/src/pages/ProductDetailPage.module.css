@@ -460,65 +460,259 @@
   }
 }
 
-/* Variant Modal */
-.variantModal :global(.ant-modal-header) {
+/* Variant Drawer */
+.variantDrawer :global(.ant-drawer-header) {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 12px 12px 0 0;
-  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+  border-bottom: none;
+  padding: 16px 24px;
 }
 
-.variantModal :global(.ant-modal-title) {
-  color: white;
-  font-weight: 600;
-  font-size: 18px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+.variantDrawer :global(.ant-drawer-header-title) {
+  flex-direction: row-reverse;
 }
 
-.variantModal :global(.ant-modal-close) {
+.variantDrawer :global(.ant-drawer-close) {
   color: white;
+  margin-right: 0;
+  margin-left: 12px;
   transition: all 0.3s ease;
 }
 
-.variantModal :global(.ant-modal-close):hover {
+.variantDrawer :global(.ant-drawer-close):hover {
   color: rgba(255, 255, 255, 0.8);
   transform: rotate(90deg);
 }
 
-.variantModal :global(.ant-modal-body) {
-  max-height: 70vh;
+.variantDrawer :global(.ant-drawer-extra) button {
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: white;
+  font-weight: 600;
+}
+
+.variantDrawer :global(.ant-drawer-extra) button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.6);
+  color: white;
+}
+
+.variantDrawer :global(.ant-drawer-body) {
+  padding: 0;
   overflow-y: auto;
 }
 
-.variantModal :global(.ant-modal-body)::-webkit-scrollbar {
+.variantDrawer :global(.ant-drawer-body)::-webkit-scrollbar {
   width: 8px;
 }
 
-.variantModal :global(.ant-modal-body)::-webkit-scrollbar-track {
+.variantDrawer :global(.ant-drawer-body)::-webkit-scrollbar-track {
   background: #f0f0f0;
   border-radius: 4px;
 }
 
-.variantModal :global(.ant-modal-body)::-webkit-scrollbar-thumb {
+.variantDrawer :global(.ant-drawer-body)::-webkit-scrollbar-thumb {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 4px;
 }
 
-.variantModal :global(.ant-modal-body)::-webkit-scrollbar-thumb:hover {
+.variantDrawer :global(.ant-drawer-body)::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
 }
 
-.variantModalContent {
+.drawerHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: white;
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.drawerIcon {
+  font-size: 20px;
+}
+
+.variantDrawerContent {
+  height: 100%;
+}
+
+/* Variant Drawer Tabs */
+.variantTabs {
+  height: 100%;
+}
+
+.variantTabs :global(.ant-tabs-nav) {
+  padding: 0 24px;
+  margin-bottom: 0;
+  background: linear-gradient(135deg, #f8f9fa 0%, #f0f2f5 100%);
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.variantTabs :global(.ant-tabs-tab) {
+  padding: 16px 0;
+  font-weight: 600;
+  color: #666;
+  transition: all 0.3s ease;
+}
+
+.variantTabs :global(.ant-tabs-tab):hover {
+  color: #667eea;
+}
+
+.variantTabs :global(.ant-tabs-tab-active) {
+  color: #667eea;
+}
+
+.variantTabs :global(.ant-tabs-tab) span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.variantTabs :global(.ant-tabs-ink-bar) {
+  background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+}
+
+.variantTabs :global(.ant-tabs-content-holder) {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* Variant Basic Info */
+.variantBasicInfo {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.variantHeaderSection {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.variantImageWrapper {
+  flex-shrink: 0;
+}
+
+.variantImage {
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.variantImage:hover {
+  transform: scale(1.02);
+}
+
+.variantTitleSection {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.variantTitle {
+  margin: 0 !important;
+  color: #333;
+  font-size: 20px !important;
+  line-height: 1.3 !important;
+}
+
+.skuTag {
+  align-self: flex-start;
+  font-size: 13px;
+  padding: 4px 12px;
+}
+
+/* Variant Price Section */
+.variantPriceSection {
+  background: linear-gradient(135deg, #fff5f2 0%, #ffe8e0 100%);
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #ffded6;
+}
+
+.variantPriceRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.variantCurrentPrice {
+  font-size: 28px !important;
+  font-weight: 800 !important;
+  color: #ee4d2d !important;
+}
+
+.variantOriginalPrice {
+  font-size: 18px;
+}
+
+.discountTag {
+  font-weight: 600;
+}
+
+/* Stock Cards */
+.variantStockRow {
+  margin-top: 8px;
+}
+
+.stockCard {
+  background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+  border: 1px solid #e8e8e8;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.stockCard:hover {
+  border-color: #667eea;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  transform: translateY(-2px);
+}
+
+.stockCard > span:first-child {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+
+.stockNumber {
+  font-size: 24px !important;
+  display: block;
+}
+
+/* Variant Attributes */
+.variantAttributesSection {
   padding: 8px 0;
 }
 
-.variantModalContent :global(.ant-descriptions-item-label) {
-  font-weight: 600;
-  background: #fafafa;
-  width: 180px;
+.attributeTag {
+  padding: 6px 14px !important;
+  font-size: 14px;
+  border-radius: 6px;
 }
 
-.variantModalContent :global(.ant-descriptions-item-content) {
-  background: white;
+/* Variant Descriptions */
+.variantDescriptions :global(.ant-descriptions-item-label) {
+  font-weight: 600;
+  color: #666;
+  width: 120px;
+}
+
+/* Variant Specs Content */
+.variantSpecsContent {
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.variantSpecsLoading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
 }
 
 /* Short Description */
@@ -782,6 +976,153 @@
 .tabContent :global(.ant-empty-description) {
   font-size: 15px;
   color: #999;
+}
+
+/* Rich Description Styles */
+.richDescription {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #333;
+}
+
+.richDescription h1 {
+  font-size: 1.8em;
+  margin: 24px 0 16px 0;
+  color: #222;
+  font-weight: 700;
+}
+
+.richDescription h2 {
+  font-size: 1.5em;
+  margin: 20px 0 14px 0;
+  color: #333;
+  font-weight: 600;
+}
+
+.richDescription h3 {
+  font-size: 1.25em;
+  margin: 16px 0 12px 0;
+  color: #444;
+  font-weight: 600;
+}
+
+.richDescription p {
+  margin-bottom: 16px;
+}
+
+.richDescription ul,
+.richDescription ol {
+  padding-left: 24px;
+  margin-bottom: 16px;
+}
+
+.richDescription li {
+  margin-bottom: 8px;
+}
+
+.richDescription strong {
+  font-weight: 600;
+  color: #222;
+}
+
+.richDescription em {
+  font-style: italic;
+}
+
+.richDescription u {
+  text-decoration: underline;
+}
+
+.richDescription s {
+  text-decoration: line-through;
+  color: #999;
+}
+
+.richDescription blockquote {
+  border-left: 4px solid #ee4d2d;
+  padding: 12px 16px;
+  margin: 16px 0;
+  background: #fef5f1;
+  border-radius: 0 8px 8px 0;
+  color: #555;
+  font-style: italic;
+}
+
+.richDescription pre {
+  background: #1e1e1e;
+  color: #d4d4d4;
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: "Fira Code", "Monaco", "Consolas", monospace;
+  font-size: 13px;
+  margin: 16px 0;
+}
+
+.richDescription code {
+  background: #f5f5f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: "Fira Code", "Monaco", "Consolas", monospace;
+  font-size: 0.9em;
+  color: #d63384;
+}
+
+.richDescription pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+}
+
+.richDescription a {
+  color: #ee4d2d;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.richDescription a:hover {
+  color: #d4402a;
+  text-decoration: underline;
+}
+
+.richDescription img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 16px 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.richDescription iframe {
+  max-width: 100%;
+  border-radius: 8px;
+  margin: 16px 0;
+}
+
+.richDescription table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.richDescription th,
+.richDescription td {
+  padding: 12px 16px;
+  text-align: left;
+  border: 1px solid #e8e8e8;
+}
+
+.richDescription th {
+  background: #fafafa;
+  font-weight: 600;
+  color: #333;
+}
+
+.richDescription tr:hover {
+  background: #fafafa;
 }
 
 /* Specification Table */
@@ -1501,6 +1842,87 @@
 
   .nestedObjectValue {
     font-size: 12px;
+  }
+
+  /* Variant Drawer Responsive */
+  .variantDrawer :global(.ant-drawer-content-wrapper) {
+    max-width: 100vw !important;
+  }
+
+  .variantHeaderSection {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .variantTitleSection {
+    align-items: center;
+  }
+
+  .variantPriceRow {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .variantCurrentPrice {
+    font-size: 24px !important;
+  }
+
+  .stockCard {
+    padding: 12px;
+  }
+
+  .stockNumber {
+    font-size: 20px !important;
+  }
+}
+
+@media (max-width: 576px) {
+  .variantDrawer :global(.ant-drawer-header) {
+    padding: 12px 16px;
+  }
+
+  .drawerHeader {
+    font-size: 16px;
+  }
+
+  .drawerIcon {
+    font-size: 18px;
+  }
+
+  .variantTabs :global(.ant-tabs-nav) {
+    padding: 0 16px;
+  }
+
+  .variantTabs :global(.ant-tabs-tab) {
+    padding: 12px 0;
+    font-size: 14px;
+  }
+
+  .variantTabs :global(.ant-tabs-content-holder) {
+    padding: 16px;
+  }
+
+  .variantImage {
+    width: 120px !important;
+  }
+
+  .variantTitle {
+    font-size: 18px !important;
+  }
+
+  .variantPriceSection {
+    padding: 16px;
+  }
+
+  .variantCurrentPrice {
+    font-size: 22px !important;
+  }
+
+  .variantStockRow :global(.ant-col) {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 8px;
   }
 }
 

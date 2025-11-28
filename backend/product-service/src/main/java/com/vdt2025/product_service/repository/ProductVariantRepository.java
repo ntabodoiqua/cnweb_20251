@@ -119,4 +119,31 @@ public interface ProductVariantRepository extends JpaRepository<ProductVariant, 
     int bulkUpdateVariantStatusNative(
             @Param("productIds") List<String> productIds,
             @Param("status") boolean status);
+    
+    /**
+     * Lấy variants với selection options (eager fetch)
+     */
+    @Query("""
+        SELECT DISTINCT v FROM ProductVariant v
+        LEFT JOIN FETCH v.selectionOptions so
+        LEFT JOIN FETCH so.selectionGroup sg
+        WHERE v.product.id = :productId
+        AND v.isActive = true
+        ORDER BY v.createdAt DESC
+    """)
+    List<ProductVariant> findByProductIdWithSelectionOptions(@Param("productId") String productId);
+    
+    /**
+     * Lấy variants với selection options VÀ inventory stock (eager fetch)
+     * Dùng cho getProductSelectionConfig để tránh N+1
+     */
+    @Query("""
+        SELECT DISTINCT v FROM ProductVariant v
+        LEFT JOIN FETCH v.selectionOptions so
+        LEFT JOIN FETCH so.selectionGroup sg
+        LEFT JOIN FETCH v.inventoryStock
+        WHERE v.product.id = :productId
+        AND v.isActive = true
+    """)
+    List<ProductVariant> findByProductIdWithSelectionsAndStock(@Param("productId") String productId);
 }

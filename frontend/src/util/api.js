@@ -594,6 +594,26 @@ const getPublicStoresApi = (page = 0, size = 20) => {
   });
 };
 
+// Get public store detail (no authentication required)
+const getPublicStoreDetailApi = (storeId) => {
+  const URL_API = `/api/product/public/stores/${storeId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get public store categories (no authentication required)
+const getPublicStoreCategoriesApi = (storeId) => {
+  const URL_API = `/api/product/public/categories/store/${storeId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // Get public product detail (no authentication required)
 const getPublicProductDetailApi = (productId) => {
   const URL_API = `/api/product/public/products/${productId}`;
@@ -646,6 +666,67 @@ const getPublicProductSpecsApi = (productId) => {
     headers: {
       "Accept-Language": "vi",
       "Content-Type": "application/json",
+    },
+  });
+};
+
+// Get selection config for product (no authentication required)
+const getSelectionConfigApi = (productId) => {
+  const URL_API = `/api/product/public/products/${productId}/selection-config`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Find variant by selection options (no authentication required)
+const findVariantBySelectionApi = (productId, optionIds) => {
+  const URL_API = `/api/product/public/products/${productId}/find-variant-by-selection`;
+  return axios.post(
+    URL_API,
+    {
+      optionIds: optionIds,
+    },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+// Get variant metadata/specifications (no authentication required - public API)
+const getPublicVariantMetadataApi = (productId, variantId) => {
+  const URL_API = `/api/product/public/products/${productId}/variants/${variantId}/metadata`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Get available options based on current selections (no authentication required)
+const getAvailableOptionsApi = (productId, selectedOptionIds = []) => {
+  const URL_API = `/api/product/public/products/${productId}/available-options`;
+
+  // Build query string manually for array params (Spring Boot format)
+  const params = new URLSearchParams();
+  if (selectedOptionIds && selectedOptionIds.length > 0) {
+    selectedOptionIds.forEach((id) => {
+      params.append("selectedOptionIds", id);
+    });
+  }
+
+  const queryString = params.toString();
+  const fullUrl = queryString ? `${URL_API}?${queryString}` : URL_API;
+
+  return axios.get(fullUrl, {
+    headers: {
+      "Accept-Language": "vi",
     },
   });
 };
@@ -1289,6 +1370,99 @@ const getProductVariantsApi = (productId) => {
   });
 };
 
+// Selection Groups APIs (for seller)
+const getSelectionGroupsApi = (productId) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const createSelectionGroupApi = (productId, groupData) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups`;
+  return axios.post(URL_API, groupData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const updateSelectionGroupApi = (productId, groupId, groupData) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups/${groupId}`;
+  return axios.put(URL_API, groupData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+const deleteSelectionGroupApi = (productId, groupId) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups/${groupId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const getSelectionGroupDetailApi = (productId, groupId) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups/${groupId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Link variants to selection option
+const linkVariantsToOptionApi = (productId, groupId, optionId, variantIds) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups/${groupId}/options/${optionId}/link-variants`;
+  return axios.post(
+    URL_API,
+    { variantIds },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+// Unlink variants from selection option
+const unlinkVariantsFromOptionApi = (
+  productId,
+  groupId,
+  optionId,
+  variantIds
+) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups/${groupId}/options/${optionId}/unlink-variants`;
+  return axios.post(
+    URL_API,
+    { variantIds },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+// Get linked variants for an option
+const getLinkedVariantsApi = (productId, groupId, optionId) => {
+  const URL_API = `/api/product/products/${productId}/selections/groups/${groupId}/options/${optionId}/variants`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 const createVariantApi = (productId, variantData) => {
   const URL_API = `/api/product/products/${productId}/variants`;
   return axios.post(URL_API, variantData, {
@@ -1666,6 +1840,82 @@ const removeCartItemsApi = (variantIds) => {
   });
 };
 
+// Upload media file (image/video) for Rich Text Editor - returns public URL
+const uploadMediaApi = (file) => {
+  const URL_API = "/api/file/files/upload/public";
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+// Search Suggest API for autocomplete
+const getSearchSuggestApi = (query, size = 5) => {
+  const URL_API = "/api/product/products/search/suggest";
+  return axios.get(URL_API, {
+    params: {
+      q: query,
+      size: size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Search Products API with full-text search and filtering (POST)
+const searchProductsApi = (searchRequest, page = 0, size = 20) => {
+  const URL_API = "/api/product/products/search";
+  return axios.post(URL_API, searchRequest, {
+    params: {
+      page,
+      size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Quick Search Products API (GET - SEO friendly)
+const quickSearchProductsApi = (params = {}) => {
+  const URL_API = "/api/product/products/search";
+  return axios.get(URL_API, {
+    params: {
+      q: params.q || "",
+      categoryId: params.categoryId || "",
+      storeId: params.storeId || "",
+      brandId: params.brandId || "",
+      priceFrom: params.priceFrom || "",
+      priceTo: params.priceTo || "",
+      minRating: params.minRating || "",
+      sortBy: params.sortBy || "relevance",
+      sortDir: params.sortDir || "desc",
+      page: params.page ?? 0,
+      size: params.size ?? 20,
+      aggregations: params.aggregations ?? false,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Elasticsearch Health Check API
+const getSearchHealthApi = () => {
+  const URL_API = "/api/product/products/search/health";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -1712,10 +1962,16 @@ export {
   getProductsApi,
   getPublicProductsApi,
   getPublicStoresApi,
+  getPublicStoreDetailApi,
+  getPublicStoreCategoriesApi,
   getPublicProductDetailApi,
   getPublicProductVariantOptionsApi,
   findVariantByAttributesApi,
   getPublicProductSpecsApi,
+  getSelectionConfigApi,
+  findVariantBySelectionApi,
+  getAvailableOptionsApi,
+  getPublicVariantMetadataApi,
   getProductSpecsApi,
   updateProductSpecsApi,
   getProductsByStoreApi,
@@ -1773,6 +2029,16 @@ export {
   updateVariantStatusApi,
   bulkUpdateVariantStatusApi,
   bulkUpdateProductStatusApi,
+  // Selection Groups APIs
+  getSelectionGroupsApi,
+  createSelectionGroupApi,
+  updateSelectionGroupApi,
+  deleteSelectionGroupApi,
+  getSelectionGroupDetailApi,
+  // Link variants to options APIs
+  linkVariantsToOptionApi,
+  unlinkVariantsFromOptionApi,
+  getLinkedVariantsApi,
   // Variant Metadata APIs
   getVariantMetadataApi,
   updateVariantMetadataApi,
@@ -1803,5 +2069,11 @@ export {
   approveSellerProfileApi,
   rejectSellerProfileApi,
   getSellerDocumentAdminApi,
-  // Cart bulk remove API
+  // Media upload API for Rich Text Editor
+  uploadMediaApi,
+  // Search APIs
+  getSearchSuggestApi,
+  searchProductsApi,
+  quickSearchProductsApi,
+  getSearchHealthApi,
 };

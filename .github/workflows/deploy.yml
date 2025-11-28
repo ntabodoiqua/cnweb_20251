@@ -100,8 +100,8 @@ jobs:
             cd /opt/cnweb2025_1 || exit 1
 
             # Pull latest changes
-            git pull origin be/dev
-            git checkout be/dev
+            git pull origin be/test
+            git checkout be/test
 
             # Login to GitHub Container Registry
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
@@ -133,6 +133,10 @@ jobs:
             # Wait for services to be healthy
             sleep 150
 
+            # Check Elasticsearch health first (required by product-service)
+            echo "Checking Elasticsearch..."
+            curl -f http://localhost:9200/_cluster/health || echo "Warning: Elasticsearch not ready"
+
             # Check service health
             echo "Checking Discovery Service..."
             curl -f http://localhost:8761/actuator/health || exit 1
@@ -145,6 +149,10 @@ jobs:
 
             echo "Checking Product Service..."
             curl -f http://localhost:8082/actuator/health || exit 1
+
+            # Verify Elasticsearch search endpoint (internal call to product-service)
+            echo "Checking Product Search Health..."
+            curl -f http://localhost:8082/products/search/health || echo "Warning: Product search not ready"
 
             echo "Checking Notification Service..."
             curl -f http://localhost:8084/actuator/health || exit 1

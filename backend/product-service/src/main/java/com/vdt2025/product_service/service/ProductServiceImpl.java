@@ -8,6 +8,7 @@ import com.vdt2025.product_service.dto.request.FindVariantRequest;
 import com.vdt2025.product_service.dto.request.product.*;
 import com.vdt2025.product_service.dto.response.*;
 import com.vdt2025.product_service.entity.*;
+import com.vdt2025.product_service.event.ProductChangedEvent;
 import com.vdt2025.product_service.exception.AppException;
 import com.vdt2025.product_service.exception.ErrorCode;
 import com.vdt2025.product_service.mapper.BrandMapper;
@@ -16,6 +17,7 @@ import com.vdt2025.product_service.mapper.ProductImageMapper;
 import com.vdt2025.product_service.mapper.StoreMapper;
 import com.vdt2025.product_service.repository.*;
 import com.vdt2025.product_service.specification.ProductSpecification;
+import com.vdt2025.product_service.util.SpecsHelper;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -63,6 +66,7 @@ public class ProductServiceImpl implements ProductService {
     CategoryManagementService categoryManagementService;
     private final CacheEvictService cacheEvictService;
     private final InventoryService inventoryService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Value("${product-images.max-per-product:5}")
     @NonFinal
@@ -174,6 +178,16 @@ public class ProductServiceImpl implements ProductService {
             product.setMaxPrice(maxPrice);
             product = productRepository.save(product);
         }
+        
+        // Evict product search cache khi thêm sản phẩm mới
+        cacheEvictService.evictProductSearchCache();
+        
+        // Publish event để sync với Elasticsearch
+        eventPublisher.publishEvent(ProductChangedEvent.builder()
+                .productId(product.getId())
+                .changeType(ProductChangedEvent.ChangeType.CREATED)
+                .build());
+        
         log.info("Product {} created successfully with ID: {}", product.getName(), product.getId());
         return mapToProductResponse(product);
     }
@@ -269,6 +283,12 @@ public class ProductServiceImpl implements ProductService {
         product = productRepository.save(product);
         log.info("Product {} updated successfully", product.getName());
         
+        // Publish event để sync với Elasticsearch
+        eventPublisher.publishEvent(ProductChangedEvent.builder()
+                .productId(product.getId())
+                .changeType(ProductChangedEvent.ChangeType.UPDATED)
+                .build());
+        
         return mapToProductResponse(product);
     }
 
@@ -294,6 +314,15 @@ public class ProductServiceImpl implements ProductService {
             variant.setDeleted(false);
         }
         
+        // Evict product search cache khi xóa sản phẩm
+        cacheEvictService.evictProductSearchCache();
+        
+        // Publish event để sync với Elasticsearch
+        eventPublisher.publishEvent(ProductChangedEvent.builder()
+                .productId(id)
+                .changeType(ProductChangedEvent.ChangeType.DELETED)
+                .build());
+        
         log.info("Product {} soft deleted successfully", product.getName());
     }
 
@@ -313,6 +342,10 @@ public class ProductServiceImpl implements ProductService {
         }
         
         productRepository.delete(product);
+        
+        // Evict product search cache khi xóa vĩnh viễn sản phẩm
+        cacheEvictService.evictProductSearchCache();
+        
         log.info("Product {} permanently deleted", product.getName());
     }
 
@@ -429,6 +462,7 @@ public class ProductServiceImpl implements ProductService {
         variant = variantRepository.save(variant);
         log.info("Variant {} updated successfully", variant.getSku());
         cacheEvictService.evictProductDetails(productId);
+        cacheEvictService.evictVariantSelectionCaches(productId);
         return mapToVariantResponse(variant);
     }
 
@@ -560,6 +594,7 @@ public class ProductServiceImpl implements ProductService {
                 .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
         
         variantRepository.delete(variant);
+        cacheEvictService.evictVariantSelectionCaches(productId);
         log.info("Variant {} deleted successfully", variant.getSku());
     }
 
@@ -609,6 +644,11 @@ public class ProductServiceImpl implements ProductService {
             log.warn("Attribute value {} does not belong to product category {}",
                     attributeValue.getValue(), productCategory.getName());
             throw new AppException(ErrorCode.ATTRIBUTE_NOT_APPLICABLE_TO_PRODUCT_CATEGORY);
+        }
+        // Kiểm tra attributes hoặc value còn active không
+        if (!attributeValue.getAttribute().isActive() || !attributeValue.isActive()) {
+            log.warn("Attribute value {} or its attribute is inactive", attributeValue.getValue());
+            throw new AppException(ErrorCode.ATTRIBUTE_VALUE_INACTIVE);
         }
 
         // Nếu variant đã có attributeValue → bỏ qua
@@ -667,6 +707,90 @@ public class ProductServiceImpl implements ProductService {
         return mapToVariantResponse(variantRepository.save(variant));
     }
 
+    @Override
+    @Transactional
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    public VariantResponse updateVariantImage(String productId, String variantId, MultipartFile file) {
+        log.info("Updating image for variant {} of product {}", variantId, productId);
+
+        // Validate product exists
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // Authorization check
+        checkProductAccess(product);
+
+        // Validate variant exists and belongs to product
+        ProductVariant variant = variantRepository.findByProductIdAndId(productId, variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+
+        // Validate file type
+        String contentType = file.getContentType();
+        List<String> allowedTypes = Arrays.asList(
+                "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"
+        );
+        if (contentType == null || !allowedTypes.contains(contentType.toLowerCase())) {
+            throw new AppException(ErrorCode.INVALID_IMAGE_TYPE);
+        }
+
+        try {
+            // Upload file to file-service
+            ApiResponse<FileInfoResponse> response = fileServiceClient.uploadPublicFile(file);
+            FileInfoResponse result = response.getResult();
+
+            // Update variant with new image info
+            variant.setImageName(result.getFileName());
+            variant.setImageUrl(result.getFileUrl());
+            variant = variantRepository.save(variant);
+
+            // Evict cache
+            cacheEvictService.evictProductDetails(productId);
+            cacheEvictService.evictVariantCaches(variantId);
+
+            log.info("Variant {} image updated successfully", variantId);
+            return mapToVariantResponse(variant);
+        } catch (Exception e) {
+            log.error("Failed to upload variant image: {}", e.getMessage());
+            throw new AppException(ErrorCode.FILE_CANNOT_STORED);
+        }
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    public VariantResponse deleteVariantImage(String productId, String variantId) {
+        log.info("Deleting image for variant {} of product {}", variantId, productId);
+
+        // Validate product exists
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // Authorization check
+        checkProductAccess(product);
+
+        // Validate variant exists and belongs to product
+        ProductVariant variant = variantRepository.findByProductIdAndId(productId, variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+
+        // Check if variant has image
+        if (variant.getImageUrl() == null && variant.getImageName() == null) {
+            log.warn("Variant {} has no image to delete", variantId);
+            return mapToVariantResponse(variant);
+        }
+
+        // Remove image info from variant
+        variant.setImageName(null);
+        variant.setImageUrl(null);
+        variant = variantRepository.save(variant);
+
+        // Evict cache
+        cacheEvictService.evictProductDetails(productId);
+        cacheEvictService.evictVariantCaches(variantId);
+
+        log.info("Variant {} image deleted successfully", variantId);
+        return mapToVariantResponse(variant);
+    }
+
     // ========== Status Management ==========
 
     @Override
@@ -692,6 +816,13 @@ public class ProductServiceImpl implements ProductService {
             variantRepository.saveAll(variants);
             log.info("All variants of product {} have been deactivated", product.getName());
         }
+        
+        // Publish event để sync với Elasticsearch
+        eventPublisher.publishEvent(ProductChangedEvent.builder()
+                .productId(product.getId())
+                .changeType(ProductChangedEvent.ChangeType.STATUS_CHANGED)
+                .build());
+        
         log.info("Product {} status updated to {}", product.getName(), isActive);
         return mapToProductResponse(product);
     }
@@ -1217,5 +1348,166 @@ public class ProductServiceImpl implements ProductService {
         }
 
         return result;
+    }
+
+    // ========== Specs & Metadata Management ==========
+
+    @Override
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @Transactional
+    public ProductSpecsResponse updateProductSpecs(String productId, ProductSpecsUpdateRequest request) {
+        log.info("Updating specs for product: {}", productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // Authorization check
+        checkProductAccess(product);
+
+        // Validate specs data structure
+        SpecsHelper.validateSpecs(request.getSpecs());
+        
+        // Normalize specs values
+        SpecsHelper.normalizeSpecs(request.getSpecs());
+
+        // Update specs
+        product.setSpecs(request.getSpecs());
+        productRepository.save(product);
+
+        // Evict cache
+        cacheEvictService.evictProductCaches(productId);
+
+        return ProductSpecsResponse.builder()
+                .productId(product.getId())
+                .specs(product.getSpecs())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = "productSpecs", key = "#productId")
+    public ProductSpecsResponse getProductSpecs(String productId) {
+        log.info("Getting specs for product: {}", productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        return ProductSpecsResponse.builder()
+                .productId(product.getId())
+                .specs(product.getSpecs())
+                .build();
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @Transactional
+    public void deleteProductSpecs(String productId) {
+        log.info("Deleting specs for product: {}", productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // Authorization check
+        checkProductAccess(product);
+
+        // Delete specs (set to null or empty map)
+        product.setSpecs(null);
+        productRepository.save(product);
+
+        // Evict cache
+        cacheEvictService.evictProductCaches(productId);
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @Transactional
+    public VariantMetadataResponse updateVariantMetadata(String productId, String variantId, 
+                                                         VariantMetadataUpdateRequest request) {
+        log.info("Updating metadata for variant: {} of product: {}", variantId, productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        ProductVariant variant = variantRepository.findById(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+
+        // Verify variant belongs to product
+        if (!variant.getProduct().getId().equals(productId)) {
+            throw new AppException(ErrorCode.VARIANT_NOT_BELONG_TO_PRODUCT);
+        }
+
+        // Authorization check
+        checkProductAccess(product);
+
+        // Validate metadata data structure
+        SpecsHelper.validateSpecs(request.getMetadata());
+        
+        // Normalize metadata values
+        SpecsHelper.normalizeSpecs(request.getMetadata());
+
+        // Update metadata
+        variant.setMetadata(request.getMetadata());
+        variantRepository.save(variant);
+
+        // Evict cache
+        cacheEvictService.evictVariantCaches(variantId);
+
+        return VariantMetadataResponse.builder()
+                .variantId(variant.getId())
+                .productId(productId)
+                .metadata(variant.getMetadata())
+                .build();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    @Cacheable(value = "variantSpecs", key = "#variantId")
+    public VariantMetadataResponse getVariantMetadata(String productId, String variantId) {
+        log.info("Getting metadata for variant: {} of product: {}", variantId, productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        ProductVariant variant = variantRepository.findById(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+
+        // Verify variant belongs to product
+        if (!variant.getProduct().getId().equals(productId)) {
+            throw new AppException(ErrorCode.VARIANT_NOT_BELONG_TO_PRODUCT);
+        }
+
+        return VariantMetadataResponse.builder()
+                .variantId(variant.getId())
+                .productId(productId)
+                .metadata(variant.getMetadata())
+                .build();
+    }
+
+    @Override
+    @PreAuthorize("hasAnyRole('SELLER', 'ADMIN')")
+    @Transactional
+    public void deleteVariantMetadata(String productId, String variantId) {
+        log.info("Deleting metadata for variant: {} of product: {}", variantId, productId);
+
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        ProductVariant variant = variantRepository.findById(variantId)
+                .orElseThrow(() -> new AppException(ErrorCode.VARIANT_NOT_FOUND));
+
+        // Verify variant belongs to product
+        if (!variant.getProduct().getId().equals(productId)) {
+            throw new AppException(ErrorCode.VARIANT_NOT_BELONG_TO_PRODUCT);
+        }
+
+        // Authorization check
+        checkProductAccess(product);
+
+        // Delete metadata (set to null or empty map)
+        variant.setMetadata(null);
+        variantRepository.save(variant);
+
+        // Evict cache
+        cacheEvictService.evictVariantCaches(variantId);
     }
 }

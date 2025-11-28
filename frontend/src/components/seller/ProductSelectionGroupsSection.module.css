@@ -1,0 +1,209 @@
+.selectionGroupsCard {
+  margin-top: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.selectionGroupsCard :global(.ant-card-head) {
+  border-bottom: 1px solid #f0f0f0;
+  padding: 16px 24px;
+}
+
+.selectionGroupsCard :global(.ant-card-head-title) {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.selectionGroupsCard :global(.ant-card-body) {
+  padding: 24px;
+}
+
+.optionRow {
+  background: #fafafa;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+.optionRow:hover {
+  border-color: #d9d9d9;
+  background: #fff;
+}
+
+/* Table styles */
+.selectionGroupsCard :global(.ant-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.selectionGroupsCard :global(.ant-table-thead > tr > th) {
+  background: #fafafa;
+  font-weight: 600;
+}
+
+.selectionGroupsCard :global(.ant-table-tbody > tr:hover > td) {
+  background: #f5f5f5;
+}
+
+/* Modal styles */
+.selectionGroupsCard :global(.ant-modal-content) {
+  border-radius: 12px;
+}
+
+.selectionGroupsCard :global(.ant-modal-header) {
+  border-radius: 12px 12px 0 0;
+}
+
+/* Color picker */
+.optionRow :global(.ant-color-picker-trigger) {
+  border-radius: 6px;
+}
+
+/* Empty state */
+.selectionGroupsCard :global(.ant-empty) {
+  padding: 40px 0;
+}
+
+/* Expanded Row Styles */
+.expandedContent {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  padding: 20px;
+  border-radius: 12px;
+  margin: 8px 0;
+}
+
+.expandedLoading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+}
+
+.expandedHeader {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.expandedHeader span {
+  font-weight: 600;
+  color: #334155;
+}
+
+/* Options Grid */
+.optionsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.optionCard {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 16px;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.optionCard:hover {
+  border-color: #1890ff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.15);
+  transform: translateY(-2px);
+}
+
+.optionCardLinked {
+  border-color: #b7eb8f;
+  background: linear-gradient(135deg, #f6ffed 0%, #ffffff 100%);
+}
+
+.optionCardLinked:hover {
+  border-color: #52c41a;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.15);
+}
+
+.optionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.optionInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.colorDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.optionLabel {
+  font-weight: 600;
+  color: #1e293b;
+  font-size: 14px;
+}
+
+.optionValue {
+  color: #64748b;
+  font-size: 12px;
+}
+
+.optionBody {
+  margin-bottom: 12px;
+}
+
+.linkedInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #52c41a;
+  font-size: 13px;
+}
+
+.noLinkInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #faad14;
+  font-size: 13px;
+}
+
+.optionActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .optionRow {
+    padding: 8px;
+  }
+
+  .optionRow :global(.ant-space) {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .optionRow :global(.ant-space-item) {
+    width: 100%;
+  }
+
+  .optionRow :global(.ant-form-item) {
+    margin-bottom: 12px !important;
+  }
+
+  .optionsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .expandedContent {
+    padding: 12px;
+  }
+}
