@@ -38,6 +38,9 @@ export const PROTECTED_ROUTES = {
   PROFILE_HISTORY: "/profile/history",
   PROFILE_SECURITY: "/profile/security",
 
+  // Notifications
+  NOTIFICATIONS: "/notifications",
+
   // Admin routes
   ADMIN_DASHBOARD: "/admin",
   ADMIN_USERS: "/admin/users",
@@ -104,6 +107,7 @@ export const ROUTE_TITLES = {
   [PROTECTED_ROUTES.PROFILE_ADDRESSES]: "Sổ địa chỉ",
   [PROTECTED_ROUTES.PROFILE_HISTORY]: "Lịch sử giao dịch",
   [PROTECTED_ROUTES.PROFILE_SECURITY]: "Bảo mật tài khoản",
+  [PROTECTED_ROUTES.NOTIFICATIONS]: "Thông báo",
   [PROTECTED_ROUTES.ADMIN_DASHBOARD]: "Bảng điều khiển Admin",
   [PROTECTED_ROUTES.ADMIN_USERS]: "Quản lý người dùng",
   [PROTECTED_ROUTES.ADMIN_BRANDS]: "Quản lý thương hiệu",

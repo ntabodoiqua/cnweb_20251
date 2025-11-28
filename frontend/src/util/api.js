@@ -1829,6 +1829,62 @@ const removeCartItemsApi = (variantIds) => {
   });
 };
 
+// Notification APIs
+const getNotificationsApi = (page = 0, size = 20) => {
+  const URL_API = "/api/notification/notifications";
+  return axios.get(URL_API, {
+    params: { page, size },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const getRecentNotificationsApi = () => {
+  const URL_API = "/api/notification/notifications/recent";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const getUnreadNotificationsApi = () => {
+  const URL_API = "/api/notification/notifications/unread";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const getUnreadNotificationCountApi = () => {
+  const URL_API = "/api/notification/notifications/unread/count";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const markNotificationAsReadApi = (notificationId) => {
+  const URL_API = `/api/notification/notifications/${notificationId}/read`;
+  return axios.patch(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const markAllNotificationsAsReadApi = () => {
+  const URL_API = "/api/notification/notifications/read-all";
+  return axios.patch(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -1982,4 +2038,11 @@ export {
   rejectSellerProfileApi,
   getSellerDocumentAdminApi,
   // Cart bulk remove API
+  // Notification APIs
+  getNotificationsApi,
+  getRecentNotificationsApi,
+  getUnreadNotificationsApi,
+  getUnreadNotificationCountApi,
+  markNotificationAsReadApi,
+  markAllNotificationsAsReadApi,
 };
