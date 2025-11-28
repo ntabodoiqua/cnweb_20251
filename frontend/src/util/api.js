@@ -1867,6 +1867,55 @@ const getSearchSuggestApi = (query, size = 5) => {
   });
 };
 
+// Search Products API with full-text search and filtering (POST)
+const searchProductsApi = (searchRequest, page = 0, size = 20) => {
+  const URL_API = "/api/product/products/search";
+  return axios.post(URL_API, searchRequest, {
+    params: {
+      page,
+      size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Quick Search Products API (GET - SEO friendly)
+const quickSearchProductsApi = (params = {}) => {
+  const URL_API = "/api/product/products/search";
+  return axios.get(URL_API, {
+    params: {
+      q: params.q || "",
+      categoryId: params.categoryId || "",
+      storeId: params.storeId || "",
+      brandId: params.brandId || "",
+      priceFrom: params.priceFrom || "",
+      priceTo: params.priceTo || "",
+      minRating: params.minRating || "",
+      sortBy: params.sortBy || "relevance",
+      sortDir: params.sortDir || "desc",
+      page: params.page ?? 0,
+      size: params.size ?? 20,
+      aggregations: params.aggregations ?? false,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Elasticsearch Health Check API
+const getSearchHealthApi = () => {
+  const URL_API = "/api/product/products/search/health";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -2022,6 +2071,9 @@ export {
   getSellerDocumentAdminApi,
   // Media upload API for Rich Text Editor
   uploadMediaApi,
-  // Search Suggest API
+  // Search APIs
   getSearchSuggestApi,
+  searchProductsApi,
+  quickSearchProductsApi,
+  getSearchHealthApi,
 };
