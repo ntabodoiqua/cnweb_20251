@@ -594,6 +594,26 @@ const getPublicStoresApi = (page = 0, size = 20) => {
   });
 };
 
+// Get public store detail (no authentication required)
+const getPublicStoreDetailApi = (storeId) => {
+  const URL_API = `/api/product/public/stores/${storeId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get public store categories (no authentication required)
+const getPublicStoreCategoriesApi = (storeId) => {
+  const URL_API = `/api/product/public/categories/store/${storeId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // Get public product detail (no authentication required)
 const getPublicProductDetailApi = (productId) => {
   const URL_API = `/api/product/public/products/${productId}`;
@@ -1855,6 +1875,8 @@ export {
   getProductsApi,
   getPublicProductsApi,
   getPublicStoresApi,
+  getPublicStoreDetailApi,
+  getPublicStoreCategoriesApi,
   getPublicProductDetailApi,
   getPublicProductVariantOptionsApi,
   findVariantByAttributesApi,

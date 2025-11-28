@@ -17,6 +17,8 @@ public interface StoreService {
 
     Page<StoreSimpleResponse> getPublicStores(Pageable pageable);
 
+    StoreSimpleResponse getPublicStoreById(String storeId);
+
     void deactivateStoreBySellerProfileId(String sellerProfileId);
 
     PageCacheDTO<StoreResponse> getStoresOfCurrentSeller(Pageable pageable);

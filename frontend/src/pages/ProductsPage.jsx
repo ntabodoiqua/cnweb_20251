@@ -25,6 +25,7 @@ import {
   EyeOutlined,
   ClockCircleOutlined,
   StarOutlined,
+  ShopOutlined,
 } from "@ant-design/icons";
 import {
   getPublicProductsApi,
@@ -401,8 +402,18 @@ const ProductsPage = () => {
 
               {/* Store Info */}
               <div className={styles.productStore}>
-                <Text type="secondary" style={{ fontSize: 12 }}>
-                  <ShoppingCartOutlined /> {product.storeName}
+                <Text
+                  type="secondary"
+                  style={{ fontSize: 12, cursor: "pointer" }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (product.storeId) {
+                      navigate(`/store/${product.storeId}`);
+                    }
+                  }}
+                  className={styles.storeLink}
+                >
+                  <ShopOutlined /> {product.storeName}
                 </Text>
               </div>
 

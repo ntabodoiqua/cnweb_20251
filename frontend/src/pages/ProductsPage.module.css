@@ -180,6 +180,11 @@
   margin-top: 4px;
 }
 
+.storeLink:hover {
+  color: #ee4d2d !important;
+  text-decoration: underline;
+}
+
 .productFooterInfo {
   display: flex;
   justify-content: space-between;
