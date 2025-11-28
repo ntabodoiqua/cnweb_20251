@@ -10,6 +10,7 @@ import com.cnweb.order_service.dto.response.CouponValidationResponse;
 import com.cnweb.order_service.dto.response.OrderResponse;
 import com.cnweb.order_service.entity.Order;
 import com.cnweb.order_service.entity.OrderItem;
+import com.cnweb.order_service.enums.OrderStatus;
 import com.cnweb.order_service.mapper.OrderMapper;
 import com.cnweb.order_service.repository.OrderRepository;
 import com.cnweb.order_service.specification.OrderSpecification;
@@ -23,10 +24,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -229,14 +232,17 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public com.cnweb.order_service.dto.response.OrderPaymentResponse initiatePayment(String username, List<String> orderIds) {
+    public com.cnweb.order_service.dto.response.OrderPaymentResponse initiatePayment(
+            String username, com.cnweb.order_service.dto.request.OrderPaymentRequest request) {
+        List<String> orderIds = request.getOrderIds();
         List<Order> orders = orderRepository.findAllById(orderIds);
-        
+
         if (orders.isEmpty()) {
             throw new RuntimeException("Orders not found");
         }
-        
+
         // Validate
+        LocalDateTime now = LocalDateTime.now();
         for (Order order : orders) {
             if (!order.getUsername().equals(username)) {
                 throw new RuntimeException("Unauthorized access to order: " + order.getId());
@@ -244,13 +250,29 @@ public class OrderServiceImpl implements OrderService {
             if (order.getPaymentStatus() == com.cnweb.order_service.enums.PaymentStatus.PAID) {
                 throw new RuntimeException("Order already paid: " + order.getId());
             }
+
+            // Kiểm tra đơn hàng đã hết hạn thanh toán chưa (15 phút)
+            LocalDateTime expiryTime = order.getCreatedAt().plusMinutes(15);
+            if (now.isAfter(expiryTime)) {
+                throw new RuntimeException(
+                        String.format("Đơn hàng %s đã hết hạn thanh toán. Vui lòng tạo đơn hàng mới.",
+                                order.getOrderNumber())
+                );
+            }
+
+            // Kiểm tra đơn hàng đã bị hủy chưa
+            if (order.getStatus() == OrderStatus.CANCELLED) {
+                throw new RuntimeException(
+                        String.format("Đơn hàng %s đã bị hủy", order.getOrderNumber())
+                );
+            }
         }
-        
+
         // Calculate total amount for payment
         BigDecimal totalPaymentAmount = orders.stream()
                 .map(Order::getTotalAmount)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
+
         // Collect all items for payment request
         List<PaymentItem> paymentItems = new ArrayList<>();
         for (Order order : orders) {
@@ -263,13 +285,14 @@ public class OrderServiceImpl implements OrderService {
                         .build());
             }
         }
-        
+
         // Create payment request
         CreatePaymentRequest paymentRequest = CreatePaymentRequest.builder()
                 .appUser(username)
                 .amount(totalPaymentAmount.longValue())
                 .description("Thanh toán cho đơn hàng: " + String.join(", ", orders.stream().map(Order::getOrderNumber).toList()))
                 .items(paymentItems)
+                .expireDurationSeconds(request.getExpireDurationSeconds()) // Truyền thời gian hết hạn từ frontend
                 .embedData(PaymentEmbedData.builder()
                         .orderIds(orderIds)
                         .email(orders.getFirst().getReceiverEmail()) // Assume same email for batch
@@ -280,20 +303,20 @@ public class OrderServiceImpl implements OrderService {
                 .address(orders.getFirst().getShippingAddress())
                 .title("Thanh toán cho " + orders.size() + " đơn hàng")
                 .build();
-        
+
         // Call Payment Service
         CreatePaymentResponse paymentResponse = paymentClient.createZaloPayOrder(paymentRequest);
-        
+
         if ("SUCCESS".equals(paymentResponse.getStatus())) {
             String appTransId = paymentResponse.getAppTransId();
-            
+
             // Update orders with payment transaction ID
             for (Order order : orders) {
                 order.setPaymentTransactionId(appTransId);
                 order.setPaymentStatus(com.cnweb.order_service.enums.PaymentStatus.PENDING);
             }
             orderRepository.saveAll(orders);
-            
+
             return com.cnweb.order_service.dto.response.OrderPaymentResponse.builder()
                     .paymentUrl(paymentResponse.getOrderUrl())
                     .appTransId(appTransId)
@@ -383,6 +406,14 @@ public class OrderServiceImpl implements OrderService {
                 }
             }
         }
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public Page<OrderResponse> getAllOrdersForAdmin(OrderFilterRequest filter, Pageable pageable) {
+        Specification<Order> spec = OrderSpecification.getOrdersByFilter(filter, null, null);
+        Page<Order> orders = orderRepository.findAll(spec, pageable);
+        return orders.map(orderMapper::toOrderResponse);
     }
 
     private java.math.BigDecimal calculateDiscount(CouponResponse coupon, java.math.BigDecimal amount) {

@@ -46,6 +46,7 @@ public class ProductAttributeServiceImpl implements ProductAttributeService {
     @Transactional
     @Override
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "attributesByCategory", allEntries = true)
     public ProductAttributeResponse createAttribute(ProductAttributeRequest request) {
         if (productAttributeRepository.existsByNameIgnoreCase(request.getName())) {
             throw new AppException(ErrorCode.ATTRIBUTE_EXISTS);

@@ -64,4 +64,16 @@ public interface CategoryRepository extends JpaRepository<Category, String>, Jpa
     boolean existsByIdAndStoreId(String id, String storeId);
 
     List<Category> findByStoreId(String storeId);
+
+    /**
+     * Load category với parent hierarchy cho Elasticsearch indexing
+     */
+    @Query("""
+        SELECT c FROM Category c
+        LEFT JOIN FETCH c.parentCategory p1
+        LEFT JOIN FETCH p1.parentCategory p2
+        LEFT JOIN FETCH p2.parentCategory p3
+        WHERE c.id = :categoryId
+    """)
+    Optional<Category> findByIdWithParentHierarchy(@Param("categoryId") String categoryId);
 }

@@ -72,10 +72,11 @@ public class OrderController {
 
     @PostMapping("/payment")
     @Operation(summary = "Initiate payment", description = "Initiate payment for a list of orders.")
-    public ResponseEntity<ApiResponse<OrderPaymentResponse>> initiatePayment(@RequestBody List<String> orderIds) {
+    public ResponseEntity<ApiResponse<OrderPaymentResponse>> initiatePayment(
+            @RequestBody @Valid com.cnweb.order_service.dto.request.OrderPaymentRequest request) {
         String username = getCurrentUsername();
-        OrderPaymentResponse response = orderService.initiatePayment(username, orderIds);
-        
+        OrderPaymentResponse response = orderService.initiatePayment(username, request);
+
         return ResponseEntity.ok(ApiResponse.<OrderPaymentResponse>builder()
                 .code(200)
                 .message("Payment initiated successfully")
@@ -112,6 +113,19 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.<Page<OrderResponse>>builder()
                 .code(200)
                 .message("Store orders retrieved successfully")
+                .result(response)
+                .build());
+    }
+
+    @GetMapping("/admin")
+    @Operation(summary = "Get all orders (admin)", description = "Get list of all orders with filtering and pagination for admin users")
+    public ResponseEntity<ApiResponse<Page<OrderResponse>>> getAllOrdersForAdmin(
+            @ModelAttribute OrderFilterRequest filter,
+            @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        Page<OrderResponse> response = orderService.getAllOrdersForAdmin(filter, pageable);
+        return ResponseEntity.ok(ApiResponse.<Page<OrderResponse>>builder()
+                .code(200)
+                .message("All orders retrieved successfully")
                 .result(response)
                 .build());
     }

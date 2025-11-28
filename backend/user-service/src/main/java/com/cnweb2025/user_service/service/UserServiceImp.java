@@ -137,6 +137,8 @@ public class UserServiceImp implements UserService{
 
     @Override
     @Transactional
+    @CacheEvict(value = "userCache",
+            key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()")
     public String setMyAvatar(MultipartFile file) {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
@@ -179,6 +181,8 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
+    @CacheEvict(value = "userCache",
+            key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()")
     public String disableMyAccount() {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();

@@ -28,6 +28,12 @@ public interface InventoryStockRepository extends JpaRepository<InventoryStock, 
     Optional<InventoryStock> findByProductVariantId(String id);
 
     /**
+     * Tìm inventory theo danh sách variant IDs (read-only, batch query)
+     * Dùng cho hydration pattern - lấy stock realtime cho nhiều variants cùng lúc
+     */
+    List<InventoryStock> findByProductVariantIdIn(List<String> variantIds);
+
+    /**
      * Tìm inventory theo variant ID với Pessimistic Write Lock
      * Sử dụng khi cần atomic update (reserve, confirm, release)
      * Lock sẽ được giữ cho đến khi transaction commit/rollback

@@ -5,6 +5,7 @@ import com.cnweb2025.user_service.enums.VerificationStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface SellerProfileRepository extends JpaRepository<SellerProfile, String> {
+public interface SellerProfileRepository extends JpaRepository<SellerProfile, String>, JpaSpecificationExecutor<SellerProfile> {
     Boolean existsByUserId(String userId);
 
 

@@ -194,7 +194,7 @@ public class TransactionHistoryController {
             )
     })
     @GetMapping("/admin/history")
-    @PreAuthorize("hasAuthority('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<TransactionHistoryResponse>> getSystemTransactionHistory(
             @Parameter(description = "Username của người dùng (filter theo user cụ thể)")
             @RequestParam(required = false) String appUser,

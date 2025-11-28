@@ -1,16 +1,20 @@
 package com.vdt2025.product_service.entity;
 
+import com.vdt2025.product_service.dto.SpecAttribute;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.type.SqlTypes;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -115,6 +119,24 @@ public class Product {
     // Người tạo sản phẩm
     @Column(name = "created_by")
     String createdBy;
+
+    // Thông tin đặc tả kỹ thuật dưới dạng JSON
+    @JdbcTypeCode(SqlTypes.JSON) // Báo cho Hibernate đây là JSON
+    @Column(name = "specs", columnDefinition = "jsonb") // Mapping với cột jsonb trong Postgres
+    private Map<String, SpecAttribute> specs;
+
+    // ========== Seller-defined Selection Groups ==========
+    /**
+     * Các nhóm lựa chọn mà seller tự định nghĩa cho sản phẩm
+     * Ví dụ: "Mẫu điện thoại", "Kiểu vỏ", "Màu sắc"...
+     * 
+     * Khác với attributeValues (Admin định nghĩa global theo category),
+     * selectionGroups cho phép seller tự do định nghĩa theo nhu cầu riêng
+     */
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("displayOrder ASC")
+    @Builder.Default
+    List<ProductSelectionGroup> selectionGroups = new ArrayList<>();
 
 
 }

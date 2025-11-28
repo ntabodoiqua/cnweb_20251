@@ -1,6 +1,7 @@
 package com.cnweb2025.user_service.service;
 
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileCreationRequest;
+import com.cnweb2025.user_service.dto.request.seller.SellerProfileFilterRequest;
 import com.cnweb2025.user_service.dto.request.seller.SellerProfileUpdateRequest;
 import com.cnweb2025.user_service.dto.response.SellerProfileResponse;
 import com.cnweb2025.user_service.entity.*;
@@ -10,6 +11,7 @@ import com.cnweb2025.user_service.exception.ErrorCode;
 import com.cnweb2025.user_service.mapper.SellerProfileMapper;
 import com.cnweb2025.user_service.messaging.RabbitMQMessagePublisher;
 import com.cnweb2025.user_service.repository.*;
+import com.cnweb2025.user_service.specification.SellerProfileSpecification;
 import com.vdt2025.common_dto.dto.MessageType;
 import com.vdt2025.common_dto.dto.SellerProfileApprovedEvent;
 import com.vdt2025.common_dto.dto.SellerProfileRejectedEvent;
@@ -127,6 +129,28 @@ public class SellerProfileServiceImp implements SellerProfileService{
                 .map(sellerProfileMapper::toSellerResponse);
         log.info("Retrieved all seller profiles, total: {}", profiles.getTotalElements());
         return profiles;
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public Page<SellerProfileResponse> getAllSellerProfiles(SellerProfileFilterRequest filter, Pageable pageable) {
+        var specification = SellerProfileSpecification.withFilters(filter);
+        Page<SellerProfileResponse> profiles = sellerProfileRepository.findAll(specification, pageable)
+                .map(sellerProfileMapper::toSellerResponse);
+        log.info("Retrieved filtered seller profiles, total: {}", profiles.getTotalElements());
+        return profiles;
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public SellerProfileResponse getSellerProfileById(String sellerProfileId) {
+        var sellerProfile = sellerProfileRepository.findById(sellerProfileId)
+                .orElseThrow(() -> {
+                    log.error("Seller profile not found with ID: {}", sellerProfileId);
+                    return new AppException(ErrorCode.SELLER_PROFILE_NOT_FOUND);
+                });
+        log.info("Retrieved seller profile with ID: {}", sellerProfileId);
+        return sellerProfileMapper.toSellerResponse(sellerProfile);
     }
 
     @Override
