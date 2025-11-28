@@ -190,12 +190,17 @@
 
 .categoryDropdownMenu :global(.ant-dropdown-menu) {
   padding: 8px;
+  max-height: 500px;
+  overflow-y: auto;
 }
 
 .categoryDropdownMenu :global(.ant-dropdown-menu-item) {
   border-radius: 6px;
   padding: 10px 12px;
   margin-bottom: 4px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
 }
 
 .categoryDropdownMenu :global(.ant-dropdown-menu-item:hover) {
@@ -215,6 +220,52 @@
 .categoryDropdownMenu :global(.ant-dropdown-menu-item .anticon) {
   color: #ee4d2d;
   font-size: 16px;
+}
+
+/* Submenu for 2-level categories */
+.categoryDropdownMenu :global(.ant-dropdown-menu-submenu-title) {
+  border-radius: 6px;
+  padding: 10px 12px !important;
+  margin-bottom: 4px;
+  color: #333;
+  font-weight: 500;
+  font-size: 14px;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+}
+
+.categoryDropdownMenu :global(.ant-dropdown-menu-submenu-title:hover) {
+  background: #fff5f5;
+  color: #ee4d2d;
+}
+
+.categoryDropdownMenu :global(.ant-dropdown-menu-submenu-title .anticon) {
+  color: #ee4d2d;
+  font-size: 16px;
+}
+
+/* Ensure submenu item has same size as regular items */
+.categoryDropdownMenu :global(.ant-dropdown-menu-submenu) {
+  margin-bottom: 4px;
+}
+
+.categoryDropdownMenu :global(.ant-dropdown-menu-submenu .ant-dropdown-menu) {
+  min-width: 200px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 8px;
+}
+
+.categoryDropdownMenu
+  :global(.ant-dropdown-menu-submenu .ant-dropdown-menu-item) {
+  padding: 8px 12px;
+}
+
+.categoryDropdownMenu
+  :global(.ant-dropdown-menu-submenu .ant-dropdown-menu-item a) {
+  font-weight: 400;
+  font-size: 13px;
 }
 
 .headerActions {
@@ -450,7 +501,8 @@
 /* Responsive */
 @media (max-width: 992px) {
   .headerSearch {
-    display: none;
+    max-width: 280px;
+    margin: 0 20px;
   }
 
   .headerBottom .headerNav {
@@ -475,6 +527,23 @@
     padding: 0 16px;
   }
 
+  .headerSearch {
+    max-width: 200px;
+    margin: 0 12px;
+  }
+
+  .headerSearch :global(.ant-input-search .ant-input) {
+    height: 36px;
+    font-size: 13px;
+    padding-left: 12px;
+  }
+
+  .searchButton {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 14px;
+  }
+
   .headerLogoText {
     display: none;
   }
@@ -488,11 +557,63 @@
     padding: 6px 16px;
     font-size: 13px;
   }
+
+  .cartIcon,
+  .notificationIcon {
+    width: 38px;
+    height: 38px;
+  }
+
+  .cartIcon :global(.anticon),
+  .notificationIcon :global(.anticon) {
+    font-size: 18px;
+  }
 }
 
 @media (max-width: 576px) {
+  .headerSearch {
+    max-width: 150px;
+    margin: 0 8px;
+  }
+
+  .headerSearch :global(.ant-input-search .ant-input) {
+    height: 34px;
+    font-size: 12px;
+    padding-left: 10px;
+  }
+
+  .headerSearch :global(.ant-input-search .ant-input::placeholder) {
+    font-size: 11px;
+  }
+
+  .searchButton {
+    height: 34px;
+    padding: 0 10px;
+    font-size: 13px;
+  }
+
   .headerRegisterBtn {
     display: none;
+  }
+
+  .headerLoginBtn {
+    padding: 5px 12px;
+    font-size: 12px;
+  }
+
+  .cartIcon,
+  .notificationIcon {
+    width: 34px;
+    height: 34px;
+  }
+
+  .cartIcon :global(.anticon),
+  .notificationIcon :global(.anticon) {
+    font-size: 16px;
+  }
+
+  .headerLogoImage {
+    height: 32px;
   }
 }
 
@@ -501,3 +622,28 @@
    because they conflicted with Ant Design's default transition animations.
    Ant Design components (Dropdown, Notification) have their own optimized animations,
    so we let them handle it naturally for smoother transitions. */
+
+.categoryInlineMenuWrapper {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 4px 0;
+  max-height: 600px;
+  overflow-y: auto;
+  width: 280px;
+}
+
+.categoryInlineMenuWrapper :global(.ant-menu-inline) {
+  border-right: none;
+}
+
+.categoryInlineMenuWrapper :global(.ant-menu-item), 
+.categoryInlineMenuWrapper :global(.ant-menu-submenu-title) {
+  height: auto;
+  line-height: 1.5;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin: 0;
+  width: 100%;
+}
+

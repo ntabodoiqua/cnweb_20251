@@ -9,6 +9,7 @@ import {
   TruckOutlined,
   SafetyOutlined,
 } from "@ant-design/icons";
+import NoImage from "../../assets/NoImages.webp";
 
 /**
  * Quick View Modal Component
@@ -41,9 +42,12 @@ const QuickViewModal = ({ visible, onClose, product, formatPrice }) => {
           {/* Product Image */}
           <div className="quick-view-image-wrapper">
             <img
-              src={product.image}
+              src={product.image || product.thumbnailImage || NoImage}
               alt={product.name}
               className="quick-view-image"
+              onError={(e) => {
+                e.target.src = NoImage;
+              }}
             />
             {product.discount && (
               <Tag color="red" className="quick-view-discount">

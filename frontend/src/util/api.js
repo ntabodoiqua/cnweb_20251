@@ -897,6 +897,26 @@ const getPublicPlatformCategoriesApi = () => {
   });
 };
 
+// Get public category by ID (no authentication required)
+const getPublicCategoryByIdApi = (categoryId) => {
+  const URL_API = `/api/product/public/categories/platform/${categoryId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get public brand by ID (no authentication required)
+const getPublicBrandByIdApi = (brandId) => {
+  const URL_API = `/api/product/brands/public/${brandId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // Payment APIs
 const createZaloPayOrderApi = (paymentData) => {
   const URL_API = "/api/payment/v1/payments/zalopay/create-order";
@@ -1985,6 +2005,8 @@ export {
   getCategoriesApi,
   getPlatformCategoriesApi,
   getPublicPlatformCategoriesApi,
+  getPublicCategoryByIdApi,
+  getPublicBrandByIdApi,
   getPlatformCategoryDetailApi,
   getBrandsApi,
   // Payment APIs

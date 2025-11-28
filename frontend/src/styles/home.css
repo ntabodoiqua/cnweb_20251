@@ -537,6 +537,13 @@ html {
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
+.category-subcategories {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 4px;
+  font-style: italic;
+}
+
 /* ============================================
    FLASH SALE SECTION
    ============================================ */
@@ -1840,4 +1847,49 @@ html {
   .trust-badge-card {
     min-height: 80px;
   }
+}
+
+/* ============================================
+   LAZY LOADING SECTIONS - Performance Optimized
+   ============================================ */
+.lazy-section {
+  will-change: contents;
+  contain: layout style;
+}
+
+.section-placeholder {
+  background: linear-gradient(
+    90deg,
+    rgba(248, 249, 250, 0.6) 0%,
+    rgba(248, 249, 250, 0.9) 50%,
+    rgba(248, 249, 250, 0.6) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 12px;
+  margin: 16px 0;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Hardware acceleration for smooth scrolling */
+.home-page,
+.home-container {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Optimize images */
+.product-image,
+.category-image,
+.brand-logo {
+  will-change: transform;
+  contain: strict;
 }
