@@ -16,6 +16,11 @@ import {
   ControlOutlined,
   SolutionOutlined,
   PictureOutlined,
+  TeamOutlined,
+  DatabaseOutlined,
+  FileTextOutlined,
+  DownOutlined,
+  RightOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../../constants/routes";
 import "./admin-dashboard.css";
@@ -27,92 +32,144 @@ import "./admin-dashboard.css";
 const AdminDashboardLayout = () => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState([
+    "users",
+    "catalog",
+    "business",
+  ]);
 
-  // Menu items configuration
-  const menuItems = [
+  // Toggle group expansion
+  const toggleGroup = (groupKey) => {
+    setExpandedGroups((prev) =>
+      prev.includes(groupKey)
+        ? prev.filter((key) => key !== groupKey)
+        : [...prev, groupKey]
+    );
+  };
+
+  // Menu items configuration - Grouped
+  const menuGroups = [
     {
-      key: "overview",
+      key: "main",
+      label: "Chính",
       icon: <DashboardOutlined />,
-      label: "Tổng quan",
-      path: PROTECTED_ROUTES.ADMIN_DASHBOARD,
+      items: [
+        {
+          key: "overview",
+          icon: <DashboardOutlined />,
+          label: "Tổng quan",
+          path: PROTECTED_ROUTES.ADMIN_DASHBOARD,
+        },
+      ],
     },
     {
       key: "users",
-      icon: <UserOutlined />,
-      label: "Quản lý người dùng",
-      path: PROTECTED_ROUTES.ADMIN_USERS,
+      label: "Người dùng & Cửa hàng",
+      icon: <TeamOutlined />,
+      items: [
+        {
+          key: "users",
+          icon: <UserOutlined />,
+          label: "Quản lý người dùng",
+          path: PROTECTED_ROUTES.ADMIN_USERS,
+        },
+        {
+          key: "stores",
+          icon: <ShopOutlined />,
+          label: "Quản lý cửa hàng",
+          path: PROTECTED_ROUTES.ADMIN_STORES,
+        },
+        {
+          key: "seller-profiles",
+          icon: <SolutionOutlined />,
+          label: "Hồ sơ người bán",
+          path: PROTECTED_ROUTES.ADMIN_SELLER_PROFILES,
+        },
+      ],
     },
     {
-      key: "brands",
-      icon: <TagsOutlined />,
-      label: "Quản lý thương hiệu",
-      path: PROTECTED_ROUTES.ADMIN_BRANDS,
+      key: "catalog",
+      label: "Danh mục & Sản phẩm",
+      icon: <DatabaseOutlined />,
+      items: [
+        {
+          key: "categories",
+          icon: <AppstoreOutlined />,
+          label: "Danh mục sàn",
+          path: PROTECTED_ROUTES.ADMIN_CATEGORIES,
+        },
+        {
+          key: "brands",
+          icon: <TagsOutlined />,
+          label: "Thương hiệu",
+          path: PROTECTED_ROUTES.ADMIN_BRANDS,
+        },
+        {
+          key: "product-attributes",
+          icon: <ControlOutlined />,
+          label: "Thuộc tính sản phẩm",
+          path: PROTECTED_ROUTES.ADMIN_PRODUCT_ATTRIBUTES,
+        },
+        {
+          key: "products",
+          icon: <ShoppingOutlined />,
+          label: "Sản phẩm",
+          path: PROTECTED_ROUTES.ADMIN_PRODUCTS,
+        },
+        {
+          key: "banners",
+          icon: <PictureOutlined />,
+          label: "Banner",
+          path: PROTECTED_ROUTES.ADMIN_BANNERS,
+        },
+      ],
     },
     {
-      key: "banners",
-      icon: <PictureOutlined />,
-      label: "Quản lý Banner",
-      path: PROTECTED_ROUTES.ADMIN_BANNERS,
+      key: "business",
+      label: "Kinh doanh",
+      icon: <FileTextOutlined />,
+      items: [
+        {
+          key: "orders",
+          icon: <ShoppingCartOutlined />,
+          label: "Đơn hàng",
+          path: PROTECTED_ROUTES.ADMIN_ORDERS,
+        },
+        {
+          key: "payments",
+          icon: <DollarOutlined />,
+          label: "Thanh toán",
+          path: PROTECTED_ROUTES.ADMIN_PAYMENTS,
+        },
+        {
+          key: "reports",
+          icon: <BarChartOutlined />,
+          label: "Báo cáo & Thống kê",
+          path: PROTECTED_ROUTES.ADMIN_REPORTS,
+        },
+      ],
     },
     {
-      key: "stores",
-      icon: <ShopOutlined />,
-      label: "Quản lý cửa hàng",
-      path: PROTECTED_ROUTES.ADMIN_STORES,
-    },
-    {
-      key: "seller-profiles",
-      icon: <SolutionOutlined />,
-      label: "Hồ sơ người bán",
-      path: PROTECTED_ROUTES.ADMIN_SELLER_PROFILES,
-    },
-    {
-      key: "categories",
-      icon: <AppstoreOutlined />,
-      label: "Quản lý danh mục sàn",
-      path: PROTECTED_ROUTES.ADMIN_CATEGORIES,
-    },
-    {
-      key: "product-attributes",
-      icon: <ControlOutlined />,
-      label: "Thuộc tính sản phẩm",
-      path: PROTECTED_ROUTES.ADMIN_PRODUCT_ATTRIBUTES,
-    },
-    {
-      key: "products",
-      icon: <ShoppingOutlined />,
-      label: "Quản lý sản phẩm",
-      path: PROTECTED_ROUTES.ADMIN_PRODUCTS,
-    },
-    {
-      key: "orders",
-      icon: <ShoppingCartOutlined />,
-      label: "Quản lý đơn hàng",
-      path: PROTECTED_ROUTES.ADMIN_ORDERS,
-    },
-    {
-      key: "payments",
-      icon: <DollarOutlined />,
-      label: "Quản lý thanh toán",
-      path: PROTECTED_ROUTES.ADMIN_PAYMENTS,
-    },
-    {
-      key: "reports",
-      icon: <BarChartOutlined />,
-      label: "Báo cáo & Thống kê",
-      path: PROTECTED_ROUTES.ADMIN_REPORTS,
-    },
-    {
-      key: "settings",
+      key: "system",
+      label: "Hệ thống",
       icon: <SettingOutlined />,
-      label: "Cài đặt hệ thống",
-      path: PROTECTED_ROUTES.ADMIN_SETTINGS,
+      items: [
+        {
+          key: "settings",
+          icon: <SettingOutlined />,
+          label: "Cài đặt",
+          path: PROTECTED_ROUTES.ADMIN_SETTINGS,
+        },
+      ],
     },
   ];
 
+  // Flatten all items for finding active item
+  const allItems = menuGroups.flatMap((group) => group.items);
+
   // Get active menu item based on current path
   const activeItem =
-    menuItems.find((item) => item.path === location.pathname) || menuItems[0];
+    allItems.find((item) => item.path === location.pathname) || allItems[0];
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -142,20 +199,64 @@ const AdminDashboardLayout = () => {
             {/* Sidebar Menu */}
             <nav>
               <ul className="admin-menu">
-                {menuItems.map((item) => (
-                  <li key={item.key} className="admin-menu-item">
-                    <Link
-                      to={item.path}
-                      className={`admin-menu-link ${
-                        location.pathname === item.path ? "active" : ""
+                {menuGroups.map((group) => (
+                  <li key={group.key} className="admin-menu-group">
+                    {/* Group Header - Only show if more than 1 item or not collapsed */}
+                    {group.items.length > 1 && (
+                      <div
+                        className={`admin-menu-group-header ${
+                          expandedGroups.includes(group.key) ? "expanded" : ""
+                        }`}
+                        onClick={() => !collapsed && toggleGroup(group.key)}
+                        title={collapsed ? group.label : ""}
+                      >
+                        <span className="admin-menu-icon">{group.icon}</span>
+                        {!collapsed && (
+                          <>
+                            <span className="admin-menu-label">
+                              {group.label}
+                            </span>
+                            <span className="admin-menu-arrow">
+                              {expandedGroups.includes(group.key) ? (
+                                <DownOutlined />
+                              ) : (
+                                <RightOutlined />
+                              )}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Group Items */}
+                    <ul
+                      className={`admin-menu-subitems ${
+                        group.items.length === 1 ||
+                        expandedGroups.includes(group.key) ||
+                        collapsed
+                          ? "expanded"
+                          : ""
                       }`}
-                      title={collapsed ? item.label : ""}
                     >
-                      <span className="admin-menu-icon">{item.icon}</span>
-                      {!collapsed && (
-                        <span className="admin-menu-label">{item.label}</span>
-                      )}
-                    </Link>
+                      {group.items.map((item) => (
+                        <li key={item.key} className="admin-menu-item">
+                          <Link
+                            to={item.path}
+                            className={`admin-menu-link ${
+                              location.pathname === item.path ? "active" : ""
+                            } ${group.items.length > 1 ? "submenu-item" : ""}`}
+                            title={collapsed ? item.label : ""}
+                          >
+                            <span className="admin-menu-icon">{item.icon}</span>
+                            {!collapsed && (
+                              <span className="admin-menu-label">
+                                {item.label}
+                              </span>
+                            )}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
                   </li>
                 ))}
               </ul>
