@@ -936,17 +936,54 @@ public class ZaloPayServiceImpl implements ZaloPayService {
     @Transactional
     public RefundResponse refundOrder(RefundRequest request) {
         try {
-            log.info("Processing refund request - ZpTransId: {}, Amount: {}", 
+            log.info("Processing refund request - TransactionId: {}, Amount: {}", 
                     request.getZpTransId(), request.getAmount());
             
             // Tìm original transaction để lấy thông tin
-            ZaloPayTransaction originalTransaction = transactionRepository
-                    .findByZpTransId(Long.parseLong(request.getZpTransId()))
-                    .orElse(null);
+            // Hỗ trợ cả appTransId (format: yymmdd_xxxxxx) và zpTransId (số Long thuần túy)
+            ZaloPayTransaction originalTransaction = null;
+            String actualZpTransId = request.getZpTransId();
+            
+            if (request.getZpTransId() != null && request.getZpTransId().contains("_")) {
+                // Đây là appTransId, tìm bằng appTransId và lấy zpTransId thực
+                log.info("Input is appTransId format, searching by appTransId: {}", request.getZpTransId());
+                originalTransaction = transactionRepository
+                        .findByAppTransId(request.getZpTransId())
+                        .orElse(null);
+                
+                if (originalTransaction != null && originalTransaction.getZpTransId() != null) {
+                    actualZpTransId = String.valueOf(originalTransaction.getZpTransId());
+                    log.info("Found transaction, actual zpTransId: {}", actualZpTransId);
+                } else {
+                    log.error("Transaction not found or zpTransId is null for appTransId: {}", request.getZpTransId());
+                    return RefundResponse.builder()
+                            .status("FAILED")
+                            .message("Không tìm thấy giao dịch gốc hoặc giao dịch chưa được thanh toán")
+                            .zpTransId(request.getZpTransId())
+                            .build();
+                }
+            } else {
+                // Đây là zpTransId thuần túy
+                try {
+                    originalTransaction = transactionRepository
+                            .findByZpTransId(Long.parseLong(request.getZpTransId()))
+                            .orElse(null);
+                } catch (NumberFormatException e) {
+                    log.error("Invalid zpTransId format: {}", request.getZpTransId());
+                    return RefundResponse.builder()
+                            .status("FAILED")
+                            .message("Mã giao dịch không hợp lệ: " + request.getZpTransId())
+                            .zpTransId(request.getZpTransId())
+                            .build();
+                }
+            }
             
             if (originalTransaction == null) {
-                log.warn("Original transaction not found for ZpTransId: {}", request.getZpTransId());
+                log.warn("Original transaction not found for TransactionId: {}", request.getZpTransId());
             }
+            
+            // Cập nhật request với zpTransId thực để gửi tới ZaloPay
+            request.setZpTransId(actualZpTransId);
             
             // Generate m_refund_id theo format: yymmdd_appid_xxxx
             String mRefundId = generateMRefundId();

@@ -26,6 +26,7 @@ import {
   getBrandsApi,
   getStoreCategoriesApi,
 } from "../../util/api";
+import RichTextEditor from "../common/RichTextEditor";
 import styles from "./AddProductModal.module.css";
 
 const { TextArea } = Input;
@@ -228,14 +229,13 @@ const AddProductModal = ({ visible, onClose, onSuccess, storeId }) => {
             name="description"
             rules={[
               { required: true, message: "Vui lòng nhập mô tả chi tiết" },
-              { min: 10, max: 5000, message: "Mô tả từ 10-5000 ký tự" },
             ]}
+            tooltip="Hỗ trợ định dạng văn bản: in đậm, in nghiêng, danh sách, chèn ảnh, video..."
           >
-            <TextArea
-              rows={4}
-              placeholder="Nhập mô tả chi tiết về sản phẩm"
-              showCount
-              maxLength={5000}
+            <RichTextEditor
+              placeholder="Nhập mô tả chi tiết về sản phẩm..."
+              minHeight={200}
+              maxLength={10000}
             />
           </Form.Item>
         </div>

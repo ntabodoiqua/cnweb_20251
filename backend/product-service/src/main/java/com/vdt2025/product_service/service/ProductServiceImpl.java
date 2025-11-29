@@ -912,6 +912,65 @@ public class ProductServiceImpl implements ProductService {
         productRepository.updateSoldCount(productId, quantity);
     }
 
+    @Override
+    @Transactional
+    public void updateSoldCountBatch(Map<String, Integer> variantQuantityMap) {
+        if (variantQuantityMap == null || variantQuantityMap.isEmpty()) {
+            log.debug("updateSoldCountBatch called with empty map, skipping");
+            return;
+        }
+
+        log.info("Updating sold count for {} variants", variantQuantityMap.size());
+
+        // Lấy thông tin variants để biết productId tương ứng
+        List<String> variantIds = new ArrayList<>(variantQuantityMap.keySet());
+        List<ProductVariant> variants = variantRepository.findAllById(variantIds);
+
+        if (variants.isEmpty()) {
+            log.warn("No variants found for IDs: {}", variantIds);
+            return;
+        }
+
+        // Map productId -> tổng quantity bán được (gom các variants cùng product)
+        Map<String, Integer> productQuantityMap = new HashMap<>();
+
+        for (ProductVariant variant : variants) {
+            String variantId = variant.getId();
+            Integer quantity = variantQuantityMap.get(variantId);
+
+            if (quantity == null || quantity <= 0) {
+                continue;
+            }
+
+            // Cập nhật soldQuantity cho variant
+            int updatedRows = variantRepository.updateSoldQuantity(variantId, quantity);
+            if (updatedRows > 0) {
+                log.debug("Updated soldQuantity for variant {}: +{}", variantId, quantity);
+            }
+
+            // Gom quantity theo productId
+            String productId = variant.getProduct().getId();
+            productQuantityMap.merge(productId, quantity, Integer::sum);
+        }
+
+        // Cập nhật soldCount cho các products
+        for (Map.Entry<String, Integer> entry : productQuantityMap.entrySet()) {
+            String productId = entry.getKey();
+            Integer totalQuantity = entry.getValue();
+
+            int updatedRows = productRepository.updateSoldCount(productId, totalQuantity);
+            if (updatedRows > 0) {
+                log.debug("Updated soldCount for product {}: +{}", productId, totalQuantity);
+            }
+
+            // Evict cache cho product đã cập nhật
+            cacheEvictService.evictProductDetails(productId);
+        }
+
+        log.info("Successfully updated sold count for {} variants across {} products", 
+                variants.size(), productQuantityMap.size());
+    }
+
     // ========== Helper Methods ==========
 
     private void checkProductAccess(Product product) {
@@ -1264,6 +1323,7 @@ public class ProductServiceImpl implements ProductService {
                             .storeId(store.getId())
                             .storeName(store.getStoreName())
                             .storeLogo(store.getLogoUrl())
+                            .storeOwnerUsername(store.getUserName()) // Username của seller
                             .build();
                 })
                 .collect(Collectors.toList());

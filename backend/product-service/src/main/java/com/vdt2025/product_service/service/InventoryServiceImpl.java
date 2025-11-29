@@ -10,6 +10,7 @@ import com.vdt2025.product_service.exception.AppException;
 import com.vdt2025.product_service.exception.ErrorCode;
 import com.vdt2025.product_service.repository.InventoryStockRepository;
 import com.vdt2025.product_service.repository.InventoryTransactionRepository;
+import com.vdt2025.product_service.repository.ProductRepository;
 import com.vdt2025.product_service.repository.ProductVariantRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class InventoryServiceImpl implements InventoryService {
     InventoryStockRepository inventoryStockRepository;
     ProductVariantRepository productVariantRepository;
     InventoryTransactionRepository transactionRepository;
+    ProductRepository productRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -651,8 +653,62 @@ public class InventoryServiceImpl implements InventoryService {
         inventoryStockRepository.saveAll(stocks);
         transactionRepository.saveAll(transactions);
 
-        // TODO: Gửi Event (Kafka/RabbitMQ) báo "ItemSold" để:
-        // - Service Product cập nhật "sold_count" (số lượng đã bán)
+        // 6. Cập nhật sold_count cho variants và products
+        updateSoldCountForConfirmedSale(stocks, quantityMap);
+    }
+
+    /**
+     * Cập nhật soldQuantity cho variants và soldCount cho products sau khi confirm sale
+     * 
+     * @param stocks List các InventoryStock đã được confirm
+     * @param quantityMap Map variantId -> quantity đã bán
+     */
+    private void updateSoldCountForConfirmedSale(List<InventoryStock> stocks, Map<String, Integer> quantityMap) {
+        try {
+            log.info("Updating sold count for {} variants after confirmed sale", stocks.size());
+
+            // Map productId -> tổng quantity bán được (gom các variants cùng product)
+            Map<String, Integer> productQuantityMap = new java.util.HashMap<>();
+
+            for (InventoryStock stock : stocks) {
+                ProductVariant variant = stock.getProductVariant();
+                String variantId = variant.getId();
+                Integer quantity = quantityMap.get(variantId);
+
+                if (quantity == null || quantity <= 0) {
+                    continue;
+                }
+
+                // Cập nhật soldQuantity cho variant
+                int updatedVariantRows = productVariantRepository.updateSoldQuantity(variantId, quantity);
+                if (updatedVariantRows > 0) {
+                    log.debug("Updated soldQuantity for variant {}: +{}", variantId, quantity);
+                }
+
+                // Gom quantity theo productId
+                String productId = variant.getProduct().getId();
+                productQuantityMap.merge(productId, quantity, Integer::sum);
+            }
+
+            // Cập nhật soldCount cho các products
+            for (Map.Entry<String, Integer> entry : productQuantityMap.entrySet()) {
+                String productId = entry.getKey();
+                Integer totalQuantity = entry.getValue();
+
+                int updatedProductRows = productRepository.updateSoldCount(productId, totalQuantity);
+                if (updatedProductRows > 0) {
+                    log.debug("Updated soldCount for product {}: +{}", productId, totalQuantity);
+                }
+            }
+
+            log.info("Successfully updated sold count for {} variants across {} products",
+                    stocks.size(), productQuantityMap.size());
+
+        } catch (Exception e) {
+            // Log lỗi nhưng không throw exception để không ảnh hưởng đến transaction chính
+            // Sold count có thể được đồng bộ lại sau bằng batch job nếu cần
+            log.error("Failed to update sold count after confirmed sale: {}", e.getMessage(), e);
+        }
     }
 
     @Override
@@ -773,7 +829,60 @@ public class InventoryServiceImpl implements InventoryService {
         // 5. Save All
         inventoryStockRepository.saveAll(stocks);
 
-        // TODO: Gửi Event Async để giảm 'sold_count' (số lượng đã bán) bên Product Service
-        // eventPublisher.publishEvent(new InventoryReturnedEvent(orderId, quantityMap));
+        // 6. Giảm sold_count cho variants và products khi hoàn trả hàng
+        decreaseSoldCountForReturn(stocks, quantityMap);
+    }
+
+    /**
+     * Giảm soldQuantity cho variants và soldCount cho products khi hoàn trả hàng
+     * 
+     * @param stocks List các InventoryStock đã được return
+     * @param quantityMap Map variantId -> quantity được hoàn trả
+     */
+    private void decreaseSoldCountForReturn(List<InventoryStock> stocks, Map<String, Integer> quantityMap) {
+        try {
+            log.info("Decreasing sold count for {} variants after inventory return", stocks.size());
+
+            // Map productId -> tổng quantity hoàn trả (gom các variants cùng product)
+            Map<String, Integer> productQuantityMap = new java.util.HashMap<>();
+
+            for (InventoryStock stock : stocks) {
+                ProductVariant variant = stock.getProductVariant();
+                String variantId = variant.getId();
+                Integer quantity = quantityMap.get(variantId);
+
+                if (quantity == null || quantity <= 0) {
+                    continue;
+                }
+
+                // Giảm soldQuantity cho variant (quantity âm)
+                int updatedVariantRows = productVariantRepository.updateSoldQuantity(variantId, -quantity);
+                if (updatedVariantRows > 0) {
+                    log.debug("Decreased soldQuantity for variant {}: -{}", variantId, quantity);
+                }
+
+                // Gom quantity theo productId
+                String productId = variant.getProduct().getId();
+                productQuantityMap.merge(productId, quantity, Integer::sum);
+            }
+
+            // Giảm soldCount cho các products (quantity âm)
+            for (Map.Entry<String, Integer> entry : productQuantityMap.entrySet()) {
+                String productId = entry.getKey();
+                Integer totalQuantity = entry.getValue();
+
+                int updatedProductRows = productRepository.updateSoldCount(productId, -totalQuantity);
+                if (updatedProductRows > 0) {
+                    log.debug("Decreased soldCount for product {}: -{}", productId, totalQuantity);
+                }
+            }
+
+            log.info("Successfully decreased sold count for {} variants across {} products",
+                    stocks.size(), productQuantityMap.size());
+
+        } catch (Exception e) {
+            // Log lỗi nhưng không throw exception để không ảnh hưởng đến transaction chính
+            log.error("Failed to decrease sold count after inventory return: {}", e.getMessage(), e);
+        }
     }
 }

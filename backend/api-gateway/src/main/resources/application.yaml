@@ -42,6 +42,21 @@ spring:
             - Path=/api/payment/**
           filters:
             - StripPrefix=2
+        # notification-service
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notification/**
+          filters:
+            - StripPrefix=2
+        # notification-service WebSocket
+        - id: notification-websocket
+          uri: lb://notification-service
+          predicates:
+            - Path=/ws/notifications/**
+          metadata:
+            response-timeout: 3600000
+            connect-timeout: 30000
 eureka:
   client:
     service-url:

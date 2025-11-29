@@ -519,3 +519,81 @@
     font-size: 13px;
   }
 }
+
+/* Import Modal */
+.importModal :global(.ant-modal-content) {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.importModal :global(.ant-modal-header) {
+  border-bottom: none;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 50%, #69c0ff 100%);
+}
+
+.importModal :global(.ant-modal-title) {
+  font-size: 16px;
+  font-weight: 700;
+  color: white;
+}
+
+.importModal :global(.ant-modal-close) {
+  top: 12px;
+  right: 16px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.importModal :global(.ant-modal-close:hover) {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+}
+
+.importModal :global(.ant-modal-body) {
+  padding: 24px;
+  background: #fafbfc;
+}
+
+.importModal :global(.ant-modal-footer) {
+  padding: 16px 24px;
+  border-top: 1px solid #e8ecf0;
+}
+
+.importContent {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  border: 1px solid #e8ecf0;
+}
+
+.importTextareaWrapper {
+  margin-top: 12px;
+}
+
+.importTextareaHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #333;
+}
+
+.importTextarea {
+  border-radius: 10px !important;
+  border: 2px solid #e8ecf0 !important;
+  transition: all 0.3s ease !important;
+  background: #f8f9fa !important;
+}
+
+.importTextarea:hover {
+  border-color: rgba(24, 144, 255, 0.4) !important;
+}
+
+.importTextarea:focus {
+  border-color: #1890ff !important;
+  box-shadow: 0 0 0 3px rgba(24, 144, 255, 0.1) !important;
+  background: white !important;
+}

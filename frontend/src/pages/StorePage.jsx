@@ -17,6 +17,7 @@ import {
   Typography,
   Spin,
   Divider,
+  Carousel,
 } from "antd";
 import {
   SearchOutlined,
@@ -36,6 +37,8 @@ import {
   getPublicStoreDetailApi,
   getPublicStoreCategoriesApi,
   getPublicProductsApi,
+  getWardInfoApi,
+  getStoreBannersApi,
 } from "../util/api";
 import LoadingSpinner from "../components/LoadingSpinner";
 import styles from "./StorePage.module.css";
@@ -54,6 +57,8 @@ const StorePage = () => {
   const [store, setStore] = useState(null);
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
+  const [wardInfo, setWardInfo] = useState(null);
+  const [bannerSlides, setBannerSlides] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(
     searchParams.get("categoryId") || null
   );
@@ -107,25 +112,47 @@ const StorePage = () => {
   const fetchStoreData = async () => {
     setLoading(true);
     try {
-      const [storeResponse, categoriesResponse] = await Promise.all([
-        getPublicStoreDetailApi(storeId),
-        getPublicStoreCategoriesApi(storeId),
-      ]);
+      const [storeResponse, categoriesResponse, bannersResponse] =
+        await Promise.all([
+          getPublicStoreDetailApi(storeId),
+          getPublicStoreCategoriesApi(storeId),
+          getStoreBannersApi(storeId),
+        ]);
 
       // Handle store response
       if (storeResponse) {
         setStore(storeResponse);
+        // Fetch ward info if wardId exists
+        if (storeResponse.wardId) {
+          fetchWardInfo(storeResponse.wardId);
+        }
       }
 
       // Handle categories response
       if (categoriesResponse.code === 1000) {
         setCategories(categoriesResponse.result || []);
       }
+
+      // Handle banners response
+      if (bannersResponse?.code === 1000) {
+        setBannerSlides(bannersResponse.result || []);
+      }
     } catch (error) {
       console.error("Error fetching store data:", error);
       message.error("Không thể tải thông tin cửa hàng");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchWardInfo = async (wardId) => {
+    try {
+      const response = await getWardInfoApi(wardId);
+      if (response.code === 1000) {
+        setWardInfo(response.result);
+      }
+    } catch (error) {
+      console.error("Error fetching ward info:", error);
     }
   };
 
@@ -419,10 +446,37 @@ const StorePage = () => {
           </div>
         </div>
 
+        {/* Banner Slides Carousel - Below Store Header */}
+        {bannerSlides.length > 0 && (
+          <div className={styles.storeBannerSlides}>
+            <Carousel
+              autoplay
+              autoplaySpeed={4000}
+              dots={true}
+              swipe={true}
+              draggable={true}
+              className={styles.bannerCarousel}
+            >
+              {bannerSlides.map((banner) => (
+                <div key={banner.id} className={styles.bannerSlide}>
+                  <img
+                    src={banner.imageUrl}
+                    alt={banner.imageName || "Store Banner"}
+                    className={styles.bannerSlideImage}
+                  />
+                </div>
+              ))}
+            </Carousel>
+          </div>
+        )}
+
         {/* Store Content */}
         <div className={styles.storeContent}>
           {/* Contact Info */}
-          {(store.contactEmail || store.contactPhone || store.shopAddress) && (
+          {(store.contactEmail ||
+            store.contactPhone ||
+            store.shopAddress ||
+            wardInfo) && (
             <div className={styles.storeContactInfo}>
               <div className={styles.contactCard}>
                 <div className={styles.contactGrid}>
@@ -448,14 +502,18 @@ const StorePage = () => {
                       </div>
                     </div>
                   )}
-                  {store.shopAddress && (
+                  {(store.shopAddress || wardInfo) && (
                     <div className={styles.contactItem}>
                       <div className={styles.contactIcon}>
                         <EnvironmentOutlined />
                       </div>
                       <div className={styles.contactDetails}>
                         <h4>Địa chỉ</h4>
-                        <p>{store.shopAddress}</p>
+                        <p>
+                          {[store.shopAddress, wardInfo?.pathWithType]
+                            .filter(Boolean)
+                            .join(", ")}
+                        </p>
                       </div>
                     </div>
                   )}

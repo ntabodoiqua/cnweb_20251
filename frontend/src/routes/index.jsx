@@ -20,7 +20,10 @@ import PublicRoute from "./guards/PublicRoute";
 const HomePage = lazy(() => import("../pages/home"));
 const ProductsPage = lazy(() => import("../pages/ProductsPage"));
 const ProductDetailPage = lazy(() => import("../pages/ProductDetailPage"));
+const CategoryPage = lazy(() => import("../pages/CategoryPage"));
+const BrandPage = lazy(() => import("../pages/BrandPage"));
 const StorePage = lazy(() => import("../pages/StorePage"));
+const SearchPage = lazy(() => import("../pages/SearchPage"));
 const LoginPage = lazy(() => import("../pages/login"));
 const RegisterPage = lazy(() => import("../pages/register"));
 const VerifyEmailPage = lazy(() => import("../pages/verify-email"));
@@ -57,6 +60,11 @@ const CartPage = lazy(() => import("../pages/user/CartPage"));
 const CheckoutPage = lazy(() => import("../pages/user/CheckoutPage"));
 const PaymentResultPage = lazy(() => import("../pages/user/PaymentResultPage"));
 
+// Notification Pages
+const NotificationsPage = lazy(() =>
+  import("../pages/notifications/NotificationsPage")
+);
+
 // Profile sub-pages
 const ProfileGeneralPage = lazy(() =>
   import("../pages/profile/ProfileGeneralPage")
@@ -66,6 +74,9 @@ const ProfileSellerPage = lazy(() =>
 );
 const ProfileOrdersPage = lazy(() =>
   import("../pages/profile/ProfileOrdersPage")
+);
+const ProfileOrderDetailPage = lazy(() =>
+  import("../pages/profile/ProfileOrderDetailPage")
 );
 const ProfileAddressesPage = lazy(() =>
   import("../pages/profile/ProfileAddressesPage")
@@ -86,6 +97,7 @@ const AdminOverviewPage = lazy(() =>
 );
 const AdminUsersPage = lazy(() => import("../pages/admin/AdminUsersPage"));
 const AdminBrandsPage = lazy(() => import("../pages/admin/AdminBrandsPage"));
+const AdminBannersPage = lazy(() => import("../pages/admin/AdminBannersPage"));
 const AdminStoresPage = lazy(() => import("../pages/admin/AdminStoresPage"));
 const AdminSellerProfilesPage = lazy(() =>
   import("../pages/admin/AdminSellerProfilesPage")
@@ -127,6 +139,9 @@ const SellerVariantDetailPage = lazy(() =>
 const SellerOrdersPage = lazy(() => import("../pages/seller/SellerOrdersPage"));
 const SellerCategoriesPage = lazy(() =>
   import("../pages/seller/SellerCategoriesPage")
+);
+const SellerBannersPage = lazy(() =>
+  import("../pages/seller/SellerBannersPage")
 );
 const SellerProductAttributesPage = lazy(() =>
   import("../pages/seller/SellerProductAttributesPage")
@@ -202,10 +217,34 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: PUBLIC_ROUTES.CATEGORY,
+        element: (
+          <SuspenseWrapper>
+            <CategoryPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.BRAND,
+        element: (
+          <SuspenseWrapper>
+            <BrandPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
         path: PUBLIC_ROUTES.STORE,
         element: (
           <SuspenseWrapper>
             <StorePage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.SEARCH,
+        element: (
+          <SuspenseWrapper>
+            <SearchPage />
           </SuspenseWrapper>
         ),
       },
@@ -386,6 +425,20 @@ const router = createBrowserRouter([
         ),
       },
 
+      // ==================== NOTIFICATIONS ====================
+      {
+        path: PROTECTED_ROUTES.NOTIFICATIONS,
+        element: (
+          <SuspenseWrapper>
+            <ProtectedRoute
+              allowedRoles={[ROLES.USER, ROLES.ADMIN, ROLES.SELLER]}
+            >
+              <NotificationsPage />
+            </ProtectedRoute>
+          </SuspenseWrapper>
+        ),
+      },
+
       // ==================== PROTECTED ROUTES (USER + ADMIN) ====================
       // Profile routes with nested pages
       {
@@ -421,6 +474,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <ProfileOrdersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.PROFILE_ORDER_DETAIL,
+            element: (
+              <SuspenseWrapper>
+                <ProfileOrderDetailPage />
               </SuspenseWrapper>
             ),
           },
@@ -483,6 +544,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <AdminBrandsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.ADMIN_BANNERS,
+            element: (
+              <SuspenseWrapper>
+                <AdminBannersPage />
               </SuspenseWrapper>
             ),
           },
@@ -613,10 +682,34 @@ const router = createBrowserRouter([
             ),
           },
           {
+            path: PROTECTED_ROUTES.SELLER_ORDER_DETAIL,
+            element: (
+              <SuspenseWrapper>
+                <SellerOrdersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_ORDER_RETURNS,
+            element: (
+              <SuspenseWrapper>
+                <SellerOrdersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
             path: PROTECTED_ROUTES.SELLER_CATEGORIES,
             element: (
               <SuspenseWrapper>
                 <SellerCategoriesPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_BANNERS,
+            element: (
+              <SuspenseWrapper>
+                <SellerBannersPage />
               </SuspenseWrapper>
             ),
           },

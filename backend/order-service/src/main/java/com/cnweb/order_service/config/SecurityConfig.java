@@ -52,7 +52,8 @@ public class SecurityConfig {
             "/api/v1/cart",           // Get cart
             "/api/v1/cart/count",     // Get cart count
             "/api/v1/cart/validate",  // Validate cart
-            "/api/v1/cart/validate/detailed"  // Detailed validation
+            "/api/v1/cart/validate/detailed",  // Detailed validation
+            "/internal/**"            // Internal endpoints for service-to-service communication
     };
 
     private static final String[] PUBLIC_PUT_ENDPOINTS = {

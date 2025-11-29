@@ -226,6 +226,7 @@ services:
       - SPRING_RABBITMQ_VIRTUAL_HOST=xqjmojji
       - SENDGRID_API_KEY=${SENDGRID_API_KEY:-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}
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://discovery-service:8761/eureka/
+      - JWT_SIGNERKEY=cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2
     depends_on:
       discovery-service:
         condition: service_healthy
