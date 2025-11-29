@@ -92,16 +92,22 @@ const NotificationDropdown = () => {
 
   const [open, setOpen] = useState(false);
 
-  // Fetch notifications khi mở dropdown
+  // Fetch notifications khi mở dropdown - chỉ gọi nếu đã đăng nhập
   useEffect(() => {
     if (open) {
-      fetchNotifications();
+      const token = localStorage.getItem("access_token");
+      if (token) {
+        fetchNotifications();
+      }
     }
   }, [open, fetchNotifications]);
 
-  // Fetch unread count khi component mount
+  // Fetch unread count khi component mount - chỉ gọi nếu đã đăng nhập
   useEffect(() => {
-    fetchUnreadCount();
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      fetchUnreadCount();
+    }
   }, [fetchUnreadCount]);
 
   // Xử lý click vào notification

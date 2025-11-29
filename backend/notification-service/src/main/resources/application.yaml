@@ -69,4 +69,4 @@ logging:
 
 # JWT Configuration
 jwt:
-  signerKey: ${JWT_SIGNER_KEY:jxd91nf74ks03hd7fj29xks0dj37ehj21bsh67sk02jdh38sk01jdhq7263jdhxu}
+  signerKey: ${JWT_SIGNERKEY:cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2}

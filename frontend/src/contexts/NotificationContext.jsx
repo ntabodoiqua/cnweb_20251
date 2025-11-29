@@ -8,6 +8,12 @@ import {
 } from "react";
 import { notification as antdNotification } from "antd";
 import { BellOutlined } from "@ant-design/icons";
+import {
+  getRecentNotificationsApi,
+  getUnreadNotificationCountApi,
+  markNotificationAsReadApi,
+  markAllNotificationsAsReadApi,
+} from "../util/api";
 
 const NotificationContext = createContext(null);
 
@@ -16,7 +22,7 @@ const NotificationContext = createContext(null);
 const getWsBaseUrl = () => {
   const wsUrl = import.meta.env.VITE_WS_URL;
   const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-  
+
   if (wsUrl) {
     // Nếu đã có protocol (ws:// hoặc wss://), dùng trực tiếp
     if (wsUrl.startsWith("ws://") || wsUrl.startsWith("wss://")) {
@@ -41,12 +47,18 @@ export const NotificationProvider = ({ children }) => {
   const reconnectTimeoutRef = useRef(null);
   const pingIntervalRef = useRef(null);
   const reconnectAttempts = useRef(0);
-  const maxReconnectAttempts = 5;
+  const maxReconnectAttempts = 3; // Giảm số lần retry
+  const wsConnectionFailed = useRef(false); // Flag để ngăn spam log
 
   // Kết nối WebSocket
   const connectWebSocket = useCallback((userId) => {
     if (!userId) {
       console.log("No userId provided, skipping WebSocket connection");
+      return;
+    }
+
+    // Nếu đã thất bại quá nhiều lần, không thử nữa trong session này
+    if (wsConnectionFailed.current) {
       return;
     }
 
@@ -56,7 +68,9 @@ export const NotificationProvider = ({ children }) => {
     }
 
     try {
-      const wsUrl = `${WS_BASE_URL}/ws/notifications?userId=${userId}`;
+      const wsUrl = `${WS_BASE_URL}/ws/notifications?userId=${encodeURIComponent(
+        userId
+      )}`;
       console.log("Connecting to WebSocket:", wsUrl);
 
       const ws = new WebSocket(wsUrl);
@@ -110,7 +124,7 @@ export const NotificationProvider = ({ children }) => {
           clearInterval(pingIntervalRef.current);
         }
 
-        // Reconnect nếu không phải close chủ ý
+        // Reconnect nếu không phải close chủ ý và chưa vượt quá số lần thử
         if (
           event.code !== 1000 &&
           reconnectAttempts.current < maxReconnectAttempts
@@ -121,17 +135,28 @@ export const NotificationProvider = ({ children }) => {
             30000
           );
           console.log(
-            `Attempting to reconnect in ${delay}ms (attempt ${reconnectAttempts.current})`
+            `Attempting to reconnect in ${delay}ms (attempt ${reconnectAttempts.current}/${maxReconnectAttempts})`
           );
 
           reconnectTimeoutRef.current = setTimeout(() => {
             connectWebSocket(userId);
           }, delay);
+        } else if (reconnectAttempts.current >= maxReconnectAttempts) {
+          // Đánh dấu đã thất bại, không thử lại nữa
+          wsConnectionFailed.current = true;
+          console.log(
+            "WebSocket connection failed after max attempts. Will use polling instead."
+          );
         }
       };
 
-      ws.onerror = (error) => {
-        console.error("WebSocket error:", error);
+      ws.onerror = () => {
+        // Chỉ log lần đầu, không spam console
+        if (reconnectAttempts.current === 0) {
+          console.warn(
+            "WebSocket connection error. Notification updates may be delayed."
+          );
+        }
       };
     } catch (error) {
       console.error("Failed to create WebSocket connection:", error);
@@ -150,6 +175,9 @@ export const NotificationProvider = ({ children }) => {
       wsRef.current.close(1000, "User disconnected");
       wsRef.current = null;
     }
+    // Reset các flag khi disconnect
+    reconnectAttempts.current = 0;
+    wsConnectionFailed.current = false;
     setIsConnected(false);
     setNotifications([]);
     setUnreadCount(0);
@@ -183,22 +211,21 @@ export const NotificationProvider = ({ children }) => {
     try {
       setIsLoading(true);
       const token = localStorage.getItem("access_token");
-      if (!token) return;
+      if (!token) {
+        setNotifications([]);
+        return;
+      }
 
-      const response = await fetch("/api/notification/notifications/recent", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Accept-Language": "vi",
-        },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.result) {
-          setNotifications(data.result);
-        }
+      const response = await getRecentNotificationsApi();
+      if (response?.result) {
+        setNotifications(response.result);
       }
     } catch (error) {
+      // Ignore 401 errors silently - user is not authenticated
+      if (error?.response?.status === 401) {
+        setNotifications([]);
+        return;
+      }
       console.error("Failed to fetch notifications:", error);
     } finally {
       setIsLoading(false);
@@ -209,25 +236,21 @@ export const NotificationProvider = ({ children }) => {
   const fetchUnreadCount = useCallback(async () => {
     try {
       const token = localStorage.getItem("access_token");
-      if (!token) return;
+      if (!token) {
+        setUnreadCount(0);
+        return;
+      }
 
-      const response = await fetch(
-        "/api/notification/notifications/unread/count",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Accept-Language": "vi",
-          },
-        }
-      );
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.result) {
-          setUnreadCount(data.result.count);
-        }
+      const response = await getUnreadNotificationCountApi();
+      if (response?.result) {
+        setUnreadCount(response.result.count);
       }
     } catch (error) {
+      // Ignore 401 errors silently - user is not authenticated
+      if (error?.response?.status === 401) {
+        setUnreadCount(0);
+        return;
+      }
       console.error("Failed to fetch unread count:", error);
     }
   }, []);
@@ -238,18 +261,8 @@ export const NotificationProvider = ({ children }) => {
       const token = localStorage.getItem("access_token");
       if (!token) return;
 
-      const response = await fetch(
-        `/api/notification/notifications/${notificationId}/read`,
-        {
-          method: "PATCH",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Accept-Language": "vi",
-          },
-        }
-      );
-
-      if (response.ok) {
+      const response = await markNotificationAsReadApi(notificationId);
+      if (response?.result?.success) {
         setNotifications((prev) =>
           prev.map((n) =>
             n.id === notificationId
@@ -270,15 +283,8 @@ export const NotificationProvider = ({ children }) => {
       const token = localStorage.getItem("access_token");
       if (!token) return;
 
-      const response = await fetch("/api/notification/notifications/read-all", {
-        method: "PATCH",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Accept-Language": "vi",
-        },
-      });
-
-      if (response.ok) {
+      const response = await markAllNotificationsAsReadApi();
+      if (response?.result) {
         setNotifications((prev) =>
           prev.map((n) => ({
             ...n,

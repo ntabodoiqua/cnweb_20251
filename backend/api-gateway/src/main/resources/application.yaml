@@ -51,9 +51,12 @@ spring:
             - StripPrefix=2
         # notification-service WebSocket
         - id: notification-websocket
-          uri: lb:ws://notification-service
+          uri: lb://notification-service
           predicates:
             - Path=/ws/notifications/**
+          metadata:
+            response-timeout: 3600000
+            connect-timeout: 30000
 eureka:
   client:
     service-url:
