@@ -136,6 +136,9 @@ public enum ErrorCode {
     PURCHASE_NOT_VERIFIED(2005, "error.2005", HttpStatus.FORBIDDEN),
     RATING_IMAGE_LIMIT_EXCEEDED(2006, "error.2006", HttpStatus.BAD_REQUEST),
     ORDER_SERVICE_ERROR(2007, "error.2007", HttpStatus.INTERNAL_SERVER_ERROR),
+    // Lỗi banner (30xx)
+    BANNER_NOT_FOUND(3001, "error.3001", HttpStatus.NOT_FOUND),
+    MAX_BANNER_EXCEEDED(3002, "error.3002", HttpStatus.BAD_REQUEST),
 
     // Lỗi khác (99xx)
     UNCATEGORIZED_EXCEPTION(9999, "error.9999", HttpStatus.INTERNAL_SERVER_ERROR),

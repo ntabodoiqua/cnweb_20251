@@ -58,7 +58,12 @@ public class SecurityConfig {
             // Elasticsearch search endpoints - public cho user tìm kiếm
             "/products/search",
             "/products/search/suggest",
-            "/products/search/health"
+            "/products/search/health",
+            // Banner slides endpoints - public cho hiển thị banner
+            "/banner-slides",
+            "/banner-slides/platform",
+            "/banner-slides/store/**",
+            "/banner-slides/{bannerId}"
     };
 
     private static final String[] PUBLIC_POST_ENDPOINTS_SEARCH = {
