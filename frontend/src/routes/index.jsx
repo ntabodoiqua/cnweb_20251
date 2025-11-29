@@ -20,7 +20,10 @@ import PublicRoute from "./guards/PublicRoute";
 const HomePage = lazy(() => import("../pages/home"));
 const ProductsPage = lazy(() => import("../pages/ProductsPage"));
 const ProductDetailPage = lazy(() => import("../pages/ProductDetailPage"));
+const CategoryPage = lazy(() => import("../pages/CategoryPage"));
+const BrandPage = lazy(() => import("../pages/BrandPage"));
 const StorePage = lazy(() => import("../pages/StorePage"));
+const SearchPage = lazy(() => import("../pages/SearchPage"));
 const LoginPage = lazy(() => import("../pages/login"));
 const RegisterPage = lazy(() => import("../pages/register"));
 const VerifyEmailPage = lazy(() => import("../pages/verify-email"));
@@ -91,6 +94,7 @@ const AdminOverviewPage = lazy(() =>
 );
 const AdminUsersPage = lazy(() => import("../pages/admin/AdminUsersPage"));
 const AdminBrandsPage = lazy(() => import("../pages/admin/AdminBrandsPage"));
+const AdminBannersPage = lazy(() => import("../pages/admin/AdminBannersPage"));
 const AdminStoresPage = lazy(() => import("../pages/admin/AdminStoresPage"));
 const AdminSellerProfilesPage = lazy(() =>
   import("../pages/admin/AdminSellerProfilesPage")
@@ -132,6 +136,9 @@ const SellerVariantDetailPage = lazy(() =>
 const SellerOrdersPage = lazy(() => import("../pages/seller/SellerOrdersPage"));
 const SellerCategoriesPage = lazy(() =>
   import("../pages/seller/SellerCategoriesPage")
+);
+const SellerBannersPage = lazy(() =>
+  import("../pages/seller/SellerBannersPage")
 );
 const SellerProductAttributesPage = lazy(() =>
   import("../pages/seller/SellerProductAttributesPage")
@@ -207,10 +214,34 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: PUBLIC_ROUTES.CATEGORY,
+        element: (
+          <SuspenseWrapper>
+            <CategoryPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.BRAND,
+        element: (
+          <SuspenseWrapper>
+            <BrandPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
         path: PUBLIC_ROUTES.STORE,
         element: (
           <SuspenseWrapper>
             <StorePage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.SEARCH,
+        element: (
+          <SuspenseWrapper>
+            <SearchPage />
           </SuspenseWrapper>
         ),
       },
@@ -506,6 +537,14 @@ const router = createBrowserRouter([
             ),
           },
           {
+            path: PROTECTED_ROUTES.ADMIN_BANNERS,
+            element: (
+              <SuspenseWrapper>
+                <AdminBannersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
             path: PROTECTED_ROUTES.ADMIN_STORES,
             element: (
               <SuspenseWrapper>
@@ -636,6 +675,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <SellerCategoriesPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_BANNERS,
+            element: (
+              <SuspenseWrapper>
+                <SellerBannersPage />
               </SuspenseWrapper>
             ),
           },

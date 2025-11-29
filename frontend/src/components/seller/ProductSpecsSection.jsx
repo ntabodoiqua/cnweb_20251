@@ -14,6 +14,8 @@ import {
   Collapse,
   Tooltip,
   Popconfirm,
+  Dropdown,
+  Alert,
 } from "antd";
 import {
   SettingOutlined,
@@ -24,6 +26,8 @@ import {
   CloseOutlined,
   InfoCircleOutlined,
   DownOutlined,
+  ImportOutlined,
+  CodeOutlined,
 } from "@ant-design/icons";
 import { getProductSpecsApi, updateProductSpecsApi } from "../../util/api";
 import styles from "./ProductSpecsSection.module.css";
@@ -45,6 +49,11 @@ const ProductSpecsSection = ({ productId }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingSpec, setEditingSpec] = useState(null);
   const [form] = Form.useForm();
+
+  // Import JSON modal state
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importJson, setImportJson] = useState("");
+  const [importError, setImportError] = useState("");
 
   // Lấy tất cả các nhóm từ specs hiện có
   const allGroups = useMemo(() => {
@@ -198,6 +207,155 @@ const ProductSpecsSection = ({ productId }) => {
     await handleSaveSpecs(updatedSpecs);
   };
 
+  // ===== Import JSON Functions =====
+  const handleOpenImportModal = () => {
+    setIsImportModalOpen(true);
+    setImportJson("");
+    setImportError("");
+  };
+
+  const handleCloseImportModal = () => {
+    setIsImportModalOpen(false);
+    setImportJson("");
+    setImportError("");
+  };
+
+  const validateAndParseJson = (jsonString) => {
+    try {
+      const parsed = JSON.parse(jsonString);
+
+      // Validate structure
+      if (typeof parsed !== "object" || Array.isArray(parsed)) {
+        throw new Error("JSON phải là một object với các key là tên thông số");
+      }
+
+      const validatedSpecs = {};
+      let order = Object.keys(specs).length + 1;
+
+      for (const [key, value] of Object.entries(parsed)) {
+        // Validate key format
+        if (!/^[a-zA-Z][a-zA-Z0-9]*$/.test(key)) {
+          throw new Error(
+            `Key "${key}" không hợp lệ. Key phải bắt đầu bằng chữ và chỉ chứa chữ/số`
+          );
+        }
+
+        // Handle simple value format: { "key": "value" }
+        if (typeof value !== "object" || value === null) {
+          const groupKey = "other";
+          validatedSpecs[key] = {
+            key,
+            value: value,
+            labelVi: key,
+            labelEn: key,
+            dataType:
+              typeof value === "number"
+                ? "number"
+                : typeof value === "boolean"
+                ? "boolean"
+                : "string",
+            displayOrder: order++,
+            showInList: false,
+            group: groupKey,
+            groupLabelVi: "Khác",
+            groupLabelEn: "Other",
+          };
+        } else {
+          // Handle full spec format
+          const spec = value;
+          const groupName = spec.group || spec.groupLabelVi || "Khác";
+          const groupKey =
+            groupName
+              .toLowerCase()
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .replace(/đ/g, "d")
+              .replace(/[^a-z0-9]/g, "_")
+              .replace(/_+/g, "_")
+              .replace(/^_|_$/g, "") || "other";
+
+          validatedSpecs[key] = {
+            key,
+            value: spec.value !== undefined ? spec.value : "",
+            labelVi: spec.labelVi || key,
+            labelEn: spec.labelEn || key,
+            dataType: spec.dataType || "string",
+            unit: spec.unit || undefined,
+            displayOrder: spec.displayOrder || order++,
+            showInList: spec.showInList || false,
+            group: groupKey,
+            groupLabelVi: groupName,
+            groupLabelEn: spec.groupLabelEn || groupName,
+          };
+        }
+      }
+
+      return validatedSpecs;
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        throw new Error("JSON không hợp lệ. Vui lòng kiểm tra lại cú pháp.");
+      }
+      throw error;
+    }
+  };
+
+  const handleImportJson = async () => {
+    try {
+      setImportError("");
+      const parsedSpecs = validateAndParseJson(importJson);
+
+      // Merge with existing specs
+      const updatedSpecs = { ...specs, ...parsedSpecs };
+
+      await handleSaveSpecs(updatedSpecs);
+      handleCloseImportModal();
+
+      notification.success({
+        message: "Import thành công",
+        description: `Đã import ${Object.keys(parsedSpecs).length} thông số`,
+        placement: "topRight",
+      });
+    } catch (error) {
+      setImportError(error.message);
+    }
+  };
+
+  const getExampleJson = () => {
+    return JSON.stringify(
+      {
+        screenSize: {
+          value: "6.7",
+          labelVi: "Kích thước màn hình",
+          labelEn: "Screen Size",
+          dataType: "number",
+          unit: "inch",
+          group: "Màn hình",
+          displayOrder: 1,
+          showInList: true,
+        },
+        resolution: {
+          value: "2796 x 1290",
+          labelVi: "Độ phân giải",
+          labelEn: "Resolution",
+          dataType: "string",
+          group: "Màn hình",
+          displayOrder: 2,
+        },
+        batteryCapacity: {
+          value: 4422,
+          labelVi: "Dung lượng pin",
+          labelEn: "Battery Capacity",
+          dataType: "number",
+          unit: "mAh",
+          group: "Pin & Sạc",
+          displayOrder: 1,
+        },
+      },
+      null,
+      2
+    );
+  };
+
   // Group specs by their group
   const groupedSpecs = Object.entries(specs).reduce((acc, [key, spec]) => {
     const groupKey = spec.group || "other";
@@ -305,6 +463,22 @@ const ProductSpecsSection = ({ productId }) => {
       ),
     }));
 
+  // Dropdown menu items for add button
+  const addMenuItems = [
+    {
+      key: "add",
+      icon: <PlusOutlined />,
+      label: "Thêm thông số",
+      onClick: () => handleOpenModal(),
+    },
+    {
+      key: "import",
+      icon: <ImportOutlined />,
+      label: "Import từ JSON",
+      onClick: handleOpenImportModal,
+    },
+  ];
+
   return (
     <div className={styles.specsSection}>
       <div className={styles.header}>
@@ -312,14 +486,18 @@ const ProductSpecsSection = ({ productId }) => {
           <SettingOutlined className={styles.icon} />
           <h3 className={styles.title}>Thông số kỹ thuật</h3>
         </div>
-        <Button
-          type="primary"
-          icon={<PlusOutlined />}
-          onClick={() => handleOpenModal()}
-          className={styles.addBtn}
-        >
-          Thêm thông số
-        </Button>
+        <Space>
+          <Dropdown menu={{ items: addMenuItems }} placement="bottomRight">
+            <Button
+              type="primary"
+              icon={<PlusOutlined />}
+              className={styles.addBtn}
+            >
+              Thêm thông số{" "}
+              <DownOutlined style={{ fontSize: 10, marginLeft: 4 }} />
+            </Button>
+          </Dropdown>
+        </Space>
       </div>
 
       <div className={styles.content}>
@@ -520,6 +698,94 @@ const ProductSpecsSection = ({ productId }) => {
             </Button>
           </div>
         </Form>
+      </Modal>
+
+      {/* Import JSON Modal */}
+      <Modal
+        title={
+          <Space>
+            <ImportOutlined />
+            <span>Import thông số từ JSON</span>
+          </Space>
+        }
+        open={isImportModalOpen}
+        onCancel={handleCloseImportModal}
+        width={700}
+        className={styles.importModal}
+        footer={[
+          <Button key="cancel" onClick={handleCloseImportModal}>
+            Hủy
+          </Button>,
+          <Button
+            key="import"
+            type="primary"
+            icon={<ImportOutlined />}
+            onClick={handleImportJson}
+            loading={saving}
+            disabled={!importJson.trim()}
+          >
+            Import
+          </Button>,
+        ]}
+      >
+        <div className={styles.importContent}>
+          <Alert
+            message="Hướng dẫn Import JSON"
+            description={
+              <div>
+                <p>
+                  Dán JSON theo định dạng sau để import nhiều thông số cùng lúc:
+                </p>
+                <ul style={{ marginBottom: 8, paddingLeft: 20 }}>
+                  <li>Key phải bắt đầu bằng chữ, chỉ chứa chữ và số</li>
+                  <li>
+                    Mỗi thông số cần có: value, labelVi, labelEn, dataType,
+                    group
+                  </li>
+                  <li>dataType: "string", "number", hoặc "boolean"</li>
+                  <li>Các thông số trùng key sẽ được ghi đè</li>
+                </ul>
+              </div>
+            }
+            type="info"
+            showIcon
+            style={{ marginBottom: 16 }}
+          />
+
+          {importError && (
+            <Alert
+              message="Lỗi"
+              description={importError}
+              type="error"
+              showIcon
+              closable
+              onClose={() => setImportError("")}
+              style={{ marginBottom: 16 }}
+            />
+          )}
+
+          <div className={styles.importTextareaWrapper}>
+            <div className={styles.importTextareaHeader}>
+              <span>JSON Input</span>
+              <Button
+                type="link"
+                size="small"
+                icon={<CodeOutlined />}
+                onClick={() => setImportJson(getExampleJson())}
+              >
+                Xem ví dụ
+              </Button>
+            </div>
+            <TextArea
+              value={importJson}
+              onChange={(e) => setImportJson(e.target.value)}
+              placeholder={`Dán JSON vào đây...\n\nVí dụ:\n${getExampleJson()}`}
+              rows={15}
+              className={styles.importTextarea}
+              style={{ fontFamily: "monospace", fontSize: 13 }}
+            />
+          </div>
+        </div>
       </Modal>
     </div>
   );

@@ -1,17 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
-import { message } from "antd";
 import { FireOutlined, StarOutlined } from "@ant-design/icons";
-import {
-  bannerSlides,
-  categories,
-  topBrands,
-  testimonials,
-  homePageMeta,
-} from "../data/mockdata";
+import { bannerSlides, testimonials, homePageMeta } from "../data/mockdata";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { getPublicProductsApi } from "../util/api";
+import NoImage from "../assets/NoImages.webp";
+import {
+  getPublicProductsApi,
+  getPublicPlatformCategoriesApi,
+  getBrandsApi,
+  getPlatformBannersApi,
+} from "../util/api";
 import {
   HeroBanner,
   CategoriesSection,
@@ -19,162 +18,294 @@ import {
   ProductsSection,
   BrandsSection,
   TestimonialsSection,
-  QuickViewModal,
   TrustBadges,
-  RecentlyViewed,
-  addToRecentlyViewed,
 } from "../components/home";
+import useIntersectionObserver from "../hooks/useIntersectionObserver";
 import "../styles/home.css";
+
+// Helper functions moved outside component to avoid recreating
+const getCategoryIcon = (name) => {
+  const iconMap = {
+    "điện tử": "💻",
+    "điện thoại": "📱",
+    "thời trang": "👕",
+    "đồ gia dụng": "🏠",
+    sách: "📚",
+    "thể thao": "⚽",
+    "làm đẹp": "💄",
+    "đồ chơi": "🎮",
+    "thực phẩm": "🍎",
+    "xe cộ": "🚗",
+    "máy tính": "🖥️",
+    "phụ kiện": "🎧",
+    gaming: "🎮",
+    "văn phòng": "🖨️",
+    giày: "👟",
+  };
+  const lowerName = name.toLowerCase();
+  for (const [key, icon] of Object.entries(iconMap)) {
+    if (lowerName.includes(key)) return icon;
+  }
+  return "📦";
+};
+
+const getTotalProductCount = (category) => {
+  let total = category.productCount || 0;
+  if (category.subCategories && category.subCategories.length > 0) {
+    total += category.subCategories.reduce(
+      (sum, sub) => sum + (sub.productCount || 0),
+      0
+    );
+  }
+  return total;
+};
+
+// Format price function - stable reference
+const formatPrice = (price) => {
+  return new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(price);
+};
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [imagesLoaded, setImagesLoaded] = useState(false);
-  const [quickViewVisible, setQuickViewVisible] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
 
   // Product data from API
   const [flashSaleProducts, setFlashSaleProducts] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [dailyDeals, setDailyDeals] = useState([]);
 
-  // Fetch products from API
-  useEffect(() => {
-    const fetchHomeProducts = async () => {
-      try {
-        // Fetch flash sale products (sorted by createdAt, limited to 8)
-        const flashSaleResponse = await getPublicProductsApi({
-          isActive: true,
-          sortBy: "createdAt",
-          sortDirection: "desc",
-          page: 0,
-          size: 8,
-        });
-        if (flashSaleResponse.code === 1000) {
-          setFlashSaleProducts(flashSaleResponse.result.content || []);
-        }
+  // Categories data from API
+  const [categories, setCategories] = useState([]);
 
-        // Fetch featured products (sorted by soldCount if available, otherwise by rating)
-        const featuredResponse = await getPublicProductsApi({
-          isActive: true,
-          sortBy: "createdAt",
-          sortDirection: "desc",
-          page: 0,
-          size: 8,
-        });
-        if (featuredResponse.code === 1000) {
-          setFeaturedProducts(featuredResponse.result.content || []);
-        }
+  // Brands data from API
+  const [brands, setBrands] = useState([]);
 
-        // Fetch daily deals (different set of products)
-        const dealsResponse = await getPublicProductsApi({
-          isActive: true,
-          sortBy: "price",
-          sortDirection: "asc",
-          page: 0,
-          size: 8,
-        });
-        if (dealsResponse.code === 1000) {
-          setDailyDeals(dealsResponse.result.content || []);
-        }
-      } catch (error) {
-        console.error("Error fetching home products:", error);
-        message.error("Không thể tải sản phẩm");
+  // Banner slides from API
+  const [platformBanners, setPlatformBanners] = useState([]);
+
+  // Track which sections have been loaded
+  const [loadedSections, setLoadedSections] = useState({
+    categories: false,
+    flashSale: false,
+    featured: false,
+    dailyDeals: false,
+    brands: false,
+    banners: false,
+  });
+
+  // Single intersection observer for better performance
+  const [categoriesRef, categoriesVisible] = useIntersectionObserver({
+    rootMargin: "400px 0px",
+  });
+  const [flashSaleRef, flashSaleVisible] = useIntersectionObserver({
+    rootMargin: "400px 0px",
+  });
+  const [featuredRef, featuredVisible] = useIntersectionObserver({
+    rootMargin: "400px 0px",
+  });
+  const [dailyDealsRef, dailyDealsVisible] = useIntersectionObserver({
+    rootMargin: "400px 0px",
+  });
+  const [brandsRef, brandsVisible] = useIntersectionObserver({
+    rootMargin: "400px 0px",
+  });
+
+  // Fetch categories when visible
+  const fetchCategories = useCallback(async () => {
+    if (loadedSections.categories) return;
+    try {
+      const categoriesResponse = await getPublicPlatformCategoriesApi();
+      if (categoriesResponse?.code === 1000) {
+        const apiCategories = categoriesResponse.result || [];
+        const transformedCategories = apiCategories
+          .filter((cat) => cat.active)
+          .slice(0, 8)
+          .map((cat) => ({
+            id: cat.id,
+            name: cat.name,
+            icon: getCategoryIcon(cat.name),
+            image: cat.imageUrl || NoImage,
+            productCount: getTotalProductCount(cat),
+            subCategories: cat.subCategories || [],
+          }));
+        setCategories(transformedCategories);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    } finally {
+      setLoadedSections((prev) => ({ ...prev, categories: true }));
+    }
+  }, [loadedSections.categories]);
 
-    fetchHomeProducts();
-  }, []);
+  // Fetch flash sale products when visible
+  const fetchFlashSale = useCallback(async () => {
+    if (loadedSections.flashSale) return;
+    try {
+      const flashSaleResponse = await getPublicProductsApi({
+        isActive: true,
+        sortBy: "createdAt",
+        sortDirection: "desc",
+        page: 0,
+        size: 8,
+      });
+      if (flashSaleResponse.code === 1000) {
+        setFlashSaleProducts(flashSaleResponse.result.content || []);
+      }
+    } catch (error) {
+      console.error("Error fetching flash sale:", error);
+    } finally {
+      setLoadedSections((prev) => ({ ...prev, flashSale: true }));
+    }
+  }, [loadedSections.flashSale]);
+
+  // Fetch featured products when visible
+  const fetchFeatured = useCallback(async () => {
+    if (loadedSections.featured) return;
+    try {
+      const featuredResponse = await getPublicProductsApi({
+        isActive: true,
+        sortBy: "createdAt",
+        sortDirection: "desc",
+        page: 0,
+        size: 8,
+      });
+      if (featuredResponse.code === 1000) {
+        setFeaturedProducts(featuredResponse.result.content || []);
+      }
+    } catch (error) {
+      console.error("Error fetching featured:", error);
+    } finally {
+      setLoadedSections((prev) => ({ ...prev, featured: true }));
+    }
+  }, [loadedSections.featured]);
+
+  // Fetch daily deals when visible
+  const fetchDailyDeals = useCallback(async () => {
+    if (loadedSections.dailyDeals) return;
+    try {
+      const dealsResponse = await getPublicProductsApi({
+        isActive: true,
+        sortBy: "price",
+        sortDirection: "asc",
+        page: 0,
+        size: 8,
+      });
+      if (dealsResponse.code === 1000) {
+        setDailyDeals(dealsResponse.result.content || []);
+      }
+    } catch (error) {
+      console.error("Error fetching daily deals:", error);
+    } finally {
+      setLoadedSections((prev) => ({ ...prev, dailyDeals: true }));
+    }
+  }, [loadedSections.dailyDeals]);
+
+  // Fetch brands when visible
+  const fetchBrands = useCallback(async () => {
+    if (loadedSections.brands) return;
+    try {
+      const brandsResponse = await getBrandsApi(0, 8);
+      if (brandsResponse?.code === 1000) {
+        const apiBrands = brandsResponse.result?.content || [];
+        const transformedBrands = apiBrands
+          .filter((brand) => brand.isActive)
+          .map((brand) => ({
+            id: brand.id,
+            name: brand.name,
+            logo: brand.logoUrl || NoImage,
+            productsCount: brand.productCount || 0,
+          }));
+        setBrands(transformedBrands);
+      }
+    } catch (error) {
+      console.error("Error fetching brands:", error);
+    } finally {
+      setLoadedSections((prev) => ({ ...prev, brands: true }));
+    }
+  }, [loadedSections.brands]);
+
+  // Fetch platform banners on mount
+  const fetchBanners = useCallback(async () => {
+    if (loadedSections.banners) return;
+    try {
+      const bannersResponse = await getPlatformBannersApi();
+      if (bannersResponse?.code === 1000) {
+        const apiBanners = bannersResponse.result || [];
+        // Transform API response to match HeroBanner props
+        // API returns: id, imageName, imageUrl, displayOrder, storeId
+        const transformedBanners = apiBanners
+          .sort((a, b) => a.displayOrder - b.displayOrder)
+          .map((banner, index) => ({
+            id: banner.id || index + 1,
+            image: banner.imageUrl,
+            imageName: banner.imageName,
+          }));
+        setPlatformBanners(transformedBanners);
+      }
+    } catch (error) {
+      console.error("Error fetching banners:", error);
+      // Fallback to mock data if API fails
+      setPlatformBanners(bannerSlides);
+    } finally {
+      setLoadedSections((prev) => ({ ...prev, banners: true }));
+    }
+  }, [loadedSections.banners]);
+
+  // Fetch banners immediately on mount
+  useEffect(() => {
+    fetchBanners();
+  }, [fetchBanners]);
+
+  // Consolidated effect for triggering fetches
+  useEffect(() => {
+    if (categoriesVisible && !loadedSections.categories) fetchCategories();
+    if (flashSaleVisible && !loadedSections.flashSale) fetchFlashSale();
+    if (featuredVisible && !loadedSections.featured) fetchFeatured();
+    if (dailyDealsVisible && !loadedSections.dailyDeals) fetchDailyDeals();
+    if (brandsVisible && !loadedSections.brands) fetchBrands();
+  }, [
+    categoriesVisible,
+    flashSaleVisible,
+    featuredVisible,
+    dailyDealsVisible,
+    brandsVisible,
+    loadedSections,
+    fetchCategories,
+    fetchFlashSale,
+    fetchFeatured,
+    fetchDailyDeals,
+    fetchBrands,
+  ]);
 
   // Simulate loading and wait for critical images
   useEffect(() => {
-    // Wait for component to mount and data to be ready
+    // Set loading false faster
     const loadTimer = setTimeout(() => {
       setLoading(false);
-    }, 500);
-
-    // Preload critical images
-    const preloadImages = () => {
-      const imageUrls = [
-        ...bannerSlides.map((slide) => slide.image),
-        ...categories.slice(0, 4).map((cat) => cat.image),
-      ];
-
-      let loadedCount = 0;
-      const totalImages = imageUrls.length;
-
-      imageUrls.forEach((url) => {
-        const img = new Image();
-        img.src = url;
-        img.onload = () => {
-          loadedCount++;
-          if (loadedCount === totalImages) {
-            setImagesLoaded(true);
-          }
-        };
-        img.onerror = () => {
-          loadedCount++;
-          if (loadedCount === totalImages) {
-            setImagesLoaded(true);
-          }
-        };
-      });
-
-      // Fallback: Set images as loaded after 2 seconds regardless
-      setTimeout(() => {
-        setImagesLoaded(true);
-      }, 2000);
-    };
-
-    preloadImages();
+      setImagesLoaded(true);
+    }, 300);
 
     return () => clearTimeout(loadTimer);
   }, []);
 
-  // Format price to VND
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(price);
-  };
+  // Memoized handlers to prevent re-renders
+  const handleProductClick = useCallback(
+    (productId) => {
+      navigate(`/product/${productId}`);
+    },
+    [navigate]
+  );
 
-  // Handle product click
-  const handleProductClick = (productId) => {
-    // Save to recently viewed
-    const product = [
-      ...flashSaleProducts,
-      ...featuredProducts,
-      ...dailyDeals,
-    ].find((p) => p.id === productId);
-    if (product) {
-      addToRecentlyViewed(product);
-    }
-    navigate(`/product/${productId}`);
-  };
-
-  // Handle quick view
-  const handleQuickView = (product) => {
-    setSelectedProduct(product);
-    setQuickViewVisible(true);
-  };
-
-  // Handle add to cart
-  const handleAddToCart = (product) => {
-    message.success(`Đã thêm "${product.name}" vào giỏ hàng!`);
-    // TODO: Implement actual cart logic
-  };
-
-  // Handle add to wishlist
-  const handleAddToWishlist = (product) => {
-    message.success(`Đã thêm "${product.name}" vào danh sách yêu thích!`);
-    // TODO: Implement actual wishlist logic
-  };
-
-  // Handle category click
-  const handleCategoryClick = (categorySlug) => {
-    navigate(`/category/${categorySlug}`);
-  };
+  const handleCategoryClick = useCallback(
+    (categorySlug) => {
+      navigate(`/category/${categorySlug}`);
+    },
+    [navigate]
+  );
 
   // Show loading until both data is ready and critical images are loaded
   if (loading || !imagesLoaded) {
@@ -202,79 +333,83 @@ const HomePage = () => {
 
       <main className="home-page">
         {/* Hero Banner Carousel */}
-        <HeroBanner slides={bannerSlides} />
+        <HeroBanner
+          slides={platformBanners.length > 0 ? platformBanners : bannerSlides}
+        />
 
         <div className="home-container">
           {/* Trust Badges */}
           <TrustBadges />
 
-          {/* Categories Section */}
-          <CategoriesSection
-            categories={categories}
-            onCategoryClick={handleCategoryClick}
-          />
+          {/* Categories Section - Lazy Loaded */}
+          <section ref={categoriesRef} className="lazy-section">
+            {loadedSections.categories ? (
+              <CategoriesSection
+                categories={categories}
+                onCategoryClick={handleCategoryClick}
+              />
+            ) : (
+              <div className="section-placeholder" style={{ minHeight: 280 }} />
+            )}
+          </section>
 
-          {/* Flash Sale Section */}
-          <FlashSaleSection
-            products={flashSaleProducts}
-            onProductClick={handleProductClick}
-            formatPrice={formatPrice}
-            onQuickView={handleQuickView}
-            onAddToCart={handleAddToCart}
-            onAddToWishlist={handleAddToWishlist}
-          />
+          {/* Flash Sale Section - Lazy Loaded */}
+          <section ref={flashSaleRef} className="lazy-section">
+            {loadedSections.flashSale ? (
+              <FlashSaleSection
+                products={flashSaleProducts}
+                onProductClick={handleProductClick}
+                formatPrice={formatPrice}
+              />
+            ) : (
+              <div className="section-placeholder" style={{ minHeight: 450 }} />
+            )}
+          </section>
 
-          {/* Featured Products Section */}
-          <ProductsSection
-            title="Sản Phẩm Nổi Bật"
-            icon={<FireOutlined />}
-            products={featuredProducts}
-            onProductClick={handleProductClick}
-            formatPrice={formatPrice}
-            showViewAll={true}
-            viewAllLink="/products"
-            viewAllText="Xem thêm"
-            onQuickView={handleQuickView}
-            onAddToCart={handleAddToCart}
-            onAddToWishlist={handleAddToWishlist}
-          />
+          {/* Featured Products Section - Lazy Loaded */}
+          <section ref={featuredRef} className="lazy-section">
+            {loadedSections.featured ? (
+              <ProductsSection
+                title="Sản Phẩm Nổi Bật"
+                icon={<FireOutlined />}
+                products={featuredProducts}
+                onProductClick={handleProductClick}
+                formatPrice={formatPrice}
+                showViewAll={true}
+                viewAllLink="/products"
+                viewAllText="Xem thêm"
+              />
+            ) : (
+              <div className="section-placeholder" style={{ minHeight: 450 }} />
+            )}
+          </section>
 
-          {/* Daily Deals Section */}
-          <ProductsSection
-            title="Gợi Ý Hôm Nay"
-            icon={<StarOutlined />}
-            products={dailyDeals}
-            onProductClick={handleProductClick}
-            formatPrice={formatPrice}
-            showProgress={true}
-            onQuickView={handleQuickView}
-            onAddToCart={handleAddToCart}
-            onAddToWishlist={handleAddToWishlist}
-          />
+          {/* Daily Deals Section - Lazy Loaded */}
+          <section ref={dailyDealsRef} className="lazy-section">
+            {loadedSections.dailyDeals ? (
+              <ProductsSection
+                title="Gợi Ý Hôm Nay"
+                icon={<StarOutlined />}
+                products={dailyDeals}
+                onProductClick={handleProductClick}
+                formatPrice={formatPrice}
+                showProgress={true}
+              />
+            ) : (
+              <div className="section-placeholder" style={{ minHeight: 450 }} />
+            )}
+          </section>
 
-          {/* Recently Viewed Section */}
-          <RecentlyViewed
-            formatPrice={formatPrice}
-            onProductClick={handleProductClick}
-            onQuickView={handleQuickView}
-            onAddToCart={handleAddToCart}
-            onAddToWishlist={handleAddToWishlist}
-          />
-
-          {/* Top Brands Section */}
-          <BrandsSection brands={topBrands} />
+          {/* Top Brands Section - Lazy Loaded */}
+          <section ref={brandsRef} className="lazy-section">
+            {loadedSections.brands && brands.length > 0 && (
+              <BrandsSection brands={brands} />
+            )}
+          </section>
 
           {/* Testimonials Section */}
           <TestimonialsSection testimonials={testimonials} />
         </div>
-
-        {/* Quick View Modal */}
-        <QuickViewModal
-          visible={quickViewVisible}
-          onClose={() => setQuickViewVisible(false)}
-          product={selectedProduct}
-          formatPrice={formatPrice}
-        />
 
         {/* Hidden content for SEO */}
         <div className="visually-hidden">

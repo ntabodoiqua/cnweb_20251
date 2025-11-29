@@ -38,6 +38,7 @@ import NoImages from "../../assets/NoImages.webp";
 import ProductVariantsSection from "../../components/seller/ProductVariantsSection";
 import ProductSpecsSection from "../../components/seller/ProductSpecsSection";
 import ProductSelectionGroupsSection from "../../components/seller/ProductSelectionGroupsSection";
+import ProductDescriptionEditor from "../../components/seller/ProductDescriptionEditor";
 import styles from "./SellerProductDetailPage.module.css";
 
 const { TextArea } = Input;
@@ -99,17 +100,6 @@ const SellerProductDetailPage = () => {
         setSelectedImage(
           primaryImage?.imageUrl || productData.images?.[0]?.imageUrl || null
         );
-
-        // Set form values
-        form.setFieldsValue({
-          name: productData.name,
-          description: productData.description,
-          shortDescription: productData.shortDescription,
-          categoryId: productData.category?.id,
-          brandId: productData.brand?.id,
-          storeCategoryIds:
-            productData.storeCategories?.map((cat) => cat.id) || [],
-        });
       }
     } catch (error) {
       console.error("Error fetching product detail:", error);
@@ -154,9 +144,15 @@ const SellerProductDetailPage = () => {
     }
   };
 
-  const handleParentCategoryChange = async (parentCategoryId) => {
+  const handleParentCategoryChange = async (
+    parentCategoryId,
+    keepCategoryId = false
+  ) => {
     try {
-      form.setFieldsValue({ categoryId: undefined });
+      // Chỉ reset categoryId nếu không phải khởi tạo ban đầu
+      if (!keepCategoryId) {
+        form.setFieldsValue({ categoryId: undefined });
+      }
       setSubCategories([]);
 
       if (!parentCategoryId) return;
@@ -188,11 +184,24 @@ const SellerProductDetailPage = () => {
       await loadStoreCategories(product.store.id);
     }
 
-    // Load subcategories if category exists
+    // Load subcategories if category exists (load trước khi set form values)
+    // Truyền keepCategoryId = true để không reset categoryId
     if (product?.category?.parentId) {
-      await handleParentCategoryChange(product.category.parentId);
-      form.setFieldsValue({ parentCategoryId: product.category.parentId });
+      await handleParentCategoryChange(product.category.parentId, true);
     }
+
+    // Set form values sau khi đã load xong dữ liệu subcategories
+    // Use setTimeout to ensure form is mounted first
+    setTimeout(() => {
+      form.setFieldsValue({
+        name: product.name,
+        shortDescription: product.shortDescription,
+        parentCategoryId: product.category?.parentId, // Set danh mục cấp 0
+        categoryId: product.category?.id, // Set danh mục cấp 1
+        brandId: product.brand?.id,
+        storeCategoryIds: product.storeCategories?.map((cat) => cat.id) || [],
+      });
+    }, 0);
   };
 
   const handleCancelEdit = () => {
@@ -200,7 +209,6 @@ const SellerProductDetailPage = () => {
     // Reset form to original values
     form.setFieldsValue({
       name: product.name,
-      description: product.description,
       shortDescription: product.shortDescription,
       categoryId: product.category?.id,
       brandId: product.brand?.id,
@@ -214,7 +222,6 @@ const SellerProductDetailPage = () => {
 
       const updateData = {
         name: values.name,
-        description: values.description,
         shortDescription: values.shortDescription || "",
         categoryId: values.categoryId,
         storeId: product.store.id,
@@ -223,13 +230,32 @@ const SellerProductDetailPage = () => {
       };
 
       await updateProductApi(productId, updateData);
+
+      // Get updated category and brand info
+      const selectedCategory = subCategories.find(
+        (cat) => cat.id === values.categoryId
+      );
+      const selectedBrand = brands.find((brand) => brand.id === values.brandId);
+      const selectedStoreCategories = storeCategories.filter((cat) =>
+        values.storeCategoryIds?.includes(cat.id)
+      );
+
+      // Update local state
+      setProduct((prev) => ({
+        ...prev,
+        name: values.name,
+        shortDescription: values.shortDescription || "",
+        category: selectedCategory || prev.category,
+        brand: selectedBrand || null,
+        storeCategories: selectedStoreCategories || [],
+      }));
+
       notification.success({
         message: "Thành công",
         description: "Cập nhật sản phẩm thành công!",
         placement: "topRight",
       });
       setIsEditing(false);
-      fetchProductDetail(); // Reload data
     } catch (error) {
       console.error("Error updating product:", error);
       notification.error({
@@ -239,6 +265,42 @@ const SellerProductDetailPage = () => {
       });
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSaveDescription = async (description) => {
+    try {
+      const updateData = {
+        name: product.name,
+        description: description,
+        shortDescription: product.shortDescription || "",
+        categoryId: product.category.id,
+        storeId: product.store.id,
+        brandId: product.brand?.id || null,
+        storeCategoryIds: product.storeCategories?.map((cat) => cat.id) || [],
+      };
+
+      await updateProductApi(productId, updateData);
+
+      // Update local state instead of reloading
+      setProduct((prev) => ({
+        ...prev,
+        description: description,
+      }));
+
+      notification.success({
+        message: "Thành công",
+        description: "Cập nhật mô tả sản phẩm thành công!",
+        placement: "topRight",
+      });
+    } catch (error) {
+      console.error("Error updating description:", error);
+      notification.error({
+        message: "Lỗi",
+        description: "Không thể cập nhật mô tả sản phẩm",
+        placement: "topRight",
+      });
+      throw error;
     }
   };
 
@@ -279,13 +341,31 @@ const SellerProductDetailPage = () => {
     try {
       setUploadingImage(true);
       const displayOrder = (product.images?.length || 0) + 1;
-      await uploadProductImageApi(productId, file, displayOrder);
+      const response = await uploadProductImageApi(
+        productId,
+        file,
+        displayOrder
+      );
+
+      // Add new image to local state
+      const newImage = response?.result;
+      if (newImage) {
+        setProduct((prev) => ({
+          ...prev,
+          images: [...(prev.images || []), newImage],
+        }));
+
+        // Set as selected if it's the first image
+        if (!product.images || product.images.length === 0) {
+          setSelectedImage(newImage.imageUrl);
+        }
+      }
+
       notification.success({
         message: "Thành công",
         description: "Tải ảnh lên thành công!",
         placement: "topRight",
       });
-      fetchProductDetail(); // Reload product data
     } catch (error) {
       console.error("Error uploading image:", error);
       notification.error({
@@ -325,6 +405,25 @@ const SellerProductDetailPage = () => {
             }));
 
             await updateProductImagesOrderApi(productId, imagesOrder);
+
+            // Update display order in remaining images
+            remainingImages.forEach((img, idx) => {
+              img.displayOrder = idx + 1;
+            });
+          }
+
+          // Update local state
+          setProduct((prev) => ({
+            ...prev,
+            images: remainingImages,
+          }));
+
+          // Update selected image if deleted image was selected
+          if (
+            selectedImage ===
+            product.images.find((img) => img.id === imageId)?.imageUrl
+          ) {
+            setSelectedImage(remainingImages[0]?.imageUrl || null);
           }
 
           notification.success({
@@ -332,7 +431,6 @@ const SellerProductDetailPage = () => {
             description: "Xóa ảnh và cập nhật thứ tự thành công!",
             placement: "topRight",
           });
-          fetchProductDetail();
         } catch (error) {
           console.error("Error deleting image:", error);
           notification.error({
@@ -348,12 +446,21 @@ const SellerProductDetailPage = () => {
   const handleSetPrimaryImage = async (imageId) => {
     try {
       await setProductImagePrimaryApi(productId, imageId);
+
+      // Update local state
+      setProduct((prev) => ({
+        ...prev,
+        images: prev.images.map((img) => ({
+          ...img,
+          isPrimary: img.id === imageId,
+        })),
+      }));
+
       notification.success({
         message: "Thành công",
         description: "Đã đặt làm ảnh chính!",
         placement: "topRight",
       });
-      fetchProductDetail();
     } catch (error) {
       console.error("Error setting primary image:", error);
       notification.error({
@@ -404,19 +511,20 @@ const SellerProductDetailPage = () => {
         displayOrder: idx + 1,
       }));
 
-      // Update local state immediately for better UX
-      setProduct({ ...product, images });
-
       // Call API to update order
       await updateProductImagesOrderApi(productId, imagesOrder);
+
+      // Update local state after successful API call
+      setProduct((prev) => ({
+        ...prev,
+        images: images,
+      }));
+
       notification.success({
         message: "Thành công",
         description: "Đã cập nhật thứ tự ảnh!",
         placement: "topRight",
       });
-
-      // Reload to get fresh data
-      fetchProductDetail();
     } catch (error) {
       console.error("Error updating images order:", error);
       notification.error({
@@ -424,7 +532,7 @@ const SellerProductDetailPage = () => {
         description: "Không thể cập nhật thứ tự ảnh",
         placement: "topRight",
       });
-      // Reload on error to revert changes
+      // Reload to revert changes on error
       fetchProductDetail();
     } finally {
       setDraggedImage(null);
@@ -747,14 +855,6 @@ const SellerProductDetailPage = () => {
                   </div>
                 </div>
               </div>
-
-              {/* Description Section */}
-              <div className={styles.descriptionSection}>
-                <h3 className={styles.sectionTitle}>Mô tả chi tiết</h3>
-                <div className={styles.descriptionContent}>
-                  {product.description || "Chưa có mô tả"}
-                </div>
-              </div>
             </>
           ) : (
             // Edit Mode
@@ -791,22 +891,6 @@ const SellerProductDetailPage = () => {
               </Form.Item>
 
               <Form.Item
-                label="Mô tả chi tiết"
-                name="description"
-                rules={[
-                  { required: true, message: "Vui lòng nhập mô tả chi tiết" },
-                  { min: 10, max: 5000, message: "Mô tả từ 10-5000 ký tự" },
-                ]}
-              >
-                <TextArea
-                  rows={4}
-                  placeholder="Nhập mô tả chi tiết"
-                  showCount
-                  maxLength={5000}
-                />
-              </Form.Item>
-
-              <Form.Item
                 label="Danh mục sàn (Cấp 0)"
                 name="parentCategoryId"
                 rules={[
@@ -817,7 +901,7 @@ const SellerProductDetailPage = () => {
                   placeholder="Chọn danh mục sàn"
                   showSearch
                   suffixIcon={<AppstoreOutlined />}
-                  onChange={handleParentCategoryChange}
+                  onChange={(value) => handleParentCategoryChange(value, false)}
                   filterOption={(input, option) =>
                     option.children
                       .toLowerCase()
@@ -906,6 +990,13 @@ const SellerProductDetailPage = () => {
           )}
         </div>
       </div>
+
+      {/* Product Description Editor - Separate section for detailed description */}
+      <ProductDescriptionEditor
+        description={product.description}
+        onSave={handleSaveDescription}
+        saving={saving}
+      />
 
       {/* Variants Section */}
       <ProductVariantsSection

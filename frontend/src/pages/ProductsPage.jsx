@@ -115,9 +115,11 @@ const ProductsPage = () => {
           ? response.result
           : [];
         resultArray.forEach((category) => {
-          allCategories.push(category);
+          allCategories.push({ ...category, level: 0 });
           if (category.subCategories && category.subCategories.length > 0) {
-            allCategories.push(...category.subCategories);
+            category.subCategories.forEach((sub) => {
+              allCategories.push({ ...sub, level: 1 });
+            });
           }
         });
         setCategories(allCategories);

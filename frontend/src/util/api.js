@@ -698,6 +698,17 @@ const findVariantBySelectionApi = (productId, optionIds) => {
   );
 };
 
+// Get variant metadata/specifications (no authentication required - public API)
+const getPublicVariantMetadataApi = (productId, variantId) => {
+  const URL_API = `/api/product/public/products/${productId}/variants/${variantId}/metadata`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
 // Get available options based on current selections (no authentication required)
 const getAvailableOptionsApi = (productId, selectedOptionIds = []) => {
   const URL_API = `/api/product/public/products/${productId}/available-options`;
@@ -879,6 +890,26 @@ const getBrandsApi = (page = 0, size = 100) => {
 // Get public platform categories (no authentication required)
 const getPublicPlatformCategoriesApi = () => {
   const URL_API = "/api/product/public/categories/platform";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get public category by ID (no authentication required)
+const getPublicCategoryByIdApi = (categoryId) => {
+  const URL_API = `/api/product/public/categories/platform/${categoryId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get public brand by ID (no authentication required)
+const getPublicBrandByIdApi = (brandId) => {
+  const URL_API = `/api/product/brands/public/${brandId}`;
   return axios.get(URL_API, {
     headers: {
       "Accept-Language": "vi",
@@ -1829,6 +1860,252 @@ const removeCartItemsApi = (variantIds) => {
   });
 };
 
+// Upload media file (image/video) for Rich Text Editor - returns public URL
+const uploadMediaApi = (file) => {
+  const URL_API = "/api/file/files/upload/public";
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+// Search Suggest API for autocomplete
+const getSearchSuggestApi = (query, size = 5) => {
+  const URL_API = "/api/product/products/search/suggest";
+  return axios.get(URL_API, {
+    params: {
+      q: query,
+      size: size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Search Products API with full-text search and filtering (POST)
+const searchProductsApi = (searchRequest, page = 0, size = 20) => {
+  const URL_API = "/api/product/products/search";
+  return axios.post(URL_API, searchRequest, {
+    params: {
+      page,
+      size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Quick Search Products API (GET - SEO friendly)
+const quickSearchProductsApi = (params = {}) => {
+  const URL_API = "/api/product/products/search";
+  return axios.get(URL_API, {
+    params: {
+      q: params.q || "",
+      categoryId: params.categoryId || "",
+      storeId: params.storeId || "",
+      brandId: params.brandId || "",
+      priceFrom: params.priceFrom || "",
+      priceTo: params.priceTo || "",
+      minRating: params.minRating || "",
+      sortBy: params.sortBy || "relevance",
+      sortDir: params.sortDir || "desc",
+      page: params.page ?? 0,
+      size: params.size ?? 20,
+      aggregations: params.aggregations ?? false,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Elasticsearch Health Check API
+const getSearchHealthApi = () => {
+  const URL_API = "/api/product/products/search/health";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// ============================================
+// Banner Slides APIs
+// ============================================
+
+// PUBLIC ENDPOINTS
+
+// Lấy tất cả banner (public)
+const getAllBannersApi = () => {
+  const URL_API = "/api/product/banner-slides";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Lấy banner của platform (public)
+const getPlatformBannersApi = () => {
+  const URL_API = "/api/product/banner-slides/platform";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Lấy banner của store cụ thể (public)
+const getStoreBannersApi = (storeId) => {
+  const URL_API = `/api/product/banner-slides/store/${storeId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Lấy thông tin banner theo ID (public)
+const getBannerByIdApi = (bannerId) => {
+  const URL_API = `/api/product/banner-slides/${bannerId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// ADMIN ENDPOINTS
+
+// Admin tạo banner cho platform
+const createPlatformBannerApi = (file, displayOrder) => {
+  const URL_API = "/api/product/banner-slides/admin";
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("displayOrder", displayOrder);
+
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Admin cập nhật banner platform
+const updatePlatformBannerApi = (bannerId, displayOrder, file = null) => {
+  const URL_API = `/api/product/banner-slides/admin/${bannerId}`;
+  const formData = new FormData();
+  if (displayOrder !== null && displayOrder !== undefined) {
+    formData.append("displayOrder", displayOrder);
+  }
+  if (file) {
+    formData.append("file", file);
+  }
+
+  return axios.put(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Admin xóa banner platform
+const deletePlatformBannerApi = (bannerId) => {
+  const URL_API = `/api/product/banner-slides/admin/${bannerId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Admin cập nhật thứ tự hiển thị các banner platform
+const updatePlatformBannerDisplayOrderApi = (bannerOrders) => {
+  const URL_API = "/api/product/banner-slides/admin/display-order";
+  return axios.put(URL_API, bannerOrders, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// SELLER ENDPOINTS
+
+// Seller lấy banner của store mình
+const getMyStoreBannersApi = (storeId) => {
+  const URL_API = `/api/product/banner-slides/seller/my-store/${storeId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Seller tạo banner cho store của mình
+const createStoreBannerApi = (storeId, file, displayOrder) => {
+  const URL_API = `/api/product/banner-slides/seller/${storeId}`;
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("displayOrder", displayOrder);
+
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Seller cập nhật banner của store mình
+const updateStoreBannerApi = (storeId, bannerId, displayOrder, file = null) => {
+  const URL_API = `/api/product/banner-slides/seller/${storeId}/${bannerId}`;
+  const formData = new FormData();
+  if (displayOrder !== null && displayOrder !== undefined) {
+    formData.append("displayOrder", displayOrder);
+  }
+  if (file) {
+    formData.append("file", file);
+  }
+
+  return axios.put(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Seller xóa banner của store mình
+const deleteStoreBannerApi = (storeId, bannerId) => {
+  const URL_API = `/api/product/banner-slides/seller/${storeId}/${bannerId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Seller cập nhật thứ tự hiển thị các banner của store mình
+const updateStoreBannerDisplayOrderApi = (storeId, bannerOrders) => {
+  const URL_API = `/api/product/banner-slides/seller/${storeId}/display-order`;
+  return axios.put(URL_API, bannerOrders, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
 // Notification APIs
 const getNotificationsApi = (page = 0, size = 20) => {
   const URL_API = "/api/notification/notifications";
@@ -1940,6 +2217,7 @@ export {
   getSelectionConfigApi,
   findVariantBySelectionApi,
   getAvailableOptionsApi,
+  getPublicVariantMetadataApi,
   getProductSpecsApi,
   updateProductSpecsApi,
   getProductsByStoreApi,
@@ -1953,6 +2231,8 @@ export {
   getCategoriesApi,
   getPlatformCategoriesApi,
   getPublicPlatformCategoriesApi,
+  getPublicCategoryByIdApi,
+  getPublicBrandByIdApi,
   getPlatformCategoryDetailApi,
   getBrandsApi,
   // Payment APIs
@@ -2037,6 +2317,29 @@ export {
   approveSellerProfileApi,
   rejectSellerProfileApi,
   getSellerDocumentAdminApi,
+  // Media upload API for Rich Text Editor
+  uploadMediaApi,
+  // Search APIs
+  getSearchSuggestApi,
+  searchProductsApi,
+  quickSearchProductsApi,
+  getSearchHealthApi,
+  // Banner Slides APIs - Public
+  getAllBannersApi,
+  getPlatformBannersApi,
+  getStoreBannersApi,
+  getBannerByIdApi,
+  // Banner Slides APIs - Admin
+  createPlatformBannerApi,
+  updatePlatformBannerApi,
+  deletePlatformBannerApi,
+  updatePlatformBannerDisplayOrderApi,
+  // Banner Slides APIs - Seller
+  getMyStoreBannersApi,
+  createStoreBannerApi,
+  updateStoreBannerApi,
+  deleteStoreBannerApi,
+  updateStoreBannerDisplayOrderApi,
   // Cart bulk remove API
   // Notification APIs
   getNotificationsApi,
