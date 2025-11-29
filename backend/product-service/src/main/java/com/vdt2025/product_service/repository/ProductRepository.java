@@ -124,6 +124,7 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     /**
      * Fetch products với tất cả relations cần thiết cho Elasticsearch indexing
      * Sử dụng JOIN FETCH để tránh LazyInitializationException
+     * Note: Removed bag fetches to avoid MultipleBagFetchException
      */
     @Query("""
         SELECT DISTINCT p FROM Product p
@@ -131,9 +132,6 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
         LEFT JOIN FETCH c.parentCategory
         LEFT JOIN FETCH p.store
         LEFT JOIN FETCH p.brand
-        LEFT JOIN FETCH p.storeCategories
-        LEFT JOIN FETCH p.selectionGroups sg
-        LEFT JOIN FETCH sg.options
         WHERE p.isDeleted = false
         ORDER BY p.createdAt DESC
     """)
@@ -155,6 +153,8 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
 
     /**
      * Fetch single product với tất cả relations cho Elasticsearch
+     * Note: Removed bag fetches (storeCategories, selectionGroups) to avoid MultipleBagFetchException.
+     * These will be lazy loaded within the transaction.
      */
     @Query("""
         SELECT p FROM Product p
@@ -162,9 +162,6 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
         LEFT JOIN FETCH c.parentCategory
         LEFT JOIN FETCH p.store
         LEFT JOIN FETCH p.brand
-        LEFT JOIN FETCH p.storeCategories
-        LEFT JOIN FETCH p.selectionGroups sg
-        LEFT JOIN FETCH sg.options
         WHERE p.id = :productId
     """)
     java.util.Optional<Product> findByIdForElasticsearch(@Param("productId") String productId);

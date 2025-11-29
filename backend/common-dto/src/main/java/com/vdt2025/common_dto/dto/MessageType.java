@@ -15,7 +15,11 @@ public enum MessageType {
     PAYMENT_SUCCESS("payment.success", "payment-success-queue"),
     PAYMENT_FAILED("payment.failed", "payment-failed-queue"),
     REFUND_SUCCESS("refund.success", "refund-success-queue"),
-    REFUND_FAILED("refund.failed", "refund-failed-queue");
+    REFUND_FAILED("refund.failed", "refund-failed-queue"),
+    PRODUCT_CREATED("product.created", "product-created-queue"),
+    PRODUCT_UPDATED("product.updated", "product-updated-queue"),
+    PRODUCT_DELETED("product.deleted", "product-deleted-queue"),
+    PRODUCT_STATUS_CHANGED("product.status.changed", "product-status-changed-queue");
 
     private final String routingKey;
     private final String queueName;

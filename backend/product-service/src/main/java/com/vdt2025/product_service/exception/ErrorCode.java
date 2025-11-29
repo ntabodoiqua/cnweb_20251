@@ -128,6 +128,9 @@ public enum ErrorCode {
     INVALID_STOCK_QUANTITY(1906, "error.1906", HttpStatus.BAD_REQUEST),
     INVENTORY_STOCK_ALREADY_EXISTS(1907, "error.1907", HttpStatus.CONFLICT),
 
+    // Lỗi banner (30xx)
+    BANNER_NOT_FOUND(3001, "error.3001", HttpStatus.NOT_FOUND),
+    MAX_BANNER_EXCEEDED(3002, "error.3002", HttpStatus.BAD_REQUEST),
 
     // Lỗi khác (99xx)
     UNCATEGORIZED_EXCEPTION(9999, "error.9999", HttpStatus.INTERNAL_SERVER_ERROR),
