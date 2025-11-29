@@ -107,8 +107,14 @@ const SellerOrdersPage = () => {
     confirmed: "CONFIRMED",
     shipping: "SHIPPING",
     delivered: "DELIVERED",
+    pendingReturn: "DELIVERED", // Đơn đã giao đang chờ xử lý trả hàng
     cancelled: "CANCELLED",
     returned: "RETURNED",
+  };
+
+  // Refund status mapping for pendingReturn tab
+  const refundStatusMapping = {
+    pendingReturn: "PENDING", // Filter by refundStatus = PENDING
   };
 
   const orderTabs = [
@@ -118,6 +124,7 @@ const SellerOrdersPage = () => {
     { key: "confirmed", label: "Đã xác nhận" },
     { key: "shipping", label: "Đang giao" },
     { key: "delivered", label: "Đã giao" },
+    { key: "pendingReturn", label: "Chờ trả hàng" },
     { key: "cancelled", label: "Đã hủy" },
     { key: "returned", label: "Đã trả hàng" },
   ];
@@ -190,6 +197,7 @@ const SellerOrdersPage = () => {
           search: searchToUse,
           status: statusMapping[activeTab] || "",
           paymentStatus: filtersToUse.paymentStatus,
+          refundStatus: refundStatusMapping[activeTab] || "", // Add refundStatus for pendingReturn tab
           startDate: filtersToUse.startDate
             ? filtersToUse.startDate.format("YYYY-MM-DDTHH:mm:ss")
             : "",
@@ -247,7 +255,8 @@ const SellerOrdersPage = () => {
     }
   }, [selectedStoreId, fetchOrders]);
 
-  const getStatusBadge = (status) => {
+  // Hiển thị badge trạng thái đơn hàng, có xét cả yêu cầu trả hàng
+  const getStatusBadge = (status, order = null) => {
     const statusConfig = {
       PENDING: {
         icon: <ClockCircleOutlined />,
@@ -292,10 +301,19 @@ const SellerOrdersPage = () => {
     };
 
     const config = statusConfig[status] || statusConfig.PENDING;
+
+    // Kiểm tra nếu đơn hàng đang chờ xử lý trả hàng
+    const isPendingReturn = order && canProcessReturn(order);
+
     return (
       <span className={`${styles.statusBadge} ${config.className}`}>
         {config.icon}
         {config.label}
+        {isPendingReturn && (
+          <Tag color="orange" style={{ marginLeft: 8, fontSize: 11 }}>
+            Chờ trả hàng
+          </Tag>
+        )}
       </span>
     );
   };
@@ -333,7 +351,10 @@ const SellerOrdersPage = () => {
   // Stats calculation
   const getStatusCount = (status) => {
     if (status === "all") return pagination.total;
-    // Tính từ orders đã load
+    // Tính từ orders đã load - cho pendingReturn, đếm các đơn có canProcessReturn = true
+    if (status === "pendingReturn") {
+      return orders.filter((o) => canProcessReturn(o)).length;
+    }
     return orders.filter((o) => o.status === statusMapping[status]).length;
   };
 
@@ -543,8 +564,12 @@ const SellerOrdersPage = () => {
   const canShip = (order) => order.status === "CONFIRMED";
   const canCancel = (order) =>
     ["PENDING", "PAID", "CONFIRMED"].includes(order.status);
+  // Sử dụng canProcessReturn từ backend hoặc kiểm tra returnReason != null và returnProcessedAt == null
   const canProcessReturn = (order) =>
-    order.status === "DELIVERED" && order.refundStatus === "PENDING";
+    order.canProcessReturn === true ||
+    (order.status === "DELIVERED" &&
+      order.returnReason &&
+      !order.returnProcessedAt);
 
   // Render action buttons cho mỗi order
   const renderOrderActions = (order) => {
@@ -920,7 +945,7 @@ const SellerOrdersPage = () => {
                             {formatCurrency(order.totalAmount)}
                           </span>
                         </td>
-                        <td>{getStatusBadge(order.status)}</td>
+                        <td>{getStatusBadge(order.status, order)}</td>
                         <td>{getPaymentStatusBadge(order.paymentStatus)}</td>
                         <td>{formatDateTime(order.createdAt)}</td>
                         <td>{renderOrderActions(order)}</td>
@@ -1002,7 +1027,7 @@ const SellerOrdersPage = () => {
                     flexWrap: "wrap",
                   }}
                 >
-                  {getStatusBadge(selectedOrder.status)}
+                  {getStatusBadge(selectedOrder.status, selectedOrder)}
                   {getPaymentStatusBadge(selectedOrder.paymentStatus)}
                 </div>
 

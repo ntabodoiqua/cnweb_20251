@@ -75,6 +75,9 @@ const ProfileSellerPage = lazy(() =>
 const ProfileOrdersPage = lazy(() =>
   import("../pages/profile/ProfileOrdersPage")
 );
+const ProfileOrderDetailPage = lazy(() =>
+  import("../pages/profile/ProfileOrderDetailPage")
+);
 const ProfileAddressesPage = lazy(() =>
   import("../pages/profile/ProfileAddressesPage")
 );
@@ -471,6 +474,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <ProfileOrdersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.PROFILE_ORDER_DETAIL,
+            element: (
+              <SuspenseWrapper>
+                <ProfileOrderDetailPage />
               </SuspenseWrapper>
             ),
           },

@@ -724,6 +724,8 @@ public class OrderServiceImpl implements OrderService {
         order.setReturnReason(request.getReturnReason());
         order.setReturnDescription(request.getReturnDescription());
         order.setReturnRequestedAt(LocalDateTime.now());
+        // Set refundStatus to PENDING to indicate a return/refund request is waiting to be processed
+        order.setRefundStatus(RefundStatus.PENDING);
 
         // Store return images as JSON
         if (request.getReturnImages() != null && !request.getReturnImages().isEmpty()) {
@@ -809,6 +811,8 @@ public class OrderServiceImpl implements OrderService {
                 throw new AppException(ErrorCode.REJECTION_REASON_REQUIRED);
             }
             order.setReturnRejectionReason(request.getRejectionReason());
+            // Set refundStatus to REJECTED
+            order.setRefundStatus(RefundStatus.REJECTED);
             log.info("Return rejected for order {} by seller {}: {}", orderId, sellerUsername, request.getRejectionReason());
         }
 

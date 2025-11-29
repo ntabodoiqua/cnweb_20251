@@ -268,12 +268,13 @@ public class Order {
 
     /**
      * Kiểm tra yêu cầu trả hàng có thể được xử lý không
-     * Chỉ khi đang chờ xử lý (PENDING return)
+     * Chỉ khi đang chờ xử lý (PENDING return/refund)
      */
     public boolean canProcessReturn() {
         return status == OrderStatus.DELIVERED 
                && returnReason != null 
-               && returnProcessedAt == null;
+               && returnProcessedAt == null
+               && refundStatus == RefundStatus.PENDING;
     }
 
     /**
