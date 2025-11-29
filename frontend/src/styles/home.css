@@ -133,7 +133,7 @@ html {
 
 .banner-slide {
   position: relative;
-  height: 450px;
+  height: 320px;
   display: flex !important;
   align-items: center;
   justify-content: center;
@@ -1197,7 +1197,7 @@ html {
 /* Tablet: 768px - 1024px */
 @media (max-width: 1024px) {
   .banner-slide {
-    height: 350px;
+    height: 280px;
   }
 
   .banner-content h1 {
@@ -1229,7 +1229,7 @@ html {
   }
 
   .banner-slide {
-    height: 280px;
+    height: 220px;
   }
 
   .banner-content {
@@ -1316,7 +1316,7 @@ html {
 /* Small Mobile: < 576px */
 @media (max-width: 576px) {
   .banner-slide {
-    height: 220px;
+    height: 180px;
   }
 
   .banner-content {
