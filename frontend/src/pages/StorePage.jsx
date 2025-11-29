@@ -17,6 +17,7 @@ import {
   Typography,
   Spin,
   Divider,
+  Carousel,
 } from "antd";
 import {
   SearchOutlined,
@@ -37,6 +38,7 @@ import {
   getPublicStoreCategoriesApi,
   getPublicProductsApi,
   getWardInfoApi,
+  getStoreBannersApi,
 } from "../util/api";
 import LoadingSpinner from "../components/LoadingSpinner";
 import styles from "./StorePage.module.css";
@@ -56,6 +58,7 @@ const StorePage = () => {
   const [categories, setCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [wardInfo, setWardInfo] = useState(null);
+  const [bannerSlides, setBannerSlides] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(
     searchParams.get("categoryId") || null
   );
@@ -109,10 +112,12 @@ const StorePage = () => {
   const fetchStoreData = async () => {
     setLoading(true);
     try {
-      const [storeResponse, categoriesResponse] = await Promise.all([
-        getPublicStoreDetailApi(storeId),
-        getPublicStoreCategoriesApi(storeId),
-      ]);
+      const [storeResponse, categoriesResponse, bannersResponse] =
+        await Promise.all([
+          getPublicStoreDetailApi(storeId),
+          getPublicStoreCategoriesApi(storeId),
+          getStoreBannersApi(storeId),
+        ]);
 
       // Handle store response
       if (storeResponse) {
@@ -126,6 +131,11 @@ const StorePage = () => {
       // Handle categories response
       if (categoriesResponse.code === 1000) {
         setCategories(categoriesResponse.result || []);
+      }
+
+      // Handle banners response
+      if (bannersResponse?.code === 1000) {
+        setBannerSlides(bannersResponse.result || []);
       }
     } catch (error) {
       console.error("Error fetching store data:", error);
@@ -435,6 +445,30 @@ const StorePage = () => {
             </div>
           </div>
         </div>
+
+        {/* Banner Slides Carousel - Below Store Header */}
+        {bannerSlides.length > 0 && (
+          <div className={styles.storeBannerSlides}>
+            <Carousel
+              autoplay
+              autoplaySpeed={4000}
+              dots={true}
+              swipe={true}
+              draggable={true}
+              className={styles.bannerCarousel}
+            >
+              {bannerSlides.map((banner) => (
+                <div key={banner.id} className={styles.bannerSlide}>
+                  <img
+                    src={banner.imageUrl}
+                    alt={banner.imageName || "Store Banner"}
+                    className={styles.bannerSlideImage}
+                  />
+                </div>
+              ))}
+            </Carousel>
+          </div>
+        )}
 
         {/* Store Content */}
         <div className={styles.storeContent}>
