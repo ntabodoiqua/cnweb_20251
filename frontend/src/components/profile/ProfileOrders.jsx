@@ -22,10 +22,19 @@ import {
   ExclamationCircleOutlined,
   PayCircleOutlined,
   WarningOutlined,
+  CarOutlined,
+  RollbackOutlined,
+  StopOutlined,
 } from "@ant-design/icons";
 import NoImages from "../../assets/NoImages.webp";
 import styles from "../../pages/Profile.module.css";
-import { getMyOrdersApi, initiateOrderPaymentApi } from "../../util/api";
+import {
+  getMyOrdersApi,
+  initiateOrderPaymentApi,
+  deliverOrderApi,
+  cancelOrderApi,
+  requestReturnApi,
+} from "../../util/api";
 import {
   message,
   Pagination,
@@ -34,11 +43,17 @@ import {
   Modal,
   Tag,
   Spin,
+  Input,
+  Button,
+  Popconfirm,
+  Select,
+  Upload,
 } from "antd";
 import LoadingSpinner from "../LoadingSpinner";
 import useDebounce from "../../hooks/useDebounce";
 
 const { RangePicker } = DatePicker;
+const { TextArea } = Input;
 
 const ProfileOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -50,6 +65,31 @@ const ProfileOrders = () => {
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [payingOrderId, setPayingOrderId] = useState(null);
   const [orderTimers, setOrderTimers] = useState({});
+
+  // Action states
+  const [actionLoading, setActionLoading] = useState({});
+  const [cancelModalVisible, setCancelModalVisible] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [orderToCancel, setOrderToCancel] = useState(null);
+  const [returnModalVisible, setReturnModalVisible] = useState(false);
+  const [orderToReturn, setOrderToReturn] = useState(null);
+  const [returnData, setReturnData] = useState({
+    returnReason: "",
+    returnDescription: "",
+    returnImages: [],
+  });
+
+  // Return reason options
+  const returnReasonOptions = [
+    { value: "DAMAGED", label: "Sản phẩm bị hư hỏng" },
+    { value: "DEFECTIVE", label: "Sản phẩm lỗi" },
+    { value: "WRONG_ITEM", label: "Giao sai sản phẩm" },
+    { value: "NOT_AS_DESCRIBED", label: "Sản phẩm không đúng mô tả" },
+    { value: "CHANGED_MIND", label: "Đổi ý không muốn mua nữa" },
+    { value: "SIZE_NOT_FIT", label: "Kích cỡ không phù hợp" },
+    { value: "QUALITY_ISSUE", label: "Vấn đề về chất lượng" },
+    { value: "OTHER", label: "Lý do khác" },
+  ];
 
   // Pagination
   const [pagination, setPagination] = useState({
@@ -72,12 +112,14 @@ const ProfileOrders = () => {
   const debouncedFilters = useDebounce(filters, 800);
 
   // Order status mapping - Theo enum OrderStatus của backend:
-  // PENDING (Chờ xác nhận), PAID (Đã thanh toán), CONFIRMED (Đã xác nhận), CANCELLED (Đã hủy), RETURNED (Đã trả hàng)
+  // PENDING (Chờ xác nhận), PAID (Đã thanh toán), CONFIRMED (Đã xác nhận), SHIPPING, DELIVERED, CANCELLED (Đã hủy), RETURNED (Đã trả hàng)
   const statusMapping = {
     all: "",
     pending: "PENDING",
     paid: "PAID",
     confirmed: "CONFIRMED",
+    shipping: "SHIPPING",
+    delivered: "DELIVERED",
     cancelled: "CANCELLED",
     returned: "RETURNED",
   };
@@ -167,6 +209,8 @@ const ProfileOrders = () => {
     { key: "pending", label: "Chờ xác nhận" },
     { key: "paid", label: "Đã thanh toán" },
     { key: "confirmed", label: "Đã xác nhận" },
+    { key: "shipping", label: "Đang giao" },
+    { key: "delivered", label: "Đã giao" },
     { key: "cancelled", label: "Đã hủy" },
     { key: "returned", label: "Đã trả hàng" },
   ];
@@ -199,13 +243,23 @@ const ProfileOrders = () => {
         label: "Đã xác nhận",
         color: "#1890ff",
       },
+      SHIPPING: {
+        icon: <CarOutlined />,
+        label: "Đang giao",
+        color: "#13c2c2",
+      },
+      DELIVERED: {
+        icon: <GiftOutlined />,
+        label: "Đã giao",
+        color: "#52c41a",
+      },
       CANCELLED: {
         icon: <CloseOutlined />,
         label: "Đã hủy",
         color: "#ff4d4f",
       },
       RETURNED: {
-        icon: <TruckOutlined />,
+        icon: <RollbackOutlined />,
         label: "Đã trả hàng",
         color: "#722ed1",
       },
@@ -458,6 +512,120 @@ const ProfileOrders = () => {
     setSelectedOrder(order);
     setDetailModalVisible(true);
   };
+
+  // ============================================
+  // Order Status Actions for Customer
+  // ============================================
+
+  // Xác nhận đã nhận hàng (SHIPPING -> DELIVERED)
+  const handleConfirmDelivery = async (orderId) => {
+    setActionLoading((prev) => ({ ...prev, [orderId]: "deliver" }));
+    try {
+      const response = await deliverOrderApi(orderId);
+      if (response?.code === 200) {
+        message.success("Đã xác nhận nhận hàng thành công!");
+        fetchOrders();
+        if (selectedOrder?.id === orderId) {
+          setSelectedOrder(response.result);
+        }
+      }
+    } catch (error) {
+      console.error("Error confirming delivery:", error);
+      message.error(
+        error.response?.data?.message || "Không thể xác nhận nhận hàng"
+      );
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [orderId]: null }));
+    }
+  };
+
+  // Mở modal hủy đơn
+  const openCancelModal = (order) => {
+    setOrderToCancel(order);
+    setCancelReason("");
+    setCancelModalVisible(true);
+  };
+
+  // Hủy đơn hàng (Customer có thể hủy đơn PENDING)
+  const handleCancelOrder = async () => {
+    if (!cancelReason.trim()) {
+      message.warning("Vui lòng nhập lý do hủy đơn");
+      return;
+    }
+
+    setActionLoading((prev) => ({ ...prev, [orderToCancel.id]: "cancel" }));
+    try {
+      const response = await cancelOrderApi(orderToCancel.id, cancelReason);
+      if (response?.code === 200) {
+        message.success("Đã hủy đơn hàng thành công!");
+        setCancelModalVisible(false);
+        fetchOrders();
+        if (selectedOrder?.id === orderToCancel.id) {
+          setSelectedOrder(response.result);
+        }
+      }
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+      message.error(error.response?.data?.message || "Không thể hủy đơn hàng");
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [orderToCancel?.id]: null }));
+    }
+  };
+
+  // Mở modal yêu cầu trả hàng
+  const openReturnModal = (order) => {
+    setOrderToReturn(order);
+    setReturnData({
+      returnReason: "",
+      returnDescription: "",
+      returnImages: [],
+    });
+    setReturnModalVisible(true);
+  };
+
+  // Gửi yêu cầu trả hàng
+  const handleRequestReturn = async () => {
+    if (!returnData.returnReason) {
+      message.warning("Vui lòng chọn lý do trả hàng");
+      return;
+    }
+    if (!returnData.returnDescription.trim()) {
+      message.warning("Vui lòng mô tả chi tiết lý do trả hàng");
+      return;
+    }
+
+    setActionLoading((prev) => ({ ...prev, [orderToReturn.id]: "return" }));
+    try {
+      const response = await requestReturnApi(orderToReturn.id, {
+        returnReason: returnData.returnReason,
+        returnDescription: returnData.returnDescription,
+        returnImages: returnData.returnImages,
+      });
+      if (response?.code === 200) {
+        message.success(
+          "Đã gửi yêu cầu trả hàng thành công! Người bán sẽ xem xét yêu cầu của bạn."
+        );
+        setReturnModalVisible(false);
+        fetchOrders();
+        if (selectedOrder?.id === orderToReturn.id) {
+          setSelectedOrder(response.result);
+        }
+      }
+    } catch (error) {
+      console.error("Error requesting return:", error);
+      message.error(
+        error.response?.data?.message || "Không thể gửi yêu cầu trả hàng"
+      );
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [orderToReturn?.id]: null }));
+    }
+  };
+
+  // Kiểm tra xem đơn hàng có thể thực hiện action nào
+  const canCancel = (order) =>
+    order.status === "PENDING" && order.paymentStatus !== "PAID";
+  const canConfirmDelivery = (order) => order.status === "SHIPPING";
+  const canRequestReturn = (order) => order.canBeReturned === true;
 
   // Stats calculation - Theo enum OrderStatus của backend
   const stats = {
@@ -1134,6 +1302,97 @@ const ProfileOrders = () => {
                       </button>
                     )}
 
+                    {/* Nút xác nhận đã nhận hàng */}
+                    {canConfirmDelivery(order) && (
+                      <Popconfirm
+                        title="Xác nhận đã nhận hàng"
+                        description="Bạn đã nhận được hàng và hài lòng với sản phẩm?"
+                        onConfirm={() => handleConfirmDelivery(order.id)}
+                        okText="Đã nhận hàng"
+                        cancelText="Hủy"
+                      >
+                        <button
+                          className={`${styles.btn}`}
+                          style={{
+                            background: "#52c41a",
+                            color: "white",
+                            border: "none",
+                            padding: "8px 16px",
+                            borderRadius: "6px",
+                            fontWeight: 600,
+                            cursor: "pointer",
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "6px",
+                          }}
+                          disabled={actionLoading[order.id] === "deliver"}
+                        >
+                          {actionLoading[order.id] === "deliver" ? (
+                            <Spin size="small" />
+                          ) : (
+                            <CheckCircleOutlined />
+                          )}
+                          Đã nhận hàng
+                        </button>
+                      </Popconfirm>
+                    )}
+
+                    {/* Nút yêu cầu trả hàng */}
+                    {canRequestReturn(order) && (
+                      <button
+                        className={`${styles.btn}`}
+                        style={{
+                          background: "#722ed1",
+                          color: "white",
+                          border: "none",
+                          padding: "8px 16px",
+                          borderRadius: "6px",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                        onClick={() => openReturnModal(order)}
+                        disabled={actionLoading[order.id] === "return"}
+                      >
+                        {actionLoading[order.id] === "return" ? (
+                          <Spin size="small" />
+                        ) : (
+                          <RollbackOutlined />
+                        )}
+                        Yêu cầu trả hàng
+                      </button>
+                    )}
+
+                    {/* Nút hủy đơn */}
+                    {canCancel(order) && (
+                      <button
+                        className={`${styles.btn}`}
+                        style={{
+                          background: "#ff4d4f",
+                          color: "white",
+                          border: "none",
+                          padding: "8px 16px",
+                          borderRadius: "6px",
+                          fontWeight: 600,
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "6px",
+                        }}
+                        onClick={() => openCancelModal(order)}
+                        disabled={actionLoading[order.id] === "cancel"}
+                      >
+                        {actionLoading[order.id] === "cancel" ? (
+                          <Spin size="small" />
+                        ) : (
+                          <StopOutlined />
+                        )}
+                        Hủy đơn
+                      </button>
+                    )}
+
                     <button
                       className={`${styles.btn} ${styles.btnPrimary}`}
                       onClick={() => showOrderDetail(order)}
@@ -1609,6 +1868,188 @@ const ProfileOrders = () => {
                   </p>
                 </div>
               )}
+          </div>
+        )}
+      </Modal>
+
+      {/* Cancel Order Modal */}
+      <Modal
+        title={
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <StopOutlined style={{ color: "#ff4d4f", fontSize: "18px" }} />
+            <span>Hủy đơn hàng #{orderToCancel?.orderNumber}</span>
+          </div>
+        }
+        open={cancelModalVisible}
+        onCancel={() => setCancelModalVisible(false)}
+        footer={[
+          <Button key="back" onClick={() => setCancelModalVisible(false)}>
+            Đóng
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            danger
+            loading={actionLoading[orderToCancel?.id] === "cancel"}
+            onClick={handleCancelOrder}
+          >
+            Xác nhận hủy
+          </Button>,
+        ]}
+      >
+        <div style={{ marginBottom: "16px" }}>
+          <p style={{ marginBottom: "8px", color: "#666" }}>
+            Vui lòng nhập lý do hủy đơn hàng:
+          </p>
+          <TextArea
+            rows={4}
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            placeholder="Nhập lý do hủy đơn (bắt buộc)..."
+            maxLength={500}
+            showCount
+          />
+        </div>
+        <div
+          style={{
+            padding: "12px",
+            background: "#fff2e8",
+            borderRadius: "8px",
+            border: "1px solid #ffbb96",
+          }}
+        >
+          <ExclamationCircleOutlined
+            style={{ color: "#fa8c16", marginRight: "8px" }}
+          />
+          <span style={{ color: "#ad4e00" }}>
+            Lưu ý: Đơn hàng sau khi hủy sẽ không thể khôi phục.
+          </span>
+        </div>
+      </Modal>
+
+      {/* Request Return Modal */}
+      <Modal
+        title={
+          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <RollbackOutlined style={{ color: "#722ed1", fontSize: "18px" }} />
+            <span>Yêu cầu trả hàng #{orderToReturn?.orderNumber}</span>
+          </div>
+        }
+        open={returnModalVisible}
+        onCancel={() => setReturnModalVisible(false)}
+        footer={[
+          <Button key="back" onClick={() => setReturnModalVisible(false)}>
+            Đóng
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            style={{ background: "#722ed1", borderColor: "#722ed1" }}
+            loading={actionLoading[orderToReturn?.id] === "return"}
+            onClick={handleRequestReturn}
+          >
+            Gửi yêu cầu trả hàng
+          </Button>,
+        ]}
+        width={600}
+      >
+        {orderToReturn && (
+          <div>
+            {/* Order Summary */}
+            <div
+              style={{
+                padding: "12px",
+                background: "#f5f5f5",
+                borderRadius: "8px",
+                marginBottom: "16px",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  marginBottom: "8px",
+                }}
+              >
+                Thông tin đơn hàng
+              </div>
+              <div style={{ fontSize: "13px", color: "#666" }}>
+                <div>Cửa hàng: {orderToReturn.storeName}</div>
+                <div>
+                  Tổng tiền:{" "}
+                  <span style={{ color: "#ee4d2d", fontWeight: 600 }}>
+                    {formatCurrency(orderToReturn.totalAmount)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Return Reason */}
+            <div style={{ marginBottom: "16px" }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "8px",
+                  fontWeight: 500,
+                }}
+              >
+                Lý do trả hàng <span style={{ color: "#ff4d4f" }}>*</span>
+              </label>
+              <Select
+                style={{ width: "100%" }}
+                placeholder="Chọn lý do trả hàng"
+                value={returnData.returnReason || undefined}
+                onChange={(value) =>
+                  setReturnData({ ...returnData, returnReason: value })
+                }
+                options={returnReasonOptions}
+              />
+            </div>
+
+            {/* Return Description */}
+            <div style={{ marginBottom: "16px" }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "8px",
+                  fontWeight: 500,
+                }}
+              >
+                Mô tả chi tiết <span style={{ color: "#ff4d4f" }}>*</span>
+              </label>
+              <TextArea
+                rows={4}
+                value={returnData.returnDescription}
+                onChange={(e) =>
+                  setReturnData({
+                    ...returnData,
+                    returnDescription: e.target.value,
+                  })
+                }
+                placeholder="Mô tả chi tiết vấn đề bạn gặp phải với sản phẩm..."
+                maxLength={1000}
+                showCount
+              />
+            </div>
+
+            {/* Notice */}
+            <div
+              style={{
+                padding: "12px",
+                background: "#f9f0ff",
+                borderRadius: "8px",
+                border: "1px solid #d3adf7",
+              }}
+            >
+              <ExclamationCircleOutlined
+                style={{ color: "#722ed1", marginRight: "8px" }}
+              />
+              <span style={{ color: "#531dab" }}>
+                Người bán sẽ xem xét yêu cầu của bạn trong vòng 3 ngày làm việc.
+                Nếu được chấp nhận, bạn sẽ nhận được hoàn tiền theo phương thức
+                thanh toán ban đầu.
+              </span>
+            </div>
           </div>
         )}
       </Modal>

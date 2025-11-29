@@ -55,6 +55,7 @@ public class OrderServiceImpl implements OrderService {
     OrderMapper orderMapper;
     CouponService couponService;
     ObjectMapper objectMapper;
+    OrderNotificationService orderNotificationService;
     @Value("${payment.redirect-url}")
     @NonFinal
     String paymentRedirectUrl;
@@ -167,9 +168,21 @@ public class OrderServiceImpl implements OrderService {
             }
             
             // 8. Map to response (NO PAYMENT INITIATION HERE)
-            return createdOrders.stream()
+            List<OrderResponse> responses = createdOrders.stream()
                     .map(orderMapper::toOrderResponse)
                     .toList();
+            
+            // 9. Send notifications for each created order
+            for (Order order : createdOrders) {
+                try {
+                    orderNotificationService.notifyOrderCreated(order, request.getReceiverEmail());
+                } catch (Exception e) {
+                    log.error("Failed to send notification for order {}: {}", order.getOrderNumber(), e.getMessage());
+                    // Don't fail the order creation if notification fails
+                }
+            }
+            
+            return responses;
 
         } catch (Exception e) {
             log.error("Error saving orders, triggering compensation transaction to release stock", e);
@@ -491,6 +504,13 @@ public class OrderServiceImpl implements OrderService {
         order = orderRepository.save(order);
         log.info("Order {} confirmed by seller {}", orderId, sellerUsername);
 
+        // Send notification to customer
+        try {
+            orderNotificationService.notifyOrderConfirmed(order);
+        } catch (Exception e) {
+            log.error("Failed to send order confirmed notification for order {}: {}", orderId, e.getMessage());
+        }
+
         return orderMapper.toOrderResponse(order);
     }
 
@@ -519,6 +539,13 @@ public class OrderServiceImpl implements OrderService {
         order = orderRepository.save(order);
         log.info("Order {} is now shipping, set by seller {}", orderId, sellerUsername);
 
+        // Send notification to customer
+        try {
+            orderNotificationService.notifyOrderShipped(order);
+        } catch (Exception e) {
+            log.error("Failed to send order shipped notification for order {}: {}", orderId, e.getMessage());
+        }
+
         return orderMapper.toOrderResponse(order);
     }
 
@@ -546,6 +573,13 @@ public class OrderServiceImpl implements OrderService {
 
         order = orderRepository.save(order);
         log.info("Order {} delivered, confirmed by customer {}", orderId, customerUsername);
+
+        // Send notification to customer
+        try {
+            orderNotificationService.notifyOrderDelivered(order);
+        } catch (Exception e) {
+            log.error("Failed to send order delivered notification for order {}: {}", orderId, e.getMessage());
+        }
 
         return orderMapper.toOrderResponse(order);
     }
@@ -576,7 +610,7 @@ public class OrderServiceImpl implements OrderService {
             throw new AppException(ErrorCode.CANCEL_REASON_REQUIRED);
         }
 
-        // Release reserved inventory
+        // Prepare inventory changes
         List<InventoryChangeRequest> inventoryChanges = order.getItems().stream()
                 .map(item -> InventoryChangeRequest.builder()
                         .variantId(item.getVariantId())
@@ -584,13 +618,31 @@ public class OrderServiceImpl implements OrderService {
                         .build())
                 .toList();
 
+        // Handle inventory based on payment status
         try {
-            productClient.releaseBatch(BatchInventoryChangeRequest.builder()
-                    .items(inventoryChanges)
-                    .build());
+            if (order.getPaymentStatus() == com.cnweb.order_service.enums.PaymentStatus.PAID) {
+                // Đơn đã thanh toán: tồn kho đã bị trừ (confirmBatch), cần hoàn lại (returnBatch)
+                log.info("Order {} was PAID - using returnBatch to restore inventory", orderId);
+                productClient.returnBatch(BatchInventoryChangeRequest.builder()
+                        .items(inventoryChanges)
+                        .build());
+            } else {
+                // Đơn chưa thanh toán: tồn kho chỉ bị reserve, cần release (releaseBatch)
+                log.info("Order {} was NOT PAID - using releaseBatch to release reservation", orderId);
+                productClient.releaseBatch(BatchInventoryChangeRequest.builder()
+                        .items(inventoryChanges)
+                        .build());
+            }
         } catch (Exception e) {
-            log.error("Failed to release inventory for cancelled order {}: {}", orderId, e.getMessage());
-            // Continue with cancellation even if inventory release fails
+            log.error("Failed to restore/release inventory for cancelled order {}: {}", orderId, e.getMessage());
+            // Continue with cancellation even if inventory operation fails
+        }
+
+        // Process refund if order was paid
+        if (order.getPaymentStatus() == com.cnweb.order_service.enums.PaymentStatus.PAID
+                && order.getPaymentTransactionId() != null) {
+            log.info("Order {} was PAID, processing refund for cancellation", orderId);
+            processCancellationRefund(order, cancelReason);
         }
 
         // Update status
@@ -601,6 +653,13 @@ public class OrderServiceImpl implements OrderService {
 
         order = orderRepository.save(order);
         log.info("Order {} cancelled by {}", orderId, username);
+
+        // Send notification to customer
+        try {
+            orderNotificationService.notifyOrderCancelled(order, username);
+        } catch (Exception e) {
+            log.error("Failed to send order cancelled notification for order {}: {}", orderId, e.getMessage());
+        }
 
         return orderMapper.toOrderResponse(order);
     }
@@ -675,6 +734,13 @@ public class OrderServiceImpl implements OrderService {
         order = orderRepository.save(order);
         log.info("Return request submitted for order {} by customer {}", orderId, customerUsername);
 
+        // Send notification to seller
+        try {
+            orderNotificationService.notifyReturnRequested(order);
+        } catch (Exception e) {
+            log.error("Failed to send return requested notification for order {}: {}", orderId, e.getMessage());
+        }
+
         return orderMapper.toOrderResponse(order);
     }
 
@@ -709,7 +775,7 @@ public class OrderServiceImpl implements OrderService {
             order.setStatus(OrderStatus.RETURNED);
             order.setReturnedAt(LocalDateTime.now());
 
-            // Restore inventory
+            // Restore inventory - Đơn hàng đã DELIVERED nên tồn kho đã bị trừ, cần hoàn lại bằng returnBatch
             List<InventoryChangeRequest> inventoryChanges = order.getItems().stream()
                     .map(item -> InventoryChangeRequest.builder()
                             .variantId(item.getVariantId())
@@ -718,7 +784,7 @@ public class OrderServiceImpl implements OrderService {
                     .toList();
 
             try {
-                productClient.releaseBatch(BatchInventoryChangeRequest.builder()
+                productClient.returnBatch(BatchInventoryChangeRequest.builder()
                         .items(inventoryChanges)
                         .build());
                 log.info("Inventory restored for returned order {}", orderId);
@@ -744,6 +810,18 @@ public class OrderServiceImpl implements OrderService {
         }
 
         order = orderRepository.save(order);
+        
+        // Send notification based on approval status
+        try {
+            if (request.getApproved()) {
+                orderNotificationService.notifyReturnApproved(order);
+            } else {
+                orderNotificationService.notifyReturnRejected(order, request.getRejectionReason());
+            }
+        } catch (Exception e) {
+            log.error("Failed to send return process notification for order {}: {}", orderId, e.getMessage());
+        }
+        
         return orderMapper.toOrderResponse(order);
     }
 
@@ -787,6 +865,7 @@ public class OrderServiceImpl implements OrderService {
 
             if ("SUCCESS".equals(refundResponse.getStatus()) || "PROCESSING".equals(refundResponse.getStatus())) {
                 order.setRefundTransactionId(refundResponse.getMRefundId());
+                order.setPaymentStatus(com.cnweb.order_service.enums.PaymentStatus.REFUNDED);
                 if ("SUCCESS".equals(refundResponse.getStatus())) {
                     order.setRefundStatus(RefundStatus.COMPLETED);
                     order.setRefundedAt(LocalDateTime.now());
@@ -801,6 +880,44 @@ public class OrderServiceImpl implements OrderService {
         } catch (Exception e) {
             order.setRefundStatus(RefundStatus.FAILED);
             log.error("Error processing refund for order {}: {}", order.getId(), e.getMessage());
+        }
+    }
+
+    /**
+     * Process refund for a cancelled order (different from return - uses cancel reason)
+     */
+    private void processCancellationRefund(Order order, String cancelReason) {
+        log.info("Processing cancellation refund for order {}", order.getId());
+
+        try {
+            order.setRefundStatus(RefundStatus.PROCESSING);
+            order.setRefundAmount(order.getTotalAmount());
+
+            RefundRequest refundRequest = RefundRequest.builder()
+                    .zpTransId(order.getPaymentTransactionId())
+                    .amount(order.getTotalAmount().longValue())
+                    .description("Hoàn tiền do hủy đơn hàng " + order.getOrderNumber() + " - Lý do: " + cancelReason)
+                    .build();
+
+            RefundResponse refundResponse = paymentClient.refundOrder(refundRequest);
+
+            if ("SUCCESS".equals(refundResponse.getStatus()) || "PROCESSING".equals(refundResponse.getStatus())) {
+                order.setRefundTransactionId(refundResponse.getMRefundId());
+                order.setPaymentStatus(com.cnweb.order_service.enums.PaymentStatus.REFUNDED);
+                if ("SUCCESS".equals(refundResponse.getStatus())) {
+                    order.setRefundStatus(RefundStatus.COMPLETED);
+                    order.setRefundedAt(LocalDateTime.now());
+                }
+                log.info("Cancellation refund initiated successfully for order {}, mRefundId: {}", 
+                        order.getId(), refundResponse.getMRefundId());
+            } else {
+                order.setRefundStatus(RefundStatus.FAILED);
+                log.error("Cancellation refund failed for order {}: {}", order.getId(), refundResponse.getMessage());
+            }
+
+        } catch (Exception e) {
+            order.setRefundStatus(RefundStatus.FAILED);
+            log.error("Error processing cancellation refund for order {}: {}", order.getId(), e.getMessage());
         }
     }
 }

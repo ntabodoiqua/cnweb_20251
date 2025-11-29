@@ -79,6 +79,58 @@ public class NotificationService {
     }
     
     /**
+     * Tạo và gửi thông báo với đảm bảo idempotency
+     * Kiểm tra xem notification với referenceId và referenceType đã tồn tại chưa
+     * Nếu đã tồn tại thì bỏ qua, không tạo mới
+     */
+    @Transactional
+    public NotificationDTO createAndSendNotificationIdempotent(
+            String userId,
+            String title,
+            String message,
+            NotificationType type,
+            String link,
+            String imageUrl,
+            String referenceId,
+            String referenceType
+    ) {
+        // Kiểm tra idempotency - notification đã tồn tại chưa
+        if (referenceId != null && referenceType != null) {
+            boolean exists = notificationRepository.existsByUserIdAndReferenceIdAndReferenceType(
+                    userId, referenceId, referenceType);
+            if (exists) {
+                log.info("Notification already exists for user: {}, referenceId: {}, referenceType: {}. Skipping...",
+                        userId, referenceId, referenceType);
+                return null;
+            }
+        }
+        
+        log.info("Creating idempotent notification for user: {}, referenceId: {}, referenceType: {}",
+                userId, referenceId, referenceType);
+        
+        Notification notification = Notification.builder()
+                .userId(userId)
+                .title(title)
+                .message(message)
+                .type(type)
+                .link(link)
+                .imageUrl(imageUrl)
+                .referenceId(referenceId)
+                .referenceType(referenceType)
+                .isRead(false)
+                .build();
+        
+        notification = notificationRepository.save(notification);
+        NotificationDTO dto = notificationMapper.toDTO(notification);
+        
+        // Gửi push notification qua WebSocket
+        webSocketService.sendNotificationToUser(userId, dto);
+        
+        log.info("Idempotent notification created and sent to user: {}", userId);
+        return dto;
+    }
+    
+    /**
      * Lấy danh sách thông báo của user (có phân trang)
      */
     @Transactional(readOnly = true)

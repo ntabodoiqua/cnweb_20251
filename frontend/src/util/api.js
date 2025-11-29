@@ -2106,6 +2106,102 @@ const updateStoreBannerDisplayOrderApi = (storeId, bannerOrders) => {
   });
 };
 
+// ============================================
+// Order Status Management APIs
+// ============================================
+
+// Confirm order (Seller/Admin)
+const confirmOrderApi = (orderId) => {
+  const URL_API = `/api/order/api/v1/orders/${orderId}/confirm`;
+  return axios.put(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Ship order (Seller/Admin)
+const shipOrderApi = (orderId) => {
+  const URL_API = `/api/order/api/v1/orders/${orderId}/ship`;
+  return axios.put(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Deliver order (Customer/Admin)
+const deliverOrderApi = (orderId) => {
+  const URL_API = `/api/order/api/v1/orders/${orderId}/deliver`;
+  return axios.put(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Cancel order (Customer/Seller/Admin)
+const cancelOrderApi = (orderId, cancelReason) => {
+  const URL_API = `/api/order/api/v1/orders/${orderId}/cancel`;
+  return axios.put(
+    URL_API,
+    { cancelReason },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
+// Request return (Customer)
+const requestReturnApi = (orderId, returnData) => {
+  const URL_API = `/api/order/api/v1/orders/${orderId}/return`;
+  return axios.post(URL_API, returnData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Process return (Seller/Admin)
+const processReturnApi = (orderId, processData) => {
+  const URL_API = `/api/order/api/v1/orders/${orderId}/return/process`;
+  return axios.put(URL_API, processData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Get pending return orders for store (Seller)
+const getPendingReturnOrdersApi = (storeId, params = {}) => {
+  const URL_API = `/api/order/api/v1/orders/store/${storeId}/pending-returns`;
+  return axios.get(URL_API, {
+    params: {
+      page: params.page || 0,
+      size: params.size || 20,
+      sort: params.sort || "returnRequestedAt,ASC",
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get order detail by ID
+const getOrderDetailApi = (orderId) => {
+  const URL_API = `/api/order/api/v1/orders/${orderId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // Notification APIs
 const getNotificationsApi = (page = 0, size = 20) => {
   const URL_API = "/api/notification/notifications";
@@ -2246,6 +2342,15 @@ export {
   getMyOrdersApi,
   getStoreOrdersApi,
   getAdminOrdersApi,
+  getOrderDetailApi,
+  // Order Status Management APIs
+  confirmOrderApi,
+  shipOrderApi,
+  deliverOrderApi,
+  cancelOrderApi,
+  requestReturnApi,
+  processReturnApi,
+  getPendingReturnOrdersApi,
   // Cart APIs
   getCartApi,
   addToCartApi,

@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
 @Table(name = "notifications", indexes = {
     @Index(name = "idx_notification_user_id", columnList = "userId"),
     @Index(name = "idx_notification_created_at", columnList = "createdAt"),
-    @Index(name = "idx_notification_is_read", columnList = "isRead")
+    @Index(name = "idx_notification_is_read", columnList = "isRead"),
+    @Index(name = "idx_notification_reference", columnList = "referenceId, referenceType")
 })
 @Getter
 @Setter
@@ -45,6 +46,18 @@ public class Notification {
     
     @Column(length = 500)
     String imageUrl;
+    
+    /**
+     * ID tham chiếu để đảm bảo idempotency (ví dụ: orderId, paymentId)
+     */
+    @Column(length = 100)
+    String referenceId;
+    
+    /**
+     * Loại tham chiếu (ví dụ: ORDER, PAYMENT, REFUND)
+     */
+    @Column(length = 50)
+    String referenceType;
     
     @Column(nullable = false)
     @Builder.Default

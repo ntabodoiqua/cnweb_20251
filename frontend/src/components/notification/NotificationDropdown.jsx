@@ -1,14 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Dropdown,
-  Badge,
-  Empty,
-  Spin,
-  Button,
-  List,
-  Avatar,
-  Typography,
-} from "antd";
+import { Dropdown, Empty, Spin, Button, List, Avatar, Typography } from "antd";
 import {
   BellOutlined,
   CheckOutlined,
@@ -230,9 +221,12 @@ const NotificationDropdown = () => {
       overlayClassName={styles.dropdownOverlay}
     >
       <div className={styles.notificationIcon}>
-        <Badge count={unreadCount} overflowCount={99} offset={[-2, 2]}>
-          <BellOutlined className={styles.bellIcon} />
-        </Badge>
+        <BellOutlined className={styles.bellIcon} />
+        {unreadCount > 0 && (
+          <span className={styles.notificationBadge}>
+            {unreadCount > 99 ? "99+" : unreadCount}
+          </span>
+        )}
       </div>
     </Dropdown>
   );

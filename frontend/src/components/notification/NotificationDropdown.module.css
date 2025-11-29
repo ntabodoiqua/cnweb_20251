@@ -172,7 +172,27 @@
   color: #d73211;
 }
 
-/* Animation for notification badge */
+/* Notification Badge - giống như cart badge */
+.notificationBadge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #ff4d4f;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 20px;
+  height: 20px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  border: 2px solid #ee4d2d;
+  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.4);
+  animation: pulse 2s infinite;
+}
+
 @keyframes pulse {
   0%,
   100% {
@@ -181,10 +201,4 @@
   50% {
     transform: scale(1.1);
   }
-}
-
-.notificationIcon :global(.ant-badge-count) {
-  animation: pulse 2s infinite;
-  background: #ff4d4f;
-  box-shadow: 0 2px 8px rgba(255, 77, 79, 0.4);
 }

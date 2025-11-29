@@ -35,4 +35,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Stri
     
     @Query("SELECT n FROM Notification n WHERE n.userId = :userId ORDER BY n.createdAt DESC")
     List<Notification> findTop10ByUserIdOrderByCreatedAtDesc(@Param("userId") String userId, Pageable pageable);
+    
+    /**
+     * Kiểm tra notification đã tồn tại dựa trên referenceId và referenceType
+     * Dùng để đảm bảo idempotency
+     */
+    boolean existsByUserIdAndReferenceIdAndReferenceType(String userId, String referenceId, String referenceType);
 }
