@@ -154,6 +154,14 @@ public interface ProductService {
      */
     void updateSoldCount(String productId, Integer quantity);
 
+    /**
+     * Cập nhật sold count cho nhiều variants cùng lúc (batch operation)
+     * Sẽ cập nhật cả soldQuantity của ProductVariant và soldCount của Product tương ứng
+     * 
+     * @param variantQuantityMap Map chứa variantId -> quantity đã bán
+     */
+    void updateSoldCountBatch(java.util.Map<String, Integer> variantQuantityMap);
+
     // ========== Variant Selection (for E-commerce UI) ==========
 
     /**

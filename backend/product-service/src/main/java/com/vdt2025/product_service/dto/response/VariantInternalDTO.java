@@ -24,6 +24,7 @@ public class VariantInternalDTO implements Serializable {
     String storeName;
     String storeId;
     String storeLogo;
+    String storeOwnerUsername; // Username của seller
     BigDecimal price;
     BigDecimal originalPrice;
     Integer stockQuantity;

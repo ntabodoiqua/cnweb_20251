@@ -60,6 +60,11 @@ const CartPage = lazy(() => import("../pages/user/CartPage"));
 const CheckoutPage = lazy(() => import("../pages/user/CheckoutPage"));
 const PaymentResultPage = lazy(() => import("../pages/user/PaymentResultPage"));
 
+// Notification Pages
+const NotificationsPage = lazy(() =>
+  import("../pages/notifications/NotificationsPage")
+);
+
 // Profile sub-pages
 const ProfileGeneralPage = lazy(() =>
   import("../pages/profile/ProfileGeneralPage")
@@ -69,6 +74,9 @@ const ProfileSellerPage = lazy(() =>
 );
 const ProfileOrdersPage = lazy(() =>
   import("../pages/profile/ProfileOrdersPage")
+);
+const ProfileOrderDetailPage = lazy(() =>
+  import("../pages/profile/ProfileOrderDetailPage")
 );
 const ProfileAddressesPage = lazy(() =>
   import("../pages/profile/ProfileAddressesPage")
@@ -417,6 +425,20 @@ const router = createBrowserRouter([
         ),
       },
 
+      // ==================== NOTIFICATIONS ====================
+      {
+        path: PROTECTED_ROUTES.NOTIFICATIONS,
+        element: (
+          <SuspenseWrapper>
+            <ProtectedRoute
+              allowedRoles={[ROLES.USER, ROLES.ADMIN, ROLES.SELLER]}
+            >
+              <NotificationsPage />
+            </ProtectedRoute>
+          </SuspenseWrapper>
+        ),
+      },
+
       // ==================== PROTECTED ROUTES (USER + ADMIN) ====================
       // Profile routes with nested pages
       {
@@ -452,6 +474,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <ProfileOrdersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.PROFILE_ORDER_DETAIL,
+            element: (
+              <SuspenseWrapper>
+                <ProfileOrderDetailPage />
               </SuspenseWrapper>
             ),
           },
@@ -645,6 +675,22 @@ const router = createBrowserRouter([
           },
           {
             path: PROTECTED_ROUTES.SELLER_ORDERS,
+            element: (
+              <SuspenseWrapper>
+                <SellerOrdersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_ORDER_DETAIL,
+            element: (
+              <SuspenseWrapper>
+                <SellerOrdersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_ORDER_RETURNS,
             element: (
               <SuspenseWrapper>
                 <SellerOrdersPage />

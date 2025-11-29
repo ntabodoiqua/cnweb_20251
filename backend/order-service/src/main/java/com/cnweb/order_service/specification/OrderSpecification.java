@@ -50,6 +50,11 @@ public class OrderSpecification {
                 predicates.add(criteriaBuilder.equal(root.get("paymentStatus"), filter.getPaymentStatus()));
             }
 
+            // Refund Status (for filtering pending return requests)
+            if (filter.getRefundStatus() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("refundStatus"), filter.getRefundStatus()));
+            }
+
             // Date Range
             if (filter.getStartDate() != null) {
                 predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"), filter.getStartDate()));

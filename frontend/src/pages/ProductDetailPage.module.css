@@ -1956,3 +1956,39 @@
 .detailsCard {
   animation-delay: 0.3s;
 }
+
+/* Review Section */
+.reviewHeader {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.writeReviewBtn {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff7875 100%);
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  height: 40px;
+  padding: 0 24px;
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+  transition: all 0.3s ease;
+}
+
+.writeReviewBtn:hover {
+  background: linear-gradient(135deg, #ff7875 0%, #ee4d2d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.4);
+}
+
+@media (max-width: 576px) {
+  .reviewHeader {
+    justify-content: center;
+  }
+
+  .writeReviewBtn {
+    width: 100%;
+  }
+}

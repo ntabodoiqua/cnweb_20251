@@ -124,6 +124,89 @@ public class RabbitMQMessageConsumer {
         handleMessage(MessageType.REFUND_FAILED, event);
     }
 
+    // ==================== Order Event Listeners ====================
+
+    /**
+     * Listener cho order created
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).ORDER_CREATED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleOrderCreated(OrderEvent event) {
+        handleMessage(MessageType.ORDER_CREATED, event);
+    }
+
+    /**
+     * Listener cho order confirmed
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).ORDER_CONFIRMED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleOrderConfirmed(OrderEvent event) {
+        handleMessage(MessageType.ORDER_CONFIRMED, event);
+    }
+
+    /**
+     * Listener cho order shipped
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).ORDER_SHIPPED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleOrderShipped(OrderEvent event) {
+        handleMessage(MessageType.ORDER_SHIPPED, event);
+    }
+
+    /**
+     * Listener cho order delivered
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).ORDER_DELIVERED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleOrderDelivered(OrderEvent event) {
+        handleMessage(MessageType.ORDER_DELIVERED, event);
+    }
+
+    /**
+     * Listener cho order cancelled
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).ORDER_CANCELLED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleOrderCancelled(OrderEvent event) {
+        handleMessage(MessageType.ORDER_CANCELLED, event);
+    }
+
+    /**
+     * Listener cho order return requested
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).ORDER_RETURN_REQUESTED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleOrderReturnRequested(OrderEvent event) {
+        handleMessage(MessageType.ORDER_RETURN_REQUESTED, event);
+    }
+
+    /**
+     * Listener cho order return approved
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).ORDER_RETURN_APPROVED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleOrderReturnApproved(OrderEvent event) {
+        handleMessage(MessageType.ORDER_RETURN_APPROVED, event);
+    }
+
+    /**
+     * Listener cho order return rejected
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).ORDER_RETURN_REJECTED).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleOrderReturnRejected(OrderEvent event) {
+        handleMessage(MessageType.ORDER_RETURN_REJECTED, event);
+    }
+
+    /**
+     * Listener cho seller new order
+     */
+    @RabbitListener(queues = "#{messageTypeQueues.get(T(com.vdt2025.common_dto.dto.MessageType).SELLER_NEW_ORDER).name}")
+    @Retryable(maxAttempts = 3, backoff = @Backoff(delay = 1000, multiplier = 2.0))
+    public void handleSellerNewOrder(OrderEvent event) {
+        handleMessage(MessageType.SELLER_NEW_ORDER, event);
+    }
+
     /**
      * Phương thức chung để xử lý message
      * @param messageType Loại message

@@ -46,7 +46,9 @@ import {
   getPublicPlatformCategoriesApi,
   getBrandsApi,
 } from "../../util/api";
+import { useNotification } from "../../contexts/NotificationContext";
 import { getRoleName, ROLES, getHighestRole } from "../../constants/roles";
+import NotificationDropdown from "../notification/NotificationDropdown";
 import styles from "./header.module.css";
 import logo from "../../assets/logo.png";
 
@@ -55,6 +57,8 @@ const Header = () => {
   const location = useLocation();
   const { auth, setAuth } = useContext(AuthContext);
   const { cartCount, resetCart } = useCart();
+  const { connectWebSocket, disconnectWebSocket, fetchUnreadCount } =
+    useNotification();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -129,6 +133,23 @@ const Header = () => {
 
     setSearchTimeout(timeout);
   };
+
+  // Kết nối WebSocket khi user đăng nhập
+  useEffect(() => {
+    if (auth.isAuthenticated && auth.user?.username) {
+      // Sử dụng username làm userId cho WebSocket
+      connectWebSocket(auth.user.username);
+      fetchUnreadCount();
+    } else {
+      disconnectWebSocket();
+    }
+  }, [
+    auth.isAuthenticated,
+    auth.user?.username,
+    connectWebSocket,
+    disconnectWebSocket,
+    fetchUnreadCount,
+  ]);
 
   const handleLogout = async () => {
     // Ngăn chặn click nhiều lần
@@ -564,26 +585,8 @@ const Header = () => {
               </span>
             </div>
 
-            {/* Notification Icon with Badge */}
-            {auth.isAuthenticated && (
-              <div
-                className={styles.notificationIcon}
-                onClick={() =>
-                  notification.info({
-                    message: "Thông báo",
-                    description: "Tính năng thông báo đang phát triển",
-                    placement: "topRight",
-                  })
-                }
-              >
-                <BellOutlined />
-                {notificationCount > 0 && (
-                  <span className={styles.notificationBadge}>
-                    {notificationCount > 99 ? "99+" : notificationCount}
-                  </span>
-                )}
-              </div>
-            )}
+            {/* Notification Dropdown */}
+            {auth.isAuthenticated && <NotificationDropdown />}
 
             {/* Mobile Menu Trigger */}
             <MenuOutlined

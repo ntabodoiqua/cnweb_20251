@@ -2,6 +2,7 @@ package com.cnweb.order_service.dto.request;
 
 import com.cnweb.order_service.enums.OrderStatus;
 import com.cnweb.order_service.enums.PaymentStatus;
+import com.cnweb.order_service.enums.RefundStatus;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,6 +23,7 @@ public class OrderFilterRequest {
     String search; // Search by orderNumber, receiverName, storeName
     OrderStatus status;
     PaymentStatus paymentStatus;
+    RefundStatus refundStatus; // Filter by refund status (PENDING = waiting for return processing)
     
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     LocalDateTime startDate;

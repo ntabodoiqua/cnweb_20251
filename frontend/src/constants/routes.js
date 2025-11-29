@@ -37,9 +37,13 @@ export const PROTECTED_ROUTES = {
   PROFILE_GENERAL: "/profile/general",
   PROFILE_SELLER: "/profile/seller",
   PROFILE_ORDERS: "/profile/orders",
+  PROFILE_ORDER_DETAIL: "/profile/orders/:orderId",
   PROFILE_ADDRESSES: "/profile/addresses",
   PROFILE_HISTORY: "/profile/history",
   PROFILE_SECURITY: "/profile/security",
+
+  // Notifications
+  NOTIFICATIONS: "/notifications",
 
   // Admin routes
   ADMIN_DASHBOARD: "/admin",
@@ -69,6 +73,8 @@ export const PROTECTED_ROUTES = {
   SELLER_PRODUCT_DETAIL: "/seller/products/:productId",
   SELLER_VARIANT_DETAIL: "/seller/products/:productId/variants/:variantId",
   SELLER_ORDERS: "/seller/orders",
+  SELLER_ORDER_DETAIL: "/seller/orders/:orderId",
+  SELLER_ORDER_RETURNS: "/seller/orders/:orderId/returns",
   SELLER_CATEGORIES: "/seller/categories",
   SELLER_BANNERS: "/seller/banners",
   SELLER_PRODUCT_ATTRIBUTES: "/seller/product-attributes",
@@ -109,9 +115,11 @@ export const ROUTE_TITLES = {
   [PROTECTED_ROUTES.PROFILE_GENERAL]: "Thông tin chung",
   [PROTECTED_ROUTES.PROFILE_SELLER]: "Hồ sơ người bán",
   [PROTECTED_ROUTES.PROFILE_ORDERS]: "Đơn hàng của tôi",
+  [PROTECTED_ROUTES.PROFILE_ORDER_DETAIL]: "Chi tiết đơn hàng",
   [PROTECTED_ROUTES.PROFILE_ADDRESSES]: "Sổ địa chỉ",
   [PROTECTED_ROUTES.PROFILE_HISTORY]: "Lịch sử giao dịch",
   [PROTECTED_ROUTES.PROFILE_SECURITY]: "Bảo mật tài khoản",
+  [PROTECTED_ROUTES.NOTIFICATIONS]: "Thông báo",
   [PROTECTED_ROUTES.ADMIN_DASHBOARD]: "Bảng điều khiển Admin",
   [PROTECTED_ROUTES.ADMIN_USERS]: "Quản lý người dùng",
   [PROTECTED_ROUTES.ADMIN_BRANDS]: "Quản lý thương hiệu",
@@ -133,6 +141,8 @@ export const ROUTE_TITLES = {
   [PROTECTED_ROUTES.SELLER_PRODUCT_DETAIL]: "Chi tiết sản phẩm",
   [PROTECTED_ROUTES.SELLER_VARIANT_DETAIL]: "Chi tiết biến thể",
   [PROTECTED_ROUTES.SELLER_ORDERS]: "Quản lý đơn hàng",
+  [PROTECTED_ROUTES.SELLER_ORDER_DETAIL]: "Chi tiết đơn hàng",
+  [PROTECTED_ROUTES.SELLER_ORDER_RETURNS]: "Xử lý trả hàng",
   [PROTECTED_ROUTES.SELLER_CATEGORIES]: "Danh mục sản phẩm",
   [PROTECTED_ROUTES.SELLER_BANNERS]: "Quản lý Banner",
   [PROTECTED_ROUTES.SELLER_PRODUCT_ATTRIBUTES]: "Thuộc tính sản phẩm",

@@ -3,6 +3,8 @@ package com.cnweb.order_service.dto.response;
 import com.cnweb.order_service.enums.OrderStatus;
 import com.cnweb.order_service.enums.PaymentMethod;
 import com.cnweb.order_service.enums.PaymentStatus;
+import com.cnweb.order_service.enums.RefundStatus;
+import com.cnweb.order_service.enums.ReturnReason;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -54,12 +56,32 @@ public class OrderResponse {
     String cancelReason;
     String cancelledBy;
 
+    // Return/Refund info
+    ReturnReason returnReason;
+    String returnDescription;
+    List<String> returnImages;
+    LocalDateTime returnRequestedAt;
+    LocalDateTime returnProcessedAt;
+    String returnProcessedBy;
+    String returnRejectionReason;
+    RefundStatus refundStatus;
+    BigDecimal refundAmount;
+    String refundTransactionId;
+    LocalDateTime refundedAt;
+    LocalDateTime returnedAt;
+
+    // Flags for UI
+    Boolean canBeReturned;
+    Boolean canProcessReturn;
+
     // Thời gian
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
     LocalDateTime confirmedAt;
     LocalDateTime paidAt;
     LocalDateTime cancelledAt;
+    LocalDateTime shippingAt;
+    LocalDateTime deliveredAt;
 
     // Items
     List<OrderItemResponse> items;
