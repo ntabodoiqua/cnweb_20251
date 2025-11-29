@@ -5,6 +5,7 @@ import { useContext, useEffect } from "react";
 import { AuthContext } from "./components/context/auth.context";
 import LoadingSpinner from "./components/LoadingSpinner";
 import { getTokenInfo, isTokenExpired } from "./util/jwt";
+import { getMyInfoApi } from "./util/api";
 import useScrollToTop from "./hooks/useScrollToTop";
 
 /**
@@ -46,13 +47,52 @@ function App() {
             const tokenInfo = getTokenInfo(token);
 
             if (tokenInfo) {
-              setAuth({
-                isAuthenticated: true,
-                user: {
-                  username: tokenInfo.username,
-                  role: tokenInfo.role,
-                },
-              });
+              // Gọi API để lấy đầy đủ thông tin user
+              try {
+                const userInfoRes = await getMyInfoApi();
+                if (userInfoRes && userInfoRes.code === 1000) {
+                  const userInfo = userInfoRes.result;
+                  setAuth({
+                    isAuthenticated: true,
+                    user: {
+                      username: userInfo.username || tokenInfo.username,
+                      role: tokenInfo.role,
+                      firstName: userInfo.firstName || "",
+                      lastName: userInfo.lastName || "",
+                      avatarUrl:
+                        userInfo.avatarUrl || userInfo.avatarName || "",
+                      email: userInfo.email || "",
+                    },
+                  });
+                } else {
+                  // Nếu không lấy được thông tin chi tiết, dùng thông tin từ token
+                  setAuth({
+                    isAuthenticated: true,
+                    user: {
+                      username: tokenInfo.username,
+                      role: tokenInfo.role,
+                      firstName: "",
+                      lastName: "",
+                      avatarUrl: "",
+                      email: "",
+                    },
+                  });
+                }
+              } catch (userInfoError) {
+                console.error("Error fetching user info:", userInfoError);
+                // Nếu có lỗi, vẫn đăng nhập với thông tin từ token
+                setAuth({
+                  isAuthenticated: true,
+                  user: {
+                    username: tokenInfo.username,
+                    role: tokenInfo.role,
+                    firstName: "",
+                    lastName: "",
+                    avatarUrl: "",
+                    email: "",
+                  },
+                });
+              }
             } else {
               // Token không hợp lệ
               localStorage.removeItem("access_token");
@@ -63,6 +103,9 @@ function App() {
                   email: "",
                   name: "",
                   role: "",
+                  firstName: "",
+                  lastName: "",
+                  avatarUrl: "",
                 },
               });
             }
@@ -76,6 +119,9 @@ function App() {
               email: "",
               name: "",
               role: "",
+              firstName: "",
+              lastName: "",
+              avatarUrl: "",
             },
           });
         }
@@ -88,6 +134,9 @@ function App() {
             email: "",
             name: "",
             role: "",
+            firstName: "",
+            lastName: "",
+            avatarUrl: "",
           },
         });
       } finally {
