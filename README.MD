@@ -401,5 +401,4 @@ Chỉ sử dụng cho mục đích học tập.
 
 ---
 
-**Made with ❤️ by HUST Students**
-
+**Made with ❤️ by Group 1**
