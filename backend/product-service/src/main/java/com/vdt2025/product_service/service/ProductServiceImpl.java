@@ -490,6 +490,7 @@ public class ProductServiceImpl implements ProductService {
                     .isPrimary(displayOrder == 1)
                     .product(product)
                     .build();
+            cacheEvictService.evictProductSearchCache();
             return (
                     productImageMapper.toProductImageResponse(
                             productImageRepository.save(productImage)
@@ -498,6 +499,7 @@ public class ProductServiceImpl implements ProductService {
         } catch (Exception e) {
             throw new AppException(ErrorCode.FILE_CANNOT_STORED);
         }
+
     }
 
     @Override
@@ -511,6 +513,7 @@ public class ProductServiceImpl implements ProductService {
         checkProductAccess(productImage.getProduct());
         productImageRepository.delete(productImage);
         log.info("Product image {} deleted successfully", imageId);
+        cacheEvictService.evictProductSearchCache();
     }
 
     @Override
@@ -566,6 +569,7 @@ public class ProductServiceImpl implements ProductService {
                 .toList();
 
         log.info("Image order updated for product {}", productId);
+        cacheEvictService.evictProductSearchCache();
         return responses;
     }
 

@@ -52,14 +52,14 @@ public class CacheEvictServiceImpl implements CacheEvictService{
         // Evict variantSelectionOptions cache
         String pattern1 = "variantSelectionOptions::" + productId + "*";
         Set<String> keys1 = redisTemplate.keys(pattern1);
-        if (keys1 != null && !keys1.isEmpty()) {
+        if (!keys1.isEmpty()) {
             redisTemplate.delete(keys1);
         }
         
         // Evict variantByAttributes cache (pattern: productId-[...])
         String pattern2 = "variantByAttributes::" + productId + "-*";
         Set<String> keys2 = redisTemplate.keys(pattern2);
-        if (keys2 != null && !keys2.isEmpty()) {
+        if (!keys2.isEmpty()) {
             redisTemplate.delete(keys2);
         }
     }
@@ -68,7 +68,7 @@ public class CacheEvictServiceImpl implements CacheEvictService{
     public void evictProductSearchCache() {
         String pattern = "product-search::*";
         Set<String> keys = redisTemplate.keys(pattern);
-        if (keys != null && !keys.isEmpty()) {
+        if (!keys.isEmpty()) {
             redisTemplate.delete(keys);
         }
     }
@@ -77,7 +77,7 @@ public class CacheEvictServiceImpl implements CacheEvictService{
     public void evictProductSelectionConfig(String productId) {
         String pattern = "productSelectionConfig::" + productId + "*";
         Set<String> keys = redisTemplate.keys(pattern);
-        if (keys != null && !keys.isEmpty()) {
+        if (!keys.isEmpty()) {
             redisTemplate.delete(keys);
         }
     }
