@@ -142,16 +142,6 @@ html {
   background-repeat: no-repeat;
 }
 
-.banner-slide::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(to right, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.2));
-}
-
 .banner-content {
   position: relative;
   z-index: 2;
@@ -417,14 +407,14 @@ html {
    ============================================ */
 .categories-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16px;
 }
 
 .category-card {
   position: relative;
-  height: 200px;
-  border-radius: 16px;
+  height: 140px;
+  border-radius: 12px;
   overflow: hidden;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -499,7 +489,7 @@ html {
   bottom: 0;
   left: 0;
   right: 0;
-  padding: 20px;
+  padding: 14px;
   z-index: 2;
   color: white;
   transform: translateY(0);
@@ -511,23 +501,23 @@ html {
 }
 
 .category-name {
-  font-size: 20px;
+  font-size: 15px;
   font-weight: 700;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
 }
 
 .category-card:hover .category-name {
   text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
-  transform: scale(1.05);
+  transform: scale(1.03);
 }
 
 .category-count {
-  font-size: 14px;
+  font-size: 12px;
   opacity: 0.9;
   transition: all 0.3s ease;
 }
@@ -1272,16 +1262,16 @@ html {
 
   .categories-grid,
   .products-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 12px;
   }
 
   .category-card {
-    height: 150px;
+    height: 120px;
   }
 
   .category-name {
-    font-size: 16px;
+    font-size: 14px;
   }
 
   .brands-grid {
@@ -1823,7 +1813,7 @@ html {
 
   /* Category cards */
   .category-card {
-    min-height: 160px;
+    min-height: 100px;
   }
 
   /* Brand cards */

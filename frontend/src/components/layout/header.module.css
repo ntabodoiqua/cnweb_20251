@@ -49,11 +49,48 @@
   letter-spacing: -0.5px;
 }
 
-/* Search Bar */
+/* Search Bar - Desktop */
 .headerSearch {
   flex: 1;
   max-width: 450px;
   margin: 0 40px;
+}
+
+/* Mobile Search Wrapper - Hidden on desktop, shown on mobile */
+.mobileSearchWrapper {
+  display: none;
+  width: 100%;
+  padding: 0 0 12px 0;
+}
+
+.mobileSearchWrapper :global(.ant-input-search) {
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.mobileSearchWrapper :global(.ant-input-search .ant-input) {
+  height: 40px;
+  font-size: 14px;
+  border: none;
+  background: white;
+  padding-left: 16px;
+}
+
+.mobileSearchWrapper :global(.ant-input-search .ant-input::placeholder) {
+  color: #999;
+}
+
+.mobileSearchWrapper .searchButton {
+  height: 40px;
+  background: #ee4d2d;
+  color: white;
+  border: none;
+  padding: 0 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .headerSearch .searchInput {
@@ -137,7 +174,8 @@
 }
 
 .headerBottom .headerContainer {
-  height: 48px;
+  min-height: 48px;
+  flex-wrap: wrap;
 }
 
 .headerNav {
@@ -527,15 +565,18 @@
     padding: 0 16px;
   }
 
+  /* Hide desktop search, show mobile search */
   .headerSearch {
-    max-width: 200px;
-    margin: 0 12px;
+    display: none;
   }
 
-  .headerSearch :global(.ant-input-search .ant-input) {
-    height: 36px;
-    font-size: 13px;
-    padding-left: 12px;
+  .mobileSearchWrapper {
+    display: block;
+  }
+
+  .headerNav {
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .searchButton {
@@ -572,22 +613,20 @@
 
 @media (max-width: 576px) {
   .headerSearch {
-    max-width: 150px;
-    margin: 0 8px;
+    display: none;
   }
 
-  .headerSearch :global(.ant-input-search .ant-input) {
-    height: 34px;
-    font-size: 12px;
-    padding-left: 10px;
+  .mobileSearchWrapper {
+    display: block;
   }
 
-  .headerSearch :global(.ant-input-search .ant-input::placeholder) {
-    font-size: 11px;
+  .mobileSearchWrapper :global(.ant-input-search .ant-input) {
+    height: 36px;
+    font-size: 13px;
   }
 
   .searchButton {
-    height: 34px;
+    height: 36px;
     padding: 0 10px;
     font-size: 13px;
   }
@@ -637,7 +676,7 @@
   border-right: none;
 }
 
-.categoryInlineMenuWrapper :global(.ant-menu-item), 
+.categoryInlineMenuWrapper :global(.ant-menu-item),
 .categoryInlineMenuWrapper :global(.ant-menu-submenu-title) {
   height: auto;
   line-height: 1.5;
@@ -646,4 +685,3 @@
   margin: 0;
   width: 100%;
 }
-

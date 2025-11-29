@@ -659,6 +659,34 @@ const Header = () => {
       {/* Navigation Bar */}
       <div className={styles.headerBottom}>
         <div className={styles.headerContainer}>
+          {/* Mobile Search Bar - Shows on mobile only */}
+          <div className={styles.mobileSearchWrapper}>
+            <AutoComplete
+              style={{ width: "100%" }}
+              options={options}
+              onSelect={(value) => {
+                setSearchValue(value);
+                handleSearch(value);
+              }}
+              onSearch={handleSearchChange}
+              value={searchValue}
+              popupClassName={styles.searchDropdown}
+              popupMatchSelectWidth={true}
+            >
+              <Input.Search
+                placeholder="Tìm kiếm sản phẩm..."
+                size="middle"
+                onSearch={handleSearch}
+                enterButton={
+                  <button className={styles.searchButton}>
+                    <SearchOutlined />
+                  </button>
+                }
+                className={styles.searchInput}
+              />
+            </AutoComplete>
+          </div>
+
           <nav className={styles.headerNav}>
             <Link
               to="/"
