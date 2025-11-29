@@ -27,11 +27,13 @@ public class OrderReturnRequestedMessageHandler implements MessageHandler<OrderE
 
         try {
             // Gửi push notification cho seller (thông báo có yêu cầu trả hàng) với idempotency
-            if (payload.getStoreId() != null) {
+            // Sử dụng storeOwnerUsername (username của seller) thay vì storeId
+            String sellerUsername = payload.getStoreOwnerUsername();
+            if (sellerUsername != null && !sellerUsername.isEmpty()) {
                 String returnReason = payload.getReturnReason() != null ? payload.getReturnReason() : "Không rõ";
                 
                 notificationService.createAndSendNotificationIdempotent(
-                        payload.getStoreId(),
+                        sellerUsername,
                         "Yêu cầu trả hàng mới",
                         String.format("Đơn hàng %s có yêu cầu trả hàng từ khách hàng. Lý do: %s. Vui lòng xem xét và xử lý.",
                                 payload.getOrderNumber(), returnReason),
@@ -41,7 +43,9 @@ public class OrderReturnRequestedMessageHandler implements MessageHandler<OrderE
                         payload.getOrderId(),
                         REFERENCE_TYPE_SELLER
                 );
-                log.info("Successfully processed ORDER_RETURN_REQUESTED notification for store: {}", payload.getStoreId());
+                log.info("Successfully processed ORDER_RETURN_REQUESTED notification for seller: {}", sellerUsername);
+            } else {
+                log.warn("No storeOwnerUsername found for order: {}. Cannot send notification to seller.", payload.getOrderNumber());
             }
             
             // Gửi xác nhận cho customer rằng yêu cầu đã được gửi với idempotency

@@ -104,13 +104,16 @@ public class OrderServiceImpl implements OrderService {
         for (Map.Entry<String, List<OrderItemRequest>> entry : itemsByStore.entrySet()) {
             String storeId = entry.getKey();
             List<OrderItemRequest> storeItems = entry.getValue();
-            String storeName = variantMap.get(storeItems.getFirst().getVariantId()).getStoreName();
+            VariantInternalDTO firstVariant = variantMap.get(storeItems.getFirst().getVariantId());
+            String storeName = firstVariant.getStoreName();
+            String storeOwnerUsername = firstVariant.getStoreOwnerUsername();
 
             Order order = orderMapper.toOrder(request);
             order.setOrderNumber(generateOrderNumber());
             order.setUsername(username);
             order.setStoreId(storeId);
             order.setStoreName(storeName);
+            order.setStoreOwnerUsername(storeOwnerUsername); // Lưu username của seller
 
             List<OrderItem> orderItems = new ArrayList<>();
             for (OrderItemRequest itemRequest : storeItems) {
@@ -465,7 +468,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderResponse getOrderById(String username, String orderId) {
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithItems(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         // Check authorization: customer hoặc seller của store đó
@@ -484,7 +487,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse confirmOrder(String sellerUsername, String orderId) {
         log.info("Seller {} confirming order {}", sellerUsername, orderId);
 
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithItems(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         // Validate seller owns the store
@@ -519,7 +522,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse shipOrder(String sellerUsername, String orderId) {
         log.info("Seller {} shipping order {}", sellerUsername, orderId);
 
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithItems(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         // Validate seller owns the store
@@ -554,7 +557,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse deliverOrder(String customerUsername, String orderId) {
         log.info("Customer {} confirming delivery of order {}", customerUsername, orderId);
 
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithItems(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         // Validate customer owns the order
@@ -589,7 +592,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse cancelOrder(String username, String orderId, String cancelReason) {
         log.info("User {} cancelling order {} with reason: {}", username, orderId, cancelReason);
 
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithItems(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         // Check authorization: customer hoặc seller của store đó
@@ -683,7 +686,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse requestReturn(String customerUsername, String orderId, ReturnOrderRequest request) {
         log.info("Customer {} requesting return for order {}", customerUsername, orderId);
 
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithItems(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         // Validate customer owns the order
@@ -749,7 +752,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderResponse processReturn(String sellerUsername, String orderId, ProcessReturnRequest request) {
         log.info("Seller {} processing return for order {}, approved: {}", sellerUsername, orderId, request.getApproved());
 
-        Order order = orderRepository.findById(orderId)
+        Order order = orderRepository.findByIdWithItems(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         // Validate seller owns the store

@@ -55,6 +55,9 @@ public class Order {
     @Column(name = "store_name", nullable = false)
     String storeName;
 
+    @Column(name = "store_owner_username")
+    String storeOwnerUsername; // Username của seller (để gửi notification)
+
     // Thông tin người nhận
     @Column(name = "receiver_name", nullable = false, length = 100)
     String receiverName;

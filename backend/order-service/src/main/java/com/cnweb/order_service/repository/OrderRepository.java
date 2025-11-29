@@ -20,6 +20,13 @@ import java.util.Optional;
  */
 @Repository
 public interface OrderRepository extends JpaRepository<Order, String>, JpaSpecificationExecutor<Order> {
+    
+    /**
+     * Tìm đơn hàng theo ID và fetch items để tránh LazyInitializationException
+     */
+    @Query("SELECT o FROM Order o LEFT JOIN FETCH o.items WHERE o.id = :orderId")
+    Optional<Order> findByIdWithItems(@Param("orderId") String orderId);
+
     /**
      * Tìm đơn hàng theo mã giao dịch thanh toán
      */

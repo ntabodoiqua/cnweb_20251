@@ -166,6 +166,7 @@ public class OrderNotificationService {
                 .email(email)
                 .storeId(order.getStoreId())
                 .storeName(order.getStoreName())
+                .storeOwnerUsername(order.getStoreOwnerUsername()) // Username của seller
                 .totalAmount(order.getTotalAmount())
                 .status(order.getStatus().name())
                 .shippingAddress(order.getShippingAddress())

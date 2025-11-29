@@ -1323,6 +1323,7 @@ public class ProductServiceImpl implements ProductService {
                             .storeId(store.getId())
                             .storeName(store.getStoreName())
                             .storeLogo(store.getLogoUrl())
+                            .storeOwnerUsername(store.getUserName()) // Username của seller
                             .build();
                 })
                 .collect(Collectors.toList());

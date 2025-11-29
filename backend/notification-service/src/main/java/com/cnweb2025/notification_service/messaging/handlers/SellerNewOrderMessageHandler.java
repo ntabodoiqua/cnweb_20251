@@ -28,9 +28,11 @@ public class SellerNewOrderMessageHandler implements MessageHandler<OrderEvent> 
             String formattedAmount = String.format("%,.0f VNĐ", payload.getTotalAmount());
             
             // Gửi push notification cho seller với idempotency check
-            if (payload.getStoreId() != null) {
+            // Sử dụng storeOwnerUsername (username của seller) thay vì storeId
+            String sellerUsername = payload.getStoreOwnerUsername();
+            if (sellerUsername != null && !sellerUsername.isEmpty()) {
                 notificationService.createAndSendNotificationIdempotent(
-                        payload.getStoreId(),
+                        sellerUsername,
                         "Đơn hàng mới",
                         String.format("Bạn có đơn hàng mới %s từ %s. Giá trị: %s. Vui lòng xác nhận đơn hàng.",
                                 payload.getOrderNumber(), 
@@ -42,7 +44,9 @@ public class SellerNewOrderMessageHandler implements MessageHandler<OrderEvent> 
                         payload.getOrderId(),
                         REFERENCE_TYPE
                 );
-                log.info("Successfully processed SELLER_NEW_ORDER notification for store: {}", payload.getStoreId());
+                log.info("Successfully processed SELLER_NEW_ORDER notification for seller: {}", sellerUsername);
+            } else {
+                log.warn("No storeOwnerUsername found for order: {}. Cannot send notification to seller.", payload.getOrderNumber());
             }
         } catch (Exception e) {
             log.error("Failed to handle SELLER_NEW_ORDER event for order: {}", payload.getOrderNumber(), e);

@@ -19,6 +19,7 @@ public class OrderEvent {
     String email;
     String storeId;
     String storeName;
+    String storeOwnerUsername; // Username của seller (để gửi notification)
     BigDecimal totalAmount;
     String status;
     String shippingAddress;
