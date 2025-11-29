@@ -5,18 +5,13 @@ spring:
     name: notification-service
   # Database configuration
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/notification_db?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
-    username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:root}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db-postgresql-sgp1-93557-do-user-27848320-0.d.db.ondigitalocean.com:25060/notification_service}
+    username: ${SPRING_DATASOURCE_USERNAME:doadmin}
+    password: ${SPRING_DATASOURCE_PASSWORD:AVNS_GP853Gug731-gzXfmnT}
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: false
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
-        format_sql: true
+    show-sql: ${SPRING_JPA_SHOW_SQL:true}
   rabbitmq:
     addresses: amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
     username: xqjmojji
@@ -57,11 +52,12 @@ management:
     prometheus:
       enabled: true
   metrics:
-    export:
-      prometheus:
-        enabled: true
     tags:
       application: ${spring.application.name}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
 
 # Logging configuration for Loki
 logging:
