@@ -12,7 +12,25 @@ import { BellOutlined } from "@ant-design/icons";
 const NotificationContext = createContext(null);
 
 // WebSocket URL - điều chỉnh theo môi trường
-const WS_BASE_URL = import.meta.env.VITE_WS_URL || "ws://localhost:8080";
+// Nếu VITE_WS_URL không được định nghĩa, sử dụng host hiện tại với ws/wss protocol
+const getWsBaseUrl = () => {
+  const wsUrl = import.meta.env.VITE_WS_URL;
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  
+  if (wsUrl) {
+    // Nếu đã có protocol (ws:// hoặc wss://), dùng trực tiếp
+    if (wsUrl.startsWith("ws://") || wsUrl.startsWith("wss://")) {
+      return wsUrl;
+    }
+    // Nếu chưa có protocol, thêm vào dựa trên protocol hiện tại
+    return `${protocol}//${wsUrl}`;
+  }
+
+  // Fallback: sử dụng host hiện tại
+  return `${protocol}//${window.location.host}`;
+};
+
+const WS_BASE_URL = getWsBaseUrl();
 
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([]);
