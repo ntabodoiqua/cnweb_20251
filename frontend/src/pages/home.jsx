@@ -9,6 +9,7 @@ import {
   getPublicProductsApi,
   getPublicPlatformCategoriesApi,
   getBrandsApi,
+  getPlatformBannersApi,
 } from "../util/api";
 import {
   HeroBanner,
@@ -83,6 +84,9 @@ const HomePage = () => {
   // Brands data from API
   const [brands, setBrands] = useState([]);
 
+  // Banner slides from API
+  const [platformBanners, setPlatformBanners] = useState([]);
+
   // Track which sections have been loaded
   const [loadedSections, setLoadedSections] = useState({
     categories: false,
@@ -90,6 +94,7 @@ const HomePage = () => {
     featured: false,
     dailyDeals: false,
     brands: false,
+    banners: false,
   });
 
   // Single intersection observer for better performance
@@ -223,6 +228,38 @@ const HomePage = () => {
     }
   }, [loadedSections.brands]);
 
+  // Fetch platform banners on mount
+  const fetchBanners = useCallback(async () => {
+    if (loadedSections.banners) return;
+    try {
+      const bannersResponse = await getPlatformBannersApi();
+      if (bannersResponse?.code === 1000) {
+        const apiBanners = bannersResponse.result || [];
+        // Transform API response to match HeroBanner props
+        // API returns: id, imageName, imageUrl, displayOrder, storeId
+        const transformedBanners = apiBanners
+          .sort((a, b) => a.displayOrder - b.displayOrder)
+          .map((banner, index) => ({
+            id: banner.id || index + 1,
+            image: banner.imageUrl,
+            imageName: banner.imageName,
+          }));
+        setPlatformBanners(transformedBanners);
+      }
+    } catch (error) {
+      console.error("Error fetching banners:", error);
+      // Fallback to mock data if API fails
+      setPlatformBanners(bannerSlides);
+    } finally {
+      setLoadedSections((prev) => ({ ...prev, banners: true }));
+    }
+  }, [loadedSections.banners]);
+
+  // Fetch banners immediately on mount
+  useEffect(() => {
+    fetchBanners();
+  }, [fetchBanners]);
+
   // Consolidated effect for triggering fetches
   useEffect(() => {
     if (categoriesVisible && !loadedSections.categories) fetchCategories();
@@ -296,7 +333,9 @@ const HomePage = () => {
 
       <main className="home-page">
         {/* Hero Banner Carousel */}
-        <HeroBanner slides={bannerSlides} />
+        <HeroBanner
+          slides={platformBanners.length > 0 ? platformBanners : bannerSlides}
+        />
 
         <div className="home-container">
           {/* Trust Badges */}

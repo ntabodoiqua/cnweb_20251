@@ -15,6 +15,7 @@ import {
   MenuUnfoldOutlined,
   ControlOutlined,
   SolutionOutlined,
+  PictureOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../../constants/routes";
 import "./admin-dashboard.css";
@@ -46,6 +47,12 @@ const AdminDashboardLayout = () => {
       icon: <TagsOutlined />,
       label: "Quản lý thương hiệu",
       path: PROTECTED_ROUTES.ADMIN_BRANDS,
+    },
+    {
+      key: "banners",
+      icon: <PictureOutlined />,
+      label: "Quản lý Banner",
+      path: PROTECTED_ROUTES.ADMIN_BANNERS,
     },
     {
       key: "stores",

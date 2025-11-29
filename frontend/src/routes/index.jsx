@@ -89,6 +89,7 @@ const AdminOverviewPage = lazy(() =>
 );
 const AdminUsersPage = lazy(() => import("../pages/admin/AdminUsersPage"));
 const AdminBrandsPage = lazy(() => import("../pages/admin/AdminBrandsPage"));
+const AdminBannersPage = lazy(() => import("../pages/admin/AdminBannersPage"));
 const AdminStoresPage = lazy(() => import("../pages/admin/AdminStoresPage"));
 const AdminSellerProfilesPage = lazy(() =>
   import("../pages/admin/AdminSellerProfilesPage")
@@ -130,6 +131,9 @@ const SellerVariantDetailPage = lazy(() =>
 const SellerOrdersPage = lazy(() => import("../pages/seller/SellerOrdersPage"));
 const SellerCategoriesPage = lazy(() =>
   import("../pages/seller/SellerCategoriesPage")
+);
+const SellerBannersPage = lazy(() =>
+  import("../pages/seller/SellerBannersPage")
 );
 const SellerProductAttributesPage = lazy(() =>
   import("../pages/seller/SellerProductAttributesPage")
@@ -514,6 +518,14 @@ const router = createBrowserRouter([
             ),
           },
           {
+            path: PROTECTED_ROUTES.ADMIN_BANNERS,
+            element: (
+              <SuspenseWrapper>
+                <AdminBannersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
             path: PROTECTED_ROUTES.ADMIN_STORES,
             element: (
               <SuspenseWrapper>
@@ -644,6 +656,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <SellerCategoriesPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_BANNERS,
+            element: (
+              <SuspenseWrapper>
+                <SellerBannersPage />
               </SuspenseWrapper>
             ),
           },

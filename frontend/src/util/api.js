@@ -1936,6 +1936,176 @@ const getSearchHealthApi = () => {
   });
 };
 
+// ============================================
+// Banner Slides APIs
+// ============================================
+
+// PUBLIC ENDPOINTS
+
+// Lấy tất cả banner (public)
+const getAllBannersApi = () => {
+  const URL_API = "/api/product/banner-slides";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Lấy banner của platform (public)
+const getPlatformBannersApi = () => {
+  const URL_API = "/api/product/banner-slides/platform";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Lấy banner của store cụ thể (public)
+const getStoreBannersApi = (storeId) => {
+  const URL_API = `/api/product/banner-slides/store/${storeId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Lấy thông tin banner theo ID (public)
+const getBannerByIdApi = (bannerId) => {
+  const URL_API = `/api/product/banner-slides/${bannerId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// ADMIN ENDPOINTS
+
+// Admin tạo banner cho platform
+const createPlatformBannerApi = (file, displayOrder) => {
+  const URL_API = "/api/product/banner-slides/admin";
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("displayOrder", displayOrder);
+
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Admin cập nhật banner platform
+const updatePlatformBannerApi = (bannerId, displayOrder, file = null) => {
+  const URL_API = `/api/product/banner-slides/admin/${bannerId}`;
+  const formData = new FormData();
+  if (displayOrder !== null && displayOrder !== undefined) {
+    formData.append("displayOrder", displayOrder);
+  }
+  if (file) {
+    formData.append("file", file);
+  }
+
+  return axios.put(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Admin xóa banner platform
+const deletePlatformBannerApi = (bannerId) => {
+  const URL_API = `/api/product/banner-slides/admin/${bannerId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Admin cập nhật thứ tự hiển thị các banner platform
+const updatePlatformBannerDisplayOrderApi = (bannerOrders) => {
+  const URL_API = "/api/product/banner-slides/admin/display-order";
+  return axios.put(URL_API, bannerOrders, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// SELLER ENDPOINTS
+
+// Seller lấy banner của store mình
+const getMyStoreBannersApi = (storeId) => {
+  const URL_API = `/api/product/banner-slides/seller/my-store/${storeId}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Seller tạo banner cho store của mình
+const createStoreBannerApi = (storeId, file, displayOrder) => {
+  const URL_API = `/api/product/banner-slides/seller/${storeId}`;
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("displayOrder", displayOrder);
+
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Seller cập nhật banner của store mình
+const updateStoreBannerApi = (storeId, bannerId, displayOrder, file = null) => {
+  const URL_API = `/api/product/banner-slides/seller/${storeId}/${bannerId}`;
+  const formData = new FormData();
+  if (displayOrder !== null && displayOrder !== undefined) {
+    formData.append("displayOrder", displayOrder);
+  }
+  if (file) {
+    formData.append("file", file);
+  }
+
+  return axios.put(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Seller xóa banner của store mình
+const deleteStoreBannerApi = (storeId, bannerId) => {
+  const URL_API = `/api/product/banner-slides/seller/${storeId}/${bannerId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Seller cập nhật thứ tự hiển thị các banner của store mình
+const updateStoreBannerDisplayOrderApi = (storeId, bannerOrders) => {
+  const URL_API = `/api/product/banner-slides/seller/${storeId}/display-order`;
+  return axios.put(URL_API, bannerOrders, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -2098,4 +2268,20 @@ export {
   searchProductsApi,
   quickSearchProductsApi,
   getSearchHealthApi,
+  // Banner Slides APIs - Public
+  getAllBannersApi,
+  getPlatformBannersApi,
+  getStoreBannersApi,
+  getBannerByIdApi,
+  // Banner Slides APIs - Admin
+  createPlatformBannerApi,
+  updatePlatformBannerApi,
+  deletePlatformBannerApi,
+  updatePlatformBannerDisplayOrderApi,
+  // Banner Slides APIs - Seller
+  getMyStoreBannersApi,
+  createStoreBannerApi,
+  updateStoreBannerApi,
+  deleteStoreBannerApi,
+  updateStoreBannerDisplayOrderApi,
 };
