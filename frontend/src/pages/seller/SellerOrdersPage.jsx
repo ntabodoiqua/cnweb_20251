@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   SearchOutlined,
   EyeOutlined,
@@ -45,6 +46,7 @@ import {
   processReturnApi,
   getPendingReturnOrdersApi,
   getMyStoresApi,
+  getOrderDetailApi,
 } from "../../util/api";
 import NoImages from "../../assets/NoImages.webp";
 import LoadingSpinner from "../../components/LoadingSpinner";
@@ -57,6 +59,11 @@ const { RangePicker } = DatePicker;
  * SellerOrdersPage - Trang quản lý đơn hàng của người bán
  */
 const SellerOrdersPage = () => {
+  const { orderId } = useParams();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const isReturnsPage = location.pathname.endsWith("/returns");
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -254,6 +261,46 @@ const SellerOrdersPage = () => {
       fetchOrders();
     }
   }, [selectedStoreId, fetchOrders]);
+
+  // Handle orderId from URL - auto open detail modal or return modal
+  useEffect(() => {
+    const fetchOrderDetail = async () => {
+      if (orderId) {
+        try {
+          const response = await getOrderDetailApi(orderId);
+          if (response?.code === 200 && response.result) {
+            const order = response.result;
+            if (isReturnsPage) {
+              // Open return modal if URL ends with /returns
+              setOrderToProcessReturn(order);
+              setReturnModalVisible(true);
+            } else {
+              // Open detail modal
+              setSelectedOrder(order);
+              setDetailModalVisible(true);
+            }
+          } else {
+            notification.error({
+              message: "Lỗi",
+              description: "Không tìm thấy đơn hàng",
+              placement: "topRight",
+            });
+            navigate("/seller/orders", { replace: true });
+          }
+        } catch (error) {
+          console.error("Error fetching order detail:", error);
+          notification.error({
+            message: "Lỗi",
+            description: "Không thể tải chi tiết đơn hàng",
+            placement: "topRight",
+          });
+          navigate("/seller/orders", { replace: true });
+        }
+      }
+    };
+
+    fetchOrderDetail();
+  }, [orderId, isReturnsPage, navigate]);
 
   // Hiển thị badge trạng thái đơn hàng, có xét cả yêu cầu trả hàng
   const getStatusBadge = (status, order = null) => {
@@ -564,12 +611,24 @@ const SellerOrdersPage = () => {
   const canShip = (order) => order.status === "CONFIRMED";
   const canCancel = (order) =>
     ["PENDING", "PAID", "CONFIRMED"].includes(order.status);
-  // Sử dụng canProcessReturn từ backend hoặc kiểm tra returnReason != null và returnProcessedAt == null
-  const canProcessReturn = (order) =>
-    order.canProcessReturn === true ||
-    (order.status === "DELIVERED" &&
+  // Sử dụng canProcessReturn từ backend hoặc kiểm tra:
+  // - status = DELIVERED (chưa chuyển sang RETURNED)
+  // - có returnReason (đã yêu cầu trả hàng)
+  // - chưa có returnProcessedAt (chưa xử lý)
+  // - refundStatus = PENDING (chưa hoàn tiền)
+  const canProcessReturn = (order) => {
+    // Nếu backend trả về canProcessReturn thì ưu tiên dùng
+    if (order.canProcessReturn === true) return true;
+    if (order.canProcessReturn === false) return false;
+
+    // Fallback: kiểm tra thủ công
+    return (
+      order.status === "DELIVERED" &&
       order.returnReason &&
-      !order.returnProcessedAt);
+      !order.returnProcessedAt &&
+      order.refundStatus === "PENDING"
+    );
+  };
 
   // Render action buttons cho mỗi order
   const renderOrderActions = (order) => {
@@ -1010,7 +1069,13 @@ const SellerOrdersPage = () => {
               </div>
             }
             open={detailModalVisible}
-            onCancel={() => setDetailModalVisible(false)}
+            onCancel={() => {
+              setDetailModalVisible(false);
+              // Navigate back to orders list if came from URL with orderId
+              if (orderId) {
+                navigate("/seller/orders", { replace: true });
+              }
+            }}
             footer={null}
             width="90%"
             style={{ maxWidth: "800px" }}
@@ -1363,7 +1428,13 @@ const SellerOrdersPage = () => {
               </div>
             }
             open={returnModalVisible}
-            onCancel={() => setReturnModalVisible(false)}
+            onCancel={() => {
+              setReturnModalVisible(false);
+              // Navigate back to orders list if came from URL with orderId/returns
+              if (orderId && isReturnsPage) {
+                navigate("/seller/orders", { replace: true });
+              }
+            }}
             footer={null}
             width={600}
           >
@@ -1431,59 +1502,133 @@ const SellerOrdersPage = () => {
                   </div>
                 </div>
 
-                {/* Rejection Reason Input */}
-                <div style={{ marginBottom: "16px" }}>
-                  <p style={{ marginBottom: "8px", color: "#666" }}>
-                    Nếu từ chối, vui lòng nhập lý do:
-                  </p>
-                  <Input.TextArea
-                    rows={3}
-                    value={returnRejectionReason}
-                    onChange={(e) => setReturnRejectionReason(e.target.value)}
-                    placeholder="Nhập lý do từ chối (bắt buộc nếu từ chối)..."
-                    maxLength={1000}
-                    showCount
-                  />
-                </div>
-
-                {/* Action Buttons */}
-                <div
-                  style={{
-                    display: "flex",
-                    gap: "12px",
-                    justifyContent: "flex-end",
-                  }}
-                >
-                  <Button onClick={() => setReturnModalVisible(false)}>
-                    Đóng
-                  </Button>
-                  <Button
-                    danger
-                    loading={
-                      actionLoading[orderToProcessReturn?.id] === "return"
-                    }
-                    onClick={() => handleProcessReturn(false)}
+                {/* Hiển thị trạng thái đã xử lý nếu có */}
+                {orderToProcessReturn.returnProcessedAt && (
+                  <div
+                    style={{
+                      padding: "12px 16px",
+                      background:
+                        orderToProcessReturn.refundStatus === "REFUNDED"
+                          ? "#f6ffed"
+                          : "#fff2f0",
+                      borderRadius: "8px",
+                      border: `1px solid ${
+                        orderToProcessReturn.refundStatus === "REFUNDED"
+                          ? "#b7eb8f"
+                          : "#ffccc7"
+                      }`,
+                      marginBottom: "16px",
+                    }}
                   >
-                    <StopOutlined /> Từ chối
-                  </Button>
-                  <Popconfirm
-                    title="Xác nhận chấp nhận trả hàng"
-                    description="Bạn có chắc chắn muốn chấp nhận yêu cầu trả hàng và hoàn tiền cho khách?"
-                    onConfirm={() => handleProcessReturn(true)}
-                    okText="Xác nhận"
-                    cancelText="Hủy"
+                    {orderToProcessReturn.refundStatus === "REFUNDED" ? (
+                      <CheckCircleOutlined
+                        style={{ color: "#52c41a", marginRight: "8px" }}
+                      />
+                    ) : (
+                      <CloseCircleOutlined
+                        style={{ color: "#ff4d4f", marginRight: "8px" }}
+                      />
+                    )}
+                    <span
+                      style={{
+                        color:
+                          orderToProcessReturn.refundStatus === "REFUNDED"
+                            ? "#389e0d"
+                            : "#cf1322",
+                      }}
+                    >
+                      {orderToProcessReturn.refundStatus === "REFUNDED"
+                        ? "Yêu cầu trả hàng đã được chấp nhận và hoàn tiền"
+                        : "Yêu cầu trả hàng đã bị từ chối"}
+                    </span>
+                    {orderToProcessReturn.refundRejectionReason && (
+                      <div style={{ marginTop: "8px", color: "#666" }}>
+                        <strong>Lý do từ chối:</strong>{" "}
+                        {orderToProcessReturn.refundRejectionReason}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Action Buttons - chỉ hiển thị nếu chưa xử lý */}
+                {canProcessReturn(orderToProcessReturn) ? (
+                  <>
+                    {/* Rejection Reason Input */}
+                    <div style={{ marginBottom: "16px" }}>
+                      <p style={{ marginBottom: "8px", color: "#666" }}>
+                        Nếu từ chối, vui lòng nhập lý do:
+                      </p>
+                      <Input.TextArea
+                        rows={3}
+                        value={returnRejectionReason}
+                        onChange={(e) =>
+                          setReturnRejectionReason(e.target.value)
+                        }
+                        placeholder="Nhập lý do từ chối (bắt buộc nếu từ chối)..."
+                        maxLength={1000}
+                        showCount
+                      />
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: "12px",
+                        justifyContent: "flex-end",
+                      }}
+                    >
+                      <Button onClick={() => setReturnModalVisible(false)}>
+                        Đóng
+                      </Button>
+                      <Button
+                        danger
+                        loading={
+                          actionLoading[orderToProcessReturn?.id] === "return"
+                        }
+                        onClick={() => handleProcessReturn(false)}
+                      >
+                        <StopOutlined /> Từ chối
+                      </Button>
+                      <Popconfirm
+                        title="Xác nhận chấp nhận trả hàng"
+                        description="Bạn có chắc chắn muốn chấp nhận yêu cầu trả hàng và hoàn tiền cho khách?"
+                        onConfirm={() => handleProcessReturn(true)}
+                        okText="Xác nhận"
+                        cancelText="Hủy"
+                      >
+                        <Button
+                          type="primary"
+                          style={{
+                            background: "#52c41a",
+                            borderColor: "#52c41a",
+                          }}
+                          loading={
+                            actionLoading[orderToProcessReturn?.id] === "return"
+                          }
+                        >
+                          <CheckOutlined /> Chấp nhận & Hoàn tiền
+                        </Button>
+                      </Popconfirm>
+                    </div>
+                  </>
+                ) : (
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                    }}
                   >
                     <Button
-                      type="primary"
-                      style={{ background: "#52c41a", borderColor: "#52c41a" }}
-                      loading={
-                        actionLoading[orderToProcessReturn?.id] === "return"
-                      }
+                      onClick={() => {
+                        setReturnModalVisible(false);
+                        if (orderId && isReturnsPage) {
+                          navigate("/seller/orders", { replace: true });
+                        }
+                      }}
                     >
-                      <CheckOutlined /> Chấp nhận & Hoàn tiền
+                      Đóng
                     </Button>
-                  </Popconfirm>
-                </div>
+                  </div>
+                )}
               </div>
             )}
           </Modal>

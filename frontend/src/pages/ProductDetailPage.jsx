@@ -39,6 +39,7 @@ import {
   InfoCircleOutlined,
   AppstoreOutlined,
   CloseOutlined,
+  EditOutlined,
 } from "@ant-design/icons";
 import {
   getPublicProductDetailApi,
@@ -51,10 +52,13 @@ import {
   findVariantBySelectionApi,
   getAvailableOptionsApi,
   getPublicVariantMetadataApi,
+  canRateProductApi,
 } from "../util/api";
 import { getSpecSectionConfig } from "../constants/productSpecsTranslations";
 import { useCart } from "../contexts/CartContext";
 import LoadingSpinner from "../components/LoadingSpinner";
+import ProductRatings from "../components/ProductRatings";
+import RatingModal from "../components/RatingModal";
 import DOMPurify from "dompurify";
 import styles from "./ProductDetailPage.module.css";
 
@@ -89,13 +93,36 @@ const ProductDetailPage = () => {
   const [selectedOptions, setSelectedOptions] = useState({});
   const [availableOptionsLoading, setAvailableOptionsLoading] = useState(false);
 
+  // Rating states
+  const [ratingModalVisible, setRatingModalVisible] = useState(false);
+  const [canRate, setCanRate] = useState(false);
+  const [ratingsKey, setRatingsKey] = useState(0); // Used to refresh ratings component
+
   useEffect(() => {
     if (productId) {
       fetchProductDetail();
       fetchProductSpecs();
       fetchSelectionConfig();
+      checkCanRate();
     }
   }, [productId]);
+
+  // Check if user can rate this product
+  const checkCanRate = async () => {
+    try {
+      const response = await canRateProductApi(productId);
+      setCanRate(response?.result === true);
+    } catch (error) {
+      setCanRate(false);
+    }
+  };
+
+  // Handle rating success - refresh ratings
+  const handleRatingSuccess = () => {
+    setRatingsKey((prev) => prev + 1);
+    checkCanRate();
+    fetchProductDetail(); // Refresh product to get updated rating count
+  };
 
   // Only fetch legacy variant options if no selection config exists
   useEffect(() => {
@@ -1631,7 +1658,19 @@ const ProductDetailPage = () => {
                   label: `Đánh giá (${product.ratingCount || 0})`,
                   children: (
                     <div className={styles.tabContent}>
-                      <Empty description="Chưa có đánh giá nào" />
+                      {/* Write Review Button */}
+                      <div className={styles.reviewHeader}>
+                        <Button
+                          type="primary"
+                          icon={<EditOutlined />}
+                          onClick={() => setRatingModalVisible(true)}
+                          className={styles.writeReviewBtn}
+                        >
+                          {canRate ? "Viết đánh giá" : "Xem đánh giá của bạn"}
+                        </Button>
+                      </div>
+                      {/* Product Ratings Component */}
+                      <ProductRatings key={ratingsKey} productId={productId} />
                     </div>
                   ),
                 },
@@ -1926,6 +1965,20 @@ const ProductDetailPage = () => {
             </div>
           )}
         </Drawer>
+
+        {/* Rating Modal */}
+        <RatingModal
+          visible={ratingModalVisible}
+          onCancel={() => setRatingModalVisible(false)}
+          onSuccess={handleRatingSuccess}
+          productId={productId}
+          productName={product?.name}
+          variantId={selectedVariant?.id}
+          variantName={selectedVariant?.variantName}
+          productImage={
+            selectedVariant?.imageUrl || product?.images?.[0]?.imageUrl
+          }
+        />
       </div>
     </>
   );

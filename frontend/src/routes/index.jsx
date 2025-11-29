@@ -682,6 +682,22 @@ const router = createBrowserRouter([
             ),
           },
           {
+            path: PROTECTED_ROUTES.SELLER_ORDER_DETAIL,
+            element: (
+              <SuspenseWrapper>
+                <SellerOrdersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_ORDER_RETURNS,
+            element: (
+              <SuspenseWrapper>
+                <SellerOrdersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
             path: PROTECTED_ROUTES.SELLER_CATEGORIES,
             element: (
               <SuspenseWrapper>

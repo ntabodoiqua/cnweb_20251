@@ -25,6 +25,8 @@ import {
   CarOutlined,
   RollbackOutlined,
   StopOutlined,
+  PlusOutlined,
+  DeleteOutlined,
 } from "@ant-design/icons";
 import NoImages from "../../assets/NoImages.webp";
 import styles from "../../pages/Profile.module.css";
@@ -34,6 +36,7 @@ import {
   deliverOrderApi,
   cancelOrderApi,
   requestReturnApi,
+  uploadPublicImageApi,
 } from "../../util/api";
 import {
   message,
@@ -48,6 +51,7 @@ import {
   Popconfirm,
   Select,
   Upload,
+  Image,
 } from "antd";
 import LoadingSpinner from "../LoadingSpinner";
 import useDebounce from "../../hooks/useDebounce";
@@ -78,6 +82,10 @@ const ProfileOrders = () => {
     returnDescription: "",
     returnImages: [],
   });
+  const [returnImageUploading, setReturnImageUploading] = useState(false);
+
+  // S3 base URL for images
+  const S3_BASE_URL = "https://hla.sgp1.digitaloceanspaces.com";
 
   // Return reason options
   const returnReasonOptions = [
@@ -572,6 +580,57 @@ const ProfileOrders = () => {
     }
   };
 
+  // Handle upload return images
+  const handleReturnImageUpload = async (file) => {
+    if (returnData.returnImages.length >= 5) {
+      message.warning("Tối đa 5 ảnh minh chứng");
+      return false;
+    }
+
+    const isImage = file.type.startsWith("image/");
+    if (!isImage) {
+      message.error("Chỉ được upload file ảnh!");
+      return false;
+    }
+
+    const isLt5M = file.size / 1024 / 1024 < 5;
+    if (!isLt5M) {
+      message.error("Ảnh phải nhỏ hơn 5MB!");
+      return false;
+    }
+
+    setReturnImageUploading(true);
+    try {
+      const response = await uploadPublicImageApi(file);
+      if (response?.result?.fileUrl || response?.result?.fileName) {
+        const imageUrl =
+          response.result?.fileUrl ||
+          `${S3_BASE_URL}/${response.result?.fileName}`;
+        setReturnData((prev) => ({
+          ...prev,
+          returnImages: [...prev.returnImages, imageUrl],
+        }));
+        message.success("Upload ảnh thành công");
+      } else {
+        message.error("Upload ảnh thất bại");
+      }
+    } catch (error) {
+      console.error("Error uploading return image:", error);
+      message.error("Upload ảnh thất bại");
+    } finally {
+      setReturnImageUploading(false);
+    }
+    return false;
+  };
+
+  // Remove return image
+  const handleRemoveReturnImage = (index) => {
+    setReturnData((prev) => ({
+      ...prev,
+      returnImages: prev.returnImages.filter((_, i) => i !== index),
+    }));
+  };
+
   // Mở modal yêu cầu trả hàng
   const openReturnModal = (order) => {
     setOrderToReturn(order);
@@ -625,7 +684,11 @@ const ProfileOrders = () => {
   const canCancel = (order) =>
     order.status === "PENDING" && order.paymentStatus !== "PAID";
   const canConfirmDelivery = (order) => order.status === "SHIPPING";
-  const canRequestReturn = (order) => order.canBeReturned === true;
+  // Chỉ cho phép yêu cầu trả hàng nếu canBeReturned = true VÀ chưa có yêu cầu trả hàng
+  const canRequestReturn = (order) =>
+    order.canBeReturned === true && !order.returnReason;
+  // Kiểm tra đã có yêu cầu trả hàng chưa
+  const hasReturnRequest = (order) => !!order.returnReason;
 
   // Stats calculation - Theo enum OrderStatus của backend
   const stats = {
@@ -1737,6 +1800,199 @@ const ProfileOrders = () => {
               </div>
             </div>
 
+            {/* Return Request Info - Hiển thị nếu đã yêu cầu trả hàng */}
+            {selectedOrder.returnReason && (
+              <div
+                style={{
+                  marginBottom: "24px",
+                  padding: "16px",
+                  background:
+                    selectedOrder.refundStatus === "REFUNDED"
+                      ? "#f6ffed"
+                      : selectedOrder.refundStatus === "REJECTED"
+                      ? "#fff2f0"
+                      : "#f9f0ff",
+                  borderRadius: "12px",
+                  border: `1px solid ${
+                    selectedOrder.refundStatus === "REFUNDED"
+                      ? "#b7eb8f"
+                      : selectedOrder.refundStatus === "REJECTED"
+                      ? "#ffccc7"
+                      : "#d3adf7"
+                  }`,
+                }}
+              >
+                <h4
+                  style={{
+                    margin: "0 0 12px",
+                    color:
+                      selectedOrder.refundStatus === "REFUNDED"
+                        ? "#389e0d"
+                        : selectedOrder.refundStatus === "REJECTED"
+                        ? "#cf1322"
+                        : "#722ed1",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <RollbackOutlined />
+                  Yêu cầu trả hàng
+                  {selectedOrder.refundStatus === "PENDING" && (
+                    <Tag color="processing">Đang chờ xử lý</Tag>
+                  )}
+                  {selectedOrder.refundStatus === "REFUNDED" && (
+                    <Tag color="success">Đã hoàn tiền</Tag>
+                  )}
+                  {selectedOrder.refundStatus === "REJECTED" && (
+                    <Tag color="error">Đã bị từ chối</Tag>
+                  )}
+                </h4>
+
+                <div style={{ fontSize: "13px", color: "#666" }}>
+                  {/* Lý do trả hàng */}
+                  <div style={{ marginBottom: "8px" }}>
+                    <strong>Lý do:</strong>{" "}
+                    <Tag color="orange">
+                      {returnReasonOptions.find(
+                        (r) => r.value === selectedOrder.returnReason
+                      )?.label || selectedOrder.returnReason}
+                    </Tag>
+                  </div>
+
+                  {/* Mô tả chi tiết */}
+                  {selectedOrder.returnDescription && (
+                    <div style={{ marginBottom: "8px" }}>
+                      <strong>Mô tả chi tiết:</strong>
+                      <p style={{ margin: "4px 0 0", color: "#333" }}>
+                        {selectedOrder.returnDescription}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Hình ảnh minh chứng */}
+                  {selectedOrder.returnImages?.length > 0 && (
+                    <div style={{ marginBottom: "8px" }}>
+                      <strong>Hình ảnh minh chứng:</strong>
+                      <div
+                        style={{
+                          display: "flex",
+                          gap: "8px",
+                          marginTop: "8px",
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        {selectedOrder.returnImages.map((img, idx) => (
+                          <Image
+                            key={idx}
+                            src={img}
+                            alt={`Return image ${idx + 1}`}
+                            style={{
+                              width: "80px",
+                              height: "80px",
+                              objectFit: "cover",
+                              borderRadius: "8px",
+                              border: "1px solid #d9d9d9",
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Thời gian yêu cầu */}
+                  {selectedOrder.returnRequestedAt && (
+                    <div style={{ marginBottom: "8px" }}>
+                      <CalendarOutlined style={{ marginRight: "8px" }} />
+                      Ngày yêu cầu:{" "}
+                      {formatDateTime(selectedOrder.returnRequestedAt)}
+                    </div>
+                  )}
+
+                  {/* Kết quả xử lý */}
+                  {selectedOrder.returnProcessedAt && (
+                    <div style={{ marginBottom: "8px" }}>
+                      <CheckCircleOutlined
+                        style={{
+                          marginRight: "8px",
+                          color:
+                            selectedOrder.refundStatus === "REFUNDED"
+                              ? "#52c41a"
+                              : "#ff4d4f",
+                        }}
+                      />
+                      Ngày xử lý:{" "}
+                      {formatDateTime(selectedOrder.returnProcessedAt)}
+                    </div>
+                  )}
+
+                  {/* Lý do từ chối */}
+                  {selectedOrder.returnRejectionReason && (
+                    <div
+                      style={{
+                        marginTop: "12px",
+                        padding: "12px",
+                        background: "#fff2f0",
+                        borderRadius: "8px",
+                        border: "1px solid #ffccc7",
+                      }}
+                    >
+                      <strong style={{ color: "#cf1322" }}>
+                        Lý do từ chối:
+                      </strong>
+                      <p style={{ margin: "4px 0 0", color: "#cf1322" }}>
+                        {selectedOrder.returnRejectionReason}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Thông tin hoàn tiền */}
+                  {selectedOrder.refundStatus === "REFUNDED" && (
+                    <div
+                      style={{
+                        marginTop: "12px",
+                        padding: "12px",
+                        background: "#f6ffed",
+                        borderRadius: "8px",
+                        border: "1px solid #b7eb8f",
+                      }}
+                    >
+                      <div style={{ color: "#389e0d", fontWeight: 600 }}>
+                        <CheckCircleOutlined style={{ marginRight: "8px" }} />
+                        Đã hoàn tiền:{" "}
+                        {formatCurrency(
+                          selectedOrder.refundAmount ||
+                            selectedOrder.totalAmount
+                        )}
+                      </div>
+                      {selectedOrder.refundedAt && (
+                        <div
+                          style={{
+                            marginTop: "4px",
+                            fontSize: "12px",
+                            color: "#666",
+                          }}
+                        >
+                          Thời gian: {formatDateTime(selectedOrder.refundedAt)}
+                        </div>
+                      )}
+                      {selectedOrder.refundTransactionId && (
+                        <div
+                          style={{
+                            marginTop: "4px",
+                            fontSize: "12px",
+                            color: "#666",
+                          }}
+                        >
+                          Mã giao dịch: {selectedOrder.refundTransactionId}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Payment Action Button */}
             {canPayOrder(selectedOrder) && (
               <div
@@ -2030,6 +2286,112 @@ const ProfileOrders = () => {
                 maxLength={1000}
                 showCount
               />
+            </div>
+
+            {/* Return Images */}
+            <div style={{ marginBottom: "16px" }}>
+              <label
+                style={{
+                  display: "block",
+                  marginBottom: "8px",
+                  fontWeight: 500,
+                }}
+              >
+                Hình ảnh minh chứng (tối đa 5 ảnh)
+              </label>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                {returnData.returnImages.map((imageUrl, index) => (
+                  <div
+                    key={index}
+                    style={{
+                      position: "relative",
+                      width: "80px",
+                      height: "80px",
+                      borderRadius: "8px",
+                      overflow: "hidden",
+                      border: "1px solid #d9d9d9",
+                    }}
+                  >
+                    <Image
+                      src={imageUrl}
+                      alt={`Return image ${index + 1}`}
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        objectFit: "cover",
+                      }}
+                    />
+                    <button
+                      onClick={() => handleRemoveReturnImage(index)}
+                      style={{
+                        position: "absolute",
+                        top: "2px",
+                        right: "2px",
+                        width: "20px",
+                        height: "20px",
+                        borderRadius: "50%",
+                        border: "none",
+                        background: "rgba(0,0,0,0.5)",
+                        color: "#fff",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        fontSize: "12px",
+                      }}
+                    >
+                      <DeleteOutlined />
+                    </button>
+                  </div>
+                ))}
+                {returnData.returnImages.length < 5 && (
+                  <Upload
+                    accept="image/*"
+                    showUploadList={false}
+                    beforeUpload={handleReturnImageUpload}
+                    disabled={returnImageUploading}
+                  >
+                    <div
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        borderRadius: "8px",
+                        border: "1px dashed #d9d9d9",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        cursor: "pointer",
+                        background: "#fafafa",
+                      }}
+                    >
+                      {returnImageUploading ? (
+                        <Spin size="small" />
+                      ) : (
+                        <>
+                          <PlusOutlined
+                            style={{ fontSize: "16px", color: "#999" }}
+                          />
+                          <span
+                            style={{
+                              fontSize: "12px",
+                              color: "#999",
+                              marginTop: "4px",
+                            }}
+                          >
+                            Thêm ảnh
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  </Upload>
+                )}
+              </div>
+              <div
+                style={{ fontSize: "12px", color: "#999", marginTop: "4px" }}
+              >
+                Hãy chụp ảnh sản phẩm để minh chứng cho yêu cầu trả hàng
+              </div>
             </div>
 
             {/* Notice */}

@@ -2202,6 +2202,176 @@ const getOrderDetailApi = (orderId) => {
   });
 };
 
+// ============================================
+// Product Rating APIs
+// ============================================
+
+// Public APIs - Không cần authentication
+
+// Lấy danh sách đánh giá của sản phẩm
+const getProductRatingsApi = (productId, params = {}) => {
+  const URL_API = `/api/product/public/ratings/product/${productId}`;
+  return axios.get(URL_API, {
+    params: {
+      page: params.page || 0,
+      size: params.size || 10,
+      sort: params.sort || "createdAt,desc",
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Lấy thống kê đánh giá của sản phẩm
+const getProductRatingSummaryApi = (productId) => {
+  const URL_API = `/api/product/public/ratings/product/${productId}/summary`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Lấy đánh giá theo số sao
+const getProductRatingsByStarApi = (productId, starLevel, params = {}) => {
+  const URL_API = `/api/product/public/ratings/product/${productId}/stars/${starLevel}`;
+  return axios.get(URL_API, {
+    params: {
+      page: params.page || 0,
+      size: params.size || 10,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Lấy đánh giá có ảnh
+const getProductRatingsWithImagesApi = (productId, params = {}) => {
+  const URL_API = `/api/product/public/ratings/product/${productId}/with-images`;
+  return axios.get(URL_API, {
+    params: {
+      page: params.page || 0,
+      size: params.size || 10,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Lấy đánh giá đã xác thực mua hàng
+const getProductVerifiedRatingsApi = (productId, params = {}) => {
+  const URL_API = `/api/product/public/ratings/product/${productId}/verified`;
+  return axios.get(URL_API, {
+    params: {
+      page: params.page || 0,
+      size: params.size || 10,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Customer APIs - Cần authentication
+
+// Tạo đánh giá mới
+const createRatingApi = (ratingData) => {
+  const URL_API = "/api/product/ratings";
+  return axios.post(URL_API, ratingData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Cập nhật đánh giá
+const updateRatingApi = (ratingId, ratingData) => {
+  const URL_API = `/api/product/ratings/${ratingId}`;
+  return axios.put(URL_API, ratingData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Xóa đánh giá
+const deleteRatingApi = (ratingId) => {
+  const URL_API = `/api/product/ratings/${ratingId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Lấy đánh giá của tôi cho sản phẩm
+const getMyRatingForProductApi = (productId) => {
+  const URL_API = `/api/product/ratings/my-rating`;
+  return axios.get(URL_API, {
+    params: { productId },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Lấy tất cả đánh giá của tôi
+const getMyRatingsApi = (params = {}) => {
+  const URL_API = "/api/product/ratings/my-ratings";
+  return axios.get(URL_API, {
+    params: {
+      page: params.page || 0,
+      size: params.size || 10,
+      sort: params.sort || "createdAt,desc",
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Kiểm tra có thể đánh giá sản phẩm không
+const canRateProductApi = (productId) => {
+  const URL_API = `/api/product/ratings/can-rate`;
+  return axios.get(URL_API, {
+    params: { productId },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Đánh dấu đánh giá là hữu ích
+const markRatingHelpfulApi = (ratingId) => {
+  const URL_API = `/api/product/ratings/${ratingId}/helpful`;
+  return axios.post(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Upload ảnh public (dùng cho rating, return request, etc.)
+const uploadPublicImageApi = (file) => {
+  const URL_API = "/api/file/files/upload/public";
+  const formData = new FormData();
+  formData.append("file", file);
+
+  return axios.post(URL_API, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+// Alias for backward compatibility
+const uploadRatingImageApi = uploadPublicImageApi;
+
 // Notification APIs
 const getNotificationsApi = (page = 0, size = 20) => {
   const URL_API = "/api/notification/notifications";
@@ -2453,4 +2623,19 @@ export {
   getUnreadNotificationCountApi,
   markNotificationAsReadApi,
   markAllNotificationsAsReadApi,
+  // Product Rating APIs
+  getProductRatingsApi,
+  getProductRatingSummaryApi,
+  getProductRatingsByStarApi,
+  getProductRatingsWithImagesApi,
+  getProductVerifiedRatingsApi,
+  createRatingApi,
+  updateRatingApi,
+  deleteRatingApi,
+  getMyRatingForProductApi,
+  getMyRatingsApi,
+  canRateProductApi,
+  markRatingHelpfulApi,
+  uploadRatingImageApi,
+  uploadPublicImageApi,
 };
