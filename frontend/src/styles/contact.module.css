@@ -1,5 +1,5 @@
 /* Contact Container */
-.contact-container {
+.container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 20px 60px;
@@ -7,7 +7,7 @@
 }
 
 /* Hero Section */
-.contact-hero {
+.hero {
   position: relative;
   padding: 80px 20px;
   margin: 0 -20px 60px;
@@ -16,7 +16,7 @@
   border-radius: 0 0 32px 32px;
 }
 
-.hero-background {
+.heroBackground {
   position: absolute;
   top: 0;
   left: 0;
@@ -25,14 +25,14 @@
   overflow: hidden;
 }
 
-.hero-circle {
+.heroCircle {
   position: absolute;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   animation: float 6s ease-in-out infinite;
 }
 
-.hero-circle-1 {
+.heroCircle1 {
   width: 400px;
   height: 400px;
   top: -100px;
@@ -40,7 +40,7 @@
   animation-delay: 0s;
 }
 
-.hero-circle-2 {
+.heroCircle2 {
   width: 300px;
   height: 300px;
   top: 50%;
@@ -48,7 +48,7 @@
   animation-delay: 2s;
 }
 
-.hero-circle-3 {
+.heroCircle3 {
   width: 200px;
   height: 200px;
   bottom: -50px;
@@ -66,14 +66,14 @@
   }
 }
 
-.hero-content {
+.heroContent {
   position: relative;
   z-index: 1;
   text-align: center;
   animation: fadeInDown 1s ease;
 }
 
-.hero-logo {
+.heroLogo {
   width: 120px;
   height: auto;
   margin-bottom: 24px;
@@ -91,7 +91,7 @@
   }
 }
 
-.hero-title {
+.heroTitle {
   font-size: 48px;
   font-weight: 900;
   color: white;
@@ -101,7 +101,7 @@
   animation: slideInUp 0.8s ease 0.3s both;
 }
 
-.hero-subtitle {
+.heroSubtitle {
   font-size: 18px;
   color: rgba(255, 255, 255, 0.95);
   font-weight: 500;
@@ -121,18 +121,18 @@
 }
 
 /* Contact Info Section */
-.contact-info-section {
+.contactInfoSection {
   margin-bottom: 60px;
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
-.contact-info-grid {
+.contactInfoGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
 }
 
-.contact-info-card {
+.contactInfoCard {
   background: white;
   padding: 32px;
   border-radius: 16px;
@@ -142,39 +142,39 @@
   transition: all 0.3s ease;
 }
 
-.contact-info-card:hover {
+.contactInfoCard:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 32px rgba(238, 77, 45, 0.2);
   border-color: #fee;
 }
 
-.info-icon {
+.infoIcon {
   font-size: 48px;
   margin-bottom: 16px;
 }
 
-.contact-info-card h3 {
+.contactInfoCard h3 {
   font-size: 18px;
   font-weight: 700;
   color: #222;
   margin-bottom: 12px;
 }
 
-.info-content {
+.infoContent {
   font-size: 16px;
   color: #444;
   font-weight: 600;
   margin-bottom: 4px;
 }
 
-.info-subcontent {
+.infoSubcontent {
   font-size: 14px;
   color: #999;
   margin: 0;
 }
 
 /* Main Content */
-.contact-main {
+.contactMain {
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: 40px;
@@ -183,7 +183,7 @@
 }
 
 /* Contact Form Section */
-.contact-form-section {
+.contactFormSection {
   background: white;
   padding: 40px;
   border-radius: 16px;
@@ -191,31 +191,31 @@
   box-shadow: 0 4px 16px rgba(238, 77, 45, 0.08);
 }
 
-.section-title {
+.sectionTitle {
   font-size: 28px;
   font-weight: 800;
   color: #222;
   margin-bottom: 12px;
 }
 
-.section-description {
+.sectionDescription {
   font-size: 15px;
   color: #666;
   margin-bottom: 32px;
   line-height: 1.6;
 }
 
-.contact-form .form-row {
+.contactForm :global(.form-row) {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
 
-.form-item-half {
+.formItemHalf {
   margin-bottom: 24px;
 }
 
-.submit-btn {
+.submitBtn {
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
   border: none;
   height: 48px;
@@ -224,19 +224,19 @@
   box-shadow: 0 4px 16px rgba(238, 77, 45, 0.3);
 }
 
-.submit-btn:hover {
+.submitBtn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(238, 77, 45, 0.4);
 }
 
 /* Sidebar */
-.contact-sidebar {
+.contactSidebar {
   display: flex;
   flex-direction: column;
   gap: 24px;
 }
 
-.sidebar-section {
+.sidebarSection {
   background: white;
   padding: 32px;
   border-radius: 16px;
@@ -244,7 +244,7 @@
   box-shadow: 0 4px 16px rgba(238, 77, 45, 0.08);
 }
 
-.sidebar-section h3 {
+.sidebarSection h3 {
   font-size: 20px;
   font-weight: 700;
   color: #222;
@@ -252,13 +252,13 @@
 }
 
 /* FAQ Categories */
-.faq-categories {
+.faqCategories {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.faq-category-card {
+.faqCategoryCard {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -270,39 +270,39 @@
   text-decoration: none;
 }
 
-.faq-category-card:hover {
+.faqCategoryCard:hover {
   background: #fff5f5;
   border-color: #ee4d2d;
   transform: translateX(4px);
 }
 
-.faq-icon {
+.faqIcon {
   font-size: 32px;
   color: #ee4d2d;
   flex-shrink: 0;
 }
 
-.faq-content h4 {
+.faqContent h4 {
   font-size: 16px;
   font-weight: 700;
   color: #222;
   margin-bottom: 4px;
 }
 
-.faq-content p {
+.faqContent p {
   font-size: 14px;
   color: #666;
   margin: 0;
 }
 
 /* Social Links */
-.social-links {
+.socialLinks {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.social-link {
+.socialLink {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -314,29 +314,29 @@
   transition: all 0.3s ease;
 }
 
-.social-link:hover {
+.socialLink:hover {
   transform: translateX(4px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   color: white;
 }
 
-.social-link span {
+.socialLink span {
   font-size: 15px;
 }
 
 /* Business Hours */
-.business-hours {
+.businessHours {
   background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
   border-color: #fee;
 }
 
-.hours-list {
+.hoursList {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.hours-item {
+.hoursItem {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -346,25 +346,25 @@
   border: 1px solid #f0f0f0;
 }
 
-.hours-item .day {
+.hoursItem .day {
   font-size: 15px;
   color: #444;
   font-weight: 600;
 }
 
-.hours-item .time {
+.hoursItem .time {
   font-size: 15px;
   color: #ee4d2d;
   font-weight: 700;
 }
 
 /* Map Section */
-.map-section {
+.mapSection {
   margin-bottom: 60px;
   animation: fadeInUp 0.8s ease 0.6s both;
 }
 
-.map-section .section-title {
+.mapSection .sectionTitle {
   font-size: 32px;
   font-weight: 800;
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
@@ -375,7 +375,7 @@
   margin-bottom: 32px;
 }
 
-.map-container {
+.mapContainer {
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 8px 32px rgba(238, 77, 45, 0.15);
@@ -416,103 +416,103 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .contact-container {
+  .container {
     padding: 0 20px 48px;
   }
 
-  .contact-hero {
+  .hero {
     padding: 60px 20px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 42px;
   }
 
-  .contact-main {
+  .contactMain {
     grid-template-columns: 1fr;
     gap: 32px;
   }
 }
 
 @media (max-width: 768px) {
-  .contact-container {
+  .container {
     padding: 0 16px 40px;
   }
 
-  .contact-hero {
+  .hero {
     padding: 48px 16px;
     margin: 0 -16px 40px;
     border-radius: 0 0 24px 24px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 100px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 36px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 16px;
   }
 
-  .contact-info-grid {
+  .contactInfoGrid {
     grid-template-columns: 1fr;
   }
 
-  .contact-form-section {
+  .contactFormSection {
     padding: 32px 24px;
   }
 
-  .contact-form .form-row {
+  .contactForm :global(.form-row) {
     grid-template-columns: 1fr;
     gap: 0;
   }
 
-  .sidebar-section {
+  .sidebarSection {
     padding: 24px;
   }
 }
 
 @media (max-width: 480px) {
-  .contact-hero {
+  .hero {
     padding: 40px 16px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 90px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 28px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 15px;
   }
 
-  .contact-info-card {
+  .contactInfoCard {
     padding: 24px;
   }
 
-  .info-icon {
+  .infoIcon {
     font-size: 40px;
   }
 
-  .contact-form-section {
+  .contactFormSection {
     padding: 24px 20px;
   }
 
-  .section-title {
+  .sectionTitle {
     font-size: 24px;
   }
 
-  .sidebar-section {
+  .sidebarSection {
     padding: 20px;
   }
 
-  .map-section .section-title {
+  .mapSection .sectionTitle {
     font-size: 26px;
   }
 }

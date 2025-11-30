@@ -1,5 +1,5 @@
 /* Careers Container */
-.careers-container {
+.container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px 60px;
@@ -7,7 +7,7 @@
 }
 
 /* Hero Section */
-.careers-hero {
+.hero {
   position: relative;
   padding: 80px 20px;
   margin: 0 -20px 60px;
@@ -16,7 +16,7 @@
   border-radius: 0 0 32px 32px;
 }
 
-.hero-background {
+.heroBackground {
   position: absolute;
   top: 0;
   left: 0;
@@ -25,14 +25,14 @@
   overflow: hidden;
 }
 
-.hero-circle {
+.heroCircle {
   position: absolute;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   animation: float 6s ease-in-out infinite;
 }
 
-.hero-circle-1 {
+.heroCircle1 {
   width: 400px;
   height: 400px;
   top: -100px;
@@ -40,7 +40,7 @@
   animation-delay: 0s;
 }
 
-.hero-circle-2 {
+.heroCircle2 {
   width: 300px;
   height: 300px;
   top: 50%;
@@ -48,7 +48,7 @@
   animation-delay: 2s;
 }
 
-.hero-circle-3 {
+.heroCircle3 {
   width: 200px;
   height: 200px;
   bottom: -50px;
@@ -66,14 +66,14 @@
   }
 }
 
-.hero-content {
+.heroContent {
   position: relative;
   z-index: 1;
   text-align: center;
   animation: fadeInDown 1s ease;
 }
 
-.hero-logo {
+.heroLogo {
   width: 180px;
   height: auto;
   margin-bottom: 24px;
@@ -82,7 +82,7 @@
   transition: transform 0.3s ease;
 }
 
-.hero-logo:hover {
+.heroLogo:hover {
   transform: scale(1.1) rotate(5deg);
 }
 
@@ -96,7 +96,7 @@
   }
 }
 
-.hero-title {
+.heroTitle {
   font-size: 56px;
   font-weight: 900;
   color: white;
@@ -106,7 +106,7 @@
   animation: slideInUp 0.8s ease 0.3s both;
 }
 
-.hero-subtitle {
+.heroSubtitle {
   font-size: 20px;
   color: rgba(255, 255, 255, 0.95);
   font-weight: 500;
@@ -115,18 +115,18 @@
   animation: slideInUp 0.8s ease 0.5s both;
 }
 
-.hero-stats {
+.heroStats {
   display: flex;
   justify-content: center;
   gap: 48px;
   animation: slideInUp 0.8s ease 0.7s both;
 }
 
-.stat-item {
+.statItem {
   text-align: center;
 }
 
-.stat-number {
+.statNumber {
   font-size: 40px;
   font-weight: 900;
   color: white;
@@ -134,14 +134,14 @@
   margin-bottom: 8px;
 }
 
-.stat-label {
+.statLabel {
   font-size: 16px;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
 }
 
 /* Section Title */
-.section-title {
+.sectionTitle {
   font-size: 36px;
   font-weight: 800;
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
@@ -154,18 +154,18 @@
 }
 
 /* Why Join Us Section */
-.why-join-section {
+.whyJoinSection {
   margin-bottom: 80px;
 }
 
-.culture-grid {
+.cultureGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 24px;
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
-.culture-card {
+.cultureCard {
   background: white;
   padding: 32px;
   border-radius: 16px;
@@ -178,7 +178,7 @@
   overflow: hidden;
 }
 
-.culture-card::before {
+.cultureCard::before {
   content: "";
   position: absolute;
   top: 0;
@@ -191,17 +191,17 @@
   transition: transform 0.4s ease;
 }
 
-.culture-card:hover {
+.cultureCard:hover {
   transform: translateY(-8px);
   box-shadow: 0 12px 32px rgba(238, 77, 45, 0.2);
   border-color: #ee4d2d;
 }
 
-.culture-card:hover::before {
+.cultureCard:hover::before {
   transform: scaleX(1);
 }
 
-.culture-icon {
+.cultureIcon {
   width: 64px;
   height: 64px;
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
@@ -216,37 +216,37 @@
   transition: all 0.4s ease;
 }
 
-.culture-card:hover .culture-icon {
+.cultureCard:hover .cultureIcon {
   transform: scale(1.1) rotate(5deg);
   box-shadow: 0 6px 24px rgba(238, 77, 45, 0.5);
 }
 
-.culture-card h3 {
+.cultureCard h3 {
   color: #222;
   margin-bottom: 12px;
   font-size: 20px;
   font-weight: 700;
 }
 
-.culture-card p {
+.cultureCard p {
   color: #666;
   line-height: 1.6;
   font-size: 15px;
 }
 
 /* Benefits Section */
-.benefits-section {
+.benefitsSection {
   margin-bottom: 80px;
 }
 
-.benefits-grid {
+.benefitsGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
   gap: 24px;
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
-.benefit-card {
+.benefitCard {
   background: white;
   padding: 32px;
   border-radius: 16px;
@@ -260,7 +260,7 @@
   overflow: hidden;
 }
 
-.benefit-card::after {
+.benefitCard::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -273,18 +273,18 @@
   transition: width 0.6s ease, height 0.6s ease;
 }
 
-.benefit-card:hover::after {
+.benefitCard:hover::after {
   width: 500px;
   height: 500px;
 }
 
-.benefit-card:hover {
+.benefitCard:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15);
   border-color: #fee;
 }
 
-.benefit-icon {
+.benefitIcon {
   width: 56px;
   height: 56px;
   background: #fff;
@@ -300,11 +300,11 @@
   z-index: 1;
 }
 
-.benefit-card:hover .benefit-icon {
+.benefitCard:hover .benefitIcon {
   transform: scale(1.1);
 }
 
-.benefit-card h3 {
+.benefitCard h3 {
   color: #222;
   margin-bottom: 8px;
   font-size: 18px;
@@ -313,7 +313,7 @@
   z-index: 1;
 }
 
-.benefit-card p {
+.benefitCard p {
   color: #666;
   line-height: 1.6;
   font-size: 14px;
@@ -322,18 +322,18 @@
 }
 
 /* Jobs Section */
-.jobs-section {
+.jobsSection {
   margin-bottom: 80px;
 }
 
-.jobs-list {
+.jobsList {
   display: flex;
   flex-direction: column;
   gap: 20px;
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
-.job-card {
+.jobCard {
   background: white;
   border-radius: 16px;
   border: 2px solid #f0f0f0;
@@ -342,17 +342,17 @@
   overflow: hidden;
 }
 
-.job-card:hover {
+.jobCard:hover {
   border-color: #fee;
   box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15);
 }
 
-.job-card.expanded {
+.jobCard.expanded {
   border-color: #ee4d2d;
   box-shadow: 0 8px 32px rgba(238, 77, 45, 0.2);
 }
 
-.job-header {
+.jobHeader {
   padding: 24px 32px;
   display: flex;
   justify-content: space-between;
@@ -361,29 +361,29 @@
   transition: all 0.3s ease;
 }
 
-.job-header:hover {
+.jobHeader:hover {
   background: #fafafa;
 }
 
-.job-header-left {
+.jobHeaderLeft {
   flex: 1;
 }
 
-.job-title-row {
+.jobTitleRow {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 12px;
 }
 
-.job-title {
+.jobTitle {
   font-size: 22px;
   font-weight: 700;
   color: #222;
   margin: 0;
 }
 
-.hot-badge {
+.hotBadge {
   background: linear-gradient(135deg, #ff4d4f 0%, #ff7a45 100%);
   color: white;
   padding: 4px 12px;
@@ -403,13 +403,13 @@
   }
 }
 
-.job-meta {
+.jobMeta {
   display: flex;
   flex-wrap: wrap;
   gap: 16px;
 }
 
-.job-meta-item {
+.jobMetaItem {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -417,18 +417,18 @@
   font-size: 14px;
 }
 
-.job-meta-item.salary {
+.jobMetaItem.salary {
   color: #ee4d2d;
   font-weight: 600;
 }
 
-.job-header-right {
+.jobHeaderRight {
   display: flex;
   align-items: center;
   gap: 16px;
 }
 
-.job-level {
+.jobLevel {
   padding: 6px 16px;
   background: #f0f0f0;
   border-radius: 20px;
@@ -437,18 +437,18 @@
   color: #666;
 }
 
-.expand-icon {
+.expandIcon {
   font-size: 16px;
   color: #999;
   transition: all 0.3s ease;
 }
 
-.expand-icon.rotated {
+.expandIcon.rotated {
   transform: rotate(90deg);
   color: #ee4d2d;
 }
 
-.job-details {
+.jobDetails {
   padding: 0 32px 32px;
   animation: slideDown 0.4s ease;
 }
@@ -464,13 +464,13 @@
   }
 }
 
-.job-description,
-.job-requirements,
-.job-responsibilities {
+.jobDescription,
+.jobRequirements,
+.jobResponsibilities {
   margin-bottom: 24px;
 }
 
-.job-details h4 {
+.jobDetails h4 {
   color: #222;
   font-size: 18px;
   font-weight: 700;
@@ -480,7 +480,7 @@
   gap: 8px;
 }
 
-.job-details h4::before {
+.jobDetails h4::before {
   content: "";
   width: 4px;
   height: 20px;
@@ -488,19 +488,19 @@
   border-radius: 2px;
 }
 
-.job-details p {
+.jobDetails p {
   color: #666;
   line-height: 1.8;
   font-size: 15px;
 }
 
-.job-details ul {
+.jobDetails ul {
   list-style: none;
   padding: 0;
   margin: 0;
 }
 
-.job-details ul li {
+.jobDetails ul li {
   color: #666;
   line-height: 1.8;
   font-size: 15px;
@@ -509,7 +509,7 @@
   margin-bottom: 8px;
 }
 
-.check-icon {
+.checkIcon {
   position: absolute;
   left: 0;
   top: 6px;
@@ -517,7 +517,7 @@
   font-size: 16px;
 }
 
-.job-actions {
+.jobActions {
   display: flex;
   gap: 12px;
   margin-top: 24px;
@@ -525,7 +525,7 @@
   border-top: 1px solid #f0f0f0;
 }
 
-.apply-btn {
+.applyBtn {
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
   color: white;
   border: none;
@@ -538,16 +538,16 @@
   box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
 }
 
-.apply-btn:hover {
+.applyBtn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(238, 77, 45, 0.4);
 }
 
-.apply-btn:active {
+.applyBtn:active {
   transform: translateY(0);
 }
 
-.share-btn {
+.shareBtn {
   background: white;
   color: #666;
   border: 2px solid #e0e0e0;
@@ -559,14 +559,14 @@
   transition: all 0.3s ease;
 }
 
-.share-btn:hover {
+.shareBtn:hover {
   border-color: #ee4d2d;
   color: #ee4d2d;
   background: #fff5f5;
 }
 
 /* CTA Section */
-.cta-section {
+.ctaSection {
   text-align: center;
   padding: 60px 40px;
   background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
@@ -575,14 +575,14 @@
   animation: fadeInUp 0.8s ease 0.4s both;
 }
 
-.cta-section h2 {
+.ctaSection h2 {
   font-size: 32px;
   font-weight: 800;
   color: #222;
   margin-bottom: 16px;
 }
 
-.cta-section p {
+.ctaSection p {
   font-size: 18px;
   color: #666;
   margin-bottom: 32px;
@@ -591,7 +591,7 @@
   margin-right: auto;
 }
 
-.cta-btn {
+.ctaBtn {
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
   color: white;
   border: none;
@@ -604,12 +604,12 @@
   box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
 }
 
-.cta-btn:hover {
+.ctaBtn:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 28px rgba(238, 77, 45, 0.4);
 }
 
-.cta-btn:active {
+.ctaBtn:active {
   transform: translateY(-2px);
 }
 
@@ -658,234 +658,234 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .careers-container {
+  .container {
     padding: 0 20px 48px;
   }
 
-  .careers-hero {
+  .hero {
     padding: 60px 20px;
     margin: 0 -20px 48px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 160px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 48px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 18px;
   }
 
-  .hero-stats {
+  .heroStats {
     gap: 32px;
   }
 
-  .stat-number {
+  .statNumber {
     font-size: 36px;
   }
 
-  .section-title {
+  .sectionTitle {
     font-size: 32px;
   }
 }
 
 @media (max-width: 768px) {
-  .careers-container {
+  .container {
     padding: 0 16px 40px;
   }
 
-  .careers-hero {
+  .hero {
     padding: 48px 16px;
     margin: 0 -16px 40px;
     border-radius: 0 0 24px 24px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 140px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 40px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 16px;
     margin-bottom: 24px;
   }
 
-  .hero-stats {
+  .heroStats {
     gap: 24px;
   }
 
-  .stat-number {
+  .statNumber {
     font-size: 32px;
   }
 
-  .stat-label {
+  .statLabel {
     font-size: 14px;
   }
 
-  .hero-circle-1 {
+  .heroCircle1 {
     width: 300px;
     height: 300px;
   }
 
-  .hero-circle-2 {
+  .heroCircle2 {
     width: 200px;
     height: 200px;
   }
 
-  .hero-circle-3 {
+  .heroCircle3 {
     width: 150px;
     height: 150px;
   }
 
-  .section-title {
+  .sectionTitle {
     font-size: 28px;
     margin-bottom: 32px;
   }
 
-  .culture-grid {
+  .cultureGrid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
 
-  .culture-card {
+  .cultureCard {
     padding: 24px;
   }
 
-  .benefits-grid {
+  .benefitsGrid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
 
-  .benefit-card {
+  .benefitCard {
     padding: 24px;
   }
 
-  .job-header {
+  .jobHeader {
     padding: 20px 24px;
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
   }
 
-  .job-header-right {
+  .jobHeaderRight {
     width: 100%;
     justify-content: space-between;
   }
 
-  .job-title {
+  .jobTitle {
     font-size: 20px;
   }
 
-  .job-meta {
+  .jobMeta {
     gap: 12px;
   }
 
-  .job-meta-item {
+  .jobMetaItem {
     font-size: 13px;
   }
 
-  .job-details {
+  .jobDetails {
     padding: 0 24px 24px;
   }
 
-  .job-actions {
+  .jobActions {
     flex-direction: column;
   }
 
-  .apply-btn,
-  .share-btn {
+  .applyBtn,
+  .shareBtn {
     width: 100%;
   }
 
-  .cta-section {
+  .ctaSection {
     padding: 40px 24px;
   }
 
-  .cta-section h2 {
+  .ctaSection h2 {
     font-size: 26px;
   }
 
-  .cta-section p {
+  .ctaSection p {
     font-size: 16px;
   }
 }
 
 @media (max-width: 480px) {
-  .careers-hero {
+  .hero {
     padding: 40px 16px;
     margin: 0 -16px 32px;
     border-radius: 0 0 20px 20px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 120px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 32px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 15px;
   }
 
-  .hero-stats {
+  .heroStats {
     flex-direction: column;
     gap: 16px;
   }
 
-  .stat-number {
+  .statNumber {
     font-size: 28px;
   }
 
-  .section-title {
+  .sectionTitle {
     font-size: 24px;
   }
 
-  .culture-card,
-  .benefit-card {
+  .cultureCard,
+  .benefitCard {
     padding: 20px;
   }
 
-  .culture-icon {
+  .cultureIcon {
     width: 56px;
     height: 56px;
     font-size: 24px;
   }
 
-  .benefit-icon {
+  .benefitIcon {
     width: 48px;
     height: 48px;
     font-size: 20px;
   }
 
-  .job-header {
+  .jobHeader {
     padding: 16px 20px;
   }
 
-  .job-title {
+  .jobTitle {
     font-size: 18px;
   }
 
-  .job-details {
+  .jobDetails {
     padding: 0 20px 20px;
   }
 
-  .cta-section {
+  .ctaSection {
     padding: 32px 20px;
   }
 
-  .cta-section h2 {
+  .ctaSection h2 {
     font-size: 24px;
   }
 
-  .cta-btn {
+  .ctaBtn {
     padding: 14px 32px;
     font-size: 16px;
   }

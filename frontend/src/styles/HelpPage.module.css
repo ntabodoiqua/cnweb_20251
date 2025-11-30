@@ -1,5 +1,5 @@
 /* Help Page Container */
-.help-page-container {
+.helpPageContainer {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px 60px;
@@ -7,7 +7,7 @@
 }
 
 /* Hero Section với Logo - Giống AboutUs */
-.help-page-hero {
+.helpPageHero {
   position: relative;
   padding: 80px 20px;
   margin: 0 0 60px;
@@ -16,7 +16,7 @@
   border-radius: 0 0 32px 32px;
 }
 
-.hero-background {
+.heroBackground {
   position: absolute;
   top: 0;
   left: 0;
@@ -25,14 +25,14 @@
   overflow: hidden;
 }
 
-.hero-circle {
+.heroCircle {
   position: absolute;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   animation: float 6s ease-in-out infinite;
 }
 
-.hero-circle-1 {
+.heroCircle1 {
   width: 400px;
   height: 400px;
   top: -100px;
@@ -40,7 +40,7 @@
   animation-delay: 0s;
 }
 
-.hero-circle-2 {
+.heroCircle2 {
   width: 300px;
   height: 300px;
   top: 50%;
@@ -48,7 +48,7 @@
   animation-delay: 2s;
 }
 
-.hero-circle-3 {
+.heroCircle3 {
   width: 200px;
   height: 200px;
   bottom: -50px;
@@ -66,14 +66,14 @@
   }
 }
 
-.hero-content {
+.heroContent {
   position: relative;
   z-index: 1;
   text-align: center;
   animation: fadeInDown 1s ease;
 }
 
-.hero-logo {
+.heroLogo {
   width: 180px;
   height: auto;
   margin-bottom: 24px;
@@ -82,7 +82,7 @@
   transition: transform 0.3s ease;
 }
 
-.hero-logo:hover {
+.heroLogo:hover {
   transform: scale(1.1) rotate(5deg);
 }
 
@@ -96,7 +96,7 @@
   }
 }
 
-.hero-title {
+.heroTitle {
   font-size: 56px;
   font-weight: 900;
   color: white;
@@ -106,7 +106,7 @@
   animation: slideInUp 0.8s ease 0.3s both;
 }
 
-.hero-subtitle {
+.heroSubtitle {
   font-size: 20px;
   color: rgba(255, 255, 255, 0.95);
   font-weight: 500;
@@ -126,7 +126,7 @@
 }
 
 /* Search Section */
-.help-search-section {
+.helpSearchSection {
   max-width: 1200px;
   margin: -40px auto 60px;
   padding: 0 20px;
@@ -134,7 +134,7 @@
   z-index: 2;
 }
 
-.search-container {
+.searchContainer {
   position: relative;
   background: white;
   border-radius: 50px;
@@ -144,12 +144,12 @@
   border: 2px solid transparent;
 }
 
-.search-container:hover {
+.searchContainer:hover {
   box-shadow: 0 8px 24px rgba(238, 77, 45, 0.25);
   border-color: #ee4d2d;
 }
 
-.search-icon {
+.searchIcon {
   position: absolute;
   left: 30px;
   top: 50%;
@@ -158,7 +158,7 @@
   color: #ee4d2d;
 }
 
-.search-input {
+.searchInput {
   width: 100%;
   padding: 20px 30px 20px 70px;
   border: none;
@@ -166,12 +166,12 @@
   outline: none;
 }
 
-.search-input::placeholder {
+.searchInput::placeholder {
   color: #999;
 }
 
 /* Header Section */
-.help-page-header {
+.helpPageHeader {
   max-width: 1200px;
   margin: 0 auto 60px;
   padding: 0 20px;
@@ -179,7 +179,7 @@
   animation: fadeInDown 0.8s ease;
 }
 
-.help-page-header h1 {
+.helpPageHeader h1 {
   font-size: 42px;
   font-weight: 800;
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
@@ -189,7 +189,7 @@
   margin-bottom: 20px;
 }
 
-.help-page-header p {
+.helpPageHeader p {
   font-size: 18px;
   color: #666;
   max-width: 800px;
@@ -199,14 +199,14 @@
 }
 
 /* Content Section */
-.help-page-content {
+.helpPageContent {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
-.help-category-section {
+.helpCategorySection {
   background: white;
   padding: 40px;
   border-radius: 16px;
@@ -219,7 +219,7 @@
   overflow: hidden;
 }
 
-.help-category-section::before {
+.helpCategorySection::before {
   content: "";
   position: absolute;
   top: 0;
@@ -232,7 +232,7 @@
   transition: transform 0.4s ease;
 }
 
-.help-category-section::after {
+.helpCategorySection::after {
   content: "";
   position: absolute;
   top: 50%;
@@ -245,22 +245,22 @@
   transition: width 0.6s ease, height 0.6s ease;
 }
 
-.help-category-section:hover::after {
+.helpCategorySection:hover::after {
   width: 500px;
   height: 500px;
 }
 
-.help-category-section:hover {
+.helpCategorySection:hover {
   transform: translateY(-8px) scale(1.02);
   box-shadow: 0 12px 32px rgba(238, 77, 45, 0.2);
   border-color: #ee4d2d;
 }
 
-.help-category-section:hover::before {
+.helpCategorySection:hover::before {
   transform: scaleX(1);
 }
 
-.category-header {
+.categoryHeader {
   display: flex;
   align-items: center;
   margin-bottom: 30px;
@@ -269,7 +269,7 @@
   z-index: 1;
 }
 
-.section-icon {
+.sectionIcon {
   width: 64px;
   height: 64px;
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
@@ -284,12 +284,12 @@
   transition: all 0.4s ease;
 }
 
-.help-category-section:hover .section-icon {
+.helpCategorySection:hover .sectionIcon {
   transform: scale(1.1) rotate(5deg);
   box-shadow: 0 6px 24px rgba(238, 77, 45, 0.5);
 }
 
-.category-header h2 {
+.categoryHeader h2 {
   font-size: 28px;
   font-weight: 700;
   color: #222;
@@ -297,12 +297,12 @@
   transition: color 0.3s ease;
 }
 
-.help-category-section:hover .category-header h2 {
+.helpCategorySection:hover .categoryHeader h2 {
   color: #ee4d2d;
 }
 
 /* FAQ Items */
-.faq-list {
+.faqList {
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -310,7 +310,7 @@
   z-index: 1;
 }
 
-.faq-item {
+.faqItem {
   padding: 25px;
   background: #f7f7f7;
   border-radius: 12px;
@@ -318,14 +318,14 @@
   transition: all 0.3s ease;
 }
 
-.faq-item:hover {
+.faqItem:hover {
   background: #fff;
   border-left-color: #ff6b35;
   transform: translateX(5px);
   box-shadow: 0 4px 12px rgba(238, 77, 45, 0.1);
 }
 
-.faq-question {
+.faqQuestion {
   font-size: 18px;
   font-weight: 600;
   color: #222;
@@ -334,12 +334,12 @@
   align-items: center;
 }
 
-.faq-question svg {
+.faqQuestion svg {
   color: #ee4d2d;
   margin-right: 8px;
 }
 
-.faq-answer {
+.faqAnswer {
   font-size: 16px;
   color: #666;
   line-height: 1.8;
@@ -348,14 +348,14 @@
 }
 
 /* Contact Section */
-.help-contact-section {
+.helpContactSection {
   max-width: 1200px;
   margin: 60px auto 0;
   padding: 0 20px 60px;
   animation: fadeInUp 0.8s ease 0.4s both;
 }
 
-.contact-card {
+.contactCard {
   background: linear-gradient(135deg, #ee4d2d 0%, #ff7337 50%, #ff9a56 100%);
   border-radius: 16px;
   padding: 60px 40px;
@@ -366,7 +366,7 @@
   overflow: hidden;
 }
 
-.contact-card::before {
+.contactCard::before {
   content: "";
   position: absolute;
   top: -50%;
@@ -390,7 +390,7 @@
   }
 }
 
-.contact-icon {
+.contactIcon {
   font-size: 60px;
   margin-bottom: 20px;
   animation: pulse 2s infinite;
@@ -408,7 +408,7 @@
   }
 }
 
-.contact-card h2 {
+.contactCard h2 {
   font-size: 32px;
   font-weight: 700;
   margin: 0 0 15px 0;
@@ -417,7 +417,7 @@
   text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.contact-card > p {
+.contactCard > p {
   font-size: 18px;
   opacity: 0.95;
   margin-bottom: 40px;
@@ -425,7 +425,7 @@
   z-index: 1;
 }
 
-.contact-methods {
+.contactMethods {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 30px;
@@ -435,7 +435,7 @@
   z-index: 1;
 }
 
-.contact-method {
+.contactMethod {
   background: rgba(255, 255, 255, 0.15);
   padding: 25px;
   border-radius: 12px;
@@ -446,13 +446,13 @@
   transition: all 0.3s ease;
 }
 
-.contact-method:hover {
+.contactMethod:hover {
   background: rgba(255, 255, 255, 0.25);
   transform: translateY(-5px);
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
-.contact-method strong {
+.contactMethod strong {
   display: block;
   font-size: 18px;
   margin-bottom: 8px;
@@ -493,170 +493,170 @@
 
 /* Responsive */
 @media (max-width: 1024px) {
-  .help-page-hero {
+  .helpPageHero {
     padding: 60px 20px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 160px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 48px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 18px;
   }
 
-  .help-page-header h1 {
+  .helpPageHeader h1 {
     font-size: 36px;
   }
 }
 
 @media (max-width: 768px) {
-  .help-page-hero {
+  .helpPageHero {
     padding: 48px 16px;
     margin: 0 0 48px;
     border-radius: 0 0 24px 24px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 140px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 40px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 16px;
   }
 
-  .hero-circle-1 {
+  .heroCircle1 {
     width: 300px;
     height: 300px;
   }
 
-  .hero-circle-2 {
+  .heroCircle2 {
     width: 200px;
     height: 200px;
   }
 
-  .hero-circle-3 {
+  .heroCircle3 {
     width: 150px;
     height: 150px;
   }
 
-  .help-search-section {
+  .helpSearchSection {
     margin: -30px auto 40px;
   }
 
-  .search-input {
+  .searchInput {
     padding: 18px 25px 18px 60px;
     font-size: 14px;
   }
 
-  .search-icon {
+  .searchIcon {
     left: 20px;
     font-size: 18px;
   }
 
-  .help-page-header h1 {
+  .helpPageHeader h1 {
     font-size: 32px;
   }
 
-  .help-page-header p {
+  .helpPageHeader p {
     font-size: 16px;
   }
 
-  .help-category-section {
+  .helpCategorySection {
     padding: 30px 20px;
   }
 
-  .category-header {
+  .categoryHeader {
     flex-direction: row;
   }
 
-  .category-header h2 {
+  .categoryHeader h2 {
     font-size: 24px;
   }
 
-  .section-icon {
+  .sectionIcon {
     width: 56px;
     height: 56px;
     font-size: 24px;
   }
 
-  .faq-question {
+  .faqQuestion {
     font-size: 16px;
   }
 
-  .faq-answer {
+  .faqAnswer {
     font-size: 14px;
     padding-left: 24px;
   }
 
-  .contact-card {
+  .contactCard {
     padding: 40px 20px;
   }
 
-  .contact-card h2 {
+  .contactCard h2 {
     font-size: 26px;
   }
 
-  .contact-icon {
+  .contactIcon {
     font-size: 50px;
   }
 
-  .contact-methods {
+  .contactMethods {
     grid-template-columns: 1fr;
     gap: 20px;
   }
 }
 
 @media (max-width: 480px) {
-  .help-page-hero {
+  .helpPageHero {
     padding: 40px 16px;
     border-radius: 0 0 20px 20px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 120px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 32px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 15px;
   }
 
-  .help-page-header h1 {
+  .helpPageHeader h1 {
     font-size: 28px;
   }
 
-  .help-page-header p {
+  .helpPageHeader p {
     font-size: 15px;
   }
 
-  .help-category-section {
+  .helpCategorySection {
     padding: 24px 20px;
   }
 
-  .section-icon {
+  .sectionIcon {
     width: 48px;
     height: 48px;
     font-size: 20px;
     border-radius: 12px;
   }
 
-  .category-header h2 {
+  .categoryHeader h2 {
     font-size: 20px;
   }
 
-  .contact-card h2 {
+  .contactCard h2 {
     font-size: 24px;
   }
 }

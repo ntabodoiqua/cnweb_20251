@@ -1,5 +1,5 @@
-/* Terms Container */
-.terms-container {
+/* Privacy Container */
+.container {
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px 60px;
@@ -7,7 +7,7 @@
 }
 
 /* Hero Section */
-.terms-hero {
+.hero {
   position: relative;
   padding: 80px 20px;
   margin: 0 -20px 60px;
@@ -16,7 +16,7 @@
   border-radius: 0 0 32px 32px;
 }
 
-.hero-background {
+.heroBackground {
   position: absolute;
   top: 0;
   left: 0;
@@ -25,14 +25,14 @@
   overflow: hidden;
 }
 
-.hero-circle {
+.heroCircle {
   position: absolute;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.1);
   animation: float 6s ease-in-out infinite;
 }
 
-.hero-circle-1 {
+.heroCircle1 {
   width: 400px;
   height: 400px;
   top: -100px;
@@ -40,7 +40,7 @@
   animation-delay: 0s;
 }
 
-.hero-circle-2 {
+.heroCircle2 {
   width: 300px;
   height: 300px;
   top: 50%;
@@ -48,7 +48,7 @@
   animation-delay: 2s;
 }
 
-.hero-circle-3 {
+.heroCircle3 {
   width: 200px;
   height: 200px;
   bottom: -50px;
@@ -66,14 +66,14 @@
   }
 }
 
-.hero-content {
+.heroContent {
   position: relative;
   z-index: 1;
   text-align: center;
   animation: fadeInDown 1s ease;
 }
 
-.hero-logo {
+.heroLogo {
   width: 120px;
   height: auto;
   margin-bottom: 24px;
@@ -91,7 +91,7 @@
   }
 }
 
-.hero-title {
+.heroTitle {
   font-size: 48px;
   font-weight: 900;
   color: white;
@@ -101,7 +101,7 @@
   animation: slideInUp 0.8s ease 0.3s both;
 }
 
-.hero-subtitle {
+.heroSubtitle {
   font-size: 18px;
   color: rgba(255, 255, 255, 0.95);
   font-weight: 500;
@@ -110,7 +110,7 @@
   animation: slideInUp 0.8s ease 0.5s both;
 }
 
-.last-updated {
+.lastUpdated {
   display: inline-block;
   background: rgba(255, 255, 255, 0.2);
   color: white;
@@ -134,134 +134,21 @@
 }
 
 /* Introduction */
-.terms-intro {
-  background: white;
-  padding: 32px;
-  border-radius: 16px;
-  border: 2px solid #f0f0f0;
-  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.08);
-  margin-bottom: 40px;
-  animation: fadeInUp 0.8s ease 0.2s both;
-}
-
-.terms-intro p {
-  font-size: 16px;
-  line-height: 1.8;
-  color: #444;
-  margin: 0;
-  text-align: justify;
-}
-
-/* Terms Content */
-.terms-content {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  animation: fadeInUp 0.8s ease 0.4s both;
-}
-
-.terms-section {
-  background: white;
-  padding: 32px;
-  border-radius: 16px;
-  border: 2px solid #f0f0f0;
-  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.08);
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.terms-section::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 4px;
-  height: 100%;
-  background: linear-gradient(180deg, #ee4d2d 0%, #ff6b35 100%);
-  transform: scaleY(0);
-  transform-origin: top;
-  transition: transform 0.3s ease;
-}
-
-.terms-section:hover {
-  border-color: #fee;
-  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15);
-}
-
-.terms-section:hover::before {
-  transform: scaleY(1);
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 20px;
-  position: relative;
-  z-index: 1;
-}
-
-.section-icon {
-  width: 48px;
-  height: 48px;
-  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  color: white;
-  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
-  flex-shrink: 0;
-  transition: all 0.3s ease;
-}
-
-.terms-section:hover .section-icon {
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.5);
-}
-
-.section-header h2 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #222;
-  margin: 0;
-}
-
-.section-content {
-  position: relative;
-  z-index: 1;
-}
-
-.section-content p {
-  font-size: 15px;
-  line-height: 1.8;
-  color: #666;
-  margin-bottom: 12px;
-  text-align: justify;
-}
-
-.section-content p:last-child {
-  margin-bottom: 0;
-}
-
-/* Important Notice */
-.terms-notice {
+.privacyIntro {
   background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
   padding: 32px;
   border-radius: 16px;
   border: 2px solid #ffd8bf;
-  margin-top: 40px;
+  margin-bottom: 40px;
   display: flex;
   gap: 20px;
   align-items: flex-start;
-  animation: fadeInUp 0.8s ease 0.6s both;
+  animation: fadeInUp 0.8s ease 0.2s both;
   box-shadow: 0 4px 16px rgba(238, 77, 45, 0.1);
 }
 
-.notice-icon {
-  font-size: 40px;
+.introIcon {
+  font-size: 48px;
   color: #ee4d2d;
   flex-shrink: 0;
   animation: pulse 2s ease-in-out infinite;
@@ -279,17 +166,190 @@
   }
 }
 
-.notice-content h3 {
-  font-size: 20px;
+.introContent h3 {
+  font-size: 22px;
   font-weight: 700;
   color: #ee4d2d;
   margin-bottom: 12px;
 }
 
-.notice-content p {
+.introContent p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #444;
+  margin: 0;
+  text-align: justify;
+}
+
+/* Privacy Content */
+.privacyContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: fadeInUp 0.8s ease 0.4s both;
+}
+
+.privacySection {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  border: 2px solid #f0f0f0;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.08);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.privacySection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #ee4d2d 0%, #ff6b35 100%);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.3s ease;
+}
+
+.privacySection:hover {
+  border-color: #fee;
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15);
+}
+
+.privacySection:hover::before {
+  transform: scaleY(1);
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.sectionIcon {
+  width: 48px;
+  height: 48px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: white;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.privacySection:hover .sectionIcon {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.5);
+}
+
+.sectionHeader h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+.sectionContent {
+  position: relative;
+  z-index: 1;
+}
+
+.sectionContent p {
   font-size: 15px;
   line-height: 1.8;
   color: #666;
+  margin-bottom: 12px;
+  text-align: justify;
+}
+
+.sectionContent p:last-child {
+  margin-bottom: 0;
+}
+
+/* Trust Badge */
+.privacyBadge {
+  background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+  padding: 40px;
+  border-radius: 20px;
+  border: 2px solid #ffd8bf;
+  margin-top: 40px;
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  animation: fadeInUp 0.8s ease 0.6s both;
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.privacyBadge::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle,
+    rgba(238, 77, 45, 0.1) 0%,
+    transparent 70%
+  );
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.badgeIcon {
+  font-size: 64px;
+  color: #ee4d2d;
+  flex-shrink: 0;
+  animation: shield 3s ease-in-out infinite;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes shield {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.badgeContent {
+  position: relative;
+  z-index: 1;
+}
+
+.badgeContent h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ee4d2d;
+  margin-bottom: 12px;
+}
+
+.badgeContent p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: #444;
   margin: 0;
   text-align: justify;
 }
@@ -328,167 +388,202 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .terms-container {
+  .container {
     padding: 0 20px 48px;
   }
 
-  .terms-hero {
+  .hero {
     padding: 60px 20px;
     margin: 0 -20px 48px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 100px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 42px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 16px;
+  }
+
+  .badgeIcon {
+    font-size: 56px;
+  }
+
+  .badgeContent h3 {
+    font-size: 22px;
   }
 }
 
 @media (max-width: 768px) {
-  .terms-container {
+  .container {
     padding: 0 16px 40px;
   }
 
-  .terms-hero {
+  .hero {
     padding: 48px 16px;
     margin: 0 -16px 40px;
     border-radius: 0 0 24px 24px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 90px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 36px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 15px;
   }
 
-  .last-updated {
+  .lastUpdated {
     font-size: 13px;
     padding: 6px 16px;
   }
 
-  .hero-circle-1 {
+  .heroCircle1 {
     width: 300px;
     height: 300px;
   }
 
-  .hero-circle-2 {
+  .heroCircle2 {
     width: 200px;
     height: 200px;
   }
 
-  .hero-circle-3 {
+  .heroCircle3 {
     width: 150px;
     height: 150px;
   }
 
-  .terms-intro {
+  .privacyIntro {
     padding: 24px;
+    gap: 16px;
   }
 
-  .terms-intro p {
+  .introIcon {
+    font-size: 40px;
+  }
+
+  .introContent h3 {
+    font-size: 20px;
+  }
+
+  .introContent p {
     font-size: 15px;
   }
 
-  .terms-section {
+  .privacySection {
     padding: 24px;
   }
 
-  .section-header {
+  .sectionHeader {
     gap: 12px;
   }
 
-  .section-icon {
+  .sectionIcon {
     width: 40px;
     height: 40px;
     font-size: 20px;
   }
 
-  .section-header h2 {
+  .sectionHeader h2 {
     font-size: 20px;
   }
 
-  .section-content p {
+  .sectionContent p {
     font-size: 14px;
   }
 
-  .terms-notice {
-    padding: 24px;
-    gap: 16px;
+  .privacyBadge {
+    padding: 32px 24px;
+    gap: 20px;
   }
 
-  .notice-icon {
-    font-size: 32px;
+  .badgeIcon {
+    font-size: 48px;
   }
 
-  .notice-content h3 {
-    font-size: 18px;
+  .badgeContent h3 {
+    font-size: 20px;
   }
 
-  .notice-content p {
-    font-size: 14px;
+  .badgeContent p {
+    font-size: 15px;
   }
 }
 
 @media (max-width: 480px) {
-  .terms-hero {
+  .hero {
     padding: 40px 16px;
     margin: 0 -16px 32px;
     border-radius: 0 0 20px 20px;
   }
 
-  .hero-logo {
+  .heroLogo {
     width: 80px;
   }
 
-  .hero-title {
+  .heroTitle {
     font-size: 28px;
   }
 
-  .hero-subtitle {
+  .heroSubtitle {
     font-size: 14px;
   }
 
-  .last-updated {
+  .lastUpdated {
     font-size: 12px;
   }
 
-  .terms-intro {
-    padding: 20px;
-  }
-
-  .terms-section {
-    padding: 20px;
-  }
-
-  .section-icon {
-    width: 36px;
-    height: 36px;
-    font-size: 18px;
-  }
-
-  .section-header h2 {
-    font-size: 18px;
-  }
-
-  .terms-notice {
+  .privacyIntro {
     padding: 20px;
     flex-direction: column;
     text-align: center;
   }
 
-  .notice-icon {
-    font-size: 28px;
+  .introIcon {
+    font-size: 36px;
+  }
+
+  .introContent h3 {
+    font-size: 18px;
+  }
+
+  .privacySection {
+    padding: 20px;
+  }
+
+  .sectionIcon {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .sectionHeader h2 {
+    font-size: 18px;
+  }
+
+  .privacyBadge {
+    padding: 24px 20px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .badgeIcon {
+    font-size: 40px;
+  }
+
+  .badgeContent h3 {
+    font-size: 18px;
+  }
+
+  .badgeContent p {
+    font-size: 14px;
   }
 }
