@@ -15,6 +15,7 @@ import {
   GiftOutlined,
   CloseOutlined,
   CheckCircleOutlined,
+  ShopOutlined,
 } from "@ant-design/icons";
 import { AuthContext } from "../../components/context/auth.context";
 import { useCart } from "../../contexts/CartContext";
