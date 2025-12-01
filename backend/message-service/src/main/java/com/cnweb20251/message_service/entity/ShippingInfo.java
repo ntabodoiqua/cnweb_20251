@@ -32,7 +32,23 @@ public class ShippingInfo {
     private String status;
 
     /**
-     * Địa chỉ giao hàng (rút gọn).
+     * Tên người nhận.
      */
+    private String recipientName;
+
+    /**
+     * Số điện thoại người nhận.
+     */
+    private String recipientPhone;
+
+    /**
+     * Địa chỉ giao hàng.
+     */
+    private String address;
+
+    /**
+     * Địa chỉ giao hàng (rút gọn - deprecated, sử dụng address).
+     */
+    @Deprecated
     private String deliveryAddress;
 }

@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * Internal API Controller for inter-service communication
- * Used by other services (order-service, etc.) to get product information
+ * Used by other services (order-service, message-service, etc.) to get product information
  */
 @RestController
 @RequestMapping("/internal/products")
@@ -30,6 +30,19 @@ public class InternalController {
     private final ProductService productService;
     private final InventoryService inventoryService;
     private final StoreService storeService;
+
+    /**
+     * Get product information by ID (for internal service calls)
+     * GET /internal/products/{productId}
+     */
+    @GetMapping("/{productId}")
+    public ApiResponse<com.vdt2025.product_service.dto.response.ProductResponse> getProductById(@PathVariable String productId) {
+        log.info("Internal: Fetching product info for ID: {}", productId);
+        var product = productService.getProductById(productId);
+        return ApiResponse.<com.vdt2025.product_service.dto.response.ProductResponse>builder()
+                .result(product)
+                .build();
+    }
 
     /**
      * Validate if a user owns a store

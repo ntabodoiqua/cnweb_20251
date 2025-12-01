@@ -31,11 +31,13 @@ public class Conversation {
      * Sử dụng Set để đảm bảo không trùng lặp.
      */
     @Indexed
+    @Builder.Default
     private Set<String> participantIds = new HashSet<>();
 
     /**
      * Thông tin chi tiết của các người tham gia.
      */
+    @Builder.Default
     private Set<Participant> participants = new HashSet<>();
 
     /**
@@ -47,6 +49,7 @@ public class Conversation {
      * Số tin nhắn chưa đọc cho mỗi người tham gia.
      * Key: userId, Value: số tin nhắn chưa đọc
      */
+    @Builder.Default
     private java.util.Map<String, Integer> unreadCount = new java.util.HashMap<>();
 
     /**

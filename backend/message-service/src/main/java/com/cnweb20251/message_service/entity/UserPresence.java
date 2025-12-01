@@ -6,6 +6,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 /**
@@ -17,7 +18,9 @@ import java.time.Instant;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserPresence {
+public class UserPresence implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     private String id;
@@ -34,9 +37,19 @@ public class UserPresence {
     private PresenceStatus status;
 
     /**
+     * Session ID của WebSocket connection.
+     */
+    private String sessionId;
+
+    /**
      * Thời gian hoạt động cuối cùng.
      */
     @Indexed
+    private Instant lastSeen;
+
+    /**
+     * Thời gian hoạt động cuối cùng (alias).
+     */
     private Instant lastSeenAt;
 
     /**

@@ -22,6 +22,15 @@ public class GlobalExceptionHandler {
     private static final String MIN_ATTRIBUTE = "min";
     private final MessageService messageService;
 
+    @ExceptionHandler(value = ChatException.class)
+    ResponseEntity<ApiResponse> handlingChatException(ChatException exception) {
+        log.error("Chat Exception: {}", exception.getMessage());
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(exception.getCode());
+        apiResponse.setMessage(exception.getMessage());
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
+
     @ExceptionHandler(value = RuntimeException.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
         log.error("Exception: ", exception);

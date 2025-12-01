@@ -44,6 +44,12 @@ public class SecurityConfig {
             "/actuator/metrics/**"
     };
 
+    private static final String[] WEBSOCKET_ENDPOINTS = {
+            "/ws/**",
+            "/ws/chat/**",
+            "/ws/chat"
+    };
+
     private static final String[] PUBLIC_POST_ENDPOINTS = {
             "/users",
             "/public/**",
@@ -70,6 +76,8 @@ public class SecurityConfig {
                                 // Allow Swagger endpoints (highest priority)
                                 .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
                                 .requestMatchers(HEALTH_ENDPOINTS).permitAll()
+                                // Allow WebSocket endpoints
+                                .requestMatchers(WEBSOCKET_ENDPOINTS).permitAll()
                                 // Allow auth endpoints
                                 .requestMatchers(AUTH_ENDPOINTS).permitAll()
                                 // Allow POST to create users
