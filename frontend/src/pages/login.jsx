@@ -495,10 +495,15 @@ const LoginPage = () => {
           </div>
 
           <div className={styles.loginFooter}>
-            <span>Chưa có tài khoản? </span>
-            <Link to="/register" className={styles.registerLink}>
-              Đăng ký ngay
-            </Link>
+            <Button
+              type="default"
+              size="large"
+              block
+              onClick={() => navigate("/register")}
+              className={styles.registerButton}
+            >
+              Chưa có tài khoản? Đăng ký ngay
+            </Button>
           </div>
 
           <div className={styles.loginHomeLink}>

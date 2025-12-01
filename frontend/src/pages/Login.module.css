@@ -362,6 +362,29 @@
   text-decoration: underline;
 }
 
+.registerButton {
+  height: 48px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: 2px solid #ee4d2d !important;
+  background: white !important;
+  color: #ee4d2d !important;
+  transition: all 0.3s ease;
+}
+
+.registerButton:hover {
+  background: #fff5f2 !important;
+  border-color: #ff6b35 !important;
+  color: #ff6b35 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.2);
+}
+
+.registerButton:active {
+  transform: translateY(0);
+}
+
 .loginHomeLink {
   text-align: center;
   margin-top: 16px;
