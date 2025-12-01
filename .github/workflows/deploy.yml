@@ -49,6 +49,8 @@ jobs:
             path: file-service
           - name: payment-service
             path: payment-service
+          - name: message-service
+            path: message-service
 
     steps:
       - name: Checkout code
@@ -102,7 +104,7 @@ jobs:
             # Pull latest changes
             git checkout be/dev
             git pull origin be/dev
-      
+
             # Login to GitHub Container Registry
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
@@ -165,6 +167,9 @@ jobs:
 
             echo "Checking Payment Service..."
             curl -f http://localhost:8086/actuator/health || exit 1
+
+            echo "Checking Message Service..."
+            curl -f http://localhost:8087/actuator/health || exit 1
 
             echo "All services are healthy!"
 

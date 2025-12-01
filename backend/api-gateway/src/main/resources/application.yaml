@@ -57,6 +57,21 @@ spring:
           metadata:
             response-timeout: 3600000
             connect-timeout: 30000
+        # message-service
+        - id: message-service
+          uri: lb://message-service
+          predicates:
+            - Path=/api/chat/**
+          filters:
+            - StripPrefix=1
+        # message-service WebSocket
+        - id: message-websocket
+          uri: lb://message-service
+          predicates:
+            - Path=/ws/chat/**
+          metadata:
+            response-timeout: 3600000
+            connect-timeout: 30000
 eureka:
   client:
     service-url:
