@@ -27,6 +27,7 @@ import {
   BellOutlined,
   TagOutlined,
   RightOutlined,
+  MessageOutlined,
 } from "@ant-design/icons";
 import {
   Dropdown,
@@ -47,6 +48,7 @@ import {
   getBrandsApi,
 } from "../../util/api";
 import { useNotification } from "../../contexts/NotificationContext";
+import { useChat } from "../../contexts/ChatContext";
 import { getRoleName, ROLES, getHighestRole } from "../../constants/roles";
 import NotificationDropdown from "../notification/NotificationDropdown";
 import styles from "./header.module.css";
@@ -59,6 +61,7 @@ const Header = () => {
   const { cartCount, resetCart } = useCart();
   const { connectWebSocket, disconnectWebSocket, fetchUnreadCount } =
     useNotification();
+  const { unreadTotal: chatUnreadCount } = useChat();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -577,6 +580,27 @@ const Header = () => {
 
           {/* Actions */}
           <div className={styles.headerActions}>
+            {/* Chat Icon with Badge */}
+            {auth.isAuthenticated && (
+              <div
+                className={styles.chatIcon}
+                onClick={() =>
+                  navigate(
+                    getHighestRole(auth.user?.role) === ROLES.SELLER
+                      ? "/seller/chat"
+                      : "/chat"
+                  )
+                }
+              >
+                <MessageOutlined />
+                {chatUnreadCount > 0 && (
+                  <span className={styles.chatBadge}>
+                    {chatUnreadCount > 99 ? "99+" : chatUnreadCount}
+                  </span>
+                )}
+              </div>
+            )}
+
             {/* Cart Icon with Badge */}
             <div className={styles.cartIcon} onClick={() => navigate("/cart")}>
               <ShoppingCartOutlined />
@@ -619,9 +643,6 @@ const Header = () => {
                       getAvatarInitials()
                     )}
                   </div>
-                  <span className={styles.headerUserName}>
-                    {getDisplayName()}
-                  </span>
                   {auth.user?.role && (
                     <span
                       className={`${styles.headerUserRole} ${

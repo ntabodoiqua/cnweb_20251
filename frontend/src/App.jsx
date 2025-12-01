@@ -2,6 +2,7 @@ import { Outlet, useNavigate } from "react-router-dom";
 import Header from "./components/layout/header";
 import Footer from "./components/layout/footer";
 import ScrollToTop from "./components/common/ScrollToTop";
+import ChatWidget from "./components/chat/ChatWidget";
 import { useContext, useEffect } from "react";
 import { AuthContext } from "./components/context/auth.context";
 import LoadingSpinner from "./components/LoadingSpinner";
@@ -168,6 +169,7 @@ function App() {
       </main>
       <Footer />
       <ScrollToTop />
+      <ChatWidget />
     </div>
   );
 }

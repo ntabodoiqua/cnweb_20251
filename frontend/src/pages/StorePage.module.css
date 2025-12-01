@@ -153,6 +153,30 @@
   font-size: 16px;
 }
 
+/* Store Actions - Chat Button */
+.storeActions {
+  margin-top: 16px;
+}
+
+.storeActions button {
+  background: #fff !important;
+  color: #ee4d2d !important;
+  border-color: #fff !important;
+  font-weight: 600;
+  padding: 0 24px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.storeActions button:hover {
+  background: #fff5f0 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
 /* Store Content */
 .storeContent {
   max-width: 1400px;

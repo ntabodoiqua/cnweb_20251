@@ -65,6 +65,9 @@ const NotificationsPage = lazy(() =>
   import("../pages/notifications/NotificationsPage")
 );
 
+// Chat Pages
+const ChatPage = lazy(() => import("../pages/chat"));
+
 // Profile sub-pages
 const ProfileGeneralPage = lazy(() =>
   import("../pages/profile/ProfileGeneralPage")
@@ -155,6 +158,7 @@ const SellerStatisticsPage = lazy(() =>
 const SellerSettingsPage = lazy(() =>
   import("../pages/seller/SellerSettingsPage")
 );
+const SellerChatPage = lazy(() => import("../pages/seller/SellerChatPage"));
 
 // Error Pages
 const NotFoundPage = lazy(() => import("../pages/not-found"));
@@ -434,6 +438,20 @@ const router = createBrowserRouter([
               allowedRoles={[ROLES.USER, ROLES.ADMIN, ROLES.SELLER]}
             >
               <NotificationsPage />
+            </ProtectedRoute>
+          </SuspenseWrapper>
+        ),
+      },
+
+      // ==================== CHAT ====================
+      {
+        path: PROTECTED_ROUTES.CHAT,
+        element: (
+          <SuspenseWrapper>
+            <ProtectedRoute
+              allowedRoles={[ROLES.USER, ROLES.ADMIN, ROLES.SELLER]}
+            >
+              <ChatPage />
             </ProtectedRoute>
           </SuspenseWrapper>
         ),
@@ -726,6 +744,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <SellerCustomersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_CHAT,
+            element: (
+              <SuspenseWrapper>
+                <SellerChatPage />
               </SuspenseWrapper>
             ),
           },

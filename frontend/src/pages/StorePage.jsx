@@ -32,6 +32,7 @@ import {
   ClockCircleOutlined,
   StarOutlined,
   TagsOutlined,
+  MessageOutlined,
 } from "@ant-design/icons";
 import {
   getPublicStoreDetailApi,
@@ -41,6 +42,7 @@ import {
   getStoreBannersApi,
 } from "../util/api";
 import LoadingSpinner from "../components/LoadingSpinner";
+import ChatButton from "../components/chat/ChatButton";
 import styles from "./StorePage.module.css";
 
 const { Title, Text } = Typography;
@@ -440,6 +442,16 @@ const StorePage = () => {
                     <ClockCircleOutlined />
                     Tham gia: {formatDate(store.createdAt)}
                   </span>
+                </div>
+                <div className={styles.storeActions}>
+                  <ChatButton
+                    shopId={storeId}
+                    shopName={store.storeName}
+                    type="primary"
+                    size="large"
+                  >
+                    <MessageOutlined /> Chat với Shop
+                  </ChatButton>
                 </div>
               </div>
             </div>

@@ -40,6 +40,7 @@ import {
   AppstoreOutlined,
   CloseOutlined,
   EditOutlined,
+  MessageOutlined,
 } from "@ant-design/icons";
 import {
   getPublicProductDetailApi,
@@ -61,6 +62,7 @@ import LoadingSpinner from "../components/LoadingSpinner";
 import ProductRatings from "../components/ProductRatings";
 import RatingModal from "../components/RatingModal";
 import DOMPurify from "dompurify";
+import ChatButton from "../components/chat/ChatButton";
 import styles from "./ProductDetailPage.module.css";
 
 const { Title, Text, Paragraph } = Typography;
@@ -1319,13 +1321,22 @@ const ProductDetailPage = () => {
                       </Space>
                     </Col>
                     <Col flex="none">
-                      <Button
-                        type="primary"
-                        icon={<ShopOutlined />}
-                        onClick={handleStoreClick}
-                      >
-                        Xem cửa hàng
-                      </Button>
+                      <Space>
+                        <ChatButton
+                          shopId={product.store.id}
+                          shopName={product.store.storeName}
+                          type="default"
+                        >
+                          <MessageOutlined /> Chat ngay
+                        </ChatButton>
+                        <Button
+                          type="primary"
+                          icon={<ShopOutlined />}
+                          onClick={handleStoreClick}
+                        >
+                          Xem cửa hàng
+                        </Button>
+                      </Space>
                     </Col>
                   </Row>
                 </Card>

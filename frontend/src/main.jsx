@@ -7,6 +7,7 @@ import { HelmetProvider } from "react-helmet-async";
 import { AuthWrapper } from "./components/context/auth.context.jsx";
 import { CartProvider } from "./contexts/CartContext.jsx";
 import { NotificationProvider } from "./contexts/NotificationContext.jsx";
+import { ChatProvider } from "./contexts/ChatContext.jsx";
 import ErrorBoundary from "./components/ErrorBoundary.jsx";
 import router from "./routes/index.jsx";
 import { GoogleOAuthProvider } from "@react-oauth/google";
@@ -29,7 +30,9 @@ ReactDOM.createRoot(document.getElementById("root")).render(
           <AuthWrapper>
             <CartProvider>
               <NotificationProvider>
-                <RouterProvider router={router} />
+                <ChatProvider>
+                  <RouterProvider router={router} />
+                </ChatProvider>
               </NotificationProvider>
             </CartProvider>
           </AuthWrapper>
