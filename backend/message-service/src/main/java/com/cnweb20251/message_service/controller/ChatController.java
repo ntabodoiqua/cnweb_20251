@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
  * Sử dụng cho các thao tác không realtime như lấy lịch sử tin nhắn, tạo conversation, etc.
  */
 @RestController
-@RequestMapping("/api/chat")
+@RequestMapping("/chat")
 @RequiredArgsConstructor
 @Slf4j
 @Tag(name = "Chat", description = "Chat API - Chat giữa người mua và shop")
