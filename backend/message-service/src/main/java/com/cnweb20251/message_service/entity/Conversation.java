@@ -4,6 +4,7 @@ import com.cnweb20251.message_service.enums.ConversationStatus;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -12,11 +13,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Entity đại diện cho một đoạn hội thoại 1-1 giữa 2 người dùng.
- * Có thể là giữa user-user hoặc user-seller.
+ * Entity đại diện cho một đoạn hội thoại 1-1 giữa người mua (buyer) và shop (seller).
+ * Mỗi conversation luôn có đúng 1 buyer và 1 shop.
  */
 @Document(collection = "conversations")
-@CompoundIndex(name = "participants_idx", def = "{'participantIds': 1}")
+@CompoundIndexes({
+    @CompoundIndex(name = "participants_idx", def = "{'participantIds': 1}"),
+    @CompoundIndex(name = "shop_buyer_idx", def = "{'shopId': 1, 'buyerId': 1}", unique = true)
+})
 @Data
 @Builder
 @NoArgsConstructor
@@ -27,8 +31,22 @@ public class Conversation {
     private String id;
 
     /**
+     * ID của shop (store) trong conversation.
+     * Bắt buộc - mỗi conversation phải liên kết với một shop.
+     */
+    @Indexed
+    private String shopId;
+
+    /**
+     * ID của buyer (người mua) trong conversation.
+     * Bắt buộc - mỗi conversation phải có một buyer.
+     */
+    @Indexed
+    private String buyerId;
+
+    /**
      * Danh sách ID của 2 người tham gia cuộc hội thoại.
-     * Sử dụng Set để đảm bảo không trùng lặp.
+     * Bao gồm: buyerId và shopId.
      */
     @Indexed
     @Builder.Default
@@ -47,7 +65,7 @@ public class Conversation {
 
     /**
      * Số tin nhắn chưa đọc cho mỗi người tham gia.
-     * Key: userId, Value: số tin nhắn chưa đọc
+     * Key: participantId (buyerId hoặc shopId), Value: số tin nhắn chưa đọc
      */
     @Builder.Default
     private java.util.Map<String, Integer> unreadCount = new java.util.HashMap<>();

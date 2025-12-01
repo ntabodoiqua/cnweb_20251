@@ -7,6 +7,7 @@ import lombok.*;
 
 /**
  * Request DTO để gửi tin nhắn mới.
+ * Chỉ hỗ trợ gửi tin nhắn trong conversation buyer-seller đã tồn tại.
  */
 @Data
 @Builder
@@ -15,14 +16,11 @@ import lombok.*;
 public class SendMessageRequest {
 
     /**
-     * ID của conversation (nếu đã có).
+     * ID của conversation (bắt buộc).
+     * Conversation phải được tạo trước bằng API createConversation.
      */
+    @NotBlank(message = "Conversation ID is required")
     private String conversationId;
-
-    /**
-     * ID người nhận (nếu tạo conversation mới).
-     */
-    private String recipientId;
 
     /**
      * Loại nội dung chính của tin nhắn.

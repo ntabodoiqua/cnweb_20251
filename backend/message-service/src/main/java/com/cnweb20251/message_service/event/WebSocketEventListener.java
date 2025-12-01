@@ -20,7 +20,7 @@ import java.security.Principal;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class WebSocketEventListener {
+public class  WebSocketEventListener {
 
     private final PresenceService presenceService;
 

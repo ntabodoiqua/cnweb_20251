@@ -57,6 +57,19 @@ public class InternalController {
     }
 
     /**
+     * Get store information by ID (for internal service calls)
+     * GET /internal/products/stores/{storeId}
+     */
+    @GetMapping("/stores/{storeId}")
+    public ApiResponse<com.vdt2025.product_service.dto.response.StoreSimpleResponse> getStoreById(@PathVariable String storeId) {
+        log.info("Internal: Fetching store info for ID: {}", storeId);
+        var store = storeService.getPublicStoreById(storeId);
+        return ApiResponse.<com.vdt2025.product_service.dto.response.StoreSimpleResponse>builder()
+                .result(store)
+                .build();
+    }
+
+    /**
      * Get variant information by ID (for internal service calls)
      * POST /internal/products/variants
      */

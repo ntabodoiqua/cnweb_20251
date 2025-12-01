@@ -17,14 +17,16 @@
 
 ## 1. Tổng quan
 
-Message Service là microservice xử lý chức năng chat real-time trong hệ thống e-commerce. Service này hỗ trợ:
+Message Service là microservice xử lý chức năng chat real-time trong hệ thống e-commerce. Service này **chỉ hỗ trợ chat giữa người mua (Buyer) và người bán (Shop/Seller)**:
 
-- **Chat 1-1** giữa User và User hoặc User và Seller
+- **Chat Buyer-Seller**: Người mua có thể chat với Shop để hỏi về sản phẩm, đơn hàng
 - **Tin nhắn đa dạng**: Text, Image, Product, Order, File, Sticker
 - **Real-time messaging** qua WebSocket/STOMP
 - **Typing indicator** (thông báo đang gõ)
 - **Read receipts** (thông báo đã đọc)
 - **Reply to message** (trả lời tin nhắn)
+
+> ⚠️ **Lưu ý quan trọng**: Service này **KHÔNG hỗ trợ** chat giữa 2 người dùng thông thường (user-to-user). Tất cả conversation phải có 1 buyer và 1 shop.
 
 ### Tech Stack
 
@@ -191,19 +193,26 @@ Base URL: `/api/chat`
 
 ### 5.1. Conversation Endpoints
 
-#### Tạo hoặc lấy Conversation
+#### Tạo hoặc lấy Conversation với Shop
 
 ```http
 POST /api/chat/conversations
 ```
 
+**Mô tả:** Tạo conversation mới giữa buyer (người gọi API) và shop. Nếu conversation đã tồn tại, sẽ trả về conversation hiện có.
+
+**Quy tắc:**
+
+- Chỉ buyer (người mua) mới có thể tạo conversation với shop
+- Shop owner không thể tạo conversation với shop của chính mình
+- Mỗi cặp buyer-shop chỉ có 1 conversation duy nhất
+
 **Request Body:**
 
 ```json
 {
-  "recipientId": "string (required)",
-  "recipientType": "USER | SELLER (optional)",
-  "shopId": "string (optional, required if recipientType is SELLER)"
+  "shopId": "string (required) - ID của shop muốn chat",
+  "initialMessage": "string (optional) - Tin nhắn khởi tạo"
 }
 ```
 
@@ -215,17 +224,19 @@ POST /api/chat/conversations
   "message": "Success",
   "result": {
     "id": "conv_123",
-    "participantIds": ["user1", "user2"],
+    "shopId": "shop_123",
+    "buyerId": "user_456",
+    "participantIds": ["user_456", "shop_123"],
     "participants": [
       {
-        "userId": "user1",
+        "userId": "user_456",
         "displayName": "John Doe",
         "avatarUrl": "https://...",
         "type": "USER",
         "online": true
       },
       {
-        "userId": "user2",
+        "userId": "shop_123",
         "displayName": "Shop ABC",
         "avatarUrl": "https://...",
         "type": "SELLER",
@@ -235,7 +246,7 @@ POST /api/chat/conversations
       }
     ],
     "lastMessage": null,
-    "unreadCount": { "user1": 0, "user2": 0 },
+    "unreadCount": { "user_456": 0, "shop_123": 0 },
     "status": "ACTIVE",
     "createdAt": "2025-12-01T10:00:00Z",
     "updatedAt": "2025-12-01T10:00:00Z"
@@ -243,11 +254,19 @@ POST /api/chat/conversations
 }
 ```
 
+**Error Responses:**
+
+- `400 Bad Request`: shopId is required
+- `404 Not Found`: Shop not found
+- `400 Bad Request`: You cannot create a conversation with your own shop
+
+````
+
 #### Lấy danh sách Conversations
 
 ```http
 GET /api/chat/conversations?page=0&size=20
-```
+````
 
 **Response:**
 
@@ -282,11 +301,13 @@ GET /api/chat/conversations/{conversationId}
 POST /api/chat/messages
 ```
 
+**Mô tả:** Gửi tin nhắn trong conversation đã tồn tại. Phải tạo conversation trước bằng API `POST /api/chat/conversations`.
+
 **Request Body (Text Message):**
 
 ```json
 {
-  "conversationId": "conv_123",
+  "conversationId": "conv_123 (required)",
   "contentType": "TEXT",
   "text": "Xin chào!",
   "replyToMessageId": "msg_456 (optional)"
@@ -537,6 +558,8 @@ function markAsRead(conversationId, messageIds) {
 ```json
 {
   "id": "string",
+  "shopId": "string - ID của shop trong conversation",
+  "buyerId": "string - ID của buyer trong conversation",
   "participantIds": ["string"],
   "participants": [
     {
@@ -544,8 +567,8 @@ function markAsRead(conversationId, messageIds) {
       "displayName": "string",
       "avatarUrl": "string",
       "type": "USER | SELLER",
-      "shopId": "string (optional)",
-      "shopName": "string (optional)",
+      "shopId": "string (optional, for SELLER)",
+      "shopName": "string (optional, for SELLER)",
       "online": "boolean"
     }
   ],
@@ -558,8 +581,8 @@ function markAsRead(conversationId, messageIds) {
     "sentAt": "ISO 8601 datetime"
   },
   "unreadCount": {
-    "userId1": 0,
-    "userId2": 5
+    "buyerId": 0,
+    "shopId": 5
   },
   "status": "ACTIVE | ARCHIVED | BLOCKED",
   "createdAt": "ISO 8601 datetime",
@@ -725,6 +748,18 @@ GET /internal/products/{productId}
 
 Lấy thông tin sản phẩm khi gửi tin nhắn loại PRODUCT.
 
+```
+GET /internal/products/stores/{storeId}
+```
+
+Lấy thông tin shop khi tạo conversation.
+
+```
+GET /internal/products/stores/{storeId}/validate-owner?username={username}
+```
+
+Kiểm tra user có phải owner của shop không (để ngăn shop owner tự chat với shop của mình).
+
 ### 9.3. Order Service
 
 ```
@@ -737,20 +772,18 @@ Lấy thông tin đơn hàng khi gửi tin nhắn loại ORDER.
 
 ## 10. Ví dụ sử dụng
 
-### 10.1. Kịch bản: User chat với Shop
+### 10.1. Kịch bản: Buyer chat với Shop
 
-1. **User mở chat với Shop:**
+1. **Buyer mở chat với Shop (tạo conversation):**
 
 ```http
 POST /api/chat/conversations
 {
-  "recipientId": "seller_username",
-  "recipientType": "SELLER",
   "shopId": "shop_123"
 }
 ```
 
-2. **User gửi tin nhắn hỏi về sản phẩm:**
+2. **Buyer gửi tin nhắn hỏi về sản phẩm:**
 
 ```http
 POST /api/chat/messages
@@ -761,7 +794,7 @@ POST /api/chat/messages
 }
 ```
 
-3. **User chia sẻ sản phẩm:**
+3. **Buyer chia sẻ sản phẩm:**
 
 ```http
 POST /api/chat/messages
@@ -775,7 +808,7 @@ POST /api/chat/messages
 }
 ```
 
-4. **Seller trả lời (qua WebSocket):**
+4. **Shop owner trả lời (qua WebSocket):**
 
 ```javascript
 stompClient.send(
@@ -789,7 +822,7 @@ stompClient.send(
 );
 ```
 
-5. **User đánh dấu đã đọc:**
+5. **Buyer đánh dấu đã đọc:**
 
 ```javascript
 stompClient.send(
@@ -813,6 +846,62 @@ POST /api/chat/messages
     "orderId": "order_xyz",
     "note": "Đơn hàng của tôi bao giờ giao?"
   }
+}
+```
+
+### 10.3. Kịch bản hoàn chỉnh với WebSocket
+
+```javascript
+// 1. Khởi tạo kết nối WebSocket
+const socket = new SockJS("http://localhost:8085/ws/chat");
+const stompClient = Stomp.over(socket);
+
+stompClient.connect({ Authorization: "Bearer " + token }, function (frame) {
+  console.log("Connected: " + frame);
+
+  // 2. Subscribe để nhận tin nhắn mới
+  stompClient.subscribe("/user/queue/messages", function (message) {
+    const msg = JSON.parse(message.body);
+    console.log("New message from:", msg.senderName);
+    displayMessage(msg);
+  });
+
+  // 3. Subscribe để nhận typing indicator
+  stompClient.subscribe("/user/queue/typing", function (typing) {
+    const data = JSON.parse(typing.body);
+    if (data.typing) {
+      showTypingIndicator(data.userId);
+    } else {
+      hideTypingIndicator(data.userId);
+    }
+  });
+});
+
+// 4. Tạo conversation với shop (nếu chưa có)
+async function startChatWithShop(shopId) {
+  const response = await fetch("/api/chat/conversations", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token,
+    },
+    body: JSON.stringify({ shopId: shopId }),
+  });
+  const data = await response.json();
+  return data.result; // conversation object
+}
+
+// 5. Gửi tin nhắn
+function sendMessage(conversationId, text) {
+  stompClient.send(
+    "/app/chat.send",
+    {},
+    JSON.stringify({
+      conversationId: conversationId,
+      contentType: "TEXT",
+      text: text,
+    })
+  );
 }
 ```
 

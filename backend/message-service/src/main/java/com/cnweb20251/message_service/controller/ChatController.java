@@ -18,13 +18,14 @@ import org.springframework.web.bind.annotation.*;
 
 /**
  * REST Controller cho Chat API.
+ * Chỉ hỗ trợ chat giữa buyer (người mua) và shop (seller).
  * Sử dụng cho các thao tác không realtime như lấy lịch sử tin nhắn, tạo conversation, etc.
  */
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Chat", description = "Chat API - Quản lý tin nhắn và conversations")
+@Tag(name = "Chat", description = "Chat API - Chat giữa người mua và shop")
 @SecurityRequirement(name = "bearerAuth")
 public class ChatController {
 
@@ -33,10 +34,13 @@ public class ChatController {
     // ========================= CONVERSATION ENDPOINTS =========================
 
     /**
-     * Tạo hoặc lấy conversation với một người dùng khác.
+     * Tạo hoặc lấy conversation với shop.
+     * Chỉ buyer (người mua) mới có thể tạo conversation.
+     * Shop owner không thể tạo conversation với shop của chính mình.
      */
     @PostMapping("/conversations")
-    @Operation(summary = "Tạo hoặc lấy conversation", description = "Tạo conversation mới hoặc lấy conversation đã tồn tại giữa 2 người dùng")
+    @Operation(summary = "Tạo hoặc lấy conversation với shop", 
+               description = "Tạo conversation mới giữa buyer và shop, hoặc lấy conversation đã tồn tại")
     public ResponseEntity<ApiResponse<ConversationResponse>> getOrCreateConversation(
             @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CreateConversationRequest request) {

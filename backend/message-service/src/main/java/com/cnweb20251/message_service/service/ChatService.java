@@ -28,6 +28,7 @@ import java.util.stream.Collectors;
 
 /**
  * Service xử lý logic chat chính.
+ * Chỉ hỗ trợ chat giữa người mua (USER) và người bán (SELLER/Shop).
  */
 @Service
 @RequiredArgsConstructor
@@ -45,25 +46,39 @@ public class ChatService {
     // ========================= CONVERSATION METHODS =========================
 
     /**
-     * Tạo hoặc lấy conversation giữa 2 người dùng.
+     * Tạo hoặc lấy conversation giữa người mua và shop.
+     * Chỉ cho phép chat giữa USER và SELLER.
      */
     @Transactional
     public ConversationResponse getOrCreateConversation(String currentUserId, CreateConversationRequest request) {
-        Set<String> participantIds = new HashSet<>(Arrays.asList(currentUserId, request.getRecipientId()));
+        String shopId = request.getShopId();
         
-        // Kiểm tra conversation đã tồn tại chưa
-        Optional<Conversation> existingConversation = conversationRepository.findByParticipantIds(participantIds);
+        // Lấy thông tin shop và owner
+        var storeInfo = getStoreInfo(shopId);
+        if (storeInfo == null) {
+            throw new ChatException("Shop not found: " + shopId);
+        }
+        
+        // Kiểm tra user hiện tại có phải owner của shop không
+        boolean isShopOwner = isUserShopOwner(currentUserId, shopId);
+        
+        if (isShopOwner) {
+            throw new ChatException("You cannot create a conversation with your own shop");
+        }
+        
+        // Tìm conversation dựa trên shopId (unique per user-shop pair)
+        Optional<Conversation> existingConversation = conversationRepository.findByShopIdAndBuyerId(shopId, currentUserId);
         
         if (existingConversation.isPresent()) {
             return chatMapper.toConversationResponse(existingConversation.get());
         }
         
-        // Tạo conversation mới
-        Conversation conversation = createNewConversation(currentUserId, request);
+        // Tạo conversation mới giữa buyer và shop
+        Conversation conversation = createBuyerSellerConversation(currentUserId, shopId, storeInfo);
         Conversation savedConversation = conversationRepository.save(conversation);
         
-        log.info("Created new conversation: {} between {} and {}", 
-                savedConversation.getId(), currentUserId, request.getRecipientId());
+        log.info("Created new buyer-seller conversation: {} between buyer {} and shop {}", 
+                savedConversation.getId(), currentUserId, shopId);
         
         return chatMapper.toConversationResponse(savedConversation);
     }
@@ -111,34 +126,22 @@ public class ChatService {
 
     /**
      * Gửi tin nhắn mới.
+     * Chỉ cho phép gửi tin nhắn trong conversation đã tồn tại (giữa buyer và shop).
      */
     @Transactional
     public MessageResponse sendMessage(String senderId, SendMessageRequest request) {
-        // Lấy hoặc tạo conversation
         String conversationId = request.getConversationId();
-        Conversation conversation;
         
         if (conversationId == null || conversationId.isEmpty()) {
-            if (request.getRecipientId() == null || request.getRecipientId().isEmpty()) {
-                throw new ChatException("Either conversationId or recipientId is required");
-            }
-            
-            // Tạo conversation mới
-            CreateConversationRequest createRequest = CreateConversationRequest.builder()
-                    .recipientId(request.getRecipientId())
-                    .build();
-            ConversationResponse convResponse = getOrCreateConversation(senderId, createRequest);
-            conversationId = convResponse.getId();
-            conversation = conversationRepository.findById(conversationId)
-                    .orElseThrow(() -> new ChatException("Conversation not found"));
-        } else {
-            conversation = conversationRepository.findById(conversationId)
-                    .orElseThrow(() -> new ChatException("Conversation not found"));
-            
-            // Kiểm tra sender có trong conversation không
-            if (!conversation.getParticipantIds().contains(senderId)) {
-                throw new ChatException("You are not a participant of this conversation");
-            }
+            throw new ChatException("Conversation ID is required. Please create a conversation first.");
+        }
+        
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new ChatException("Conversation not found"));
+        
+        // Kiểm tra sender có trong conversation không
+        if (!conversation.getParticipantIds().contains(senderId)) {
+            throw new ChatException("You are not a participant of this conversation");
         }
         
         // Tạo message content
@@ -317,63 +320,87 @@ public class ChatService {
 
     // ========================= HELPER METHODS =========================
 
-    private Conversation createNewConversation(String currentUserId, CreateConversationRequest request) {
-        Set<String> participantIds = new HashSet<>(Arrays.asList(currentUserId, request.getRecipientId()));
-        
-        // Lấy thông tin participants
-        Set<Participant> participants = new HashSet<>();
-        
-        // Thêm current user
+    /**
+     * Lấy thông tin store từ product-service.
+     */
+    private ProductServiceClient.StoreDetailInfo getStoreInfo(String shopId) {
         try {
-            var currentUserProfile = userServiceClient.getUserProfile(currentUserId);
-            if (currentUserProfile != null && currentUserProfile.getResult() != null) {
-                var profile = currentUserProfile.getResult();
+            var response = productServiceClient.getStoreInfo(shopId);
+            if (response != null && response.getResult() != null) {
+                return response.getResult();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get store info for: {}", shopId, e);
+        }
+        return null;
+    }
+
+    /**
+     * Kiểm tra user có phải owner của shop không.
+     */
+    private boolean isUserShopOwner(String username, String shopId) {
+        try {
+            var response = productServiceClient.validateStoreOwner(shopId, username);
+            if (response != null && response.getResult() != null) {
+                return response.getResult();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to validate store owner for shop {} and user {}", shopId, username, e);
+        }
+        return false;
+    }
+
+    /**
+     * Tạo conversation mới giữa buyer và shop.
+     */
+    private Conversation createBuyerSellerConversation(String buyerId, String shopId, ProductServiceClient.StoreDetailInfo storeInfo) {
+        // Lấy thông tin buyer
+        Set<Participant> participants = new HashSet<>();
+        Set<String> participantIds = new HashSet<>();
+        
+        // Thêm buyer
+        participantIds.add(buyerId);
+        try {
+            var buyerProfile = userServiceClient.getUserProfile(buyerId);
+            if (buyerProfile != null && buyerProfile.getResult() != null) {
+                var profile = buyerProfile.getResult();
                 participants.add(Participant.builder()
-                        .userId(currentUserId)
+                        .userId(buyerId)
                         .displayName(profile.getFullName())
                         .avatarUrl(profile.avatarUrl())
                         .type(ParticipantType.USER)
                         .build());
             }
         } catch (Exception e) {
-            log.warn("Failed to get user profile for: {}", currentUserId);
+            log.warn("Failed to get user profile for buyer: {}", buyerId);
             participants.add(Participant.builder()
-                    .userId(currentUserId)
-                    .displayName("User")
+                    .userId(buyerId)
+                    .displayName("Buyer")
                     .type(ParticipantType.USER)
                     .build());
         }
         
-        // Thêm recipient
-        try {
-            var recipientProfile = userServiceClient.getUserProfile(request.getRecipientId());
-            if (recipientProfile != null && recipientProfile.getResult() != null) {
-                var profile = recipientProfile.getResult();
-                participants.add(Participant.builder()
-                        .userId(request.getRecipientId())
-                        .displayName(profile.getFullName())
-                        .avatarUrl(profile.avatarUrl())
-                        .type(request.getRecipientType() != null ? request.getRecipientType() : ParticipantType.USER)
-                        .shopId(request.getShopId())
-                        .build());
-            }
-        } catch (Exception e) {
-            log.warn("Failed to get user profile for: {}", request.getRecipientId());
-            participants.add(Participant.builder()
-                    .userId(request.getRecipientId())
-                    .displayName("User")
-                    .type(request.getRecipientType() != null ? request.getRecipientType() : ParticipantType.USER)
-                    .build());
-        }
+        // Thêm shop (SELLER) - sử dụng shopId làm participantId
+        participantIds.add(shopId);
+        participants.add(Participant.builder()
+                .userId(shopId)  // Sử dụng shopId làm userId cho shop
+                .displayName(storeInfo.storeName())
+                .avatarUrl(storeInfo.logoUrl())
+                .type(ParticipantType.SELLER)
+                .shopId(shopId)
+                .shopName(storeInfo.storeName())
+                .build());
         
         Instant now = Instant.now();
         Map<String, Integer> unreadCount = new HashMap<>();
-        unreadCount.put(currentUserId, 0);
-        unreadCount.put(request.getRecipientId(), 0);
+        unreadCount.put(buyerId, 0);
+        unreadCount.put(shopId, 0);
         
         return Conversation.builder()
                 .participantIds(participantIds)
                 .participants(participants)
+                .shopId(shopId)  // Lưu shopId để tìm kiếm dễ dàng
+                .buyerId(buyerId)  // Lưu buyerId để tìm kiếm dễ dàng
                 .unreadCount(unreadCount)
                 .status(ConversationStatus.ACTIVE)
                 .createdAt(now)

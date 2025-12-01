@@ -1,11 +1,11 @@
 package com.cnweb20251.message_service.dto.request;
 
-import com.cnweb20251.message_service.enums.ParticipantType;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 /**
- * Request DTO để tạo conversation mới.
+ * Request DTO để tạo conversation mới giữa người mua và shop.
+ * Chỉ hỗ trợ chat giữa USER (người mua) và SELLER (shop).
  */
 @Data
 @Builder
@@ -14,18 +14,15 @@ import lombok.*;
 public class CreateConversationRequest {
 
     /**
-     * ID người dùng được mời vào conversation.
+     * ID của shop (store) mà người mua muốn chat.
+     * Bắt buộc - conversation luôn được tạo dựa trên shop.
      */
-    @NotBlank(message = "Recipient ID is required")
-    private String recipientId;
-
-    /**
-     * Loại người nhận (USER hoặc SELLER).
-     */
-    private ParticipantType recipientType;
-
-    /**
-     * ID shop (nếu người nhận là SELLER).
-     */
+    @NotBlank(message = "Shop ID is required")
     private String shopId;
+
+    /**
+     * Tin nhắn đầu tiên (tùy chọn).
+     * Nếu có, sẽ được gửi ngay sau khi tạo conversation.
+     */
+    private String initialMessage;
 }
