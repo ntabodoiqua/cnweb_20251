@@ -1,6 +1,7 @@
 package com.cnweb20251.message_service.entity;
 
 import com.cnweb20251.message_service.enums.MessageStatus;
+import com.cnweb20251.message_service.enums.MessageType;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;

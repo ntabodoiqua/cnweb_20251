@@ -1,5 +1,6 @@
 package com.cnweb20251.message_service.entity;
 
+import com.cnweb20251.message_service.enums.MessageType;
 import lombok.*;
 
 import java.time.Instant;
