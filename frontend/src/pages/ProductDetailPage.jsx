@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -56,6 +56,7 @@ import {
 } from "../util/api";
 import { getSpecSectionConfig } from "../constants/productSpecsTranslations";
 import { useCart } from "../contexts/CartContext";
+import { AuthContext } from "../components/context/auth.context";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ProductRatings from "../components/ProductRatings";
 import RatingModal from "../components/RatingModal";
@@ -68,6 +69,7 @@ const ProductDetailPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
   const { incrementCartCount, loadCartCount } = useCart();
+  const { auth } = useContext(AuthContext);
 
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState(null);
@@ -103,9 +105,17 @@ const ProductDetailPage = () => {
       fetchProductDetail();
       fetchProductSpecs();
       fetchSelectionConfig();
-      checkCanRate();
     }
   }, [productId]);
+
+  // Check can rate only when authenticated
+  useEffect(() => {
+    if (productId && auth?.isAuthenticated) {
+      checkCanRate();
+    } else {
+      setCanRate(false);
+    }
+  }, [productId, auth?.isAuthenticated]);
 
   // Check if user can rate this product
   const checkCanRate = async () => {
@@ -120,7 +130,9 @@ const ProductDetailPage = () => {
   // Handle rating success - refresh ratings
   const handleRatingSuccess = () => {
     setRatingsKey((prev) => prev + 1);
-    checkCanRate();
+    if (auth?.isAuthenticated) {
+      checkCanRate();
+    }
     fetchProductDetail(); // Refresh product to get updated rating count
   };
 
