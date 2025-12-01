@@ -63,6 +63,7 @@ public class PublicProductController {
      * - sortBy: name, price, soldCount, createdAt, averageRating
      * - page, size, sort: pagination
      */
+
     @GetMapping
     public ApiResponse<Page<ProductSummaryResponse>> getProducts(
             @ModelAttribute ProductFilterRequest filter,
