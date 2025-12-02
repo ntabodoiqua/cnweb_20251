@@ -55,6 +55,7 @@ public class SecurityConfig {
             "/categories/public/**",
             "/brands/public/**",
             "/public/**",
+            "/internal/**",
             // Elasticsearch search endpoints - public cho user tìm kiếm
             "/products/search",
             "/products/search/suggest",
