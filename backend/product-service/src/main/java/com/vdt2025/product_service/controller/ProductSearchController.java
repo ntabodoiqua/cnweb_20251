@@ -148,6 +148,8 @@ public class ProductSearchController {
                         healthy,
                         stats.indexedCount(),
                         stats.totalInDb(),
+                        stats.storeIndexedCount(),
+                        stats.storeTotalInDb(),
                         stats.syncInProgress()
                 ))
                 .build();
@@ -213,6 +215,8 @@ public class ProductSearchController {
             boolean healthy,
             long indexedCount,
             long totalInDb,
+            long storeIndexedCount,
+            long storeTotalInDb,
             boolean syncInProgress
     ) {}
 }

@@ -18,6 +18,8 @@ import {
   Checkbox,
   Collapse,
   Badge,
+  Tabs,
+  Avatar,
 } from "antd";
 import {
   AppstoreOutlined,
@@ -29,11 +31,13 @@ import {
   ShopOutlined,
   FilterOutlined,
   ClearOutlined,
+  UserOutlined,
+  EnvironmentOutlined,
   FireOutlined,
   ThunderboltOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
-import { quickSearchProductsApi } from "../util/api";
+import { quickSearchProductsApi, quickSearchStoresApi } from "../util/api";
 import LoadingSpinner from "../components/LoadingSpinner";
 import NoImages from "../assets/NoImages.webp";
 import styles from "./SearchPage.module.css";
@@ -47,12 +51,26 @@ const SearchPage = () => {
 
   // Get search query from URL
   const query = searchParams.get("q") || "";
+  const searchType = searchParams.get("type") || "all"; // 'all', 'product', 'store'
 
   // State
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState([]);
+  const [stores, setStores] = useState([]);
+  const [activeTab, setActiveTab] = useState(
+    searchType === "store" ? "store" : "product"
+  );
   const [viewMode, setViewMode] = useState("list");
   const [aggregations, setAggregations] = useState(null);
+
+  // Sync activeTab with URL searchType
+  useEffect(() => {
+    if (searchType === "store" && activeTab !== "store") {
+      setActiveTab("store");
+    } else if (searchType !== "store" && activeTab !== "product") {
+      setActiveTab("product");
+    }
+  }, [searchType]);
 
   // Pagination
   const [pagination, setPagination] = useState({
@@ -83,6 +101,13 @@ const SearchPage = () => {
   const debounceTimerRef = useRef(null);
   const skipFetchRef = useRef(false);
 
+  // Store pagination state
+  const [storePagination, setStorePagination] = useState({
+    current: 1,
+    pageSize: 20,
+    total: 0,
+  });
+
   // Cleanup debounce timer on unmount
   useEffect(() => {
     return () => {
@@ -92,19 +117,79 @@ const SearchPage = () => {
     };
   }, []);
 
-  // Fetch products when query or filters change
+  // Fetch products or stores when query or filters change
   useEffect(() => {
     if (skipFetchRef.current) {
       skipFetchRef.current = false;
       return;
     }
     if (query) {
-      fetchProducts();
+      if (activeTab === "product") {
+        fetchProducts();
+      } else if (activeTab === "store") {
+        fetchStores();
+      }
     } else {
       setProducts([]);
+      setStores([]);
       setPagination((prev) => ({ ...prev, total: 0 }));
+      setStorePagination((prev) => ({ ...prev, total: 0 }));
     }
-  }, [query, filters, pagination.current, pagination.pageSize]);
+  }, [
+    query,
+    filters,
+    pagination.current,
+    pagination.pageSize,
+    storePagination.current,
+    storePagination.pageSize,
+    activeTab,
+  ]);
+
+  const fetchStores = async () => {
+    setLoading(true);
+    try {
+      const params = {
+        q: query,
+        page: storePagination.current - 1,
+        size: storePagination.pageSize,
+        sortBy: filters.sortBy === "relevance" ? "relevance" : filters.sortBy,
+        sortDir: filters.sortDir,
+      };
+
+      // Remove empty values
+      Object.keys(params).forEach(
+        (key) =>
+          (params[key] === "" || params[key] === undefined) &&
+          delete params[key]
+      );
+
+      const response = await quickSearchStoresApi(params);
+
+      if (response?.code === 1000) {
+        const result = response.result;
+        // Map hits to stores with their highlights
+        const mappedStores = (result.hits || []).map((hit) => ({
+          ...hit.store,
+          score: hit.score,
+          highlights: hit.highlights,
+        }));
+        setStores(mappedStores);
+        setStorePagination((prev) => ({
+          ...prev,
+          total: result.totalHits || 0,
+        }));
+        setSearchMeta({
+          took: result.took || 0,
+          maxScore: result.maxScore || 0,
+        });
+      }
+    } catch (error) {
+      console.error("Error searching stores:", error);
+      message.error("Không thể tìm kiếm cửa hàng");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchProducts = async () => {
     setLoading(true);
@@ -126,7 +211,7 @@ const SearchPage = () => {
 
       const response = await quickSearchProductsApi(params);
 
-      if (response.code === 1000) {
+      if (response?.code === 1000) {
         const result = response.result;
         // Map hits to products with their highlights
         const mappedProducts = (result.hits || []).map((hit) => ({
@@ -612,6 +697,89 @@ const SearchPage = () => {
     </Card>
   );
 
+  const handleStoreClick = (storeId) => {
+    navigate(`/store/${storeId}`);
+  };
+
+  const handleStorePageChange = (page, pageSize) => {
+    setStorePagination((prev) => ({ ...prev, current: page, pageSize }));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const handleTabChange = (key) => {
+    setActiveTab(key);
+    setPagination((prev) => ({ ...prev, current: 1 }));
+    setStorePagination((prev) => ({ ...prev, current: 1 }));
+
+    // Update URL
+    const newParams = new URLSearchParams(searchParams);
+    newParams.set("type", key);
+    setSearchParams(newParams);
+  };
+
+  const renderStoreCard = (store) => {
+    return (
+      <Card
+        key={store.id}
+        hoverable
+        className={styles.storeCard}
+        onClick={() => handleStoreClick(store.id)}
+      >
+        <div className={styles.storeCardContent}>
+          <Avatar
+            size={64}
+            icon={<ShopOutlined />}
+            src={store.avatarUrl}
+            className={styles.storeAvatar}
+          />
+          <div className={styles.storeInfo}>
+            <Title level={5} className={styles.storeName}>
+              {store.highlights?.storeName
+                ? renderHighlightedText(
+                    store.storeName,
+                    store.highlights.storeName
+                  )
+                : store.storeName}
+            </Title>
+            <Text type="secondary" className={styles.storeDescription} ellipsis>
+              {store.highlights?.storeDescription
+                ? renderHighlightedText(
+                    store.storeDescription,
+                    store.highlights.storeDescription
+                  )
+                : store.storeDescription}
+            </Text>
+            <div className={styles.storeStats}>
+              <Space wrap size="small">
+                {store.shopAddress && (
+                  <Tag icon={<EnvironmentOutlined />} color="blue">
+                    {store.shopAddress}
+                  </Tag>
+                )}
+                {store.totalProducts > 0 && (
+                  <Tag color="green">{store.totalProducts} sản phẩm</Tag>
+                )}
+                {store.totalSold > 0 && (
+                  <Tag color="orange">Đã bán {store.totalSold}</Tag>
+                )}
+                {store.averageRating > 0 && (
+                  <Tag icon={<StarOutlined />} color="gold">
+                    {store.averageRating.toFixed(1)}
+                  </Tag>
+                )}
+                {store.followerCount > 0 && (
+                  <Tag icon={<UserOutlined />} color="purple">
+                    {store.followerCount} người theo dõi
+                  </Tag>
+                )}
+              </Space>
+            </div>
+          </div>
+        </div>
+      </Card>
+    );
+  };
+
   const renderSkeletons = () => (
     <Row gutter={[16, 16]}>
       {[...Array(8)].map((_, index) => (
@@ -663,22 +831,51 @@ const SearchPage = () => {
               <Text type="secondary">
                 Tìm thấy{" "}
                 <strong style={{ color: "#ee4d2d" }}>
-                  {pagination.total.toLocaleString()}
+                  {activeTab === "product"
+                    ? pagination.total.toLocaleString()
+                    : storePagination.total.toLocaleString()}
                 </strong>{" "}
-                sản phẩm
+                {activeTab === "product" ? "sản phẩm" : "cửa hàng"}
                 {searchMeta.took > 0 && ` (${searchMeta.took}ms)`}
               </Text>
             )}
           </div>
 
-          <Row gutter={[24, 24]}>
-            {/* Filters Sidebar */}
-            <Col xs={24} lg={6}>
-              {renderFilters()}
-            </Col>
+          {/* Tabs for Product and Store */}
+          <Tabs
+            activeKey={activeTab}
+            onChange={handleTabChange}
+            className={styles.searchTabs}
+            items={[
+              {
+                key: "product",
+                label: (
+                  <span>
+                    <SearchOutlined /> Sản phẩm
+                  </span>
+                ),
+              },
+              {
+                key: "store",
+                label: (
+                  <span>
+                    <ShopOutlined /> Cửa hàng
+                  </span>
+                ),
+              },
+            ]}
+          />
 
-            {/* Products List */}
-            <Col xs={24} lg={18}>
+          <Row gutter={[24, 24]}>
+            {/* Filters Sidebar - only show for products */}
+            {activeTab === "product" && (
+              <Col xs={24} lg={6}>
+                {renderFilters()}
+              </Col>
+            )}
+
+            {/* Products/Stores List */}
+            <Col xs={24} lg={activeTab === "product" ? 18 : 24}>
               <div className={styles.productsContent}>
                 {/* Sort and View Controls */}
                 <Card className={styles.productsControls}>
@@ -694,12 +891,16 @@ const SearchPage = () => {
                           <Select.Option value="relevance-desc">
                             <ThunderboltOutlined /> Liên quan nhất
                           </Select.Option>
-                          <Select.Option value="price-asc">
-                            Giá thấp đến cao
-                          </Select.Option>
-                          <Select.Option value="price-desc">
-                            Giá cao đến thấp
-                          </Select.Option>
+                          {activeTab === "product" && (
+                            <>
+                              <Select.Option value="price-asc">
+                                Giá thấp đến cao
+                              </Select.Option>
+                              <Select.Option value="price-desc">
+                                Giá cao đến thấp
+                              </Select.Option>
+                            </>
+                          )}
                           <Select.Option value="sold-desc">
                             <FireOutlined /> Bán chạy nhất
                           </Select.Option>
@@ -712,60 +913,129 @@ const SearchPage = () => {
                         </Select>
                       </Space>
                     </Col>
-                    <Col>
-                      <Space>
-                        <Button
-                          type={viewMode === "grid" ? "primary" : "default"}
-                          icon={<AppstoreOutlined />}
-                          onClick={() => setViewMode("grid")}
-                        />
-                        <Button
-                          type={viewMode === "list" ? "primary" : "default"}
-                          icon={<UnorderedListOutlined />}
-                          onClick={() => setViewMode("list")}
-                        />
-                      </Space>
-                    </Col>
+                    {activeTab === "product" && (
+                      <Col>
+                        <Space>
+                          <Button
+                            type={viewMode === "grid" ? "primary" : "default"}
+                            icon={<AppstoreOutlined />}
+                            onClick={() => setViewMode("grid")}
+                          />
+                          <Button
+                            type={viewMode === "list" ? "primary" : "default"}
+                            icon={<UnorderedListOutlined />}
+                            onClick={() => setViewMode("list")}
+                          />
+                        </Space>
+                      </Col>
+                    )}
                   </Row>
                 </Card>
 
-                {/* Products Grid/List */}
+                {/* Products/Stores Grid/List */}
                 {loading ? (
                   <LoadingSpinner tip="Đang tìm kiếm..." fullScreen={false} />
-                ) : products.length > 0 ? (
-                  <>
-                    <Row
-                      gutter={[16, 16]}
-                      className={`${styles.productsGrid} ${
-                        viewMode === "list" ? styles.listView : ""
-                      }`}
-                    >
-                      {viewMode === "grid" ? (
-                        products.map((product) => (
-                          <Col xs={24} sm={12} lg={8} xl={6} key={product.id}>
-                            {renderProductCard(product)}
+                ) : activeTab === "product" ? (
+                  products.length > 0 ? (
+                    <>
+                      <Row
+                        gutter={[16, 16]}
+                        className={`${styles.productsGrid} ${
+                          viewMode === "list" ? styles.listView : ""
+                        }`}
+                      >
+                        {viewMode === "grid" ? (
+                          products.map((product) => (
+                            <Col xs={24} sm={12} lg={8} xl={6} key={product.id}>
+                              {renderProductCard(product)}
+                            </Col>
+                          ))
+                        ) : (
+                          <Col span={24}>
+                            {products.map((product) =>
+                              renderProductCard(product)
+                            )}
                           </Col>
-                        ))
-                      ) : (
-                        <Col span={24}>
-                          {products.map((product) =>
-                            renderProductCard(product)
-                          )}
+                        )}
+                      </Row>
+
+                      {/* Pagination */}
+                      <div className={styles.productsPagination}>
+                        <Pagination
+                          current={pagination.current}
+                          pageSize={pagination.pageSize}
+                          total={pagination.total}
+                          onChange={handlePageChange}
+                          showSizeChanger
+                          showQuickJumper
+                          showTotal={(total) =>
+                            `Tổng ${total.toLocaleString()} sản phẩm`
+                          }
+                          pageSizeOptions={["12", "20", "40", "60"]}
+                        />
+                      </div>
+                    </>
+                  ) : (
+                    <Card className={styles.emptyState}>
+                      <Empty
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description={
+                          <div>
+                            <Title level={4} style={{ color: "#666" }}>
+                              Không tìm thấy sản phẩm nào
+                            </Title>
+                            <Text type="secondary">
+                              Không có kết quả cho "<strong>{query}</strong>"
+                              {hasActiveFilters() && (
+                                <span> với bộ lọc hiện tại</span>
+                              )}
+                            </Text>
+                            <br />
+                            <Text type="secondary" style={{ fontSize: 13 }}>
+                              Hãy thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc
+                            </Text>
+                          </div>
+                        }
+                      >
+                        {hasActiveFilters() && (
+                          <Button
+                            type="primary"
+                            icon={<ClearOutlined />}
+                            onClick={handleResetFilters}
+                            style={{
+                              background:
+                                "linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%)",
+                              border: "none",
+                            }}
+                          >
+                            Xóa bộ lọc
+                          </Button>
+                        )}
+                      </Empty>
+                    </Card>
+                  )
+                ) : // Store tab
+                stores.length > 0 ? (
+                  <>
+                    <Row gutter={[16, 16]} className={styles.storesGrid}>
+                      {stores.map((store) => (
+                        <Col xs={24} sm={12} lg={8} key={store.id}>
+                          {renderStoreCard(store)}
                         </Col>
-                      )}
+                      ))}
                     </Row>
 
-                    {/* Pagination */}
+                    {/* Store Pagination */}
                     <div className={styles.productsPagination}>
                       <Pagination
-                        current={pagination.current}
-                        pageSize={pagination.pageSize}
-                        total={pagination.total}
-                        onChange={handlePageChange}
+                        current={storePagination.current}
+                        pageSize={storePagination.pageSize}
+                        total={storePagination.total}
+                        onChange={handleStorePageChange}
                         showSizeChanger
                         showQuickJumper
                         showTotal={(total) =>
-                          `Tổng ${total.toLocaleString()} sản phẩm`
+                          `Tổng ${total.toLocaleString()} cửa hàng`
                         }
                         pageSizeOptions={["12", "20", "40", "60"]}
                       />
@@ -778,36 +1048,18 @@ const SearchPage = () => {
                       description={
                         <div>
                           <Title level={4} style={{ color: "#666" }}>
-                            Không tìm thấy sản phẩm nào
+                            Không tìm thấy cửa hàng nào
                           </Title>
                           <Text type="secondary">
                             Không có kết quả cho "<strong>{query}</strong>"
-                            {hasActiveFilters() && (
-                              <span> với bộ lọc hiện tại</span>
-                            )}
                           </Text>
                           <br />
                           <Text type="secondary" style={{ fontSize: 13 }}>
-                            Hãy thử tìm kiếm với từ khóa khác hoặc xóa bộ lọc
+                            Hãy thử tìm kiếm với từ khóa khác
                           </Text>
                         </div>
                       }
-                    >
-                      {hasActiveFilters() && (
-                        <Button
-                          type="primary"
-                          icon={<ClearOutlined />}
-                          onClick={handleResetFilters}
-                          style={{
-                            background:
-                              "linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%)",
-                            border: "none",
-                          }}
-                        >
-                          Xóa bộ lọc
-                        </Button>
-                      )}
-                    </Empty>
+                    />
                   </Card>
                 )}
               </div>

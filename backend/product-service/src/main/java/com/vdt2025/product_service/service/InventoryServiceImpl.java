@@ -12,6 +12,7 @@ import com.vdt2025.product_service.repository.InventoryStockRepository;
 import com.vdt2025.product_service.repository.InventoryTransactionRepository;
 import com.vdt2025.product_service.repository.ProductRepository;
 import com.vdt2025.product_service.repository.ProductVariantRepository;
+import com.vdt2025.product_service.repository.StoreRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -40,6 +41,7 @@ public class InventoryServiceImpl implements InventoryService {
     ProductVariantRepository productVariantRepository;
     InventoryTransactionRepository transactionRepository;
     ProductRepository productRepository;
+    StoreRepository storeRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -669,6 +671,8 @@ public class InventoryServiceImpl implements InventoryService {
 
             // Map productId -> tổng quantity bán được (gom các variants cùng product)
             Map<String, Integer> productQuantityMap = new java.util.HashMap<>();
+            // Map storeId -> tổng quantity bán được (gom các products cùng store)
+            Map<String, Integer> storeQuantityMap = new java.util.HashMap<>();
 
             for (InventoryStock stock : stocks) {
                 ProductVariant variant = stock.getProductVariant();
@@ -686,8 +690,15 @@ public class InventoryServiceImpl implements InventoryService {
                 }
 
                 // Gom quantity theo productId
-                String productId = variant.getProduct().getId();
+                Product product = variant.getProduct();
+                String productId = product.getId();
                 productQuantityMap.merge(productId, quantity, Integer::sum);
+
+                // Gom quantity theo storeId
+                if (product.getStore() != null) {
+                    String storeId = product.getStore().getId();
+                    storeQuantityMap.merge(storeId, quantity, Integer::sum);
+                }
             }
 
             // Cập nhật soldCount cho các products
@@ -701,8 +712,19 @@ public class InventoryServiceImpl implements InventoryService {
                 }
             }
 
-            log.info("Successfully updated sold count for {} variants across {} products",
-                    stocks.size(), productQuantityMap.size());
+            // Cập nhật totalSold cho các stores
+            for (Map.Entry<String, Integer> entry : storeQuantityMap.entrySet()) {
+                String storeId = entry.getKey();
+                Integer totalQuantity = entry.getValue();
+
+                int updatedStoreRows = storeRepository.updateTotalSold(storeId, totalQuantity);
+                if (updatedStoreRows > 0) {
+                    log.debug("Updated totalSold for store {}: +{}", storeId, totalQuantity);
+                }
+            }
+
+            log.info("Successfully updated sold count for {} variants across {} products and {} stores",
+                    stocks.size(), productQuantityMap.size(), storeQuantityMap.size());
 
         } catch (Exception e) {
             // Log lỗi nhưng không throw exception để không ảnh hưởng đến transaction chính
@@ -845,6 +867,8 @@ public class InventoryServiceImpl implements InventoryService {
 
             // Map productId -> tổng quantity hoàn trả (gom các variants cùng product)
             Map<String, Integer> productQuantityMap = new java.util.HashMap<>();
+            // Map storeId -> tổng quantity hoàn trả (gom các products cùng store)
+            Map<String, Integer> storeQuantityMap = new java.util.HashMap<>();
 
             for (InventoryStock stock : stocks) {
                 ProductVariant variant = stock.getProductVariant();
@@ -862,8 +886,15 @@ public class InventoryServiceImpl implements InventoryService {
                 }
 
                 // Gom quantity theo productId
-                String productId = variant.getProduct().getId();
+                Product product = variant.getProduct();
+                String productId = product.getId();
                 productQuantityMap.merge(productId, quantity, Integer::sum);
+
+                // Gom quantity theo storeId
+                if (product.getStore() != null) {
+                    String storeId = product.getStore().getId();
+                    storeQuantityMap.merge(storeId, quantity, Integer::sum);
+                }
             }
 
             // Giảm soldCount cho các products (quantity âm)
@@ -877,8 +908,19 @@ public class InventoryServiceImpl implements InventoryService {
                 }
             }
 
-            log.info("Successfully decreased sold count for {} variants across {} products",
-                    stocks.size(), productQuantityMap.size());
+            // Giảm totalSold cho các stores (quantity âm)
+            for (Map.Entry<String, Integer> entry : storeQuantityMap.entrySet()) {
+                String storeId = entry.getKey();
+                Integer totalQuantity = entry.getValue();
+
+                int updatedStoreRows = storeRepository.updateTotalSold(storeId, -totalQuantity);
+                if (updatedStoreRows > 0) {
+                    log.debug("Decreased totalSold for store {}: -{}", storeId, totalQuantity);
+                }
+            }
+
+            log.info("Successfully decreased sold count for {} variants across {} products and {} stores",
+                    stocks.size(), productQuantityMap.size(), storeQuantityMap.size());
 
         } catch (Exception e) {
             // Log lỗi nhưng không throw exception để không ảnh hưởng đến transaction chính

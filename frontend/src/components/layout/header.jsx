@@ -28,6 +28,7 @@ import {
   TagOutlined,
   RightOutlined,
   MessageOutlined,
+  ShopOutlined,
 } from "@ant-design/icons";
 import {
   Dropdown,
@@ -46,6 +47,7 @@ import {
   getSearchSuggestApi,
   getPublicPlatformCategoriesApi,
   getBrandsApi,
+  globalSuggestApi,
 } from "../../util/api";
 import { useNotification } from "../../contexts/NotificationContext";
 import { useChat } from "../../contexts/ChatContext";
@@ -121,16 +123,96 @@ const Header = () => {
 
     const timeout = setTimeout(async () => {
       try {
-        const response = await getSearchSuggestApi(value);
-        if (response && response.result) {
-          const newOptions = response.result.map((item) => ({
-            value: item,
-            label: item,
-          }));
+        // Sử dụng Global Suggest API để lấy cả sản phẩm và cửa hàng
+        const response = await globalSuggestApi(value, 5, 3);
+        if (response?.result) {
+          const { products = [], stores = [] } = response.result;
+
+          const newOptions = [];
+
+          // Thêm sản phẩm vào suggestions
+          if (products.length > 0) {
+            newOptions.push({
+              label: (
+                <div
+                  style={{
+                    fontWeight: 600,
+                    color: "#8c8c8c",
+                    fontSize: "12px",
+                    padding: "4px 0",
+                    borderBottom: "1px solid #f0f0f0",
+                  }}
+                >
+                  <SearchOutlined style={{ marginRight: 8 }} />
+                  Sản phẩm
+                </div>
+              ),
+              options: products.map((item) => ({
+                value: item,
+                label: (
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    <SearchOutlined style={{ color: "#1890ff" }} />
+                    <span>{item}</span>
+                  </div>
+                ),
+                type: "product",
+              })),
+            });
+          }
+
+          // Thêm cửa hàng vào suggestions
+          if (stores.length > 0) {
+            newOptions.push({
+              label: (
+                <div
+                  style={{
+                    fontWeight: 600,
+                    color: "#8c8c8c",
+                    fontSize: "12px",
+                    padding: "4px 0",
+                    borderBottom: "1px solid #f0f0f0",
+                    marginTop: products.length > 0 ? 8 : 0,
+                  }}
+                >
+                  <ShopOutlined style={{ marginRight: 8 }} />
+                  Cửa hàng
+                </div>
+              ),
+              options: stores.map((item) => ({
+                value: `store:${item}`,
+                label: (
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    <ShopOutlined style={{ color: "#52c41a" }} />
+                    <span>{item}</span>
+                  </div>
+                ),
+                type: "store",
+                storeName: item,
+              })),
+            });
+          }
+
           setOptions(newOptions);
         }
       } catch (error) {
         console.error("Error fetching suggestions:", error);
+        // Fallback to product-only search
+        try {
+          const fallbackResponse = await getSearchSuggestApi(value);
+          if (fallbackResponse && fallbackResponse.data?.result) {
+            const newOptions = fallbackResponse.data.result.map((item) => ({
+              value: item,
+              label: item,
+            }));
+            setOptions(newOptions);
+          }
+        } catch (fallbackError) {
+          console.error("Fallback search also failed:", fallbackError);
+        }
       }
     }, 150);
 
@@ -211,6 +293,21 @@ const Header = () => {
   const handleSearch = (value) => {
     if (value.trim()) {
       navigate(`/search?q=${encodeURIComponent(value.trim())}`);
+    }
+  };
+
+  // Xử lý khi chọn một suggestion
+  const handleSelectSuggestion = (value, option) => {
+    // Kiểm tra xem có phải cửa hàng không
+    if (value.startsWith("store:") || option?.type === "store") {
+      // Chuyển đến trang tìm kiếm cửa hàng
+      const storeName = option?.storeName || value.replace("store:", "");
+      navigate(`/search?q=${encodeURIComponent(storeName)}&type=store`);
+      setSearchValue(storeName);
+    } else {
+      // Tìm kiếm sản phẩm bình thường
+      setSearchValue(value);
+      handleSearch(value);
     }
   };
 
@@ -555,17 +652,14 @@ const Header = () => {
             <AutoComplete
               style={{ width: "100%" }}
               options={options}
-              onSelect={(value) => {
-                setSearchValue(value);
-                handleSearch(value);
-              }}
+              onSelect={handleSelectSuggestion}
               onSearch={handleSearchChange}
               value={searchValue}
               popupClassName={styles.searchDropdown}
               popupMatchSelectWidth={true}
             >
               <Input.Search
-                placeholder="Tìm kiếm sản phẩm, danh mục..."
+                placeholder="Tìm kiếm sản phẩm, cửa hàng..."
                 size="large"
                 onSearch={handleSearch}
                 enterButton={
@@ -688,17 +782,14 @@ const Header = () => {
             <AutoComplete
               style={{ width: "100%" }}
               options={options}
-              onSelect={(value) => {
-                setSearchValue(value);
-                handleSearch(value);
-              }}
+              onSelect={handleSelectSuggestion}
               onSearch={handleSearchChange}
               value={searchValue}
               popupClassName={styles.searchDropdown}
               popupMatchSelectWidth={true}
             >
               <Input.Search
-                placeholder="Tìm kiếm sản phẩm..."
+                placeholder="Tìm kiếm sản phẩm, cửa hàng..."
                 size="middle"
                 onSearch={handleSearch}
                 enterButton={
