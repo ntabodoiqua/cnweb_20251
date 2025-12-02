@@ -35,13 +35,17 @@ import {
   DisconnectOutlined,
   ArrowLeftOutlined,
   ShoppingOutlined,
+  ShoppingCartOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import { useChat } from "../../contexts/ChatContext";
 import { AuthContext } from "../../components/context/auth.context";
 import { ConnectionState, ContentType } from "../../util/chatWebSocket";
-import { uploadPublicImageApi } from "../../util/api";
+import { uploadPublicImageApi, getMyStoresApi } from "../../util/api";
 import { getHighestRole, ROLES } from "../../constants/roles";
 import styles from "./ChatPage.module.css";
+import ProductPickerModal from "./ProductPickerModal";
+import OrderPickerModal from "./OrderPickerModal";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
@@ -68,6 +72,8 @@ const ChatPage = () => {
     selectConversation,
     sendTextMessage,
     sendImageMessage,
+    sendProductMessage,
+    sendOrderMessage,
     sendTyping,
     createOrGetConversation,
     setActiveConversation,
@@ -80,6 +86,9 @@ const ChatPage = () => {
   const [uploading, setUploading] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
+  const [showProductPicker, setShowProductPicker] = useState(false);
+  const [showOrderPicker, setShowOrderPicker] = useState(false);
+  const [sellerStoreId, setSellerStoreId] = useState(null);
 
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
@@ -102,6 +111,23 @@ const ChatPage = () => {
       fetchConversations();
     }
   }, [auth.isAuthenticated, auth.user?.username]);
+
+  // Lấy storeId của seller
+  useEffect(() => {
+    const fetchSellerStore = async () => {
+      if (isSeller && auth.isAuthenticated) {
+        try {
+          const response = await getMyStoresApi(0, 1);
+          if (response?.result?.content?.[0]?.id) {
+            setSellerStoreId(response.result.content[0].id);
+          }
+        } catch (error) {
+          console.error("Error fetching seller store:", error);
+        }
+      }
+    };
+    fetchSellerStore();
+  }, [isSeller, auth.isAuthenticated]);
 
   // Mở conversation từ URL param
   useEffect(() => {
@@ -194,18 +220,47 @@ const ChatPage = () => {
     async (file) => {
       if (!activeConversation) return false;
 
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        message.error("Chỉ hỗ trợ file ảnh");
+        return false;
+      }
+
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024;
+      if (file.size > maxSize) {
+        message.error("Ảnh không được vượt quá 10MB");
+        return false;
+      }
+
       setUploading(true);
       try {
         const response = await uploadPublicImageApi(file);
-        if (response?.result || response?.url) {
-          const imageUrl = response.result || response.url;
-          await sendImageMessage(activeConversation.id, {
+        console.log("Upload response:", response);
+
+        // Response format: { result: { fileUrl, fileName, ... } }
+        const imageUrl =
+          response?.result?.fileUrl ||
+          response?.result?.url ||
+          response?.result;
+
+        if (imageUrl) {
+          const success = await sendImageMessage(activeConversation.id, {
             url: imageUrl,
             thumbnailUrl: imageUrl,
-            fileName: file.name,
-            fileSize: file.size,
-            mimeType: file.type,
+            fileName: response?.result?.originalFileName || file.name,
+            fileSize: response?.result?.fileSize || file.size,
+            mimeType: response?.result?.fileType || file.type,
           });
+
+          if (success) {
+            message.success("Đã gửi ảnh");
+          } else {
+            message.error("Không thể gửi tin nhắn ảnh");
+          }
+        } else {
+          console.error("Invalid upload response:", response);
+          message.error("Không thể tải ảnh lên");
         }
       } catch (error) {
         console.error("Error uploading image:", error);
@@ -217,6 +272,62 @@ const ChatPage = () => {
     },
     [activeConversation, sendImageMessage]
   );
+
+  // Gửi sản phẩm
+  const handleSendProduct = useCallback(
+    async (product) => {
+      if (!activeConversation || !product) return;
+
+      try {
+        const success = await sendProductMessage(
+          activeConversation.id,
+          product.id
+        );
+        if (success) {
+          message.success("Đã gửi sản phẩm");
+        } else {
+          message.error("Không thể gửi sản phẩm");
+        }
+      } catch (error) {
+        console.error("Error sending product:", error);
+        message.error("Không thể gửi sản phẩm");
+      }
+    },
+    [activeConversation, sendProductMessage]
+  );
+
+  // Gửi đơn hàng
+  const handleSendOrder = useCallback(
+    async (order) => {
+      if (!activeConversation || !order) return;
+
+      try {
+        const success = await sendOrderMessage(activeConversation.id, order.id);
+        if (success) {
+          message.success("Đã gửi đơn hàng");
+        } else {
+          message.error("Không thể gửi đơn hàng");
+        }
+      } catch (error) {
+        console.error("Error sending order:", error);
+        message.error("Không thể gửi đơn hàng");
+      }
+    },
+    [activeConversation, sendOrderMessage]
+  );
+
+  // Lấy storeId từ conversation
+  const getConversationStoreId = useCallback((conversation) => {
+    if (!conversation) return null;
+    // shopId có thể được lưu trực tiếp trong conversation
+    if (conversation.shopId) return conversation.shopId;
+
+    // Hoặc lấy từ participant có type là SHOP
+    const shopParticipant = conversation.participants?.find(
+      (p) => p.type === "SHOP" || p.shopId
+    );
+    return shopParticipant?.shopId || shopParticipant?.userId;
+  }, []);
 
   // Format time
   const formatTime = (dateString) => {
@@ -661,6 +772,29 @@ const ChatPage = () => {
                           />
                         </Tooltip>
                       </Upload>
+
+                      {/* Nút gửi sản phẩm - Seller gửi sản phẩm của shop, Buyer gửi sản phẩm của shop đang chat */}
+                      <Tooltip title="Gửi sản phẩm">
+                        <Button
+                          type="text"
+                          icon={<AppstoreOutlined />}
+                          onClick={() => setShowProductPicker(true)}
+                          disabled={
+                            !isSeller &&
+                            !getConversationStoreId(activeConversation)
+                          }
+                        />
+                      </Tooltip>
+
+                      {/* Nút gửi đơn hàng - Cả buyer và seller đều có thể gửi */}
+                      <Tooltip title="Gửi đơn hàng">
+                        <Button
+                          type="text"
+                          icon={<ShoppingCartOutlined />}
+                          onClick={() => setShowOrderPicker(true)}
+                        />
+                      </Tooltip>
+
                       <Button type="text" icon={<SmileOutlined />} />
                     </div>
 
@@ -703,6 +837,29 @@ const ChatPage = () => {
           )}
         </div>
       </div>
+
+      {/* Product Picker Modal */}
+      <ProductPickerModal
+        visible={showProductPicker}
+        onClose={() => setShowProductPicker(false)}
+        onSelect={handleSendProduct}
+        storeId={
+          isSeller ? sellerStoreId : getConversationStoreId(activeConversation)
+        }
+        title={isSeller ? "Chọn sản phẩm của bạn" : "Chọn sản phẩm"}
+      />
+
+      {/* Order Picker Modal */}
+      <OrderPickerModal
+        visible={showOrderPicker}
+        onClose={() => setShowOrderPicker(false)}
+        onSelect={handleSendOrder}
+        storeId={
+          isSeller ? sellerStoreId : getConversationStoreId(activeConversation)
+        }
+        isSeller={isSeller}
+        title={isSeller ? "Chọn đơn hàng của khách" : "Chọn đơn hàng của bạn"}
+      />
     </>
   );
 };

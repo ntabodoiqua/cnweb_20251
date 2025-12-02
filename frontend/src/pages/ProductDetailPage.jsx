@@ -1327,7 +1327,7 @@ const ProductDetailPage = () => {
                           shopName={product.store.storeName}
                           type="default"
                         >
-                          <MessageOutlined /> Chat ngay
+                          Chat ngay
                         </ChatButton>
                         <Button
                           type="primary"
