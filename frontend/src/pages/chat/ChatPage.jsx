@@ -24,7 +24,6 @@ import {
   MessageOutlined,
   SendOutlined,
   PictureOutlined,
-  SmileOutlined,
   ShopOutlined,
   UserOutlined,
   SearchOutlined,
@@ -90,7 +89,7 @@ const ChatPage = () => {
   const [showOrderPicker, setShowOrderPicker] = useState(false);
   const [sellerStoreId, setSellerStoreId] = useState(null);
 
-  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
@@ -150,12 +149,42 @@ const ChatPage = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Scroll to bottom
-  useEffect(() => {
-    if (messagesEndRef.current && activeConversation) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  // Scroll to bottom function - scroll within the messages container
+  const scrollToBottom = useCallback((smooth = true) => {
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      if (smooth) {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: "smooth",
+        });
+      } else {
+        container.scrollTop = container.scrollHeight;
+      }
     }
-  }, [messages, activeConversation]);
+  }, []);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (activeConversation && messages[activeConversation.id]) {
+      scrollToBottom(true);
+    }
+  }, [messages, activeConversation, scrollToBottom]);
+
+  // Scroll to bottom when selecting a new conversation
+  useEffect(() => {
+    if (activeConversation) {
+      // Use setTimeout to ensure DOM is updated before scrolling
+      setTimeout(() => scrollToBottom(false), 100);
+    }
+  }, [activeConversation?.id, scrollToBottom]);
+
+  // Scroll to bottom on initial page load
+  useEffect(() => {
+    if (activeConversation && messages[activeConversation.id]?.length > 0) {
+      setTimeout(() => scrollToBottom(false), 200);
+    }
+  }, []);
 
   // Focus input
   useEffect(() => {
@@ -723,7 +752,10 @@ const ChatPage = () => {
                   </div>
 
                   {/* Messages */}
-                  <div className={styles.messagesContainer}>
+                  <div
+                    className={styles.messagesContainer}
+                    ref={messagesContainerRef}
+                  >
                     {(messages[activeConversation.id] || []).length === 0 ? (
                       <div className={styles.emptyMessages}>
                         <Empty
@@ -745,8 +777,6 @@ const ChatPage = () => {
                         </div>
                       </div>
                     )}
-
-                    <div ref={messagesEndRef} />
                   </div>
 
                   {/* Input */}
@@ -794,8 +824,6 @@ const ChatPage = () => {
                           onClick={() => setShowOrderPicker(true)}
                         />
                       </Tooltip>
-
-                      <Button type="text" icon={<SmileOutlined />} />
                     </div>
 
                     <Input.TextArea

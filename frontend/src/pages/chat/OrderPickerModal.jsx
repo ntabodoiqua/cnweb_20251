@@ -1,6 +1,21 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Modal, Input, List, Spin, Empty, Button, Tag, Select } from "antd";
-import { SearchOutlined, ShoppingCartOutlined } from "@ant-design/icons";
+import {
+  Modal,
+  Input,
+  List,
+  Spin,
+  Empty,
+  Button,
+  Tag,
+  Select,
+  Avatar,
+} from "antd";
+import {
+  SearchOutlined,
+  ShoppingCartOutlined,
+  UserOutlined,
+  ShopOutlined,
+} from "@ant-design/icons";
 import { getMyOrdersApi, getStoreOrdersApi } from "../../util/api";
 import styles from "./PickerModal.module.css";
 import dayjs from "dayjs";
@@ -193,6 +208,11 @@ const OrderPickerModal = ({
             dataSource={orders}
             renderItem={(order) => {
               const statusInfo = getStatusInfo(order.status);
+              const orderItems = order.items || order.orderItems || [];
+              const totalItems = orderItems.reduce(
+                (sum, item) => sum + (item.quantity || 1),
+                0
+              );
               return (
                 <List.Item
                   className={`${styles.listItem} ${
@@ -202,46 +222,86 @@ const OrderPickerModal = ({
                 >
                   <div className={styles.orderItem}>
                     <div className={styles.orderHeader}>
-                      <span className={styles.orderCode}>
-                        <ShoppingCartOutlined />{" "}
-                        {order.orderCode || order.id?.substring(0, 8)}
-                      </span>
+                      <div className={styles.orderCodeWrapper}>
+                        <span className={styles.orderCode}>
+                          <ShoppingCartOutlined />{" "}
+                          {order.orderCode || order.id?.substring(0, 8)}
+                        </span>
+                        <span className={styles.orderItemCount}>
+                          ({totalItems} sản phẩm)
+                        </span>
+                      </div>
                       <Tag color={statusInfo.color}>{statusInfo.text}</Tag>
                     </div>
+
+                    {/* Thông tin người mua/shop */}
+                    <div className={styles.orderPartyInfo}>
+                      {isSeller ? (
+                        <span className={styles.partyName}>
+                          <UserOutlined />{" "}
+                          {order.customerName ||
+                            order.buyerName ||
+                            "Khách hàng"}
+                        </span>
+                      ) : (
+                        <span className={styles.partyName}>
+                          <ShopOutlined />{" "}
+                          {order.storeName || order.shopName || "Shop"}
+                        </span>
+                      )}
+                    </div>
+
                     <div className={styles.orderProducts}>
-                      {(order.items || order.orderItems || [])
-                        .slice(0, 2)
-                        .map((item, index) => (
-                          <div key={index} className={styles.orderProductItem}>
-                            <img
-                              src={item.imageUrl || item.productImage}
-                              alt={item.productName}
-                              className={styles.orderProductImage}
-                            />
-                            <div className={styles.orderProductInfo}>
-                              <span className={styles.orderProductName}>
-                                {item.productName}
+                      {orderItems.slice(0, 3).map((item, index) => (
+                        <div key={index} className={styles.orderProductItem}>
+                          <Avatar
+                            shape="square"
+                            size={48}
+                            src={
+                              item.imageUrl ||
+                              item.productImage ||
+                              item.thumbnailImage
+                            }
+                            icon={<ShoppingCartOutlined />}
+                            className={styles.orderProductAvatar}
+                          />
+                          <div className={styles.orderProductInfo}>
+                            <span className={styles.orderProductName}>
+                              {item.productName}
+                            </span>
+                            <div className={styles.orderProductDetails}>
+                              <span className={styles.orderProductPrice}>
+                                {formatPrice(item.price || item.unitPrice)}
                               </span>
                               <span className={styles.orderProductQty}>
                                 x{item.quantity}
                               </span>
                             </div>
                           </div>
-                        ))}
-                      {(order.items || order.orderItems || []).length > 2 && (
+                        </div>
+                      ))}
+                      {orderItems.length > 3 && (
                         <div className={styles.moreProducts}>
-                          +{(order.items || order.orderItems).length - 2} sản
-                          phẩm khác
+                          +{orderItems.length - 3} sản phẩm khác
                         </div>
                       )}
                     </div>
+
                     <div className={styles.orderFooter}>
-                      <span className={styles.orderDate}>
-                        {dayjs(order.createdAt).format("DD/MM/YYYY HH:mm")}
-                      </span>
-                      <span className={styles.orderTotal}>
-                        {formatPrice(order.totalAmount || order.total)}
-                      </span>
+                      <div className={styles.orderDateInfo}>
+                        <span className={styles.orderDate}>
+                          {dayjs(order.createdAt).format("DD/MM/YYYY HH:mm")}
+                        </span>
+                        {order.paymentMethod && (
+                          <Tag size="small">{order.paymentMethod}</Tag>
+                        )}
+                      </div>
+                      <div className={styles.orderTotalWrapper}>
+                        <span className={styles.orderTotalLabel}>Tổng:</span>
+                        <span className={styles.orderTotal}>
+                          {formatPrice(order.totalAmount || order.total)}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </List.Item>

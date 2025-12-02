@@ -1,6 +1,20 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Modal, Input, List, Avatar, Spin, Empty, Button, Tag } from "antd";
-import { SearchOutlined, ShoppingOutlined } from "@ant-design/icons";
+import {
+  Modal,
+  Input,
+  List,
+  Avatar,
+  Spin,
+  Empty,
+  Button,
+  Tag,
+  Rate,
+} from "antd";
+import {
+  SearchOutlined,
+  ShoppingOutlined,
+  StarOutlined,
+} from "@ant-design/icons";
 import { getPublicProductsApi } from "../../util/api";
 import styles from "./PickerModal.module.css";
 
@@ -32,6 +46,8 @@ const ProductPickerModal = ({
           page: currentPage,
           size: 10,
           isActive: true,
+          sortBy: "createdAt",
+          sortDirection: "DESC",
         });
 
         if (response?.result) {
@@ -96,6 +112,19 @@ const ProductPickerModal = ({
     }).format(price || 0);
   };
 
+  // Format price range display
+  const getPriceDisplay = (product) => {
+    if (product.minPrice && product.maxPrice) {
+      if (product.minPrice === product.maxPrice) {
+        return formatPrice(product.minPrice);
+      }
+      return `${formatPrice(product.minPrice)} - ${formatPrice(
+        product.maxPrice
+      )}`;
+    }
+    return formatPrice(product.sellingPrice || product.price || 0);
+  };
+
   return (
     <Modal
       title={
@@ -155,33 +184,60 @@ const ProductPickerModal = ({
                   avatar={
                     <Avatar
                       shape="square"
-                      size={64}
-                      src={product.thumbnailUrl || product.images?.[0]?.url}
+                      size={72}
+                      src={
+                        product.thumbnailImage ||
+                        product.thumbnailUrl ||
+                        product.images?.[0]?.url
+                      }
                       icon={<ShoppingOutlined />}
+                      className={styles.productAvatar}
                     />
                   }
                   title={
                     <div className={styles.productTitle}>
                       <span className={styles.productName}>{product.name}</span>
-                      {product.discountPercent > 0 && (
-                        <Tag color="red">-{product.discountPercent}%</Tag>
+                      {product.soldCount > 0 && (
+                        <Tag color="orange">Đã bán {product.soldCount}</Tag>
                       )}
                     </div>
                   }
                   description={
                     <div className={styles.productMeta}>
-                      <span className={styles.productPrice}>
-                        {formatPrice(product.sellingPrice || product.price)}
-                      </span>
-                      {product.originalPrice &&
-                        product.originalPrice !== product.sellingPrice && (
-                          <span className={styles.originalPrice}>
-                            {formatPrice(product.originalPrice)}
+                      <div className={styles.priceRow}>
+                        <span className={styles.productPrice}>
+                          {getPriceDisplay(product)}
+                        </span>
+                      </div>
+                      <div className={styles.infoRow}>
+                        {product.averageRating > 0 ? (
+                          <span className={styles.ratingInfo}>
+                            <Rate
+                              disabled
+                              allowHalf
+                              value={product.averageRating}
+                              style={{ fontSize: 12 }}
+                            />
+                            <span className={styles.ratingCount}>
+                              ({product.ratingCount || 0})
+                            </span>
+                          </span>
+                        ) : (
+                          <span className={styles.noRating}>
+                            <StarOutlined /> Chưa có đánh giá
                           </span>
                         )}
-                      <span className={styles.productStock}>
-                        Còn {product.totalStock || product.stock || 0} sản phẩm
-                      </span>
+                        {product.totalStock !== undefined && (
+                          <span className={styles.productStock}>
+                            Kho: {product.totalStock}
+                          </span>
+                        )}
+                      </div>
+                      {product.shortDescription && (
+                        <div className={styles.productDescription}>
+                          {product.shortDescription}
+                        </div>
+                      )}
                     </div>
                   }
                 />

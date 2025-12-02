@@ -76,6 +76,7 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 }
 
 .productName {
@@ -86,17 +87,30 @@
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  flex: 1;
+  min-width: 0;
+}
+
+.productAvatar {
+  border: 1px solid #f0f0f0;
+  border-radius: 8px !important;
 }
 
 .productMeta {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 6px;
   margin-top: 4px;
 }
 
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .productPrice {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #ee4d2d;
 }
@@ -107,9 +121,46 @@
   text-decoration: line-through;
 }
 
+.infoRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.ratingInfo {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ratingCount {
+  font-size: 12px;
+  color: #999;
+}
+
+.noRating {
+  font-size: 12px;
+  color: #999;
+}
+
 .productStock {
   font-size: 12px;
   color: #666;
+  background: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.productDescription {
+  font-size: 12px;
+  color: #666;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
 }
 
 /* Order styles */
@@ -124,6 +175,12 @@
   margin-bottom: 8px;
 }
 
+.orderCodeWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .orderCode {
   font-weight: 600;
   color: #1a1a1a;
@@ -132,34 +189,59 @@
   gap: 6px;
 }
 
+.orderItemCount {
+  font-size: 12px;
+  color: #999;
+}
+
+.orderPartyInfo {
+  margin-bottom: 8px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.partyName {
+  font-size: 13px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .orderProducts {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 8px 0;
-  border-top: 1px solid #f5f5f5;
+  gap: 10px;
+  padding: 10px 0;
   border-bottom: 1px solid #f5f5f5;
 }
 
 .orderProductItem {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+}
+
+.orderProductAvatar {
+  border: 1px solid #f0f0f0;
+  border-radius: 6px !important;
+  flex-shrink: 0;
 }
 
 .orderProductImage {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   object-fit: cover;
-  border-radius: 4px;
+  border-radius: 6px;
   border: 1px solid #f0f0f0;
 }
 
 .orderProductInfo {
   flex: 1;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
 }
 
 .orderProductName {
@@ -170,26 +252,47 @@
   line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  flex: 1;
+  font-weight: 500;
+}
+
+.orderProductDetails {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.orderProductPrice {
+  font-size: 13px;
+  color: #ee4d2d;
+  font-weight: 500;
 }
 
 .orderProductQty {
   font-size: 12px;
   color: #666;
-  margin-left: 8px;
+  background: #f5f5f5;
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
 .moreProducts {
   font-size: 12px;
   color: #999;
   font-style: italic;
+  padding-left: 60px;
 }
 
 .orderFooter {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 10px;
+}
+
+.orderDateInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .orderDate {
@@ -197,8 +300,19 @@
   color: #999;
 }
 
+.orderTotalWrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.orderTotalLabel {
+  font-size: 12px;
+  color: #666;
+}
+
 .orderTotal {
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 600;
   color: #ee4d2d;
 }
