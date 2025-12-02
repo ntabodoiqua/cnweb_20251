@@ -45,6 +45,7 @@ class ChatWebSocketService {
     this.typingHandlers = [];
     this.readReceiptHandlers = [];
     this.connectionHandlers = [];
+    this.presenceHandlers = [];
     this.token = null;
   }
 
@@ -212,6 +213,20 @@ class ChatWebSocketService {
           this.notifyReadReceiptHandlers(data);
         } catch (error) {
           console.error("Error parsing read receipt:", error);
+        }
+      }
+    );
+
+    // Subscribe để nhận presence updates (online/offline status)
+    this.subscriptions.presence = this.stompClient.subscribe(
+      "/topic/presence",
+      (message) => {
+        try {
+          const data = JSON.parse(message.body);
+          console.log("Received presence update:", data);
+          this.notifyPresenceHandlers(data);
+        } catch (error) {
+          console.error("Error parsing presence:", error);
         }
       }
     );
@@ -429,6 +444,18 @@ class ChatWebSocketService {
     };
   }
 
+  /**
+   * Đăng ký handler cho presence events (online/offline status)
+   */
+  onPresence(handler) {
+    this.presenceHandlers.push(handler);
+    return () => {
+      this.presenceHandlers = this.presenceHandlers.filter(
+        (h) => h !== handler
+      );
+    };
+  }
+
   // Notification methods
 
   notifyMessageHandlers(data) {
@@ -467,6 +494,16 @@ class ChatWebSocketService {
         handler(state);
       } catch (error) {
         console.error("Error in connection handler:", error);
+      }
+    });
+  }
+
+  notifyPresenceHandlers(data) {
+    this.presenceHandlers.forEach((handler) => {
+      try {
+        handler(data);
+      } catch (error) {
+        console.error("Error in presence handler:", error);
       }
     });
   }

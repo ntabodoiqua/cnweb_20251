@@ -61,6 +61,7 @@ const ChatPage = () => {
     activeConversation,
     messages,
     typingUsers,
+    userPresence,
     connectionState,
     isLoading,
     connectChat,
@@ -74,6 +75,7 @@ const ChatPage = () => {
     createOrGetConversation,
     setActiveConversation,
     getCurrentUserId,
+    isUserOnline,
   } = useChat();
 
   const [inputValue, setInputValue] = useState("");
@@ -234,6 +236,16 @@ const ChatPage = () => {
     if (!conversation || !conversation.participants) return null;
     const currentUser = getCurrentUserId() || auth.user?.username;
     return conversation.participants.find((p) => p.userId !== currentUser);
+  };
+
+  // Kiểm tra shop có online không
+  const isShopOnline = (conversation) => {
+    const other = getOtherParticipant(conversation);
+    if (!other) return false;
+    // Shop participant có shopId, cần check owner username online
+    return (
+      isUserOnline(other.userId) || (other.shopId && isUserOnline(other.shopId))
+    );
   };
 
   // Lọc conversations
@@ -543,7 +555,7 @@ const ChatPage = () => {
                           "Shop"}
                       </span>
                       <span className={styles.headerStatus}>
-                        {getOtherParticipant(activeConversation)?.online
+                        {isShopOnline(activeConversation)
                           ? "Đang hoạt động"
                           : "Ngoại tuyến"}
                       </span>

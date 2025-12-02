@@ -30,6 +30,7 @@ export const ChatProvider = ({ children }) => {
   const [activeConversation, setActiveConversation] = useState(null);
   const [messages, setMessages] = useState({});
   const [typingUsers, setTypingUsers] = useState({});
+  const [userPresence, setUserPresence] = useState({}); // Track online/offline status
   const [connectionState, setConnectionState] = useState(
     ConnectionState.DISCONNECTED
   );
@@ -624,12 +625,27 @@ export const ChatProvider = ({ children }) => {
       });
     });
 
+    // Đăng ký handler cho presence updates (online/offline)
+    const unsubPresence = chatWebSocketService.onPresence((data) => {
+      const { userId, status, timestamp } = data;
+      console.log("Presence update:", userId, status);
+
+      setUserPresence((prev) => ({
+        ...prev,
+        [userId]: {
+          status: status,
+          lastSeen: timestamp,
+        },
+      }));
+    });
+
     // Cleanup
     return () => {
       unsubConnection();
       unsubMessage();
       unsubTyping();
       unsubReadReceipt();
+      unsubPresence();
 
       // Clear typing timeouts
       Object.values(typingTimeouts.current).forEach(clearTimeout);
@@ -657,6 +673,7 @@ export const ChatProvider = ({ children }) => {
     activeConversation,
     messages,
     typingUsers,
+    userPresence,
     connectionState,
     isLoading,
     unreadTotal,
@@ -696,6 +713,7 @@ export const ChatProvider = ({ children }) => {
     // Utils
     isConnected: () => connectionState === ConnectionState.CONNECTED,
     getCurrentUserId: () => currentUserId.current,
+    isUserOnline: (userId) => userPresence[userId]?.status === "ONLINE",
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

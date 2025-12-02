@@ -335,11 +335,23 @@ public class ChatService {
                 .typing(typing)
                 .build();
         
-        // Gửi đến tất cả participants khác
-        for (String participantId : conversation.getParticipantIds()) {
-            if (!participantId.equals(effectiveUserId)) {
+        // Gửi đến buyer nếu không phải người gõ
+        String buyerId = conversation.getBuyerId();
+        if (buyerId != null && !buyerId.equals(userId)) {
+            messagingTemplate.convertAndSendToUser(
+                    buyerId,
+                    "/queue/typing",
+                    response
+            );
+        }
+        
+        // Gửi đến shop owner nếu không phải người gõ
+        String shopId = conversation.getShopId();
+        if (shopId != null && !shopId.equals(effectiveUserId)) {
+            String shopOwnerUsername = getShopOwnerUsername(shopId);
+            if (shopOwnerUsername != null && !shopOwnerUsername.equals(userId)) {
                 messagingTemplate.convertAndSendToUser(
-                        participantId,
+                        shopOwnerUsername,
                         "/queue/typing",
                         response
                 );
@@ -726,26 +738,80 @@ public class ChatService {
         }
     }
 
+    /**
+     * Gửi tin nhắn WebSocket đến tất cả participants trong conversation.
+     * Chuyển đổi shopId thành ownerUsername để gửi đúng đích.
+     */
     private void sendMessageToParticipants(Conversation conversation, MessageResponse message) {
-        for (String participantId : conversation.getParticipantIds()) {
+        // Gửi đến buyer (buyerId là username)
+        String buyerId = conversation.getBuyerId();
+        if (buyerId != null) {
+            log.debug("Sending message to buyer: {}", buyerId);
             messagingTemplate.convertAndSendToUser(
-                    participantId,
+                    buyerId,
                     "/queue/messages",
                     message
             );
         }
+        
+        // Gửi đến shop owner (cần convert shopId -> ownerUsername)
+        String shopId = conversation.getShopId();
+        if (shopId != null) {
+            String shopOwnerUsername = getShopOwnerUsername(shopId);
+            if (shopOwnerUsername != null) {
+                log.debug("Sending message to shop owner: {} (shop: {})", shopOwnerUsername, shopId);
+                messagingTemplate.convertAndSendToUser(
+                        shopOwnerUsername,
+                        "/queue/messages",
+                        message
+                );
+            }
+        }
     }
 
+    /**
+     * Gửi read receipt WebSocket đến tất cả participants trong conversation.
+     * Chuyển đổi shopId thành ownerUsername để gửi đúng đích.
+     */
     private void sendReadReceiptToParticipants(Conversation conversation, MessageReadResponse readResponse, String excludeUserId) {
-        for (String participantId : conversation.getParticipantIds()) {
-            if (!participantId.equals(excludeUserId)) {
+        // Gửi đến buyer nếu không phải người đọc
+        String buyerId = conversation.getBuyerId();
+        if (buyerId != null && !buyerId.equals(excludeUserId)) {
+            messagingTemplate.convertAndSendToUser(
+                    buyerId,
+                    "/queue/read-receipts",
+                    readResponse
+            );
+        }
+        
+        // Gửi đến shop owner nếu không phải người đọc
+        String shopId = conversation.getShopId();
+        if (shopId != null) {
+            String shopOwnerUsername = getShopOwnerUsername(shopId);
+            if (shopOwnerUsername != null && !shopOwnerUsername.equals(excludeUserId) && !shopId.equals(excludeUserId)) {
                 messagingTemplate.convertAndSendToUser(
-                        participantId,
+                        shopOwnerUsername,
                         "/queue/read-receipts",
                         readResponse
                 );
             }
         }
+    }
+    
+    /**
+     * Lấy ownerUsername của shop từ shopId.
+     * Dùng để gửi WebSocket message đến đúng user.
+     */
+    private String getShopOwnerUsername(String shopId) {
+        try {
+            var response = productServiceClient.getOwnerUsernameByStoreId(shopId);
+            if (response != null && response.getResult() != null) {
+                return response.getResult();
+            }
+        } catch (Exception e) {
+            log.warn("Failed to get owner username for shop: {}", shopId, e);
+        }
+        return null;
     }
 
     // ========================= USER & SHOP HELPER METHODS =========================

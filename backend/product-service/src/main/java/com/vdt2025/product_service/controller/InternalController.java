@@ -83,6 +83,19 @@ public class InternalController {
     }
 
     /**
+     * Get owner username by store ID (for internal service calls)
+     * GET /internal/products/stores/{storeId}/owner-username
+     */
+    @GetMapping("/stores/{storeId}/owner-username")
+    public ApiResponse<String> getOwnerUsernameByStoreId(@PathVariable String storeId) {
+        log.info("Internal: Fetching owner username for store ID: {}", storeId);
+        String username = storeService.getOwnerUsernameByStoreId(storeId);
+        return ApiResponse.<String>builder()
+                .result(username)
+                .build();
+    }
+
+    /**
      * Get variant information by ID (for internal service calls)
      * POST /internal/products/variants
      */

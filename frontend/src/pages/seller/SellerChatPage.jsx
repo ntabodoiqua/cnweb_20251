@@ -58,6 +58,7 @@ const SellerChatPage = () => {
     activeConversation,
     messages,
     typingUsers,
+    userPresence,
     connectionState,
     isLoading,
     connectChat,
@@ -68,6 +69,7 @@ const SellerChatPage = () => {
     sendTyping,
     setActiveConversation,
     getCurrentUserId,
+    isUserOnline,
   } = useChat();
 
   const [inputValue, setInputValue] = useState("");
@@ -209,6 +211,13 @@ const SellerChatPage = () => {
     if (!conversation || !conversation.participants) return null;
     const currentUser = getCurrentUserId() || auth.user?.username;
     return conversation.participants.find((p) => p.userId !== currentUser);
+  };
+
+  // Kiểm tra khách hàng có online không
+  const isCustomerOnline = (conversation) => {
+    const customer = getCustomerParticipant(conversation);
+    if (!customer) return false;
+    return isUserOnline(customer.userId);
   };
 
   // Lấy tên khách hàng
@@ -530,7 +539,7 @@ const SellerChatPage = () => {
                       {getCustomerName(activeConversation)}
                     </span>
                     <span className={styles.headerStatus}>
-                      {getCustomerParticipant(activeConversation)?.online
+                      {isCustomerOnline(activeConversation)
                         ? "Đang hoạt động"
                         : "Ngoại tuyến"}
                     </span>

@@ -37,4 +37,11 @@ public interface StoreService {
      * @return storeId hoặc null nếu không có store
      */
     String getStoreIdByUsername(String username);
+
+    /**
+     * Lấy ownerUsername theo storeId.
+     * @param storeId storeId
+     * @return ownerUsername hoặc null nếu không có store
+     */
+    String getOwnerUsernameByStoreId(String storeId);
 }
