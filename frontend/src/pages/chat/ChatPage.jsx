@@ -507,12 +507,45 @@ const ChatPage = () => {
                   <div className={styles.productName}>
                     {content.product?.productName}
                   </div>
-                  <div className={styles.productPrice}>
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(content.product?.price || 0)}
+                  <div className={styles.productPriceRow}>
+                    <span className={styles.productPrice}>
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(content.product?.price || 0)}
+                    </span>
+                    {content.product?.originalPrice &&
+                      content.product.originalPrice > content.product.price && (
+                        <span className={styles.productOriginalPrice}>
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(content.product.originalPrice)}
+                        </span>
+                      )}
                   </div>
+                  <div className={styles.productMeta}>
+                    {content.product?.rating > 0 && (
+                      <span className={styles.productRating}>
+                        ⭐ {content.product.rating.toFixed(1)}
+                        {content.product.ratingCount > 0 && (
+                          <span className={styles.productRatingCount}>
+                            ({content.product.ratingCount})
+                          </span>
+                        )}
+                      </span>
+                    )}
+                    {content.product?.soldCount > 0 && (
+                      <span className={styles.productSold}>
+                        Đã bán {content.product.soldCount}
+                      </span>
+                    )}
+                  </div>
+                  {content.product?.shopName && (
+                    <div className={styles.productShop}>
+                      <ShopOutlined /> {content.product.shopName}
+                    </div>
+                  )}
                 </div>
               </div>
               {content.product?.note && (
@@ -530,26 +563,102 @@ const ChatPage = () => {
             >
               <div className={styles.orderCard}>
                 <div className={styles.orderHeader}>
-                  <span className={styles.orderCode}>
-                    <ShoppingOutlined /> {content.order?.orderCode}
-                  </span>
+                  <div className={styles.orderCodeWrapper}>
+                    <span className={styles.orderCode}>
+                      <ShoppingOutlined /> {content.order?.orderCode}
+                    </span>
+                    {content.order?.itemCount > 0 && (
+                      <span className={styles.orderItemCount}>
+                        ({content.order.itemCount} sản phẩm)
+                      </span>
+                    )}
+                  </div>
                   <Tag
                     color={
                       content.order?.status === "DELIVERED"
                         ? "success"
                         : content.order?.status === "CANCELLED"
                         ? "error"
-                        : "processing"
+                        : content.order?.status === "SHIPPING"
+                        ? "processing"
+                        : "warning"
                     }
                   >
-                    {content.order?.status}
+                    {content.order?.status === "PENDING" && "Chờ xác nhận"}
+                    {content.order?.status === "CONFIRMED" && "Đã xác nhận"}
+                    {content.order?.status === "SHIPPING" && "Đang giao"}
+                    {content.order?.status === "DELIVERED" && "Đã giao"}
+                    {content.order?.status === "CANCELLED" && "Đã hủy"}
+                    {content.order?.status === "RETURNED" && "Đã hoàn"}
+                    {![
+                      "PENDING",
+                      "CONFIRMED",
+                      "SHIPPING",
+                      "DELIVERED",
+                      "CANCELLED",
+                      "RETURNED",
+                    ].includes(content.order?.status) && content.order?.status}
                   </Tag>
                 </div>
-                <div className={styles.orderAmount}>
-                  {new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(content.order?.totalAmount || 0)}
+
+                {/* Hiển thị danh sách sản phẩm trong đơn hàng */}
+                {content.order?.items && content.order.items.length > 0 && (
+                  <div className={styles.orderProducts}>
+                    {content.order.items.slice(0, 2).map((item, index) => (
+                      <div key={index} className={styles.orderProductItem}>
+                        {item.imageUrl && (
+                          <img
+                            src={item.imageUrl}
+                            alt={item.productName}
+                            className={styles.orderProductImage}
+                          />
+                        )}
+                        <div className={styles.orderProductInfo}>
+                          <span className={styles.orderProductName}>
+                            {item.productName}
+                          </span>
+                          {item.variantName && (
+                            <span className={styles.orderProductVariant}>
+                              {item.variantName}
+                            </span>
+                          )}
+                          <div className={styles.orderProductDetails}>
+                            <span className={styles.orderProductPrice}>
+                              {new Intl.NumberFormat("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                              }).format(item.unitPrice || 0)}
+                            </span>
+                            <span className={styles.orderProductQty}>
+                              x{item.quantity}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {content.order.items.length > 2 && (
+                      <div className={styles.orderMoreProducts}>
+                        +{content.order.items.length - 2} sản phẩm khác
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className={styles.orderFooter}>
+                  {content.order?.orderedAt && (
+                    <span className={styles.orderDate}>
+                      {dayjs(content.order.orderedAt).format("DD/MM/YYYY")}
+                    </span>
+                  )}
+                  <div className={styles.orderTotalWrapper}>
+                    <span className={styles.orderTotalLabel}>Tổng:</span>
+                    <span className={styles.orderAmount}>
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(content.order?.totalAmount || 0)}
+                    </span>
+                  </div>
                 </div>
               </div>
               {content.order?.note && (

@@ -369,12 +369,38 @@ const ChatWidget = () => {
                   <div className={styles.productName}>
                     {content.product?.productName}
                   </div>
-                  <div className={styles.productPrice}>
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(content.product?.price || 0)}
+                  <div className={styles.productPriceRow}>
+                    <span className={styles.productPrice}>
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(content.product?.price || 0)}
+                    </span>
+                    {content.product?.originalPrice &&
+                      content.product.originalPrice > content.product.price && (
+                        <span className={styles.productOriginalPrice}>
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(content.product.originalPrice)}
+                        </span>
+                      )}
                   </div>
+                  {(content.product?.rating > 0 ||
+                    content.product?.soldCount > 0) && (
+                    <div className={styles.productMeta}>
+                      {content.product?.rating > 0 && (
+                        <span className={styles.productRating}>
+                          ⭐ {content.product.rating.toFixed(1)}
+                        </span>
+                      )}
+                      {content.product?.soldCount > 0 && (
+                        <span className={styles.productSold}>
+                          Đã bán {content.product.soldCount}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
               {content.product?.note && (
@@ -387,22 +413,83 @@ const ChatWidget = () => {
             <div className={styles.messageOrder}>
               <div className={styles.orderCard}>
                 <div className={styles.orderHeader}>
-                  <span className={styles.orderCode}>
-                    {content.order?.orderCode}
-                  </span>
+                  <div className={styles.orderCodeWrapper}>
+                    <span className={styles.orderCode}>
+                      {content.order?.orderCode}
+                    </span>
+                    {content.order?.itemCount > 0 && (
+                      <span className={styles.orderItemCount}>
+                        ({content.order.itemCount} sản phẩm)
+                      </span>
+                    )}
+                  </div>
                   <span
                     className={`${styles.orderStatus} ${
                       styles[content.order?.status?.toLowerCase()]
                     }`}
                   >
-                    {content.order?.status}
+                    {content.order?.status === "PENDING" && "Chờ xác nhận"}
+                    {content.order?.status === "CONFIRMED" && "Đã xác nhận"}
+                    {content.order?.status === "SHIPPING" && "Đang giao"}
+                    {content.order?.status === "DELIVERED" && "Đã giao"}
+                    {content.order?.status === "CANCELLED" && "Đã hủy"}
+                    {content.order?.status === "RETURNED" && "Đã hoàn"}
+                    {![
+                      "PENDING",
+                      "CONFIRMED",
+                      "SHIPPING",
+                      "DELIVERED",
+                      "CANCELLED",
+                      "RETURNED",
+                    ].includes(content.order?.status) && content.order?.status}
                   </span>
                 </div>
-                <div className={styles.orderAmount}>
-                  {new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(content.order?.totalAmount || 0)}
+
+                {/* Hiển thị danh sách sản phẩm trong đơn hàng */}
+                {content.order?.items && content.order.items.length > 0 && (
+                  <div className={styles.orderProducts}>
+                    {content.order.items.slice(0, 2).map((item, index) => (
+                      <div key={index} className={styles.orderProductItem}>
+                        {item.imageUrl && (
+                          <img
+                            src={item.imageUrl}
+                            alt={item.productName}
+                            className={styles.orderProductImage}
+                          />
+                        )}
+                        <div className={styles.orderProductInfo}>
+                          <span className={styles.orderProductName}>
+                            {item.productName}
+                          </span>
+                          <div className={styles.orderProductDetails}>
+                            <span className={styles.orderProductPrice}>
+                              {new Intl.NumberFormat("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                              }).format(item.unitPrice || 0)}
+                            </span>
+                            <span className={styles.orderProductQty}>
+                              x{item.quantity}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {content.order.items.length > 2 && (
+                      <div className={styles.orderMoreProducts}>
+                        +{content.order.items.length - 2} sản phẩm khác
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className={styles.orderFooter}>
+                  <span className={styles.orderAmount}>
+                    {new Intl.NumberFormat("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }).format(content.order?.totalAmount || 0)}
+                  </span>
                 </div>
               </div>
               {content.order?.note && (
