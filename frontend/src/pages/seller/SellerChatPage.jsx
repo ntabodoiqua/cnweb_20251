@@ -24,7 +24,6 @@ import {
   MessageOutlined,
   SendOutlined,
   PictureOutlined,
-  SmileOutlined,
   UserOutlined,
   SearchOutlined,
   CheckOutlined,
@@ -34,12 +33,16 @@ import {
   DisconnectOutlined,
   ArrowLeftOutlined,
   ShoppingOutlined,
+  ShoppingCartOutlined,
+  AppstoreOutlined,
 } from "@ant-design/icons";
 import { useChat } from "../../contexts/ChatContext";
 import { AuthContext } from "../../components/context/auth.context";
 import { ConnectionState, ContentType } from "../../util/chatWebSocket";
-import { uploadPublicImageApi } from "../../util/api";
+import { uploadPublicImageApi, getMyStoresApi } from "../../util/api";
 import styles from "./SellerChatPage.module.css";
+import ProductPickerModal from "../chat/ProductPickerModal";
+import OrderPickerModal from "../chat/OrderPickerModal";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
@@ -66,6 +69,8 @@ const SellerChatPage = () => {
     selectConversation,
     sendTextMessage,
     sendImageMessage,
+    sendProductMessage,
+    sendOrderMessage,
     sendTyping,
     setActiveConversation,
     getCurrentUserId,
@@ -77,8 +82,11 @@ const SellerChatPage = () => {
   const [uploading, setUploading] = useState(false);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 768);
+  const [showProductPicker, setShowProductPicker] = useState(false);
+  const [showOrderPicker, setShowOrderPicker] = useState(false);
+  const [sellerStoreId, setSellerStoreId] = useState(null);
 
-  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
 
@@ -89,6 +97,23 @@ const SellerChatPage = () => {
       fetchConversations();
     }
   }, [auth.isAuthenticated, auth.user?.username]);
+
+  // Lấy storeId của seller
+  useEffect(() => {
+    const fetchSellerStore = async () => {
+      if (auth.isAuthenticated) {
+        try {
+          const response = await getMyStoresApi(0, 1);
+          if (response?.result?.content?.[0]?.id) {
+            setSellerStoreId(response.result.content[0].id);
+          }
+        } catch (error) {
+          console.error("Error fetching seller store:", error);
+        }
+      }
+    };
+    fetchSellerStore();
+  }, [auth.isAuthenticated]);
 
   // Mở conversation từ URL param
   useEffect(() => {
@@ -107,12 +132,35 @@ const SellerChatPage = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Scroll to bottom
-  useEffect(() => {
-    if (messagesEndRef.current && activeConversation) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+  // Scroll to bottom function - scroll within the messages container
+  const scrollToBottom = useCallback((smooth = true) => {
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      if (smooth) {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: "smooth",
+        });
+      } else {
+        container.scrollTop = container.scrollHeight;
+      }
     }
-  }, [messages, activeConversation]);
+  }, []);
+
+  // Scroll to bottom when messages change (new message received/sent)
+  useEffect(() => {
+    if (activeConversation && messages[activeConversation.id]) {
+      scrollToBottom(true);
+    }
+  }, [messages, activeConversation, scrollToBottom]);
+
+  // Scroll to bottom when selecting a new conversation
+  useEffect(() => {
+    if (activeConversation) {
+      // Use setTimeout to ensure DOM is updated before scrolling
+      setTimeout(() => scrollToBottom(false), 100);
+    }
+  }, [activeConversation?.id, scrollToBottom]);
 
   // Focus input
   useEffect(() => {
@@ -165,18 +213,47 @@ const SellerChatPage = () => {
     async (file) => {
       if (!activeConversation) return false;
 
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        message.error("Chỉ hỗ trợ file ảnh");
+        return false;
+      }
+
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024;
+      if (file.size > maxSize) {
+        message.error("Ảnh không được vượt quá 10MB");
+        return false;
+      }
+
       setUploading(true);
       try {
         const response = await uploadPublicImageApi(file);
-        if (response?.result || response?.url) {
-          const imageUrl = response.result || response.url;
-          await sendImageMessage(activeConversation.id, {
+        console.log("Upload response:", response);
+
+        // Response format: { result: { fileUrl, fileName, ... } }
+        const imageUrl =
+          response?.result?.fileUrl ||
+          response?.result?.url ||
+          response?.result;
+
+        if (imageUrl) {
+          const success = await sendImageMessage(activeConversation.id, {
             url: imageUrl,
             thumbnailUrl: imageUrl,
-            fileName: file.name,
-            fileSize: file.size,
-            mimeType: file.type,
+            fileName: response?.result?.originalFileName || file.name,
+            fileSize: response?.result?.fileSize || file.size,
+            mimeType: response?.result?.fileType || file.type,
           });
+
+          if (success) {
+            message.success("Đã gửi ảnh");
+          } else {
+            message.error("Không thể gửi tin nhắn ảnh");
+          }
+        } else {
+          console.error("Invalid upload response:", response);
+          message.error("Không thể tải ảnh lên");
         }
       } catch (error) {
         console.error("Error uploading image:", error);
@@ -187,6 +264,49 @@ const SellerChatPage = () => {
       return false;
     },
     [activeConversation, sendImageMessage]
+  );
+
+  // Gửi sản phẩm
+  const handleSendProduct = useCallback(
+    async (product) => {
+      if (!activeConversation || !product) return;
+
+      try {
+        const success = await sendProductMessage(
+          activeConversation.id,
+          product.id
+        );
+        if (success) {
+          message.success("Đã gửi sản phẩm");
+        } else {
+          message.error("Không thể gửi sản phẩm");
+        }
+      } catch (error) {
+        console.error("Error sending product:", error);
+        message.error("Không thể gửi sản phẩm");
+      }
+    },
+    [activeConversation, sendProductMessage]
+  );
+
+  // Gửi đơn hàng
+  const handleSendOrder = useCallback(
+    async (order) => {
+      if (!activeConversation || !order) return;
+
+      try {
+        const success = await sendOrderMessage(activeConversation.id, order.id);
+        if (success) {
+          message.success("Đã gửi đơn hàng");
+        } else {
+          message.error("Không thể gửi đơn hàng");
+        }
+      } catch (error) {
+        console.error("Error sending order:", error);
+        message.error("Không thể gửi đơn hàng");
+      }
+    },
+    [activeConversation, sendOrderMessage]
   );
 
   // Format time
@@ -342,11 +462,39 @@ const SellerChatPage = () => {
                   <div className={styles.productName}>
                     {content.product?.productName}
                   </div>
-                  <div className={styles.productPrice}>
-                    {new Intl.NumberFormat("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    }).format(content.product?.price || 0)}
+                  <div className={styles.productPriceRow}>
+                    <span className={styles.productPrice}>
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(content.product?.price || 0)}
+                    </span>
+                    {content.product?.originalPrice &&
+                      content.product.originalPrice > content.product.price && (
+                        <span className={styles.productOriginalPrice}>
+                          {new Intl.NumberFormat("vi-VN", {
+                            style: "currency",
+                            currency: "VND",
+                          }).format(content.product.originalPrice)}
+                        </span>
+                      )}
+                  </div>
+                  <div className={styles.productMeta}>
+                    {content.product?.rating > 0 && (
+                      <span className={styles.productRating}>
+                        ⭐ {content.product.rating.toFixed(1)}
+                        {content.product.ratingCount > 0 && (
+                          <span className={styles.productRatingCount}>
+                            ({content.product.ratingCount})
+                          </span>
+                        )}
+                      </span>
+                    )}
+                    {content.product?.soldCount > 0 && (
+                      <span className={styles.productSold}>
+                        Đã bán {content.product.soldCount}
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
@@ -363,26 +511,102 @@ const SellerChatPage = () => {
             >
               <div className={styles.orderCard}>
                 <div className={styles.orderHeader}>
-                  <span className={styles.orderCode}>
-                    <ShoppingOutlined /> {content.order?.orderCode}
-                  </span>
+                  <div className={styles.orderCodeWrapper}>
+                    <span className={styles.orderCode}>
+                      <ShoppingOutlined /> {content.order?.orderCode}
+                    </span>
+                    {content.order?.itemCount > 0 && (
+                      <span className={styles.orderItemCount}>
+                        ({content.order.itemCount} sản phẩm)
+                      </span>
+                    )}
+                  </div>
                   <Tag
                     color={
                       content.order?.status === "DELIVERED"
                         ? "success"
                         : content.order?.status === "CANCELLED"
                         ? "error"
-                        : "processing"
+                        : content.order?.status === "SHIPPING"
+                        ? "processing"
+                        : "warning"
                     }
                   >
-                    {content.order?.status}
+                    {content.order?.status === "PENDING" && "Chờ xác nhận"}
+                    {content.order?.status === "CONFIRMED" && "Đã xác nhận"}
+                    {content.order?.status === "SHIPPING" && "Đang giao"}
+                    {content.order?.status === "DELIVERED" && "Đã giao"}
+                    {content.order?.status === "CANCELLED" && "Đã hủy"}
+                    {content.order?.status === "RETURNED" && "Đã hoàn"}
+                    {![
+                      "PENDING",
+                      "CONFIRMED",
+                      "SHIPPING",
+                      "DELIVERED",
+                      "CANCELLED",
+                      "RETURNED",
+                    ].includes(content.order?.status) && content.order?.status}
                   </Tag>
                 </div>
-                <div className={styles.orderAmount}>
-                  {new Intl.NumberFormat("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }).format(content.order?.totalAmount || 0)}
+
+                {/* Hiển thị danh sách sản phẩm trong đơn hàng */}
+                {content.order?.items && content.order.items.length > 0 && (
+                  <div className={styles.orderProducts}>
+                    {content.order.items.slice(0, 2).map((item, index) => (
+                      <div key={index} className={styles.orderProductItem}>
+                        {item.imageUrl && (
+                          <img
+                            src={item.imageUrl}
+                            alt={item.productName}
+                            className={styles.orderProductImage}
+                          />
+                        )}
+                        <div className={styles.orderProductInfo}>
+                          <span className={styles.orderProductName}>
+                            {item.productName}
+                          </span>
+                          {item.variantName && (
+                            <span className={styles.orderProductVariant}>
+                              {item.variantName}
+                            </span>
+                          )}
+                          <div className={styles.orderProductDetails}>
+                            <span className={styles.orderProductPrice}>
+                              {new Intl.NumberFormat("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                              }).format(item.unitPrice || 0)}
+                            </span>
+                            <span className={styles.orderProductQty}>
+                              x{item.quantity}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    {content.order.items.length > 2 && (
+                      <div className={styles.orderMoreProducts}>
+                        +{content.order.items.length - 2} sản phẩm khác
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div className={styles.orderFooter}>
+                  {content.order?.orderedAt && (
+                    <span className={styles.orderDate}>
+                      {dayjs(content.order.orderedAt).format("DD/MM/YYYY")}
+                    </span>
+                  )}
+                  <div className={styles.orderTotalWrapper}>
+                    <span className={styles.orderTotalLabel}>Tổng:</span>
+                    <span className={styles.orderAmount}>
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(content.order?.totalAmount || 0)}
+                    </span>
+                  </div>
                 </div>
               </div>
               {content.order?.note && (
@@ -556,7 +780,10 @@ const SellerChatPage = () => {
                 </div>
 
                 {/* Messages */}
-                <div className={styles.messagesContainer}>
+                <div
+                  className={styles.messagesContainer}
+                  ref={messagesContainerRef}
+                >
                   {(messages[activeConversation.id] || []).length === 0 ? (
                     <div className={styles.emptyMessages}>
                       <Empty
@@ -578,8 +805,6 @@ const SellerChatPage = () => {
                       </div>
                     </div>
                   )}
-
-                  <div ref={messagesEndRef} />
                 </div>
 
                 {/* Input */}
@@ -605,7 +830,25 @@ const SellerChatPage = () => {
                         />
                       </Tooltip>
                     </Upload>
-                    <Button type="text" icon={<SmileOutlined />} />
+
+                    {/* Nút gửi sản phẩm */}
+                    <Tooltip title="Gửi sản phẩm">
+                      <Button
+                        type="text"
+                        icon={<AppstoreOutlined />}
+                        onClick={() => setShowProductPicker(true)}
+                        disabled={!sellerStoreId}
+                      />
+                    </Tooltip>
+
+                    {/* Nút gửi đơn hàng */}
+                    <Tooltip title="Gửi đơn hàng">
+                      <Button
+                        type="text"
+                        icon={<ShoppingCartOutlined />}
+                        onClick={() => setShowOrderPicker(true)}
+                      />
+                    </Tooltip>
                   </div>
 
                   <Input.TextArea
@@ -646,6 +889,25 @@ const SellerChatPage = () => {
           </div>
         )}
       </div>
+
+      {/* Product Picker Modal */}
+      <ProductPickerModal
+        visible={showProductPicker}
+        onClose={() => setShowProductPicker(false)}
+        onSelect={handleSendProduct}
+        storeId={sellerStoreId}
+        title="Chọn sản phẩm của bạn"
+      />
+
+      {/* Order Picker Modal */}
+      <OrderPickerModal
+        visible={showOrderPicker}
+        onClose={() => setShowOrderPicker(false)}
+        onSelect={handleSendOrder}
+        storeId={sellerStoreId}
+        isSeller={true}
+        title="Chọn đơn hàng của khách"
+      />
     </>
   );
 };

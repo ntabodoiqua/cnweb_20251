@@ -23,20 +23,24 @@ import {
   MinusOutlined,
   SendOutlined,
   PictureOutlined,
-  SmileOutlined,
-  PaperClipOutlined,
   ShopOutlined,
+  UserOutlined,
   CheckOutlined,
   CheckCircleOutlined,
   LoadingOutlined,
   WifiOutlined,
   DisconnectOutlined,
+  AppstoreOutlined,
+  ShoppingCartOutlined,
 } from "@ant-design/icons";
 import { useChat } from "../../contexts/ChatContext";
 import { AuthContext } from "../context/auth.context";
 import { ConnectionState, ContentType } from "../../util/chatWebSocket";
-import { uploadPublicImageApi } from "../../util/api";
+import { uploadPublicImageApi, getMyStoresApi } from "../../util/api";
+import { getHighestRole, ROLES } from "../../constants/roles";
 import styles from "./ChatWidget.module.css";
+import ProductPickerModal from "../../pages/chat/ProductPickerModal";
+import OrderPickerModal from "../../pages/chat/OrderPickerModal";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
@@ -62,6 +66,8 @@ const ChatWidget = () => {
     selectConversation,
     sendTextMessage,
     sendImageMessage,
+    sendProductMessage,
+    sendOrderMessage,
     sendTyping,
     markAsRead,
     toggleChat,
@@ -74,10 +80,16 @@ const ChatWidget = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [showConversationList, setShowConversationList] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [showProductPicker, setShowProductPicker] = useState(false);
+  const [showOrderPicker, setShowOrderPicker] = useState(false);
+  const [sellerStoreId, setSellerStoreId] = useState(null);
 
-  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
+
+  // Xác định user là seller hay buyer
+  const isSeller = getHighestRole(auth.user?.role) === ROLES.SELLER;
 
   // Kết nối chat khi user đăng nhập
   useEffect(() => {
@@ -93,12 +105,51 @@ const ChatWidget = () => {
     };
   }, [auth.isAuthenticated, auth.user?.username]);
 
+  // Lấy storeId của seller
+  useEffect(() => {
+    const fetchSellerStore = async () => {
+      if (isSeller && auth.isAuthenticated) {
+        try {
+          const response = await getMyStoresApi(0, 1);
+          if (response?.result?.content?.[0]?.id) {
+            setSellerStoreId(response.result.content[0].id);
+          }
+        } catch (error) {
+          console.error("Error fetching seller store:", error);
+        }
+      }
+    };
+    fetchSellerStore();
+  }, [isSeller, auth.isAuthenticated]);
+
+  // Scroll to bottom function - scroll within the messages container
+  const scrollToBottom = useCallback((smooth = true) => {
+    if (messagesContainerRef.current) {
+      const container = messagesContainerRef.current;
+      if (smooth) {
+        container.scrollTo({
+          top: container.scrollHeight,
+          behavior: "smooth",
+        });
+      } else {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+  }, []);
+
   // Scroll to bottom khi có tin nhắn mới
   useEffect(() => {
-    if (messagesEndRef.current && activeConversation) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    if (activeConversation && messages[activeConversation.id]) {
+      scrollToBottom(true);
     }
-  }, [messages, activeConversation]);
+  }, [messages, activeConversation, scrollToBottom]);
+
+  // Scroll to bottom when selecting a new conversation
+  useEffect(() => {
+    if (activeConversation) {
+      setTimeout(() => scrollToBottom(false), 100);
+    }
+  }, [activeConversation?.id, scrollToBottom]);
 
   // Focus input khi mở conversation
   useEffect(() => {
@@ -154,6 +205,20 @@ const ChatWidget = () => {
     async (file) => {
       if (!activeConversation) return false;
 
+      // Validate file type
+      const isImage = file.type.startsWith("image/");
+      if (!isImage) {
+        message.error("Chỉ có thể tải lên file ảnh!");
+        return false;
+      }
+
+      // Validate file size (10MB)
+      const isLt10M = file.size / 1024 / 1024 < 10;
+      if (!isLt10M) {
+        message.error("Ảnh phải nhỏ hơn 10MB!");
+        return false;
+      }
+
       setUploading(true);
       try {
         const response = await uploadPublicImageApi(file);
@@ -177,6 +242,51 @@ const ChatWidget = () => {
     },
     [activeConversation, sendImageMessage]
   );
+
+  // Gửi sản phẩm
+  const handleSendProduct = useCallback(
+    async (product) => {
+      if (!activeConversation || !product) return;
+
+      try {
+        await sendProductMessage(activeConversation.id, product);
+        setShowProductPicker(false);
+      } catch (error) {
+        console.error("Error sending product:", error);
+        message.error("Không thể gửi sản phẩm");
+      }
+    },
+    [activeConversation, sendProductMessage]
+  );
+
+  // Gửi đơn hàng
+  const handleSendOrder = useCallback(
+    async (order) => {
+      if (!activeConversation || !order) return;
+
+      try {
+        await sendOrderMessage(activeConversation.id, order);
+        setShowOrderPicker(false);
+      } catch (error) {
+        console.error("Error sending order:", error);
+        message.error("Không thể gửi đơn hàng");
+      }
+    },
+    [activeConversation, sendOrderMessage]
+  );
+
+  // Helper function to get storeId for current conversation
+  const getConversationStoreId = useCallback(() => {
+    if (!activeConversation) return null;
+
+    // If user is seller, use their store
+    if (isSeller && sellerStoreId) {
+      return sellerStoreId;
+    }
+
+    // If user is buyer, use store from conversation
+    return activeConversation.storeId;
+  }, [activeConversation, isSeller, sellerStoreId]);
 
   // Chọn conversation
   const handleSelectConversation = useCallback(
@@ -528,7 +638,7 @@ const ChatWidget = () => {
     const typingList = typingUsers[activeConversation.id] || [];
 
     return (
-      <div className={styles.messagesContainer}>
+      <div className={styles.messagesContainer} ref={messagesContainerRef}>
         {conversationMessages.length === 0 ? (
           <div className={styles.emptyMessages}>
             <Empty
@@ -550,8 +660,6 @@ const ChatWidget = () => {
             </div>
           </div>
         )}
-
-        <div ref={messagesEndRef} />
       </div>
     );
   };
@@ -577,6 +685,24 @@ const ChatWidget = () => {
           type="text"
           icon={<SmileOutlined />}
           className={styles.inputActionBtn}
+        />
+        {/* Product picker button - chỉ hiện cho seller */}
+        {isSeller && sellerStoreId && (
+          <Button
+            type="text"
+            icon={<AppstoreOutlined />}
+            className={styles.inputActionBtn}
+            onClick={() => setShowProductPicker(true)}
+            title="Gửi sản phẩm"
+          />
+        )}
+        {/* Order picker button */}
+        <Button
+          type="text"
+          icon={<ShoppingCartOutlined />}
+          className={styles.inputActionBtn}
+          onClick={() => setShowOrderPicker(true)}
+          title="Gửi đơn hàng"
         />
       </div>
 
@@ -696,6 +822,25 @@ const ChatWidget = () => {
           {activeConversation && !showConversationList && renderInput()}
         </div>
       )}
+
+      {/* Product Picker Modal - chỉ cho seller */}
+      {isSeller && sellerStoreId && (
+        <ProductPickerModal
+          open={showProductPicker}
+          onClose={() => setShowProductPicker(false)}
+          onSelect={handleSendProduct}
+          storeId={sellerStoreId}
+        />
+      )}
+
+      {/* Order Picker Modal */}
+      <OrderPickerModal
+        open={showOrderPicker}
+        onClose={() => setShowOrderPicker(false)}
+        onSelect={handleSendOrder}
+        storeId={getConversationStoreId()}
+        isSeller={isSeller}
+      />
     </>
   );
 };
