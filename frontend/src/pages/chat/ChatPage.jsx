@@ -164,7 +164,7 @@ const ChatPage = () => {
     }
   }, []);
 
-  // Scroll to bottom when messages change
+  // Scroll to bottom when messages change (new message received/sent)
   useEffect(() => {
     if (activeConversation && messages[activeConversation.id]) {
       scrollToBottom(true);
@@ -178,13 +178,6 @@ const ChatPage = () => {
       setTimeout(() => scrollToBottom(false), 100);
     }
   }, [activeConversation?.id, scrollToBottom]);
-
-  // Scroll to bottom on initial page load
-  useEffect(() => {
-    if (activeConversation && messages[activeConversation.id]?.length > 0) {
-      setTimeout(() => scrollToBottom(false), 200);
-    }
-  }, []);
 
   // Focus input
   useEffect(() => {

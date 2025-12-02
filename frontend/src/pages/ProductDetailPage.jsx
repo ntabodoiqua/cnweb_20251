@@ -101,82 +101,121 @@ const ProductDetailPage = () => {
   const [canRate, setCanRate] = useState(false);
   const [ratingsKey, setRatingsKey] = useState(0); // Used to refresh ratings component
 
+  // Track if initial data has been loaded to prevent duplicate fetches
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+
   useEffect(() => {
-    if (productId) {
-      // Fetch all initial data in parallel to reduce re-renders
-      const fetchInitialData = async () => {
-        setLoading(true);
-        try {
-          // Fetch product detail, specs, and selection config in parallel
-          const [productResponse, specsResponse, selectionResponse] =
-            await Promise.allSettled([
-              getPublicProductDetailApi(productId),
-              getPublicProductSpecsApi(productId),
-              getSelectionConfigApi(productId),
-            ]);
+    // Skip if already loaded for this productId
+    if (!productId || initialDataLoaded) return;
 
-          // Process product detail
-          if (
-            productResponse.status === "fulfilled" &&
-            productResponse.value.code === 1000
-          ) {
-            const productData = productResponse.value.result;
-            setProduct(productData);
+    // Fetch all initial data in parallel to reduce re-renders
+    const fetchInitialData = async () => {
+      setLoading(true);
 
-            // Set default image
-            if (productData.images && productData.images.length > 0) {
-              const primaryImage =
-                productData.images.find((img) => img.isPrimary) ||
-                productData.images[0];
-              setSelectedImage(primaryImage.imageUrl);
-            }
+      // Prepare all API calls including canRate if authenticated
+      const apiCalls = [
+        getPublicProductDetailApi(productId),
+        getPublicProductSpecsApi(productId),
+        getSelectionConfigApi(productId),
+      ];
 
-            // Fetch ward information if wardId exists
-            if (productData.store?.wardId) {
-              fetchWardInfo(productData.store.wardId);
-            }
+      // Add canRate API call if authenticated
+      if (auth?.isAuthenticated) {
+        apiCalls.push(canRateProductApi(productId));
+      }
+
+      try {
+        const results = await Promise.allSettled(apiCalls);
+
+        const [productResponse, specsResponse, selectionResponse] = results;
+        const canRateResponse = auth?.isAuthenticated ? results[3] : null;
+
+        // Prepare batch state updates
+        let newProduct = null;
+        let newSelectedImage = null;
+        let newProductSpecs = null;
+        let newSelectionConfig = null;
+        let newCanRate = false;
+        let wardIdToFetch = null;
+
+        // Process product detail
+        if (
+          productResponse.status === "fulfilled" &&
+          productResponse.value.code === 1000
+        ) {
+          newProduct = productResponse.value.result;
+
+          // Set default image
+          if (newProduct.images && newProduct.images.length > 0) {
+            const primaryImage =
+              newProduct.images.find((img) => img.isPrimary) ||
+              newProduct.images[0];
+            newSelectedImage = primaryImage.imageUrl;
           }
 
-          // Process specs
-          if (
-            specsResponse.status === "fulfilled" &&
-            specsResponse.value.code === 1000
-          ) {
-            setProductSpecs(specsResponse.value.result?.specs);
+          // Save wardId for later fetch (outside batch)
+          if (newProduct.store?.wardId) {
+            wardIdToFetch = newProduct.store.wardId;
           }
-
-          // Process selection config
-          if (
-            selectionResponse.status === "fulfilled" &&
-            selectionResponse.value.code === 1000
-          ) {
-            setSelectionConfig(selectionResponse.value.result);
-          }
-          setSelectionConfigLoaded(true);
-        } catch (error) {
-          console.error("Error fetching initial data:", error);
-          notification.error({
-            message: "Lỗi tải sản phẩm",
-            description: "Không thể tải thông tin sản phẩm. Vui lòng thử lại.",
-            placement: "topRight",
-          });
-        } finally {
-          setLoading(false);
         }
-      };
 
-      fetchInitialData();
-    }
-  }, [productId]);
+        // Process specs
+        if (
+          specsResponse.status === "fulfilled" &&
+          specsResponse.value.code === 1000
+        ) {
+          newProductSpecs = specsResponse.value.result?.specs;
+        }
 
-  // Check can rate only when authenticated
+        // Process selection config
+        if (
+          selectionResponse.status === "fulfilled" &&
+          selectionResponse.value.code === 1000
+        ) {
+          newSelectionConfig = selectionResponse.value.result;
+        }
+
+        // Process canRate
+        if (
+          canRateResponse?.status === "fulfilled" &&
+          canRateResponse.value?.result === true
+        ) {
+          newCanRate = true;
+        }
+
+        // Batch all state updates together using React's automatic batching
+        setProduct(newProduct);
+        setSelectedImage(newSelectedImage);
+        setProductSpecs(newProductSpecs);
+        setSelectionConfig(newSelectionConfig);
+        setSelectionConfigLoaded(true);
+        setCanRate(newCanRate);
+        setInitialDataLoaded(true);
+        setLoading(false);
+
+        // Fetch ward info separately (minor, won't cause visible re-render)
+        if (wardIdToFetch) {
+          fetchWardInfo(wardIdToFetch);
+        }
+      } catch (error) {
+        console.error("Error fetching initial data:", error);
+        notification.error({
+          message: "Lỗi tải sản phẩm",
+          description: "Không thể tải thông tin sản phẩm. Vui lòng thử lại.",
+          placement: "topRight",
+        });
+        setLoading(false);
+        setInitialDataLoaded(true);
+      }
+    };
+
+    fetchInitialData();
+  }, [productId, auth?.isAuthenticated, initialDataLoaded]);
+
+  // Reset initialDataLoaded when productId changes
   useEffect(() => {
-    if (productId && auth?.isAuthenticated) {
-      checkCanRate();
-    } else {
-      setCanRate(false);
-    }
-  }, [productId, auth?.isAuthenticated]);
+    setInitialDataLoaded(false);
+  }, [productId]);
 
   // Check if user can rate this product
   const checkCanRate = async () => {

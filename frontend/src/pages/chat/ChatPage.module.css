@@ -5,6 +5,12 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  /* Prevent body scroll when on chat page */
+  position: fixed;
+  top: 64px; /* Below header */
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 /* Page Header */
@@ -227,6 +233,7 @@
   min-height: 0; /* Important for flex child overflow */
   scrollbar-width: thin;
   scrollbar-color: #d9d9d9 transparent;
+  overscroll-behavior: contain; /* Prevent scroll propagation to parent */
 }
 
 .messagesContainer::-webkit-scrollbar {
@@ -612,6 +619,7 @@
   .chatPage {
     height: 100vh;
     max-height: 100vh;
+    top: 0; /* Full screen on mobile */
   }
 
   .pageHeader {
