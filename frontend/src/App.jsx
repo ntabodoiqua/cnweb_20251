@@ -31,58 +31,28 @@ function App() {
         const token = localStorage.getItem("access_token");
 
         if (token) {
-          // Kiểm tra token có hết hạn không
-          if (isTokenExpired(token)) {
-            // Token đã hết hạn
-            localStorage.removeItem("access_token");
-            setAuth({
-              isAuthenticated: false,
-              user: {
-                username: "",
-                email: "",
-                name: "",
-                role: "",
-              },
-            });
-          } else {
-            // Token còn hiệu lực, decode để lấy thông tin
-            const tokenInfo = getTokenInfo(token);
+          // Token còn hiệu lực, decode để lấy thông tin
+          const tokenInfo = getTokenInfo(token);
 
-            if (tokenInfo) {
-              // Gọi API để lấy đầy đủ thông tin user
-              try {
-                const userInfoRes = await getMyInfoApi();
-                if (userInfoRes && userInfoRes.code === 1000) {
-                  const userInfo = userInfoRes.result;
-                  setAuth({
-                    isAuthenticated: true,
-                    user: {
-                      username: userInfo.username || tokenInfo.username,
-                      role: tokenInfo.role,
-                      firstName: userInfo.firstName || "",
-                      lastName: userInfo.lastName || "",
-                      avatarUrl:
-                        userInfo.avatarUrl || userInfo.avatarName || "",
-                      email: userInfo.email || "",
-                    },
-                  });
-                } else {
-                  // Nếu không lấy được thông tin chi tiết, dùng thông tin từ token
-                  setAuth({
-                    isAuthenticated: true,
-                    user: {
-                      username: tokenInfo.username,
-                      role: tokenInfo.role,
-                      firstName: "",
-                      lastName: "",
-                      avatarUrl: "",
-                      email: "",
-                    },
-                  });
-                }
-              } catch (userInfoError) {
-                console.error("Error fetching user info:", userInfoError);
-                // Nếu có lỗi, vẫn đăng nhập với thông tin từ token
+          if (tokenInfo) {
+            // Gọi API để lấy đầy đủ thông tin user
+            try {
+              const userInfoRes = await getMyInfoApi();
+              if (userInfoRes && userInfoRes.code === 1000) {
+                const userInfo = userInfoRes.result;
+                setAuth({
+                  isAuthenticated: true,
+                  user: {
+                    username: userInfo.username || tokenInfo.username,
+                    role: tokenInfo.role,
+                    firstName: userInfo.firstName || "",
+                    lastName: userInfo.lastName || "",
+                    avatarUrl: userInfo.avatarUrl || userInfo.avatarName || "",
+                    email: userInfo.email || "",
+                  },
+                });
+              } else {
+                // Nếu không lấy được thông tin chi tiết, dùng thông tin từ token
                 setAuth({
                   isAuthenticated: true,
                   user: {
@@ -95,22 +65,36 @@ function App() {
                   },
                 });
               }
-            } else {
-              // Token không hợp lệ
-              localStorage.removeItem("access_token");
+            } catch (userInfoError) {
+              console.error("Error fetching user info:", userInfoError);
+              // Nếu có lỗi, vẫn đăng nhập với thông tin từ token
               setAuth({
-                isAuthenticated: false,
+                isAuthenticated: true,
                 user: {
-                  username: "",
-                  email: "",
-                  name: "",
-                  role: "",
+                  username: tokenInfo.username,
+                  role: tokenInfo.role,
                   firstName: "",
                   lastName: "",
                   avatarUrl: "",
+                  email: "",
                 },
               });
             }
+          } else {
+            // Token không hợp lệ
+            localStorage.removeItem("access_token");
+            setAuth({
+              isAuthenticated: false,
+              user: {
+                username: "",
+                email: "",
+                name: "",
+                role: "",
+                firstName: "",
+                lastName: "",
+                avatarUrl: "",
+              },
+            });
           }
         } else {
           // Không có token
