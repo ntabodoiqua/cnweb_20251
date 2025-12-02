@@ -758,7 +758,7 @@ const SearchPage = () => {
           <Avatar
             size={64}
             icon={<ShopOutlined />}
-            src={store.avatarUrl}
+            src={store.logoUrl}
             className={styles.storeAvatar}
           />
           <div className={styles.storeInfo}>

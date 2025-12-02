@@ -64,8 +64,9 @@ public class StoreFollowServiceImpl implements StoreFollowService {
                 .build();
         storeFollowRepository.save(storeFollow);
         
-        // Cập nhật follower count của store
-        store.setFollowerCount(store.getFollowerCount() + 1);
+        // Cập nhật follower count của store (xử lý trường hợp null)
+        int currentCount = store.getFollowerCount() != null ? store.getFollowerCount() : 0;
+        store.setFollowerCount(currentCount + 1);
         storeRepository.save(store);
         
         log.info("User {} followed store {} successfully", username, storeId);
@@ -95,8 +96,9 @@ public class StoreFollowServiceImpl implements StoreFollowService {
         // Xóa follow record
         storeFollowRepository.deleteByUserIdAndStoreId(username, storeId);
         
-        // Cập nhật follower count của store
-        int newCount = Math.max(0, store.getFollowerCount() - 1);
+        // Cập nhật follower count của store (xử lý trường hợp null)
+        int currentCount = store.getFollowerCount() != null ? store.getFollowerCount() : 0;
+        int newCount = Math.max(0, currentCount - 1);
         store.setFollowerCount(newCount);
         storeRepository.save(store);
         
@@ -118,11 +120,12 @@ public class StoreFollowServiceImpl implements StoreFollowService {
                 .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_FOUND));
         
         boolean isFollowing = storeFollowRepository.existsByUserIdAndStoreId(username, storeId);
+        int followerCount = store.getFollowerCount() != null ? store.getFollowerCount() : 0;
         
         return FollowStatusResponse.builder()
                 .storeId(storeId)
                 .isFollowing(isFollowing)
-                .followerCount(store.getFollowerCount())
+                .followerCount(followerCount)
                 .build();
     }
     
@@ -140,10 +143,11 @@ public class StoreFollowServiceImpl implements StoreFollowService {
         for (String storeId : storeIds) {
             Store store = storeRepository.findById(storeId).orElse(null);
             if (store != null) {
+                int followerCount = store.getFollowerCount() != null ? store.getFollowerCount() : 0;
                 responses.add(FollowStatusResponse.builder()
                         .storeId(storeId)
                         .isFollowing(followingStoreIds.contains(storeId))
-                        .followerCount(store.getFollowerCount())
+                        .followerCount(followerCount)
                         .build());
             }
         }
@@ -177,6 +181,7 @@ public class StoreFollowServiceImpl implements StoreFollowService {
     
     private StoreFollowResponse mapToStoreFollowResponse(StoreFollow storeFollow) {
         Store store = storeFollow.getStore();
+        int followerCount = store.getFollowerCount() != null ? store.getFollowerCount() : 0;
         return StoreFollowResponse.builder()
                 .id(storeFollow.getId())
                 .storeId(store.getId())
@@ -187,7 +192,7 @@ public class StoreFollowServiceImpl implements StoreFollowService {
                 .totalProducts(store.getTotalProducts())
                 .totalSold(store.getTotalSold())
                 .averageRating(store.getAverageRating())
-                .followerCount(store.getFollowerCount())
+                .followerCount(followerCount)
                 .followedAt(storeFollow.getCreatedAt())
                 .build();
     }
