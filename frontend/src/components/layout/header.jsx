@@ -29,6 +29,7 @@ import {
   RightOutlined,
   MessageOutlined,
   ShopOutlined,
+  HeartOutlined,
 } from "@ant-design/icons";
 import {
   Dropdown,
@@ -515,6 +516,18 @@ const Header = () => {
         </Link>
       ),
     },
+    {
+      key: "following-stores",
+      label: (
+        <Link
+          to="/following-stores"
+          style={{ display: "flex", alignItems: "center", gap: "12px" }}
+        >
+          <HeartOutlined />
+          <span>Cửa hàng đang theo dõi</span>
+        </Link>
+      ),
+    },
     // Thêm menu Admin nếu user là ADMIN
     ...(getHighestRole(auth.user.role) === ROLES.ADMIN
       ? [
@@ -589,6 +602,11 @@ const Header = () => {
             key: "profile",
             icon: <ProfileOutlined />,
             label: <Link to="/profile">Hồ sơ</Link>,
+          },
+          {
+            key: "following-stores",
+            icon: <HeartOutlined />,
+            label: <Link to="/following-stores">Cửa hàng đang theo dõi</Link>,
           },
           // Thêm link Admin cho ADMIN
           ...(getHighestRole(auth.user.role) === ROLES.ADMIN
@@ -849,6 +867,15 @@ const Header = () => {
 
             {auth.isAuthenticated && (
               <>
+                <Link
+                  to="/following-stores"
+                  className={`${styles.navLink} ${
+                    isActive("/following-stores") ? styles.active : ""
+                  }`}
+                >
+                  <HeartOutlined />
+                  <span>Đang theo dõi</span>
+                </Link>
                 <Link
                   to="/profile"
                   className={`${styles.navLink} ${

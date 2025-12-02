@@ -59,6 +59,9 @@ const ProfileLayout = lazy(() => import("../pages/ProfileLayout"));
 const CartPage = lazy(() => import("../pages/user/CartPage"));
 const CheckoutPage = lazy(() => import("../pages/user/CheckoutPage"));
 const PaymentResultPage = lazy(() => import("../pages/user/PaymentResultPage"));
+const FollowingStoresPage = lazy(() =>
+  import("../pages/user/FollowingStoresPage")
+);
 
 // Notification Pages
 const NotificationsPage = lazy(() =>
@@ -425,6 +428,18 @@ const router = createBrowserRouter([
         element: (
           <SuspenseWrapper>
             <PaymentResultPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PROTECTED_ROUTES.USER_FOLLOWING_STORES,
+        element: (
+          <SuspenseWrapper>
+            <ProtectedRoute
+              allowedRoles={[ROLES.USER, ROLES.ADMIN, ROLES.SELLER]}
+            >
+              <FollowingStoresPage />
+            </ProtectedRoute>
           </SuspenseWrapper>
         ),
       },

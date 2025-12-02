@@ -68,6 +68,7 @@ export const PROTECTED_ROUTES = {
   USER_CART: "/cart",
   USER_CHECKOUT: "/checkout",
   USER_WISHLIST: "/wishlist",
+  USER_FOLLOWING_STORES: "/following-stores",
   PAYMENT_RESULT: "/payment/result",
 
   // Seller routes
@@ -141,6 +142,7 @@ export const ROUTE_TITLES = {
   [PROTECTED_ROUTES.USER_ORDERS]: "Đơn hàng của tôi",
   [PROTECTED_ROUTES.USER_CART]: "Giỏ hàng",
   [PROTECTED_ROUTES.USER_CHECKOUT]: "Đặt hàng",
+  [PROTECTED_ROUTES.USER_FOLLOWING_STORES]: "Cửa hàng đang theo dõi",
   [PROTECTED_ROUTES.SELLER_DASHBOARD]: "Kênh Người Bán",
   [PROTECTED_ROUTES.SELLER_PRODUCTS]: "Quản lý sản phẩm",
   [PROTECTED_ROUTES.SELLER_PRODUCT_DETAIL]: "Chi tiết sản phẩm",

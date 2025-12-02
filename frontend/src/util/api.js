@@ -2026,6 +2026,75 @@ const globalSuggestApi = (query, productLimit = 5, storeLimit = 3) => {
 };
 
 // ============================================
+// Store Follow APIs
+// ============================================
+
+// Follow a store
+const followStoreApi = (storeId) => {
+  const URL_API = `/api/product/stores/${storeId}/follow`;
+  return axios.post(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Unfollow a store
+const unfollowStoreApi = (storeId) => {
+  const URL_API = `/api/product/stores/${storeId}/follow`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get follow status for a single store
+const getFollowStatusApi = (storeId) => {
+  const URL_API = `/api/product/stores/${storeId}/follow/status`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get follow statuses for multiple stores
+const getFollowStatusesApi = (storeIds) => {
+  const URL_API = "/api/product/stores/follow/statuses";
+  return axios.post(URL_API, storeIds, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Get stores that user is following
+const getFollowingStoresApi = (page = 0, size = 20) => {
+  const URL_API = "/api/product/stores/following";
+  return axios.get(URL_API, {
+    params: {
+      page,
+      size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get follower count for a store
+const getFollowerCountApi = (storeId) => {
+  const URL_API = `/api/product/stores/${storeId}/followers/count`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// ============================================
 // Banner Slides APIs
 // ============================================
 
@@ -2734,4 +2803,11 @@ export {
   // Global Search APIs
   globalSearchApi,
   globalSuggestApi,
+  // Store Follow APIs
+  followStoreApi,
+  unfollowStoreApi,
+  getFollowStatusApi,
+  getFollowStatusesApi,
+  getFollowingStoresApi,
+  getFollowerCountApi,
 };

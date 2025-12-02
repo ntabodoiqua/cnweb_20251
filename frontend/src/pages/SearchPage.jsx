@@ -309,6 +309,47 @@ const SearchPage = () => {
     }
   };
 
+  // Handle price preset selection - updates both priceFrom and priceTo at once
+  const handlePricePreset = (priceFrom, priceTo) => {
+    // Skip the useEffect fetch
+    skipFetchRef.current = true;
+
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Update both values at once
+    setFilters((prev) => ({
+      ...prev,
+      priceFrom: priceFrom,
+      priceTo: priceTo,
+    }));
+
+    // Set timer to fetch after a short delay
+    debounceTimerRef.current = setTimeout(() => {
+      skipFetchRef.current = false;
+      setPagination((prev) => ({ ...prev, current: 1 }));
+
+      // Update URL params
+      const newParams = new URLSearchParams(searchParams);
+      if (priceFrom) {
+        newParams.set("priceFrom", priceFrom);
+      } else {
+        newParams.delete("priceFrom");
+      }
+      if (priceTo) {
+        newParams.set("priceTo", priceTo);
+      } else {
+        newParams.delete("priceTo");
+      }
+      setSearchParams(newParams);
+
+      // Trigger fetch
+      fetchProducts();
+    }, 100); // Short delay since user clicked a preset
+  };
+
   const handleResetFilters = () => {
     setFilters({
       categoryId: "",
@@ -556,37 +597,25 @@ const SearchPage = () => {
               <div className={styles.pricePresets}>
                 <Tag
                   className={styles.priceTag}
-                  onClick={() => {
-                    handleFilterChange("priceFrom", "0");
-                    handleFilterChange("priceTo", "100000");
-                  }}
+                  onClick={() => handlePricePreset("0", "100000")}
                 >
                   Dưới 100K
                 </Tag>
                 <Tag
                   className={styles.priceTag}
-                  onClick={() => {
-                    handleFilterChange("priceFrom", "100000");
-                    handleFilterChange("priceTo", "500000");
-                  }}
+                  onClick={() => handlePricePreset("100000", "500000")}
                 >
                   100K - 500K
                 </Tag>
                 <Tag
                   className={styles.priceTag}
-                  onClick={() => {
-                    handleFilterChange("priceFrom", "500000");
-                    handleFilterChange("priceTo", "1000000");
-                  }}
+                  onClick={() => handlePricePreset("500000", "1000000")}
                 >
                   500K - 1M
                 </Tag>
                 <Tag
                   className={styles.priceTag}
-                  onClick={() => {
-                    handleFilterChange("priceFrom", "1000000");
-                    handleFilterChange("priceTo", "");
-                  }}
+                  onClick={() => handlePricePreset("1000000", "")}
                 >
                   Trên 1M
                 </Tag>
