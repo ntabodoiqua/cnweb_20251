@@ -85,7 +85,6 @@ const ProductDetailPage = () => {
   const [variantLoading, setVariantLoading] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [productSpecs, setProductSpecs] = useState(null);
-  const [specsLoading, setSpecsLoading] = useState(false);
 
   // Variant metadata states
   const [variantMetadata, setVariantMetadata] = useState(null);
@@ -104,9 +103,69 @@ const ProductDetailPage = () => {
 
   useEffect(() => {
     if (productId) {
-      fetchProductDetail();
-      fetchProductSpecs();
-      fetchSelectionConfig();
+      // Fetch all initial data in parallel to reduce re-renders
+      const fetchInitialData = async () => {
+        setLoading(true);
+        try {
+          // Fetch product detail, specs, and selection config in parallel
+          const [productResponse, specsResponse, selectionResponse] =
+            await Promise.allSettled([
+              getPublicProductDetailApi(productId),
+              getPublicProductSpecsApi(productId),
+              getSelectionConfigApi(productId),
+            ]);
+
+          // Process product detail
+          if (
+            productResponse.status === "fulfilled" &&
+            productResponse.value.code === 1000
+          ) {
+            const productData = productResponse.value.result;
+            setProduct(productData);
+
+            // Set default image
+            if (productData.images && productData.images.length > 0) {
+              const primaryImage =
+                productData.images.find((img) => img.isPrimary) ||
+                productData.images[0];
+              setSelectedImage(primaryImage.imageUrl);
+            }
+
+            // Fetch ward information if wardId exists
+            if (productData.store?.wardId) {
+              fetchWardInfo(productData.store.wardId);
+            }
+          }
+
+          // Process specs
+          if (
+            specsResponse.status === "fulfilled" &&
+            specsResponse.value.code === 1000
+          ) {
+            setProductSpecs(specsResponse.value.result?.specs);
+          }
+
+          // Process selection config
+          if (
+            selectionResponse.status === "fulfilled" &&
+            selectionResponse.value.code === 1000
+          ) {
+            setSelectionConfig(selectionResponse.value.result);
+          }
+          setSelectionConfigLoaded(true);
+        } catch (error) {
+          console.error("Error fetching initial data:", error);
+          notification.error({
+            message: "Lỗi tải sản phẩm",
+            description: "Không thể tải thông tin sản phẩm. Vui lòng thử lại.",
+            placement: "topRight",
+          });
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchInitialData();
     }
   }, [productId]);
 
@@ -160,36 +219,16 @@ const ProductDetailPage = () => {
     }
   }, [selectedAttributes]);
 
+  // Refresh product detail (used after rating, without full page loading)
   const fetchProductDetail = async () => {
-    setLoading(true);
     try {
       const response = await getPublicProductDetailApi(productId);
       if (response.code === 1000) {
         const productData = response.result;
         setProduct(productData);
-
-        // Set default image
-        if (productData.images && productData.images.length > 0) {
-          const primaryImage =
-            productData.images.find((img) => img.isPrimary) ||
-            productData.images[0];
-          setSelectedImage(primaryImage.imageUrl);
-        }
-
-        // Fetch ward information if wardId exists
-        if (productData.store?.wardId) {
-          fetchWardInfo(productData.store.wardId);
-        }
       }
     } catch (error) {
       console.error("Error fetching product detail:", error);
-      notification.error({
-        message: "Lỗi tải sản phẩm",
-        description: "Không thể tải thông tin sản phẩm. Vui lòng thử lại.",
-        placement: "topRight",
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -215,21 +254,7 @@ const ProductDetailPage = () => {
     }
   };
 
-  const fetchProductSpecs = async () => {
-    setSpecsLoading(true);
-    try {
-      const response = await getPublicProductSpecsApi(productId);
-      if (response.code === 1000) {
-        setProductSpecs(response.result?.specs);
-      }
-    } catch (error) {
-      console.error("Error fetching product specs:", error);
-      // Don't show error notification as specs might not exist for all products
-    } finally {
-      setSpecsLoading(false);
-    }
-  };
-
+  // Refresh selection config (used when resetting options)
   const fetchSelectionConfig = async () => {
     try {
       const response = await getSelectionConfigApi(productId);
@@ -238,9 +263,6 @@ const ProductDetailPage = () => {
       }
     } catch (error) {
       console.error("Error fetching selection config:", error);
-      // Selection config might not exist for all products
-    } finally {
-      setSelectionConfigLoaded(true);
     }
   };
 
@@ -1422,15 +1444,7 @@ const ProductDetailPage = () => {
                   label: "Thông số chi tiết",
                   children: (
                     <div className={styles.tabContent}>
-                      {specsLoading ? (
-                        <div style={{ textAlign: "center", padding: "40px 0" }}>
-                          <Spin
-                            size="large"
-                            tip="Đang tải thông số chi tiết..."
-                          />
-                        </div>
-                      ) : productSpecs &&
-                        Object.keys(productSpecs).length > 0 ? (
+                      {productSpecs && Object.keys(productSpecs).length > 0 ? (
                         <Collapse
                           accordion
                           defaultActiveKey={[
