@@ -70,7 +70,7 @@ public interface ProductServiceClient {
     ) {}
 
     /**
-     * DTO cho thông tin chi tiết store - khớp với StoreSimpleResponse trong product-service.
+     * DTO cho thông tin chi tiết store - khớp với StoreResponse trong product-service.
      */
     record StoreDetailInfo(
         String id,
@@ -92,22 +92,41 @@ public interface ProductServiceClient {
     ) {}
 
     /**
-     * DTO cho category.
+     * DTO cho category - khớp với CategoryResponse trong product-service.
      */
     record CategoryInfo(
         String id,
         String name,
-        String slug
+        String description,
+        String imageName,
+        String imageUrl,
+        boolean isActive,
+        Integer level,
+        String storeId,
+        String storeName,
+        String parentId,
+        String parentName
     ) {}
 
     /**
-     * DTO cho store (trong ProductInfo).
+     * DTO cho store (trong ProductInfo) - khớp với StoreResponse trong product-service.
      */
     record StoreInfo(
         String id,
-        String name,
-        String logo,
-        String ownerUsername
+        String sellerProfileId,
+        String userName,
+        String storeName,
+        String storeDescription,
+        String logoName,
+        String logoUrl,
+        String bannerName,
+        String bannerUrl,
+        String contactEmail,
+        String contactPhone,
+        String shopAddress,
+        Integer provinceId,
+        Integer wardId,
+        Boolean isActive
     ) {}
 
     /**
@@ -120,7 +139,7 @@ public interface ProductServiceClient {
     ) {}
 
     /**
-     * DTO cho variant.
+     * DTO cho variant - khớp với VariantResponse trong product-service.
      */
     record VariantInfo(
         String id,
@@ -128,19 +147,23 @@ public interface ProductServiceClient {
         String variantName,
         BigDecimal price,
         BigDecimal originalPrice,
-        Integer stockQuantity,
+        Integer soldQuantity,
+        String imageName,
         String imageUrl,
-        boolean isActive
+        BigDecimal weight,
+        boolean isActive,
+        Integer availableStock,
+        Integer reservedStock
     ) {}
 
     /**
-     * DTO cho product image.
+     * DTO cho product image - khớp với ProductImageResponse trong product-service.
      */
     record ProductImageInfo(
         String id,
-        String url,
-        String altText,
-        Integer displayOrder,
-        Boolean isPrimary
+        String imageName,
+        String imageUrl,
+        Boolean isPrimary,
+        Integer displayOrder
     ) {}
 }

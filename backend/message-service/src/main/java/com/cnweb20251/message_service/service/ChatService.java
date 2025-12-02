@@ -511,10 +511,10 @@ public class ChatService {
                     imageUrl = product.images().stream()
                             .filter(img -> img.isPrimary() != null && img.isPrimary())
                             .findFirst()
-                            .map(ProductServiceClient.ProductImageInfo::url)
-                            .orElse(product.images().get(0).url());
+                            .map(ProductServiceClient.ProductImageInfo::imageUrl)
+                            .orElse(product.images().get(0).imageUrl());
                     imageUrls = product.images().stream()
-                            .map(ProductServiceClient.ProductImageInfo::url)
+                            .map(ProductServiceClient.ProductImageInfo::imageUrl)
                             .collect(Collectors.toList());
                 }
                 
@@ -537,7 +537,7 @@ public class ChatService {
                         .imageUrl(imageUrl)
                         .imageUrls(imageUrls)
                         .shopId(product.store() != null ? product.store().id() : null)
-                        .shopName(product.store() != null ? product.store().name() : null)
+                        .shopName(product.store() != null ? product.store().storeName() : null)
                         .status(product.isActive() ? ProductStatus.AVAILABLE : ProductStatus.OUT_OF_STOCK)
                         .soldCount(product.soldCount())
                         .rating(product.averageRating())
