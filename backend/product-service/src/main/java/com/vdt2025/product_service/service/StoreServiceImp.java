@@ -275,6 +275,13 @@ public class StoreServiceImp implements StoreService {
         return storeRepository.existsByIdAndUserNameIgnoreCase(storeId, username);
     }
 
+    @Override
+    public String getStoreIdByUsername(String username) {
+        return storeRepository.findByUserName(username)
+                .map(Store::getId)
+                .orElse(null);
+    }
+
     /**
      * Helper method để kiểm tra xem một cửa hàng có thuộc về người bán hiện tại hay không
      * @param storeId ID của cửa hàng

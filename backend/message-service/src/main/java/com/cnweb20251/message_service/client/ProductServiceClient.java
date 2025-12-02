@@ -36,6 +36,12 @@ public interface ProductServiceClient {
     ApiResponse<Boolean> validateStoreOwner(@PathVariable("storeId") String storeId, @RequestParam("username") String username);
 
     /**
+     * Lấy storeId theo username của seller.
+     */
+    @GetMapping("/stores/by-username/{username}")
+    ApiResponse<String> getStoreIdByUsername(@PathVariable("username") String username);
+
+    /**
      * DTO cho thông tin sản phẩm - khớp với ProductResponse trong product-service.
      */
     record ProductInfo(

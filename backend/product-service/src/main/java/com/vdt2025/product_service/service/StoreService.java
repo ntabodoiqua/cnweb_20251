@@ -30,4 +30,11 @@ public interface StoreService {
     void activateStoreById(String storeId);
 
     boolean validateStoreOwnership(String storeId, String username);
+
+    /**
+     * Lấy storeId theo username của seller.
+     * @param username username của seller
+     * @return storeId hoặc null nếu không có store
+     */
+    String getStoreIdByUsername(String username);
 }

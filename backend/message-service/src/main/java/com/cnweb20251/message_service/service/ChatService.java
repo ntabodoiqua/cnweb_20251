@@ -85,10 +85,23 @@ public class ChatService {
 
     /**
      * Lấy danh sách conversations của user.
+     * Nếu user là shop owner, lấy cả conversations của shop.
      */
     public PageResponse<ConversationResponse> getUserConversations(String userId, int page, int size) {
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "updatedAt"));
-        Page<Conversation> conversationPage = conversationRepository.findByParticipantId(userId, pageRequest);
+        
+        // Lấy shopId nếu user là shop owner
+        String userShopId = getUserShopId(userId);
+        
+        Page<Conversation> conversationPage;
+        if (userShopId != null) {
+            // User là shop owner -> lấy conversations của shop
+            log.info("User {} is shop owner of shop {}, fetching shop conversations", userId, userShopId);
+            conversationPage = conversationRepository.findByShopId(userShopId, pageRequest);
+        } else {
+            // User là buyer -> lấy conversations của buyer
+            conversationPage = conversationRepository.findByBuyerId(userId, pageRequest);
+        }
         
         List<ConversationResponse> responses = conversationPage.getContent().stream()
                 .map(chatMapper::toConversationResponse)
@@ -114,8 +127,8 @@ public class ChatService {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new ChatException("Conversation not found"));
         
-        // Kiểm tra user có trong conversation không
-        if (!conversation.getParticipantIds().contains(userId)) {
+        // Kiểm tra user có trong conversation không (là buyer hoặc shop owner)
+        if (!isUserInConversation(userId, conversation)) {
             throw new ChatException("You are not a participant of this conversation");
         }
         
@@ -139,10 +152,13 @@ public class ChatService {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new ChatException("Conversation not found"));
         
-        // Kiểm tra sender có trong conversation không
-        if (!conversation.getParticipantIds().contains(senderId)) {
+        // Kiểm tra sender có trong conversation không (buyer hoặc shop owner)
+        if (!isUserInConversation(senderId, conversation)) {
             throw new ChatException("You are not a participant of this conversation");
         }
+        
+        // Lấy effective participant ID (shopId nếu là shop owner)
+        String effectiveSenderId = getEffectiveParticipantId(senderId, conversation);
         
         // Tạo message content
         List<MessageContent> contents = buildMessageContents(request);
@@ -153,16 +169,16 @@ public class ChatService {
             replyInfo = buildReplyInfo(request.getReplyToMessageId());
         }
         
-        // Tạo message
+        // Tạo message - sử dụng effectiveSenderId (shopId nếu là shop owner)
         Message message = Message.builder()
                 .conversationId(conversationId)
-                .senderId(senderId)
+                .senderId(effectiveSenderId)
                 .type(determineMessageType(request.getContentType()))
                 .contents(contents)
                 .replyTo(replyInfo)
                 .status(MessageStatus.SENT)
                 .sentAt(Instant.now())
-                .readBy(new ArrayList<>(Collections.singletonList(senderId)))
+                .readBy(new ArrayList<>(Collections.singletonList(effectiveSenderId)))
                 .build();
         
         Message savedMessage = messageRepository.save(message);
@@ -190,7 +206,7 @@ public class ChatService {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new ChatException("Conversation not found"));
         
-        if (!conversation.getParticipantIds().contains(userId)) {
+        if (!isUserInConversation(userId, conversation)) {
             throw new ChatException("You are not a participant of this conversation");
         }
         
@@ -224,15 +240,18 @@ public class ChatService {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new ChatException("Conversation not found"));
         
-        if (!conversation.getParticipantIds().contains(userId)) {
+        if (!isUserInConversation(userId, conversation)) {
             throw new ChatException("You are not a participant of this conversation");
         }
+        
+        // Lấy effective participant ID
+        String effectiveUserId = getEffectiveParticipantId(userId, conversation);
         
         List<Message> messagesToUpdate;
         
         if (messageIds == null || messageIds.isEmpty()) {
             // Đánh dấu tất cả tin nhắn chưa đọc
-            messagesToUpdate = messageRepository.findUnreadMessages(conversationId, userId);
+            messagesToUpdate = messageRepository.findUnreadMessages(conversationId, effectiveUserId);
         } else {
             // Đánh dấu các tin nhắn cụ thể
             messagesToUpdate = messageRepository.findAllById(messageIds);
@@ -240,8 +259,8 @@ public class ChatService {
         
         Instant now = Instant.now();
         for (Message message : messagesToUpdate) {
-            if (!message.getReadBy().contains(userId)) {
-                message.getReadBy().add(userId);
+            if (!message.getReadBy().contains(effectiveUserId)) {
+                message.getReadBy().add(effectiveUserId);
                 if (message.getReadAt() == null) {
                     message.setReadAt(now);
                 }
@@ -252,7 +271,7 @@ public class ChatService {
         messageRepository.saveAll(messagesToUpdate);
         
         // Cập nhật unread count trong conversation
-        conversation.getUnreadCount().put(userId, 0);
+        conversation.getUnreadCount().put(effectiveUserId, 0);
         conversationRepository.save(conversation);
         
         // Gửi thông báo đã đọc qua WebSocket
@@ -278,7 +297,15 @@ public class ChatService {
         Message message = messageRepository.findById(messageId)
                 .orElseThrow(() -> new ChatException("Message not found"));
         
-        if (!message.getSenderId().equals(userId)) {
+        // Kiểm tra user có quyền xóa tin nhắn không
+        // User có thể xóa nếu là sender hoặc là shop owner của sender (nếu sender là shopId)
+        String effectiveUserId = userId;
+        String userShopId = getUserShopId(userId);
+        if (userShopId != null) {
+            effectiveUserId = userShopId;
+        }
+        
+        if (!message.getSenderId().equals(userId) && !message.getSenderId().equals(effectiveUserId)) {
             throw new ChatException("You can only delete your own messages");
         }
         
@@ -296,19 +323,21 @@ public class ChatService {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new ChatException("Conversation not found"));
         
-        if (!conversation.getParticipantIds().contains(userId)) {
+        if (!isUserInConversation(userId, conversation)) {
             throw new ChatException("You are not a participant of this conversation");
         }
         
+        String effectiveUserId = getEffectiveParticipantId(userId, conversation);
+        
         TypingIndicatorResponse response = TypingIndicatorResponse.builder()
                 .conversationId(conversationId)
-                .userId(userId)
+                .userId(effectiveUserId)
                 .typing(typing)
                 .build();
         
         // Gửi đến tất cả participants khác
         for (String participantId : conversation.getParticipantIds()) {
-            if (!participantId.equals(userId)) {
+            if (!participantId.equals(effectiveUserId)) {
                 messagingTemplate.convertAndSendToUser(
                         participantId,
                         "/queue/typing",
@@ -671,15 +700,29 @@ public class ChatService {
     }
 
     private void enrichMessageResponse(MessageResponse response, String senderId) {
+        // Thử lấy thông tin từ user-service trước (nếu senderId là username/email)
         try {
             var userProfile = userServiceClient.getUserProfile(senderId);
             if (userProfile != null && userProfile.getResult() != null) {
                 var profile = userProfile.getResult();
                 response.setSenderName(profile.getFullName());
                 response.setSenderAvatar(profile.avatarUrl());
+                return;
             }
         } catch (Exception e) {
-            log.warn("Failed to enrich message with user profile: {}", senderId);
+            log.debug("SenderId {} is not a user, trying as shop", senderId);
+        }
+        
+        // Nếu không phải user, thử lấy thông tin shop (nếu senderId là shopId)
+        try {
+            var storeInfo = getStoreInfo(senderId);
+            if (storeInfo != null) {
+                response.setSenderName(storeInfo.storeName());
+                response.setSenderAvatar(storeInfo.logoUrl());
+                return;
+            }
+        } catch (Exception e) {
+            log.warn("Failed to enrich message with sender info: {}", senderId);
         }
     }
 
@@ -703,5 +746,69 @@ public class ChatService {
                 );
             }
         }
+    }
+
+    // ========================= USER & SHOP HELPER METHODS =========================
+
+    /**
+     * Lấy shopId của user nếu user là shop owner.
+     * Gọi product-service để lấy storeId theo username.
+     * @return shopId nếu user là shop owner, null nếu không phải
+     */
+    private String getUserShopId(String username) {
+        try {
+            var response = productServiceClient.getStoreIdByUsername(username);
+            if (response != null && response.getResult() != null) {
+                return response.getResult();
+            }
+        } catch (Exception e) {
+            log.debug("User {} is not a shop owner or failed to get shop ID: {}", username, e.getMessage());
+        }
+        return null;
+    }
+
+    /**
+     * Kiểm tra user có trong conversation không.
+     * User có thể là buyer (buyerId) hoặc shop owner (sở hữu shopId).
+     */
+    private boolean isUserInConversation(String userId, Conversation conversation) {
+        // Kiểm tra trực tiếp trong participantIds (buyer)
+        if (conversation.getParticipantIds().contains(userId)) {
+            return true;
+        }
+        
+        // Kiểm tra nếu user là buyer
+        if (userId.equals(conversation.getBuyerId())) {
+            return true;
+        }
+        
+        // Kiểm tra nếu user là shop owner
+        String userShopId = getUserShopId(userId);
+        if (userShopId != null && userShopId.equals(conversation.getShopId())) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Lấy participantId thực tế của user trong conversation.
+     * Nếu user là shop owner, trả về shopId.
+     * Nếu user là buyer, trả về buyerId (userId).
+     */
+    private String getEffectiveParticipantId(String userId, Conversation conversation) {
+        // Nếu userId là buyerId
+        if (userId.equals(conversation.getBuyerId())) {
+            return userId;
+        }
+        
+        // Nếu userId là shop owner
+        String userShopId = getUserShopId(userId);
+        if (userShopId != null && userShopId.equals(conversation.getShopId())) {
+            return conversation.getShopId();
+        }
+        
+        // Fallback
+        return userId;
     }
 }

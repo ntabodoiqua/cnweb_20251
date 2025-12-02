@@ -39,8 +39,7 @@ public interface UserServiceClient {
         LocalDateTime createdAt,
         LocalDateTime updatedAt,
         Set<RoleInfo> roles,
-        String gender,
-        SellerProfileInfo sellerProfile
+        String gender
     ) {
         /**
          * Helper method để lấy full name.
@@ -63,14 +62,5 @@ public interface UserServiceClient {
     record RoleInfo(
         String name,
         String description
-    ) {}
-
-    /**
-     * DTO cho seller profile.
-     */
-    record SellerProfileInfo(
-        String id,
-        String storeId,
-        String storeName
     ) {}
 }
