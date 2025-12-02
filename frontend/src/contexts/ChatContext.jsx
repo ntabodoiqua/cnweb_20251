@@ -462,6 +462,17 @@ export const ChatProvider = ({ children }) => {
   const openChatWithShop = useCallback(
     async (shopId, shopName = null) => {
       try {
+        setIsLoading(true);
+
+        // Đảm bảo WebSocket đã kết nối
+        const token = localStorage.getItem("access_token");
+        if (token && !chatWebSocketService.isConnected()) {
+          // Lấy username từ token hoặc currentUsername
+          if (currentUsername.current) {
+            chatWebSocketService.connect(token);
+          }
+        }
+
         const conversation = await createOrGetConversation(shopId);
         if (conversation) {
           setActiveConversation(conversation);
@@ -472,6 +483,9 @@ export const ChatProvider = ({ children }) => {
           if (!messages[conversation.id]) {
             await fetchMessages(conversation.id);
           }
+
+          // Refresh conversations list
+          await fetchConversations();
         }
       } catch (error) {
         console.error("Failed to open chat with shop:", error);
@@ -479,9 +493,12 @@ export const ChatProvider = ({ children }) => {
           message: "Lỗi",
           description: "Không thể mở cuộc trò chuyện với shop",
         });
+        throw error;
+      } finally {
+        setIsLoading(false);
       }
     },
-    [createOrGetConversation, fetchMessages, messages]
+    [createOrGetConversation, fetchMessages, fetchConversations, messages]
   );
 
   /**

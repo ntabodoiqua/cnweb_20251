@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Button, Tooltip, message } from "antd";
 import { MessageOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
@@ -27,15 +27,22 @@ const ChatButton = ({
   className,
   children,
   style,
+  onClick,
   ...rest
 }) => {
   const navigate = useNavigate();
   const { auth } = useContext(AuthContext);
-  const { openChatWithShop, isLoading } = useChat();
+  const { openChatWithShop } = useChat();
+  const [loading, setLoading] = useState(false);
 
   const handleClick = async (e) => {
     e.stopPropagation();
     e.preventDefault();
+
+    // Call custom onClick if provided
+    if (onClick) {
+      onClick(e);
+    }
 
     // Kiểm tra đăng nhập
     if (!auth.isAuthenticated) {
@@ -51,6 +58,7 @@ const ChatButton = ({
     }
 
     // Mở chat với shop
+    setLoading(true);
     try {
       await openChatWithShop(shopId, shopName);
     } catch (error) {
@@ -60,6 +68,8 @@ const ChatButton = ({
       } else {
         message.error("Không thể mở cuộc trò chuyện");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,7 +81,7 @@ const ChatButton = ({
         block={block}
         icon={<MessageOutlined />}
         onClick={handleClick}
-        loading={isLoading}
+        loading={loading}
         className={className}
         style={style}
         {...rest}

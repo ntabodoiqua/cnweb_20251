@@ -32,6 +32,7 @@ import {
   DisconnectOutlined,
   AppstoreOutlined,
   ShoppingCartOutlined,
+  SmileOutlined,
 } from "@ant-design/icons";
 import { useChat } from "../../contexts/ChatContext";
 import { AuthContext } from "../context/auth.context";
