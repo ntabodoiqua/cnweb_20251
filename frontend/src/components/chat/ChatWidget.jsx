@@ -514,7 +514,11 @@ const ChatWidget = () => {
       <Button
         type="primary"
         icon={<SendOutlined />}
-        onClick={handleSend}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleSend();
+        }}
         disabled={!inputValue.trim()}
         className={styles.sendButton}
       />

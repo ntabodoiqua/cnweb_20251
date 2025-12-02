@@ -3,7 +3,7 @@
 /* Floating Button */
 .floatingButton {
   position: fixed;
-  bottom: 24px;
+  bottom: 100px;
   right: 24px;
   z-index: 1000;
   cursor: pointer;
@@ -578,7 +578,7 @@
   }
 
   .floatingButton {
-    bottom: 16px;
+    bottom: 80px;
     right: 16px;
   }
 
