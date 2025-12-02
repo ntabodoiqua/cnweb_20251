@@ -71,7 +71,7 @@ public interface ChatMapper {
     default ConversationResponse.ParticipantResponse mapParticipant(Participant participant) {
         if (participant == null) return null;
         return ConversationResponse.ParticipantResponse.builder()
-                .userId(participant.getUserId())
+                .userId(participant.getUsername())  // Sử dụng username làm định danh
                 .displayName(participant.getDisplayName())
                 .avatarUrl(participant.getAvatarUrl())
                 .type(participant.getType() != null ? participant.getType().name() : null)

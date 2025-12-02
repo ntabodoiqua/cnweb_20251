@@ -13,9 +13,9 @@ import lombok.*;
 public class Participant {
 
     /**
-     * ID của người dùng.
+     * Username của người dùng (dùng làm định danh chính).
      */
-    private String userId;
+    private String username;
 
     /**
      * Tên hiển thị của người dùng.

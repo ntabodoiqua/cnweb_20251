@@ -211,12 +211,12 @@ const ChatWidget = () => {
   };
 
   // Lấy participant info (đối phương trong conversation)
+  // userId trong participant chính là username (từ backend)
   const getOtherParticipant = (conversation) => {
     if (!conversation || !conversation.participants) return null;
-    const currentUser = getCurrentUserId();
-    return conversation.participants.find(
-      (p) => p.userId !== currentUser && p.userId !== auth.user?.username
-    );
+    const currentUsername = getCurrentUserId() || auth.user?.username;
+    // userId là username của người dùng
+    return conversation.participants.find((p) => p.userId !== currentUsername);
   };
 
   // Render connection status
@@ -260,8 +260,9 @@ const ChatWidget = () => {
       ) : (
         conversations.map((conv) => {
           const otherParticipant = getOtherParticipant(conv);
-          const currentUser = getCurrentUserId() || auth.user?.username;
-          const unreadCount = conv.unreadCount?.[currentUser] || 0;
+          // Sử dụng username để lấy unreadCount
+          const currentUsername = getCurrentUserId() || auth.user?.username;
+          const unreadCount = conv.unreadCount?.[currentUsername] || 0;
 
           return (
             <div
@@ -302,9 +303,11 @@ const ChatWidget = () => {
   );
 
   // Render tin nhắn
+  // senderId là username của người gửi
   const renderMessage = (msg) => {
-    const currentUser = getCurrentUserId() || auth.user?.username;
-    const isOwn = msg.senderId === currentUser;
+    const currentUsername = getCurrentUserId() || auth.user?.username;
+    // So sánh senderId (username) với currentUsername
+    const isOwn = msg.senderId === currentUsername;
     const content = msg.contents?.[0];
 
     return (

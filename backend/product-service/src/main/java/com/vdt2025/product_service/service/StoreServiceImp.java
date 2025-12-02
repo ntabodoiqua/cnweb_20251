@@ -6,6 +6,7 @@ import com.vdt2025.common_dto.service.FileServiceClient;
 import com.vdt2025.common_dto.service.UserServiceClient;
 import com.vdt2025.product_service.dto.request.store.StoreSimpleRequest;
 import com.vdt2025.product_service.dto.response.PageCacheDTO;
+import com.vdt2025.product_service.dto.response.StoreInternalResponse;
 import com.vdt2025.product_service.dto.response.StoreResponse;
 import com.vdt2025.product_service.dto.response.StoreSimpleResponse;
 import com.vdt2025.product_service.entity.Store;
@@ -124,6 +125,31 @@ public class StoreServiceImp implements StoreService {
             throw e;
         } catch (Exception e) {
             log.error("Failed to fetch public store by ID: {}", storeId, e);
+            throw new AppException(ErrorCode.STORE_FETCH_FAILED);
+        }
+    }
+
+    @Override
+    public StoreInternalResponse getPublicStoreByIdInternal(String storeId) {
+        log.info("Fetching public store (internal) by ID: {}", storeId);
+        try {
+            Store store = storeRepository.findById(storeId)
+                    .orElseThrow(() -> {
+                        log.error("Store not found with ID: {}", storeId);
+                        return new AppException(ErrorCode.STORE_NOT_FOUND);
+                    });
+
+            // Chỉ trả về store đang hoạt động
+            if (!store.isActive()) {
+                log.error("Store is not active: {}", storeId);
+                throw new AppException(ErrorCode.STORE_NOT_FOUND);
+            }
+
+            return storeMapper.toStoreInternalResponse(store);
+        } catch (AppException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error("Failed to fetch public store (internal) by ID: {}", storeId, e);
             throw new AppException(ErrorCode.STORE_FETCH_FAILED);
         }
     }

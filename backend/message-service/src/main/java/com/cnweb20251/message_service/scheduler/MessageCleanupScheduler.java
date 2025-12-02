@@ -58,21 +58,4 @@ public class MessageCleanupScheduler {
             log.error("Error during message cleanup: ", e);
         }
     }
-
-    /**
-     * Xóa tin nhắn thủ công (dùng cho testing hoặc admin).
-     */
-    public long cleanupMessages(int days) {
-        log.info("Manual message cleanup triggered for messages older than {} days", days);
-        
-        Instant cutoffDate = Instant.now().minus(days, ChronoUnit.DAYS);
-        long countToDelete = messageRepository.findMessagesBefore(cutoffDate).size();
-        
-        if (countToDelete > 0) {
-            messageRepository.deleteAllBySentAtBefore(cutoffDate);
-        }
-        
-        log.info("Deleted {} messages", countToDelete);
-        return countToDelete;
-    }
 }

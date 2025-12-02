@@ -42,11 +42,8 @@ public class ChatController {
     @Operation(summary = "Tạo hoặc lấy conversation với shop", 
                description = "Tạo conversation mới giữa buyer và shop, hoặc lấy conversation đã tồn tại")
     public ResponseEntity<ApiResponse<ConversationResponse>> getOrCreateConversation(
-            @AuthenticationPrincipal Jwt jwt,
             @Valid @RequestBody CreateConversationRequest request) {
-        
-        String userId = jwt.getSubject();
-        ConversationResponse response = chatService.getOrCreateConversation(userId, request);
+        ConversationResponse response = chatService.getOrCreateConversation(request);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

@@ -207,16 +207,20 @@ const SellerChatPage = () => {
   };
 
   // Lấy thông tin khách hàng trong conversation
+  // userId trong participant chính là username (từ backend)
   const getCustomerParticipant = (conversation) => {
     if (!conversation || !conversation.participants) return null;
-    const currentUser = getCurrentUserId() || auth.user?.username;
-    return conversation.participants.find((p) => p.userId !== currentUser);
+    const currentUsername = getCurrentUserId() || auth.user?.username;
+    // userId là username của người dùng
+    return conversation.participants.find((p) => p.userId !== currentUsername);
   };
 
   // Kiểm tra khách hàng có online không
+  // Sử dụng username để check presence
   const isCustomerOnline = (conversation) => {
     const customer = getCustomerParticipant(conversation);
     if (!customer) return false;
+    // userId chính là username
     return isUserOnline(customer.userId);
   };
 
@@ -235,9 +239,10 @@ const SellerChatPage = () => {
   });
 
   // Đếm tổng tin nhắn chưa đọc
+  // unreadCount sử dụng username làm key
   const totalUnread = conversations.reduce((total, conv) => {
-    const currentUser = getCurrentUserId() || auth.user?.username;
-    return total + (conv.unreadCount?.[currentUser] || 0);
+    const currentUsername = getCurrentUserId() || auth.user?.username;
+    return total + (conv.unreadCount?.[currentUsername] || 0);
   }, 0);
 
   // Render connection status
@@ -266,9 +271,11 @@ const SellerChatPage = () => {
   };
 
   // Render tin nhắn
+  // senderId là username của người gửi
   const renderMessage = (msg) => {
-    const currentUser = getCurrentUserId() || auth.user?.username;
-    const isOwn = msg.senderId === currentUser;
+    const currentUsername = getCurrentUserId() || auth.user?.username;
+    // So sánh senderId (username) với currentUsername
+    const isOwn = msg.senderId === currentUsername;
     const content = msg.contents?.[0];
 
     return (
@@ -468,8 +475,10 @@ const SellerChatPage = () => {
               ) : (
                 filteredConversations.map((conv) => {
                   const customer = getCustomerParticipant(conv);
-                  const currentUser = getCurrentUserId() || auth.user?.username;
-                  const unreadCount = conv.unreadCount?.[currentUser] || 0;
+                  // Sử dụng username để lấy unreadCount
+                  const currentUsername =
+                    getCurrentUserId() || auth.user?.username;
+                  const unreadCount = conv.unreadCount?.[currentUsername] || 0;
 
                   return (
                     <div

@@ -15,11 +15,12 @@ import java.util.Set;
 /**
  * Entity đại diện cho một đoạn hội thoại 1-1 giữa người mua (buyer) và shop (seller).
  * Mỗi conversation luôn có đúng 1 buyer và 1 shop.
+ * Sử dụng username làm định danh cho buyer và shop owner.
  */
 @Document(collection = "conversations")
 @CompoundIndexes({
     @CompoundIndex(name = "participants_idx", def = "{'participantIds': 1}"),
-    @CompoundIndex(name = "shop_buyer_idx", def = "{'shopId': 1, 'buyerId': 1}", unique = true)
+    @CompoundIndex(name = "shop_buyer_idx", def = "{'shopId': 1, 'buyerUsername': 1}", unique = true)
 })
 @Data
 @Builder
@@ -38,15 +39,22 @@ public class Conversation {
     private String shopId;
 
     /**
-     * ID của buyer (người mua) trong conversation.
+     * Username của chủ shop (người bán) trong conversation.
+     * Dùng để gửi WebSocket message đến đúng user.
+     */
+    @Indexed
+    private String shopOwnerUsername;
+
+    /**
+     * Username của buyer (người mua) trong conversation.
      * Bắt buộc - mỗi conversation phải có một buyer.
      */
     @Indexed
-    private String buyerId;
+    private String buyerUsername;
 
     /**
-     * Danh sách ID của 2 người tham gia cuộc hội thoại.
-     * Bao gồm: buyerId và shopId.
+     * Danh sách username của 2 người tham gia cuộc hội thoại.
+     * Bao gồm: buyerUsername và shopOwnerUsername.
      */
     @Indexed
     @Builder.Default
@@ -65,7 +73,7 @@ public class Conversation {
 
     /**
      * Số tin nhắn chưa đọc cho mỗi người tham gia.
-     * Key: participantId (buyerId hoặc shopId), Value: số tin nhắn chưa đọc
+     * Key: username (buyerUsername hoặc shopOwnerUsername), Value: số tin nhắn chưa đọc
      */
     @Builder.Default
     private java.util.Map<String, Integer> unreadCount = new java.util.HashMap<>();

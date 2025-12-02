@@ -24,12 +24,12 @@ public interface ConversationRepository extends MongoRepository<Conversation, St
      * Dùng để kiểm tra conversation đã tồn tại chưa trước khi tạo mới.
      * Đây là phương thức chính để tìm conversation buyer-seller.
      */
-    Optional<Conversation> findByShopIdAndBuyerId(String shopId, String buyerId);
+    Optional<Conversation> findByShopIdAndBuyerUsername(String shopId, String buyerUsername);
 
     /**
      * Tìm tất cả conversations của một buyer, sắp xếp theo thời gian cập nhật mới nhất.
      */
-    Page<Conversation> findByBuyerId(String buyerId, Pageable pageable);
+    Page<Conversation> findByBuyerUsername(String buyerUsername, Pageable pageable);
 
     /**
      * Tìm tất cả conversations của một shop, sắp xếp theo thời gian cập nhật mới nhất.
@@ -65,7 +65,7 @@ public interface ConversationRepository extends MongoRepository<Conversation, St
     /**
      * Tìm tất cả conversations của một buyer (không phân trang).
      */
-    List<Conversation> findAllByBuyerId(String buyerId);
+    List<Conversation> findAllByBuyerUsername(String buyerUsername);
 
     /**
      * Tìm tất cả conversations của một shop (không phân trang).

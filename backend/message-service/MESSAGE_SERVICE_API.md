@@ -225,18 +225,19 @@ POST /api/chat/conversations
   "result": {
     "id": "conv_123",
     "shopId": "shop_123",
-    "buyerId": "user_456",
-    "participantIds": ["user_456", "shop_123"],
+    "shopOwnerUsername": "seller_john",
+    "buyerUsername": "buyer_jane",
+    "participantIds": ["buyer_jane", "seller_john"],
     "participants": [
       {
-        "userId": "user_456",
-        "displayName": "John Doe",
+        "userId": "buyer_jane",
+        "displayName": "Jane Doe",
         "avatarUrl": "https://...",
         "type": "USER",
         "online": true
       },
       {
-        "userId": "shop_123",
+        "userId": "seller_john",
         "displayName": "Shop ABC",
         "avatarUrl": "https://...",
         "type": "SELLER",
@@ -246,7 +247,7 @@ POST /api/chat/conversations
       }
     ],
     "lastMessage": null,
-    "unreadCount": { "user_456": 0, "shop_123": 0 },
+    "unreadCount": { "buyer_jane": 0, "seller_john": 0 },
     "status": "ACTIVE",
     "createdAt": "2025-12-01T10:00:00Z",
     "updatedAt": "2025-12-01T10:00:00Z"
@@ -559,11 +560,12 @@ function markAsRead(conversationId, messageIds) {
 {
   "id": "string",
   "shopId": "string - ID của shop trong conversation",
-  "buyerId": "string - ID của buyer trong conversation",
-  "participantIds": ["string"],
+  "shopOwnerUsername": "string - Username của chủ shop",
+  "buyerUsername": "string - Username của buyer trong conversation",
+  "participantIds": ["string - danh sách username của participants"],
   "participants": [
     {
-      "userId": "string",
+      "userId": "string - username của người dùng",
       "displayName": "string",
       "avatarUrl": "string",
       "type": "USER | SELLER",
@@ -574,15 +576,15 @@ function markAsRead(conversationId, messageIds) {
   ],
   "lastMessage": {
     "messageId": "string",
-    "senderId": "string",
+    "senderId": "string - username của người gửi",
     "senderName": "string",
     "preview": "string",
     "type": "TEXT | IMAGE | PRODUCT | ORDER | FILE | STICKER",
     "sentAt": "ISO 8601 datetime"
   },
   "unreadCount": {
-    "buyerId": 0,
-    "shopId": 5
+    "buyerUsername": 0,
+    "shopOwnerUsername": 5
   },
   "status": "ACTIVE | ARCHIVED | BLOCKED",
   "createdAt": "ISO 8601 datetime",
@@ -596,7 +598,7 @@ function markAsRead(conversationId, messageIds) {
 {
   "id": "string",
   "conversationId": "string",
-  "senderId": "string",
+  "senderId": "string - username của người gửi",
   "senderName": "string",
   "senderAvatar": "string",
   "type": "TEXT | IMAGE | PRODUCT | ORDER | FILE | STICKER",
@@ -613,14 +615,14 @@ function markAsRead(conversationId, messageIds) {
   ],
   "replyTo": {
     "messageId": "string",
-    "senderId": "string",
+    "senderId": "string - username của người gửi tin nhắn gốc",
     "senderName": "string",
     "type": "string",
     "preview": "string",
     "thumbnailUrl": "string (optional)"
   },
   "status": "SENDING | SENT | DELIVERED | READ | FAILED",
-  "readBy": ["userId1", "userId2"],
+  "readBy": ["username1", "username2"],
   "sentAt": "ISO 8601 datetime",
   "readAt": "ISO 8601 datetime (optional)",
   "editedAt": "ISO 8601 datetime (optional)",
@@ -921,17 +923,19 @@ function sendMessage(conversationId, text) {
 
 ## Lưu ý quan trọng
 
-1. **WebSocket Connection**: Nên duy trì 1 connection duy nhất cho mỗi user session.
+1. **Username làm định danh**: Service sử dụng `username` của user (buyer và seller) làm định danh chính thay vì `userId`. Điều này giúp dễ dàng gửi WebSocket messages đến đúng người dùng.
 
-2. **Reconnection**: Implement logic reconnect khi mất kết nối WebSocket.
+2. **WebSocket Connection**: Nên duy trì 1 connection duy nhất cho mỗi user session.
 
-3. **Message Ordering**: Tin nhắn được sắp xếp theo `sentAt` giảm dần (mới nhất trước).
+3. **Reconnection**: Implement logic reconnect khi mất kết nối WebSocket.
 
-4. **Unread Count**: Tự động tăng khi có tin nhắn mới, reset về 0 khi gọi `markAsRead`.
+4. **Message Ordering**: Tin nhắn được sắp xếp theo `sentAt` giảm dần (mới nhất trước).
 
-5. **Soft Delete**: Tin nhắn bị xóa chỉ đánh dấu `deleted = true`, không xóa khỏi database.
+5. **Unread Count**: Tự động tăng khi có tin nhắn mới, reset về 0 khi gọi `markAsRead`.
 
-6. **Rate Limiting**: Nên implement rate limiting cho việc gửi tin nhắn để tránh spam.
+6. **Soft Delete**: Tin nhắn bị xóa chỉ đánh dấu `deleted = true`, không xóa khỏi database.
+
+7. **Rate Limiting**: Nên implement rate limiting cho việc gửi tin nhắn để tránh spam.
 
 ---
 

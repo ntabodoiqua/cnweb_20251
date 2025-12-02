@@ -75,6 +75,7 @@ public interface ProductServiceClient {
     record StoreDetailInfo(
         String id,
         String storeName,
+        String userName,
         String storeDescription,
         String logoName,
         String logoUrl,

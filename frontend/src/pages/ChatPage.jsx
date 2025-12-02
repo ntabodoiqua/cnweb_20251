@@ -232,20 +232,21 @@ const ChatPage = () => {
   };
 
   // Lấy thông tin người khác trong conversation
+  // userId trong participant chính là username (từ backend)
   const getOtherParticipant = (conversation) => {
     if (!conversation || !conversation.participants) return null;
-    const currentUser = getCurrentUserId() || auth.user?.username;
-    return conversation.participants.find((p) => p.userId !== currentUser);
+    const currentUsername = getCurrentUserId() || auth.user?.username;
+    // userId là username của người dùng
+    return conversation.participants.find((p) => p.userId !== currentUsername);
   };
 
   // Kiểm tra shop có online không
+  // Sử dụng username để check presence
   const isShopOnline = (conversation) => {
     const other = getOtherParticipant(conversation);
     if (!other) return false;
-    // Shop participant có shopId, cần check owner username online
-    return (
-      isUserOnline(other.userId) || (other.shopId && isUserOnline(other.shopId))
-    );
+    // userId chính là username của shop owner
+    return isUserOnline(other.userId);
   };
 
   // Lọc conversations
@@ -283,8 +284,9 @@ const ChatPage = () => {
 
   // Render tin nhắn
   const renderMessage = (msg) => {
-    const currentUser = getCurrentUserId() || auth.user?.username;
-    const isOwn = msg.senderId === currentUser;
+    const currentUsername = getCurrentUserId() || auth.user?.username;
+    // senderId là username của người gửi
+    const isOwn = msg.senderId === currentUsername;
     const content = msg.contents?.[0];
 
     return (
@@ -472,9 +474,11 @@ const ChatPage = () => {
                 ) : (
                   filteredConversations.map((conv) => {
                     const otherParticipant = getOtherParticipant(conv);
-                    const currentUser =
+                    // Sử dụng username để lấy unreadCount
+                    const currentUsername =
                       getCurrentUserId() || auth.user?.username;
-                    const unreadCount = conv.unreadCount?.[currentUser] || 0;
+                    const unreadCount =
+                      conv.unreadCount?.[currentUsername] || 0;
 
                     return (
                       <div

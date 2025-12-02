@@ -40,7 +40,8 @@ export const ChatProvider = ({ children }) => {
   const [isChatMinimized, setIsChatMinimized] = useState(true);
 
   // Refs
-  const currentUserId = useRef(null);
+  // currentUsername là username của user hiện tại, dùng làm định danh chính
+  const currentUsername = useRef(null);
   const typingTimeouts = useRef({});
 
   // ============================================
@@ -49,15 +50,16 @@ export const ChatProvider = ({ children }) => {
 
   /**
    * Kết nối WebSocket
+   * @param {string} username - Username của user hiện tại
    */
-  const connectChat = useCallback((userId) => {
+  const connectChat = useCallback((username) => {
     const token = localStorage.getItem("access_token");
     if (!token) {
       console.log("No token available for chat connection");
       return;
     }
 
-    currentUserId.current = userId;
+    currentUsername.current = username;
     chatWebSocketService.connect(token);
   }, []);
 
@@ -66,7 +68,7 @@ export const ChatProvider = ({ children }) => {
    */
   const disconnectChat = useCallback(() => {
     chatWebSocketService.disconnect();
-    currentUserId.current = null;
+    currentUsername.current = null;
     setConversations([]);
     setMessages({});
     setActiveConversation(null);
@@ -93,10 +95,10 @@ export const ChatProvider = ({ children }) => {
         const convList = result.content || result || [];
         setConversations(convList);
 
-        // Tính tổng unread
+        // Tính tổng unread - sử dụng username làm key
         const totalUnread = convList.reduce((total, conv) => {
-          const userId = currentUserId.current;
-          const unreadCount = conv.unreadCount?.[userId] || 0;
+          const username = currentUsername.current;
+          const unreadCount = conv.unreadCount?.[username] || 0;
           return total + unreadCount;
         }, 0);
         setUnreadTotal(totalUnread);
@@ -158,9 +160,9 @@ export const ChatProvider = ({ children }) => {
           await fetchMessages(conversationId);
         }
 
-        // Đánh dấu đã đọc
-        const userId = currentUserId.current;
-        if (conversation.unreadCount?.[userId] > 0) {
+        // Đánh dấu đã đọc - sử dụng username để lấy unreadCount
+        const username = currentUsername.current;
+        if (conversation.unreadCount?.[username] > 0) {
           markAsRead(conversationId);
         }
       }
@@ -417,16 +419,16 @@ export const ChatProvider = ({ children }) => {
       }
     }
 
-    // Cập nhật unreadCount local
+    // Cập nhật unreadCount local - sử dụng username làm key
     setConversations((prev) =>
       prev.map((conv) => {
         if (conv.id === conversationId) {
-          const userId = currentUserId.current;
+          const username = currentUsername.current;
           return {
             ...conv,
             unreadCount: {
               ...conv.unreadCount,
-              [userId]: 0,
+              [username]: 0,
             },
           };
         }
@@ -440,11 +442,12 @@ export const ChatProvider = ({ children }) => {
 
   /**
    * Cập nhật tổng số tin nhắn chưa đọc
+   * unreadCount sử dụng username làm key
    */
   const updateTotalUnread = useCallback(() => {
-    const userId = currentUserId.current;
+    const username = currentUsername.current;
     const total = conversations.reduce((sum, conv) => {
-      return sum + (conv.unreadCount?.[userId] || 0);
+      return sum + (conv.unreadCount?.[username] || 0);
     }, 0);
     setUnreadTotal(total);
   }, [conversations]);
@@ -520,8 +523,9 @@ export const ChatProvider = ({ children }) => {
         addMessageToConversation(message.conversationId, message);
 
         // Hiển thị notification nếu không phải tin nhắn của mình
-        const userId = currentUserId.current;
-        if (message.senderId !== userId) {
+        // senderId là username của người gửi
+        const username = currentUsername.current;
+        if (message.senderId !== username) {
           // Cập nhật unread count nếu không phải conversation đang mở
           if (activeConversation?.id !== message.conversationId) {
             setConversations((prev) =>
@@ -531,7 +535,7 @@ export const ChatProvider = ({ children }) => {
                     ...conv,
                     unreadCount: {
                       ...conv.unreadCount,
-                      [userId]: (conv.unreadCount?.[userId] || 0) + 1,
+                      [username]: (conv.unreadCount?.[username] || 0) + 1,
                     },
                   };
                 }
@@ -712,8 +716,8 @@ export const ChatProvider = ({ children }) => {
 
     // Utils
     isConnected: () => connectionState === ConnectionState.CONNECTED,
-    getCurrentUserId: () => currentUserId.current,
-    isUserOnline: (userId) => userPresence[userId]?.status === "ONLINE",
+    getCurrentUserId: () => currentUsername.current, // Trả về username hiện tại
+    isUserOnline: (username) => userPresence[username]?.status === "ONLINE",
   };
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;

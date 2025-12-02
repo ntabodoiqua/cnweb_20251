@@ -61,10 +61,10 @@ public class InternalController {
      * GET /internal/products/stores/{storeId}
      */
     @GetMapping("/stores/{storeId}")
-    public ApiResponse<com.vdt2025.product_service.dto.response.StoreSimpleResponse> getStoreById(@PathVariable String storeId) {
+    public ApiResponse<com.vdt2025.product_service.dto.response.StoreInternalResponse> getStoreById(@PathVariable String storeId) {
         log.info("Internal: Fetching store info for ID: {}", storeId);
-        var store = storeService.getPublicStoreById(storeId);
-        return ApiResponse.<com.vdt2025.product_service.dto.response.StoreSimpleResponse>builder()
+        var store = storeService.getPublicStoreByIdInternal(storeId);
+        return ApiResponse.<com.vdt2025.product_service.dto.response.StoreInternalResponse>builder()
                 .result(store)
                 .build();
     }

@@ -3,6 +3,7 @@ package com.vdt2025.product_service.service;
 import com.vdt2025.common_dto.dto.SellerProfileApprovedEvent;
 import com.vdt2025.product_service.dto.request.store.StoreSimpleRequest;
 import com.vdt2025.product_service.dto.response.PageCacheDTO;
+import com.vdt2025.product_service.dto.response.StoreInternalResponse;
 import com.vdt2025.product_service.dto.response.StoreResponse;
 import com.vdt2025.product_service.dto.response.StoreSimpleResponse;
 import com.vdt2025.product_service.entity.Store;
@@ -18,6 +19,8 @@ public interface StoreService {
     Page<StoreSimpleResponse> getPublicStores(Pageable pageable);
 
     StoreSimpleResponse getPublicStoreById(String storeId);
+
+    StoreInternalResponse getPublicStoreByIdInternal(String storeId);
 
     void deactivateStoreBySellerProfileId(String sellerProfileId);
 

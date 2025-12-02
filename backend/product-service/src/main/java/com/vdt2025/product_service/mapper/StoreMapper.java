@@ -1,5 +1,6 @@
 package com.vdt2025.product_service.mapper;
 
+import com.vdt2025.product_service.dto.response.StoreInternalResponse;
 import com.vdt2025.product_service.dto.response.StoreResponse;
 import com.vdt2025.product_service.dto.response.StoreSimpleResponse;
 import com.vdt2025.product_service.entity.Store;
@@ -12,4 +13,6 @@ public interface StoreMapper {
     StoreResponse toStoreResponse(Store store);
     @Mapping(source = "active", target = "isActive")
     StoreSimpleResponse toStoreSimpleResponse(Store store);
+    @Mapping(source = "active", target = "isActive")
+    StoreInternalResponse toStoreInternalResponse(Store store);
 }
