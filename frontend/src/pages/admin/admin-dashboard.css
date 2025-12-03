@@ -35,6 +35,27 @@
   width: 280px;
   flex-shrink: 0;
   z-index: 100;
+  max-height: calc(100vh - 160px);
+  overflow-y: auto;
+}
+
+/* Tùy chỉnh scrollbar cho sidebar */
+.admin-sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-sidebar::-webkit-scrollbar-track {
+  background: rgba(238, 77, 45, 0.05);
+  border-radius: 3px;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb {
+  background: rgba(238, 77, 45, 0.3);
+  border-radius: 3px;
+}
+
+.admin-sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(238, 77, 45, 0.5);
 }
 
 .admin-sidebar.collapsed {

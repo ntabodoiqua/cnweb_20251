@@ -65,6 +65,13 @@ instance.interceptors.response.use(
         "/api/user/auth/google",
         "/api/user/provinces",
         "/api/user/wards/province",
+        // Public search endpoints - không cần token
+        "/api/product/products/search",
+        "/api/product/stores/search",
+        "/api/product/search",
+        "/api/product/products/public",
+        "/api/product/categories/public",
+        "/api/product/brands/public",
       ];
 
       const isPublicEndpoint = publicEndpoints.some((endpoint) =>

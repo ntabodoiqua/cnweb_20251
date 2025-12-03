@@ -10,7 +10,6 @@ import {
   AppstoreOutlined,
   DollarOutlined,
   BarChartOutlined,
-  SettingOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   ControlOutlined,
@@ -21,6 +20,7 @@ import {
   FileTextOutlined,
   DownOutlined,
   RightOutlined,
+  VideoCameraOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../../constants/routes";
 import "./admin-dashboard.css";
@@ -122,6 +122,12 @@ const AdminDashboardLayout = () => {
           label: "Banner",
           path: PROTECTED_ROUTES.ADMIN_BANNERS,
         },
+        {
+          key: "video-reviews",
+          icon: <VideoCameraOutlined />,
+          label: "Video Review",
+          path: PROTECTED_ROUTES.ADMIN_VIDEO_REVIEWS,
+        },
       ],
     },
     {
@@ -146,19 +152,6 @@ const AdminDashboardLayout = () => {
           icon: <BarChartOutlined />,
           label: "Báo cáo & Thống kê",
           path: PROTECTED_ROUTES.ADMIN_REPORTS,
-        },
-      ],
-    },
-    {
-      key: "system",
-      label: "Hệ thống",
-      icon: <SettingOutlined />,
-      items: [
-        {
-          key: "settings",
-          icon: <SettingOutlined />,
-          label: "Cài đặt",
-          path: PROTECTED_ROUTES.ADMIN_SETTINGS,
         },
       ],
     },

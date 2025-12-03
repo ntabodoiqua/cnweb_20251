@@ -27,6 +27,9 @@ import {
   BellOutlined,
   TagOutlined,
   RightOutlined,
+  MessageOutlined,
+  ShopOutlined,
+  HeartOutlined,
 } from "@ant-design/icons";
 import {
   Dropdown,
@@ -45,8 +48,10 @@ import {
   getSearchSuggestApi,
   getPublicPlatformCategoriesApi,
   getBrandsApi,
+  globalSuggestApi,
 } from "../../util/api";
 import { useNotification } from "../../contexts/NotificationContext";
+import { useChat } from "../../contexts/ChatContext";
 import { getRoleName, ROLES, getHighestRole } from "../../constants/roles";
 import NotificationDropdown from "../notification/NotificationDropdown";
 import styles from "./header.module.css";
@@ -59,6 +64,7 @@ const Header = () => {
   const { cartCount, resetCart } = useCart();
   const { connectWebSocket, disconnectWebSocket, fetchUnreadCount } =
     useNotification();
+  const { unreadTotal: chatUnreadCount } = useChat();
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -118,16 +124,96 @@ const Header = () => {
 
     const timeout = setTimeout(async () => {
       try {
-        const response = await getSearchSuggestApi(value);
-        if (response && response.result) {
-          const newOptions = response.result.map((item) => ({
-            value: item,
-            label: item,
-          }));
+        // Sử dụng Global Suggest API để lấy cả sản phẩm và cửa hàng
+        const response = await globalSuggestApi(value, 5, 3);
+        if (response?.result) {
+          const { products = [], stores = [] } = response.result;
+
+          const newOptions = [];
+
+          // Thêm sản phẩm vào suggestions
+          if (products.length > 0) {
+            newOptions.push({
+              label: (
+                <div
+                  style={{
+                    fontWeight: 600,
+                    color: "#8c8c8c",
+                    fontSize: "12px",
+                    padding: "4px 0",
+                    borderBottom: "1px solid #f0f0f0",
+                  }}
+                >
+                  <SearchOutlined style={{ marginRight: 8 }} />
+                  Sản phẩm
+                </div>
+              ),
+              options: products.map((item) => ({
+                value: item,
+                label: (
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    <SearchOutlined style={{ color: "#1890ff" }} />
+                    <span>{item}</span>
+                  </div>
+                ),
+                type: "product",
+              })),
+            });
+          }
+
+          // Thêm cửa hàng vào suggestions
+          if (stores.length > 0) {
+            newOptions.push({
+              label: (
+                <div
+                  style={{
+                    fontWeight: 600,
+                    color: "#8c8c8c",
+                    fontSize: "12px",
+                    padding: "4px 0",
+                    borderBottom: "1px solid #f0f0f0",
+                    marginTop: products.length > 0 ? 8 : 0,
+                  }}
+                >
+                  <ShopOutlined style={{ marginRight: 8 }} />
+                  Cửa hàng
+                </div>
+              ),
+              options: stores.map((item) => ({
+                value: `store:${item}`,
+                label: (
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    <ShopOutlined style={{ color: "#52c41a" }} />
+                    <span>{item}</span>
+                  </div>
+                ),
+                type: "store",
+                storeName: item,
+              })),
+            });
+          }
+
           setOptions(newOptions);
         }
       } catch (error) {
         console.error("Error fetching suggestions:", error);
+        // Fallback to product-only search
+        try {
+          const fallbackResponse = await getSearchSuggestApi(value);
+          if (fallbackResponse && fallbackResponse.data?.result) {
+            const newOptions = fallbackResponse.data.result.map((item) => ({
+              value: item,
+              label: item,
+            }));
+            setOptions(newOptions);
+          }
+        } catch (fallbackError) {
+          console.error("Fallback search also failed:", fallbackError);
+        }
       }
     }, 150);
 
@@ -208,6 +294,21 @@ const Header = () => {
   const handleSearch = (value) => {
     if (value.trim()) {
       navigate(`/search?q=${encodeURIComponent(value.trim())}`);
+    }
+  };
+
+  // Xử lý khi chọn một suggestion
+  const handleSelectSuggestion = (value, option) => {
+    // Kiểm tra xem có phải cửa hàng không
+    if (value.startsWith("store:") || option?.type === "store") {
+      // Chuyển đến trang tìm kiếm cửa hàng
+      const storeName = option?.storeName || value.replace("store:", "");
+      navigate(`/search?q=${encodeURIComponent(storeName)}&type=store`);
+      setSearchValue(storeName);
+    } else {
+      // Tìm kiếm sản phẩm bình thường
+      setSearchValue(value);
+      handleSearch(value);
     }
   };
 
@@ -415,6 +516,18 @@ const Header = () => {
         </Link>
       ),
     },
+    {
+      key: "following-stores",
+      label: (
+        <Link
+          to="/following-stores"
+          style={{ display: "flex", alignItems: "center", gap: "12px" }}
+        >
+          <HeartOutlined />
+          <span>Cửa hàng đang theo dõi</span>
+        </Link>
+      ),
+    },
     // Thêm menu Admin nếu user là ADMIN
     ...(getHighestRole(auth.user.role) === ROLES.ADMIN
       ? [
@@ -450,15 +563,6 @@ const Header = () => {
         ]
       : []),
     {
-      key: "settings",
-      label: (
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <SettingOutlined />
-          <span>Cài đặt</span>
-        </div>
-      ),
-    },
-    {
       type: "divider",
     },
     {
@@ -489,6 +593,11 @@ const Header = () => {
             key: "profile",
             icon: <ProfileOutlined />,
             label: <Link to="/profile">Hồ sơ</Link>,
+          },
+          {
+            key: "following-stores",
+            icon: <HeartOutlined />,
+            label: <Link to="/following-stores">Cửa hàng đang theo dõi</Link>,
           },
           // Thêm link Admin cho ADMIN
           ...(getHighestRole(auth.user.role) === ROLES.ADMIN
@@ -552,17 +661,14 @@ const Header = () => {
             <AutoComplete
               style={{ width: "100%" }}
               options={options}
-              onSelect={(value) => {
-                setSearchValue(value);
-                handleSearch(value);
-              }}
+              onSelect={handleSelectSuggestion}
               onSearch={handleSearchChange}
               value={searchValue}
               popupClassName={styles.searchDropdown}
               popupMatchSelectWidth={true}
             >
               <Input.Search
-                placeholder="Tìm kiếm sản phẩm, danh mục..."
+                placeholder="Tìm kiếm sản phẩm, cửa hàng..."
                 size="large"
                 onSearch={handleSearch}
                 enterButton={
@@ -577,6 +683,27 @@ const Header = () => {
 
           {/* Actions */}
           <div className={styles.headerActions}>
+            {/* Chat Icon with Badge */}
+            {auth.isAuthenticated && (
+              <div
+                className={styles.chatIcon}
+                onClick={() =>
+                  navigate(
+                    getHighestRole(auth.user?.role) === ROLES.SELLER
+                      ? "/seller/chat"
+                      : "/chat"
+                  )
+                }
+              >
+                <MessageOutlined />
+                {chatUnreadCount > 0 && (
+                  <span className={styles.chatBadge}>
+                    {chatUnreadCount > 99 ? "99+" : chatUnreadCount}
+                  </span>
+                )}
+              </div>
+            )}
+
             {/* Cart Icon with Badge */}
             <div className={styles.cartIcon} onClick={() => navigate("/cart")}>
               <ShoppingCartOutlined />
@@ -619,9 +746,6 @@ const Header = () => {
                       getAvatarInitials()
                     )}
                   </div>
-                  <span className={styles.headerUserName}>
-                    {getDisplayName()}
-                  </span>
                   {auth.user?.role && (
                     <span
                       className={`${styles.headerUserRole} ${
@@ -667,17 +791,14 @@ const Header = () => {
             <AutoComplete
               style={{ width: "100%" }}
               options={options}
-              onSelect={(value) => {
-                setSearchValue(value);
-                handleSearch(value);
-              }}
+              onSelect={handleSelectSuggestion}
               onSearch={handleSearchChange}
               value={searchValue}
               popupClassName={styles.searchDropdown}
               popupMatchSelectWidth={true}
             >
               <Input.Search
-                placeholder="Tìm kiếm sản phẩm..."
+                placeholder="Tìm kiếm sản phẩm, cửa hàng..."
                 size="middle"
                 onSearch={handleSearch}
                 enterButton={
@@ -737,6 +858,15 @@ const Header = () => {
 
             {auth.isAuthenticated && (
               <>
+                <Link
+                  to="/following-stores"
+                  className={`${styles.navLink} ${
+                    isActive("/following-stores") ? styles.active : ""
+                  }`}
+                >
+                  <HeartOutlined />
+                  <span>Đang theo dõi</span>
+                </Link>
                 <Link
                   to="/profile"
                   className={`${styles.navLink} ${

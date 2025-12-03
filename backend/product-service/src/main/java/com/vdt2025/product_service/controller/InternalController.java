@@ -19,7 +19,7 @@ import java.util.List;
 
 /**
  * Internal API Controller for inter-service communication
- * Used by other services (order-service, etc.) to get product information
+ * Used by other services (order-service, message-service, etc.) to get product information
  */
 @RestController
 @RequestMapping("/internal/products")
@@ -32,6 +32,19 @@ public class InternalController {
     private final StoreService storeService;
 
     /**
+     * Get product information by ID (for internal service calls)
+     * GET /internal/products/{productId}
+     */
+    @GetMapping("/{productId}")
+    public ApiResponse<com.vdt2025.product_service.dto.response.ProductResponse> getProductById(@PathVariable String productId) {
+        log.info("Internal: Fetching product info for ID: {}", productId);
+        var product = productService.getProductById(productId);
+        return ApiResponse.<com.vdt2025.product_service.dto.response.ProductResponse>builder()
+                .result(product)
+                .build();
+    }
+
+    /**
      * Validate if a user owns a store
      * GET /internal/products/stores/{storeId}/validate-owner
      */
@@ -40,6 +53,45 @@ public class InternalController {
         boolean isOwner = storeService.validateStoreOwnership(storeId, username);
         return ApiResponse.<Boolean>builder()
                 .result(isOwner)
+                .build();
+    }
+
+    /**
+     * Get store information by ID (for internal service calls)
+     * GET /internal/products/stores/{storeId}
+     */
+    @GetMapping("/stores/{storeId}")
+    public ApiResponse<com.vdt2025.product_service.dto.response.StoreInternalResponse> getStoreById(@PathVariable String storeId) {
+        log.info("Internal: Fetching store info for ID: {}", storeId);
+        var store = storeService.getPublicStoreByIdInternal(storeId);
+        return ApiResponse.<com.vdt2025.product_service.dto.response.StoreInternalResponse>builder()
+                .result(store)
+                .build();
+    }
+
+    /**
+     * Get store ID by owner username (for internal service calls)
+     * GET /internal/products/stores/by-username/{username}
+     */
+    @GetMapping("/stores/by-username/{username}")
+    public ApiResponse<String> getStoreIdByUsername(@PathVariable String username) {
+        log.info("Internal: Fetching store ID for username: {}", username);
+        String storeId = storeService.getStoreIdByUsername(username);
+        return ApiResponse.<String>builder()
+                .result(storeId)
+                .build();
+    }
+
+    /**
+     * Get owner username by store ID (for internal service calls)
+     * GET /internal/products/stores/{storeId}/owner-username
+     */
+    @GetMapping("/stores/{storeId}/owner-username")
+    public ApiResponse<String> getOwnerUsernameByStoreId(@PathVariable String storeId) {
+        log.info("Internal: Fetching owner username for store ID: {}", storeId);
+        String username = storeService.getOwnerUsernameByStoreId(storeId);
+        return ApiResponse.<String>builder()
+                .result(username)
                 .build();
     }
 

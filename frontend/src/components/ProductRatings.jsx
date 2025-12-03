@@ -255,7 +255,7 @@ const ProductRatings = ({ productId }) => {
       <div className={styles.ratingsList}>
         {loading ? (
           <div className={styles.loadingContainer}>
-            <Spin size="large" tip="Đang tải đánh giá..." />
+            <Spin size="large" />
           </div>
         ) : ratings.length === 0 ? (
           <Empty

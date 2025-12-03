@@ -66,6 +66,8 @@ logging:
   level:
     root: INFO
     org.springframework.security: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG
 
 # JWT Configuration
 jwt:
@@ -77,3 +79,11 @@ internal:
   service:
     secret: ${INTERNAL_SERVICE_SECRET:InT3rn@l-S3rv1c3-S3cr3t-K3y-2025-VDT}
 
+# Chat configuration
+chat:
+  message:
+    # Số ngày giữ lại tin nhắn (mặc định 90 ngày)
+    retention-days: ${CHAT_MESSAGE_RETENTION_DAYS:90}
+  cleanup:
+    # Cron expression cho cleanup task (mặc định 2:00 AM mỗi ngày)
+    cron: ${CHAT_CLEANUP_CRON:0 0 2 * * ?}

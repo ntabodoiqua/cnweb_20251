@@ -1,6 +1,9 @@
 package com.cnweb.order_service.controller;
 
+import com.cnweb.order_service.dto.response.OrderResponse;
+import com.cnweb.order_service.entity.Order;
 import com.cnweb.order_service.enums.OrderStatus;
+import com.cnweb.order_service.mapper.OrderMapper;
 import com.cnweb.order_service.repository.OrderRepository;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,7 +16,7 @@ import java.util.List;
 
 /**
  * Internal Controller cho Order Service
- * Được gọi bởi các service khác (product-service) thông qua Feign Client
+ * Được gọi bởi các service khác (product-service, message-service) thông qua Feign Client
  */
 @RestController
 @RequestMapping("/internal/orders")
@@ -23,6 +26,31 @@ import java.util.List;
 public class InternalOrderController {
 
     private final OrderRepository orderRepository;
+    private final OrderMapper orderMapper;
+
+    /**
+     * Lấy thông tin đơn hàng theo ID (internal - không kiểm tra authorization)
+     * GET /internal/orders/{orderId}
+     */
+    @GetMapping("/{orderId}")
+    @Operation(summary = "Get order by ID", description = "Get order information by ID for internal service calls")
+    public ApiResponse<OrderResponse> getOrderById(@PathVariable String orderId) {
+        log.info("Internal: Fetching order info for ID: {}", orderId);
+        
+        Order order = orderRepository.findByIdWithItems(orderId)
+                .orElse(null);
+        
+        if (order == null) {
+            return ApiResponse.<OrderResponse>builder()
+                    .result(null)
+                    .message("Order not found")
+                    .build();
+        }
+        
+        return ApiResponse.<OrderResponse>builder()
+                .result(orderMapper.toOrderResponse(order))
+                .build();
+    }
 
     /**
      * Kiểm tra user đã mua sản phẩm (đơn hàng đã DELIVERED) chưa

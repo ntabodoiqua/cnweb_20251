@@ -23,6 +23,14 @@ public enum ErrorCode {
 
     // Lỗi đơn hàng (19xx)
 
+    // Lỗi Chat/Conversation (20xx)
+    CONVERSATION_NOT_FOUND(2001, "error.2001", HttpStatus.NOT_FOUND),
+    NOT_PARTICIPANT(2002, "error.2002", HttpStatus.FORBIDDEN),
+    MESSAGE_NOT_FOUND(2003, "error.2003", HttpStatus.NOT_FOUND),
+    CANNOT_DELETE_MESSAGE(2004, "error.2004", HttpStatus.FORBIDDEN),
+    INVALID_MESSAGE_CONTENT(2005, "error.2005", HttpStatus.BAD_REQUEST),
+    RECIPIENT_REQUIRED(2006, "error.2006", HttpStatus.BAD_REQUEST),
+
     // Lỗi khác (99xx)
     UNCATEGORIZED_EXCEPTION(9999, "error.9999", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(9998, "error.9998", HttpStatus.BAD_REQUEST),

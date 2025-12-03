@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +26,11 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
     boolean existsByUsername(String username);
 
     boolean existsByPhone(String phone);
+
+    /**
+     * Tìm nhiều users theo danh sách usernames
+     */
+    List<User> findByUsernameIn(Collection<String> usernames);
 
     // Query để lấy tất cả avatar names
     @Query(

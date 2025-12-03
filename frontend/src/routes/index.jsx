@@ -59,11 +59,17 @@ const ProfileLayout = lazy(() => import("../pages/ProfileLayout"));
 const CartPage = lazy(() => import("../pages/user/CartPage"));
 const CheckoutPage = lazy(() => import("../pages/user/CheckoutPage"));
 const PaymentResultPage = lazy(() => import("../pages/user/PaymentResultPage"));
+const FollowingStoresPage = lazy(() =>
+  import("../pages/user/FollowingStoresPage")
+);
 
 // Notification Pages
 const NotificationsPage = lazy(() =>
   import("../pages/notifications/NotificationsPage")
 );
+
+// Chat Pages
+const ChatPage = lazy(() => import("../pages/chat"));
 
 // Profile sub-pages
 const ProfileGeneralPage = lazy(() =>
@@ -116,8 +122,8 @@ const AdminPaymentsPage = lazy(() =>
   import("../pages/admin/AdminPaymentsPage")
 );
 const AdminReportsPage = lazy(() => import("../pages/admin/AdminReportsPage"));
-const AdminSettingsPage = lazy(() =>
-  import("../pages/admin/AdminSettingsPage")
+const AdminVideoReviewsPage = lazy(() =>
+  import("../pages/admin/AdminVideoReviewsPage")
 );
 
 // Seller Pages
@@ -155,6 +161,7 @@ const SellerStatisticsPage = lazy(() =>
 const SellerSettingsPage = lazy(() =>
   import("../pages/seller/SellerSettingsPage")
 );
+const SellerChatPage = lazy(() => import("../pages/seller/SellerChatPage"));
 
 // Error Pages
 const NotFoundPage = lazy(() => import("../pages/not-found"));
@@ -424,6 +431,18 @@ const router = createBrowserRouter([
           </SuspenseWrapper>
         ),
       },
+      {
+        path: PROTECTED_ROUTES.USER_FOLLOWING_STORES,
+        element: (
+          <SuspenseWrapper>
+            <ProtectedRoute
+              allowedRoles={[ROLES.USER, ROLES.ADMIN, ROLES.SELLER]}
+            >
+              <FollowingStoresPage />
+            </ProtectedRoute>
+          </SuspenseWrapper>
+        ),
+      },
 
       // ==================== NOTIFICATIONS ====================
       {
@@ -434,6 +453,20 @@ const router = createBrowserRouter([
               allowedRoles={[ROLES.USER, ROLES.ADMIN, ROLES.SELLER]}
             >
               <NotificationsPage />
+            </ProtectedRoute>
+          </SuspenseWrapper>
+        ),
+      },
+
+      // ==================== CHAT ====================
+      {
+        path: PROTECTED_ROUTES.CHAT,
+        element: (
+          <SuspenseWrapper>
+            <ProtectedRoute
+              allowedRoles={[ROLES.USER, ROLES.ADMIN, ROLES.SELLER]}
+            >
+              <ChatPage />
             </ProtectedRoute>
           </SuspenseWrapper>
         ),
@@ -620,10 +653,10 @@ const router = createBrowserRouter([
             ),
           },
           {
-            path: PROTECTED_ROUTES.ADMIN_SETTINGS,
+            path: PROTECTED_ROUTES.ADMIN_VIDEO_REVIEWS,
             element: (
               <SuspenseWrapper>
-                <AdminSettingsPage />
+                <AdminVideoReviewsPage />
               </SuspenseWrapper>
             ),
           },
@@ -726,6 +759,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <SellerCustomersPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_CHAT,
+            element: (
+              <SuspenseWrapper>
+                <SellerChatPage />
               </SuspenseWrapper>
             ),
           },

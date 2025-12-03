@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import {
   SearchOutlined,
@@ -48,12 +48,80 @@ import {
   getMyStoresApi,
   getOrderDetailApi,
 } from "../../util/api";
+import React from "react";
 import NoImages from "../../assets/NoImages.webp";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import useDebounce from "../../hooks/useDebounce";
 import styles from "./SellerOrdersPage.module.css";
 
 const { RangePicker } = DatePicker;
+
+// Memoized OrderRow component để tránh re-render toàn bộ bảng
+const OrderRow = React.memo(function OrderRow({
+  order,
+  formatDate,
+  formatDateTime,
+  formatCurrency,
+  getStatusBadge,
+  getPaymentStatusBadge,
+  renderOrderActions,
+}) {
+  return (
+    <tr>
+      <td>
+        <div className={styles.orderInfo}>
+          <span className={styles.orderNumber}>{order.orderNumber}</span>
+          <span className={styles.orderDate}>
+            {formatDate(order.createdAt)}
+          </span>
+        </div>
+      </td>
+      <td>
+        <div className={styles.customerInfo}>
+          <span className={styles.customerName}>{order.receiverName}</span>
+          <span className={styles.customerPhone}>{order.receiverPhone}</span>
+        </div>
+      </td>
+      <td>
+        {order.items && order.items.length > 0 ? (
+          <div className={styles.productInfo}>
+            <img
+              src={order.items[0].productImage || NoImages}
+              alt={order.items[0].productName}
+              className={styles.productImage}
+            />
+            <div className={styles.productDetails}>
+              <span className={styles.productName}>
+                {order.items[0].productName}
+              </span>
+              {order.items[0].variantName && (
+                <span className={styles.productVariant}>
+                  {order.items[0].variantName}
+                </span>
+              )}
+              {order.items.length > 1 && (
+                <span className={styles.moreItems}>
+                  +{order.items.length - 1} sản phẩm khác
+                </span>
+              )}
+            </div>
+          </div>
+        ) : (
+          "-"
+        )}
+      </td>
+      <td>
+        <span className={styles.priceText}>
+          {formatCurrency(order.totalAmount)}
+        </span>
+      </td>
+      <td>{getStatusBadge(order.status, order)}</td>
+      <td>{getPaymentStatusBadge(order.paymentStatus)}</td>
+      <td>{formatDateTime(order.createdAt)}</td>
+      <td>{renderOrderActions(order)}</td>
+    </tr>
+  );
+});
 
 /**
  * SellerOrdersPage - Trang quản lý đơn hàng của người bán
@@ -303,7 +371,7 @@ const SellerOrdersPage = () => {
   }, [orderId, isReturnsPage, navigate]);
 
   // Hiển thị badge trạng thái đơn hàng, có xét cả yêu cầu trả hàng
-  const getStatusBadge = (status, order = null) => {
+  const getStatusBadge = useCallback((status, order = null) => {
     const statusConfig = {
       PENDING: {
         icon: <ClockCircleOutlined />,
@@ -363,9 +431,9 @@ const SellerOrdersPage = () => {
         )}
       </span>
     );
-  };
+  }, []);
 
-  const getPaymentStatusBadge = (paymentStatus) => {
+  const getPaymentStatusBadge = useCallback((paymentStatus) => {
     const statusConfig = {
       UNPAID: { label: "Chưa TT", color: "default" },
       PENDING: { label: "Đang xử lý", color: "gold" },
@@ -376,24 +444,24 @@ const SellerOrdersPage = () => {
 
     const config = statusConfig[paymentStatus] || statusConfig.PENDING;
     return <Tag color={config.color}>{config.label}</Tag>;
-  };
+  }, []);
 
-  const formatCurrency = (amount) => {
+  const formatCurrency = useCallback((amount) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
     }).format(amount);
-  };
+  }, []);
 
-  const formatDateTime = (dateString) => {
+  const formatDateTime = useCallback((dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleString("vi-VN");
-  };
+  }, []);
 
-  const formatDate = (dateString) => {
+  const formatDate = useCallback((dateString) => {
     if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("vi-VN");
-  };
+  }, []);
 
   // Stats calculation
   const getStatusCount = (status) => {
@@ -435,81 +503,93 @@ const SellerOrdersPage = () => {
     }));
   };
 
-  const showOrderDetail = (order) => {
-    setSelectedOrder(order);
-    setDetailModalVisible(true);
-  };
-
   // ============================================
   // Order Status Actions
   // ============================================
 
+  // Helper function to update a single order in the orders list
+  const updateOrderInList = useCallback((updatedOrder) => {
+    setOrders((prevOrders) =>
+      prevOrders.map((order) =>
+        order.id === updatedOrder.id ? updatedOrder : order
+      )
+    );
+  }, []);
+
   // Xác nhận đơn hàng (PAID -> CONFIRMED)
-  const handleConfirmOrder = async (orderId) => {
-    setActionLoading((prev) => ({ ...prev, [orderId]: "confirm" }));
-    try {
-      const response = await confirmOrderApi(orderId);
-      if (response?.code === 200) {
-        notification.success({
-          message: "Thành công",
-          description: "Đã xác nhận đơn hàng",
+  const handleConfirmOrder = useCallback(
+    async (orderId) => {
+      setActionLoading((prev) => ({ ...prev, [orderId]: "confirm" }));
+      try {
+        const response = await confirmOrderApi(orderId);
+        if (response?.code === 200) {
+          notification.success({
+            message: "Thành công",
+            description: "Đã xác nhận đơn hàng",
+            placement: "topRight",
+          });
+          // Cập nhật trực tiếp order trong list thay vì fetch lại toàn bộ
+          updateOrderInList(response.result);
+          // Cập nhật selectedOrder nếu đang mở modal
+          setSelectedOrder((prev) =>
+            prev?.id === orderId ? response.result : prev
+          );
+        }
+      } catch (error) {
+        console.error("Error confirming order:", error);
+        notification.error({
+          message: "Lỗi",
+          description:
+            error.response?.data?.message || "Không thể xác nhận đơn hàng",
           placement: "topRight",
         });
-        fetchOrders();
-        // Cập nhật selectedOrder nếu đang mở modal
-        if (selectedOrder?.id === orderId) {
-          setSelectedOrder(response.result);
-        }
+      } finally {
+        setActionLoading((prev) => ({ ...prev, [orderId]: null }));
       }
-    } catch (error) {
-      console.error("Error confirming order:", error);
-      notification.error({
-        message: "Lỗi",
-        description:
-          error.response?.data?.message || "Không thể xác nhận đơn hàng",
-        placement: "topRight",
-      });
-    } finally {
-      setActionLoading((prev) => ({ ...prev, [orderId]: null }));
-    }
-  };
+    },
+    [updateOrderInList]
+  );
 
   // Giao hàng (CONFIRMED -> SHIPPING)
-  const handleShipOrder = async (orderId) => {
-    setActionLoading((prev) => ({ ...prev, [orderId]: "ship" }));
-    try {
-      const response = await shipOrderApi(orderId);
-      if (response?.code === 200) {
-        notification.success({
-          message: "Thành công",
-          description: "Đơn hàng đang được giao",
+  const handleShipOrder = useCallback(
+    async (orderId) => {
+      setActionLoading((prev) => ({ ...prev, [orderId]: "ship" }));
+      try {
+        const response = await shipOrderApi(orderId);
+        if (response?.code === 200) {
+          notification.success({
+            message: "Thành công",
+            description: "Đơn hàng đang được giao",
+            placement: "topRight",
+          });
+          // Cập nhật trực tiếp order trong list thay vì fetch lại toàn bộ
+          updateOrderInList(response.result);
+          setSelectedOrder((prev) =>
+            prev?.id === orderId ? response.result : prev
+          );
+        }
+      } catch (error) {
+        console.error("Error shipping order:", error);
+        notification.error({
+          message: "Lỗi",
+          description:
+            error.response?.data?.message ||
+            "Không thể chuyển trạng thái giao hàng",
           placement: "topRight",
         });
-        fetchOrders();
-        if (selectedOrder?.id === orderId) {
-          setSelectedOrder(response.result);
-        }
+      } finally {
+        setActionLoading((prev) => ({ ...prev, [orderId]: null }));
       }
-    } catch (error) {
-      console.error("Error shipping order:", error);
-      notification.error({
-        message: "Lỗi",
-        description:
-          error.response?.data?.message ||
-          "Không thể chuyển trạng thái giao hàng",
-        placement: "topRight",
-      });
-    } finally {
-      setActionLoading((prev) => ({ ...prev, [orderId]: null }));
-    }
-  };
+    },
+    [updateOrderInList]
+  );
 
   // Mở modal hủy đơn
-  const openCancelModal = (order) => {
+  const openCancelModal = useCallback((order) => {
     setOrderToCancel(order);
     setCancelReason("");
     setCancelModalVisible(true);
-  };
+  }, []);
 
   // Hủy đơn hàng
   const handleCancelOrder = async () => {
@@ -532,7 +612,8 @@ const SellerOrdersPage = () => {
           placement: "topRight",
         });
         setCancelModalVisible(false);
-        fetchOrders();
+        // Cập nhật trực tiếp order trong list thay vì fetch lại toàn bộ
+        updateOrderInList(response.result);
         if (selectedOrder?.id === orderToCancel.id) {
           setSelectedOrder(response.result);
         }
@@ -550,11 +631,11 @@ const SellerOrdersPage = () => {
   };
 
   // Mở modal xử lý trả hàng
-  const openReturnModal = (order) => {
+  const openReturnModal = useCallback((order) => {
     setOrderToProcessReturn(order);
     setReturnRejectionReason("");
     setReturnModalVisible(true);
-  };
+  }, []);
 
   // Xử lý yêu cầu trả hàng (Approve/Reject)
   const handleProcessReturn = async (approved) => {
@@ -585,7 +666,8 @@ const SellerOrdersPage = () => {
           placement: "topRight",
         });
         setReturnModalVisible(false);
-        fetchOrders();
+        // Cập nhật trực tiếp order trong list thay vì fetch lại toàn bộ
+        updateOrderInList(response.result);
         if (selectedOrder?.id === orderToProcessReturn.id) {
           setSelectedOrder(response.result);
         }
@@ -607,16 +689,18 @@ const SellerOrdersPage = () => {
   };
 
   // Kiểm tra xem đơn hàng có thể thực hiện action nào
-  const canConfirm = (order) => order.status === "PAID";
-  const canShip = (order) => order.status === "CONFIRMED";
-  const canCancel = (order) =>
-    ["PENDING", "PAID", "CONFIRMED"].includes(order.status);
+  const canConfirm = useCallback((order) => order.status === "PAID", []);
+  const canShip = useCallback((order) => order.status === "CONFIRMED", []);
+  const canCancel = useCallback(
+    (order) => ["PENDING", "PAID", "CONFIRMED"].includes(order.status),
+    []
+  );
   // Sử dụng canProcessReturn từ backend hoặc kiểm tra:
   // - status = DELIVERED (chưa chuyển sang RETURNED)
   // - có returnReason (đã yêu cầu trả hàng)
   // - chưa có returnProcessedAt (chưa xử lý)
   // - refundStatus = PENDING (chưa hoàn tiền)
-  const canProcessReturn = (order) => {
+  const canProcessReturn = useCallback((order) => {
     // Nếu backend trả về canProcessReturn thì ưu tiên dùng
     if (order.canProcessReturn === true) return true;
     if (order.canProcessReturn === false) return false;
@@ -628,103 +712,122 @@ const SellerOrdersPage = () => {
       !order.returnProcessedAt &&
       order.refundStatus === "PENDING"
     );
-  };
+  }, []);
+
+  const showOrderDetail = useCallback((order) => {
+    setSelectedOrder(order);
+    setDetailModalVisible(true);
+  }, []);
 
   // Render action buttons cho mỗi order
-  const renderOrderActions = (order) => {
-    const isLoading = actionLoading[order.id];
+  const renderOrderActions = useCallback(
+    (order) => {
+      const isLoading = actionLoading[order.id];
 
-    return (
-      <div className={styles.actionButtons}>
-        <Tooltip title="Xem chi tiết">
-          <button
-            className={`${styles.actionBtn} ${styles.viewBtn}`}
-            onClick={() => showOrderDetail(order)}
-          >
-            <EyeOutlined />
-          </button>
-        </Tooltip>
-
-        {canConfirm(order) && (
-          <Tooltip title="Xác nhận đơn">
-            <Popconfirm
-              title="Xác nhận đơn hàng"
-              description="Bạn có chắc chắn muốn xác nhận đơn hàng này?"
-              onConfirm={() => handleConfirmOrder(order.id)}
-              okText="Xác nhận"
-              cancelText="Hủy"
-            >
-              <button
-                className={`${styles.actionBtn} ${styles.confirmBtn}`}
-                disabled={isLoading}
-              >
-                {isLoading === "confirm" ? (
-                  <LoadingSpinner size="small" />
-                ) : (
-                  <CheckOutlined />
-                )}
-              </button>
-            </Popconfirm>
-          </Tooltip>
-        )}
-
-        {canShip(order) && (
-          <Tooltip title="Giao hàng">
-            <Popconfirm
-              title="Giao hàng"
-              description="Xác nhận đơn hàng đang được giao?"
-              onConfirm={() => handleShipOrder(order.id)}
-              okText="Xác nhận"
-              cancelText="Hủy"
-            >
-              <button
-                className={`${styles.actionBtn} ${styles.shipBtn}`}
-                disabled={isLoading}
-              >
-                {isLoading === "ship" ? (
-                  <LoadingSpinner size="small" />
-                ) : (
-                  <SendOutlined />
-                )}
-              </button>
-            </Popconfirm>
-          </Tooltip>
-        )}
-
-        {canProcessReturn(order) && (
-          <Tooltip title="Xử lý trả hàng">
+      return (
+        <div className={styles.actionButtons}>
+          <Tooltip title="Xem chi tiết">
             <button
-              className={`${styles.actionBtn} ${styles.returnBtn}`}
-              onClick={() => openReturnModal(order)}
-              disabled={isLoading}
+              className={`${styles.actionBtn} ${styles.viewBtn}`}
+              onClick={() => showOrderDetail(order)}
             >
-              {isLoading === "return" ? (
-                <LoadingSpinner size="small" />
-              ) : (
-                <RollbackOutlined />
-              )}
+              <EyeOutlined />
             </button>
           </Tooltip>
-        )}
 
-        {canCancel(order) && (
-          <Tooltip title="Hủy đơn">
-            <button
-              className={`${styles.actionBtn} ${styles.cancelBtn}`}
-              onClick={() => openCancelModal(order)}
-              disabled={isLoading}
-            >
-              {isLoading === "cancel" ? (
-                <LoadingSpinner size="small" />
-              ) : (
-                <StopOutlined />
-              )}
-            </button>
-          </Tooltip>
-        )}
-      </div>
-    );
-  };
+          {canConfirm(order) && (
+            <Tooltip title="Xác nhận đơn">
+              <Popconfirm
+                title="Xác nhận đơn hàng"
+                description="Bạn có chắc chắn muốn xác nhận đơn hàng này?"
+                onConfirm={() => handleConfirmOrder(order.id)}
+                okText="Xác nhận"
+                cancelText="Hủy"
+              >
+                <button
+                  className={`${styles.actionBtn} ${styles.confirmBtn}`}
+                  disabled={isLoading}
+                >
+                  {isLoading === "confirm" ? (
+                    <LoadingSpinner size="small" />
+                  ) : (
+                    <CheckOutlined />
+                  )}
+                </button>
+              </Popconfirm>
+            </Tooltip>
+          )}
+
+          {canShip(order) && (
+            <Tooltip title="Giao hàng">
+              <Popconfirm
+                title="Giao hàng"
+                description="Xác nhận đơn hàng đang được giao?"
+                onConfirm={() => handleShipOrder(order.id)}
+                okText="Xác nhận"
+                cancelText="Hủy"
+              >
+                <button
+                  className={`${styles.actionBtn} ${styles.shipBtn}`}
+                  disabled={isLoading}
+                >
+                  {isLoading === "ship" ? (
+                    <LoadingSpinner size="small" />
+                  ) : (
+                    <SendOutlined />
+                  )}
+                </button>
+              </Popconfirm>
+            </Tooltip>
+          )}
+
+          {canProcessReturn(order) && (
+            <Tooltip title="Xử lý trả hàng">
+              <button
+                className={`${styles.actionBtn} ${styles.returnBtn}`}
+                onClick={() => openReturnModal(order)}
+                disabled={isLoading}
+              >
+                {isLoading === "return" ? (
+                  <LoadingSpinner size="small" />
+                ) : (
+                  <RollbackOutlined />
+                )}
+              </button>
+            </Tooltip>
+          )}
+
+          {canCancel(order) && (
+            <Tooltip title="Hủy đơn">
+              <button
+                className={`${styles.actionBtn} ${styles.cancelBtn}`}
+                onClick={() => openCancelModal(order)}
+                disabled={isLoading}
+              >
+                {isLoading === "cancel" ? (
+                  <LoadingSpinner size="small" />
+                ) : (
+                  <StopOutlined />
+                )}
+              </button>
+            </Tooltip>
+          )}
+        </div>
+      );
+    },
+    [
+      actionLoading,
+      showOrderDetail,
+      canConfirm,
+      canShip,
+      canCancel,
+      canProcessReturn,
+      handleConfirmOrder,
+      handleShipOrder,
+      openReturnModal,
+      openCancelModal,
+    ]
+  );
 
   return (
     <div className={styles.sellerOrders}>
@@ -950,65 +1053,16 @@ const SellerOrdersPage = () => {
                 <tbody>
                   {orders.length > 0 ? (
                     orders.map((order) => (
-                      <tr key={order.id}>
-                        <td>
-                          <div className={styles.orderInfo}>
-                            <span className={styles.orderNumber}>
-                              {order.orderNumber}
-                            </span>
-                            <span className={styles.orderDate}>
-                              {formatDate(order.createdAt)}
-                            </span>
-                          </div>
-                        </td>
-                        <td>
-                          <div className={styles.customerInfo}>
-                            <span className={styles.customerName}>
-                              {order.receiverName}
-                            </span>
-                            <span className={styles.customerPhone}>
-                              {order.receiverPhone}
-                            </span>
-                          </div>
-                        </td>
-                        <td>
-                          {order.items && order.items.length > 0 ? (
-                            <div className={styles.productInfo}>
-                              <img
-                                src={order.items[0].productImage || NoImages}
-                                alt={order.items[0].productName}
-                                className={styles.productImage}
-                              />
-                              <div className={styles.productDetails}>
-                                <span className={styles.productName}>
-                                  {order.items[0].productName}
-                                </span>
-                                {order.items[0].variantName && (
-                                  <span className={styles.productVariant}>
-                                    {order.items[0].variantName}
-                                  </span>
-                                )}
-                                {order.items.length > 1 && (
-                                  <span className={styles.moreItems}>
-                                    +{order.items.length - 1} sản phẩm khác
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          ) : (
-                            "-"
-                          )}
-                        </td>
-                        <td>
-                          <span className={styles.priceText}>
-                            {formatCurrency(order.totalAmount)}
-                          </span>
-                        </td>
-                        <td>{getStatusBadge(order.status, order)}</td>
-                        <td>{getPaymentStatusBadge(order.paymentStatus)}</td>
-                        <td>{formatDateTime(order.createdAt)}</td>
-                        <td>{renderOrderActions(order)}</td>
-                      </tr>
+                      <OrderRow
+                        key={order.id}
+                        order={order}
+                        formatDate={formatDate}
+                        formatDateTime={formatDateTime}
+                        formatCurrency={formatCurrency}
+                        getStatusBadge={getStatusBadge}
+                        getPaymentStatusBadge={getPaymentStatusBadge}
+                        renderOrderActions={renderOrderActions}
+                      />
                     ))
                   ) : (
                     <tr>

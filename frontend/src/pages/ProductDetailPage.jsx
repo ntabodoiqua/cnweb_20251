@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useContext } from "react";
 import { Helmet } from "react-helmet-async";
 import { useParams, useNavigate } from "react-router-dom";
 import {
@@ -40,6 +40,7 @@ import {
   AppstoreOutlined,
   CloseOutlined,
   EditOutlined,
+  MessageOutlined,
 } from "@ant-design/icons";
 import {
   getPublicProductDetailApi,
@@ -56,10 +57,12 @@ import {
 } from "../util/api";
 import { getSpecSectionConfig } from "../constants/productSpecsTranslations";
 import { useCart } from "../contexts/CartContext";
+import { AuthContext } from "../components/context/auth.context";
 import LoadingSpinner from "../components/LoadingSpinner";
 import ProductRatings from "../components/ProductRatings";
 import RatingModal from "../components/RatingModal";
 import DOMPurify from "dompurify";
+import ChatButton from "../components/chat/ChatButton";
 import styles from "./ProductDetailPage.module.css";
 
 const { Title, Text, Paragraph } = Typography;
@@ -68,6 +71,7 @@ const ProductDetailPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
   const { incrementCartCount, loadCartCount } = useCart();
+  const { auth } = useContext(AuthContext);
 
   const [loading, setLoading] = useState(true);
   const [product, setProduct] = useState(null);
@@ -81,7 +85,6 @@ const ProductDetailPage = () => {
   const [variantLoading, setVariantLoading] = useState(false);
   const [addingToCart, setAddingToCart] = useState(false);
   const [productSpecs, setProductSpecs] = useState(null);
-  const [specsLoading, setSpecsLoading] = useState(false);
 
   // Variant metadata states
   const [variantMetadata, setVariantMetadata] = useState(null);
@@ -98,13 +101,120 @@ const ProductDetailPage = () => {
   const [canRate, setCanRate] = useState(false);
   const [ratingsKey, setRatingsKey] = useState(0); // Used to refresh ratings component
 
+  // Track if initial data has been loaded to prevent duplicate fetches
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+
   useEffect(() => {
-    if (productId) {
-      fetchProductDetail();
-      fetchProductSpecs();
-      fetchSelectionConfig();
-      checkCanRate();
-    }
+    // Skip if already loaded for this productId
+    if (!productId || initialDataLoaded) return;
+
+    // Fetch all initial data in parallel to reduce re-renders
+    const fetchInitialData = async () => {
+      setLoading(true);
+
+      // Prepare all API calls including canRate if authenticated
+      const apiCalls = [
+        getPublicProductDetailApi(productId),
+        getPublicProductSpecsApi(productId),
+        getSelectionConfigApi(productId),
+      ];
+
+      // Add canRate API call if authenticated
+      if (auth?.isAuthenticated) {
+        apiCalls.push(canRateProductApi(productId));
+      }
+
+      try {
+        const results = await Promise.allSettled(apiCalls);
+
+        const [productResponse, specsResponse, selectionResponse] = results;
+        const canRateResponse = auth?.isAuthenticated ? results[3] : null;
+
+        // Prepare batch state updates
+        let newProduct = null;
+        let newSelectedImage = null;
+        let newProductSpecs = null;
+        let newSelectionConfig = null;
+        let newCanRate = false;
+        let wardIdToFetch = null;
+
+        // Process product detail
+        if (
+          productResponse.status === "fulfilled" &&
+          productResponse.value.code === 1000
+        ) {
+          newProduct = productResponse.value.result;
+
+          // Set default image
+          if (newProduct.images && newProduct.images.length > 0) {
+            const primaryImage =
+              newProduct.images.find((img) => img.isPrimary) ||
+              newProduct.images[0];
+            newSelectedImage = primaryImage.imageUrl;
+          }
+
+          // Save wardId for later fetch (outside batch)
+          if (newProduct.store?.wardId) {
+            wardIdToFetch = newProduct.store.wardId;
+          }
+        }
+
+        // Process specs
+        if (
+          specsResponse.status === "fulfilled" &&
+          specsResponse.value.code === 1000
+        ) {
+          newProductSpecs = specsResponse.value.result?.specs;
+        }
+
+        // Process selection config
+        if (
+          selectionResponse.status === "fulfilled" &&
+          selectionResponse.value.code === 1000
+        ) {
+          newSelectionConfig = selectionResponse.value.result;
+        }
+
+        // Process canRate
+        if (
+          canRateResponse?.status === "fulfilled" &&
+          canRateResponse.value?.result === true
+        ) {
+          newCanRate = true;
+        }
+
+        // Batch all state updates together using React's automatic batching
+        setProduct(newProduct);
+        setSelectedImage(newSelectedImage);
+        setProductSpecs(newProductSpecs);
+        setSelectionConfig(newSelectionConfig);
+        setSelectionConfigLoaded(true);
+        setCanRate(newCanRate);
+        setInitialDataLoaded(true);
+        setLoading(false);
+
+        // Fetch ward info separately (minor, won't cause visible re-render)
+        if (wardIdToFetch) {
+          fetchWardInfo(wardIdToFetch);
+        }
+      } catch (error) {
+        console.error("Error fetching initial data:", error);
+        notification.error({
+          message: "Lỗi tải sản phẩm",
+          description: "Không thể tải thông tin sản phẩm. Vui lòng thử lại.",
+          placement: "topRight",
+        });
+        setLoading(false);
+        setInitialDataLoaded(true);
+      }
+    };
+
+    fetchInitialData();
+  }, [productId, auth?.isAuthenticated, initialDataLoaded]);
+
+  // Reset initialDataLoaded when productId changes
+  useEffect(() => {
+    setInitialDataLoaded(false);
   }, [productId]);
 
   // Check if user can rate this product
@@ -120,7 +230,9 @@ const ProductDetailPage = () => {
   // Handle rating success - refresh ratings
   const handleRatingSuccess = () => {
     setRatingsKey((prev) => prev + 1);
-    checkCanRate();
+    if (auth?.isAuthenticated) {
+      checkCanRate();
+    }
     fetchProductDetail(); // Refresh product to get updated rating count
   };
 
@@ -146,36 +258,16 @@ const ProductDetailPage = () => {
     }
   }, [selectedAttributes]);
 
+  // Refresh product detail (used after rating, without full page loading)
   const fetchProductDetail = async () => {
-    setLoading(true);
     try {
       const response = await getPublicProductDetailApi(productId);
       if (response.code === 1000) {
         const productData = response.result;
         setProduct(productData);
-
-        // Set default image
-        if (productData.images && productData.images.length > 0) {
-          const primaryImage =
-            productData.images.find((img) => img.isPrimary) ||
-            productData.images[0];
-          setSelectedImage(primaryImage.imageUrl);
-        }
-
-        // Fetch ward information if wardId exists
-        if (productData.store?.wardId) {
-          fetchWardInfo(productData.store.wardId);
-        }
       }
     } catch (error) {
       console.error("Error fetching product detail:", error);
-      notification.error({
-        message: "Lỗi tải sản phẩm",
-        description: "Không thể tải thông tin sản phẩm. Vui lòng thử lại.",
-        placement: "topRight",
-      });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -201,21 +293,7 @@ const ProductDetailPage = () => {
     }
   };
 
-  const fetchProductSpecs = async () => {
-    setSpecsLoading(true);
-    try {
-      const response = await getPublicProductSpecsApi(productId);
-      if (response.code === 1000) {
-        setProductSpecs(response.result?.specs);
-      }
-    } catch (error) {
-      console.error("Error fetching product specs:", error);
-      // Don't show error notification as specs might not exist for all products
-    } finally {
-      setSpecsLoading(false);
-    }
-  };
-
+  // Refresh selection config (used when resetting options)
   const fetchSelectionConfig = async () => {
     try {
       const response = await getSelectionConfigApi(productId);
@@ -224,9 +302,6 @@ const ProductDetailPage = () => {
       }
     } catch (error) {
       console.error("Error fetching selection config:", error);
-      // Selection config might not exist for all products
-    } finally {
-      setSelectionConfigLoaded(true);
     }
   };
 
@@ -1307,13 +1382,22 @@ const ProductDetailPage = () => {
                       </Space>
                     </Col>
                     <Col flex="none">
-                      <Button
-                        type="primary"
-                        icon={<ShopOutlined />}
-                        onClick={handleStoreClick}
-                      >
-                        Xem cửa hàng
-                      </Button>
+                      <Space>
+                        <ChatButton
+                          shopId={product.store.id}
+                          shopName={product.store.storeName}
+                          type="default"
+                        >
+                          Chat ngay
+                        </ChatButton>
+                        <Button
+                          type="primary"
+                          icon={<ShopOutlined />}
+                          onClick={handleStoreClick}
+                        >
+                          Xem cửa hàng
+                        </Button>
+                      </Space>
                     </Col>
                   </Row>
                 </Card>
@@ -1399,15 +1483,7 @@ const ProductDetailPage = () => {
                   label: "Thông số chi tiết",
                   children: (
                     <div className={styles.tabContent}>
-                      {specsLoading ? (
-                        <div style={{ textAlign: "center", padding: "40px 0" }}>
-                          <Spin
-                            size="large"
-                            tip="Đang tải thông số chi tiết..."
-                          />
-                        </div>
-                      ) : productSpecs &&
-                        Object.keys(productSpecs).length > 0 ? (
+                      {productSpecs && Object.keys(productSpecs).length > 0 ? (
                         <Collapse
                           accordion
                           defaultActiveKey={[

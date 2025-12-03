@@ -17,6 +17,9 @@ import java.util.List;
 public class RatingResponse {
     String id;
     String userId;
+    String username;
+    String userFullName;
+    String userAvatarUrl;
     String productId;
     String productName;
     String variantId;

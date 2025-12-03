@@ -1,9 +1,13 @@
 package com.vdt2025.product_service.service.search;
 
 import com.vdt2025.product_service.document.ProductDocument;
+import com.vdt2025.product_service.document.StoreDocument;
 import com.vdt2025.product_service.entity.Product;
+import com.vdt2025.product_service.entity.Store;
 import com.vdt2025.product_service.repository.ProductRepository;
+import com.vdt2025.product_service.repository.StoreRepository;
 import com.vdt2025.product_service.repository.elasticsearch.ProductSearchRepository;
+import com.vdt2025.product_service.repository.elasticsearch.StoreSearchRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -42,6 +46,11 @@ public class ElasticsearchSyncService {
     ProductSearchRepository productSearchRepository;
     ProductIndexMapper productIndexMapper;
     ProductSearchService productSearchService;
+    
+    // Store sync dependencies
+    StoreRepository storeRepository;
+    StoreSearchRepository storeSearchRepository;
+    StoreIndexMapper storeIndexMapper;
 
     @Autowired
     @Lazy
@@ -52,7 +61,7 @@ public class ElasticsearchSyncService {
     static final int BATCH_SIZE = 50; // Smaller batch size to avoid memory issues
 
     /**
-     * Auto-sync khi application khởi động (nếu index trống)
+     * Auto-sync khi application khởi động - LUÔN reindex để đảm bảo dữ liệu mới nhất
      */
     @EventListener(ApplicationReadyEvent.class)
     @Async("elasticsearchTaskExecutor")
@@ -63,18 +72,40 @@ public class ElasticsearchSyncService {
             return;
         }
 
-        // Check if index is empty
-        long indexCount = productSearchRepository.count();
+        log.info("Application started. Starting automatic Elasticsearch reindex...");
+        
+        // Luôn reindex products khi khởi động
+        reindexProductsOnStartup();
+        
+        // Luôn reindex stores khi khởi động
+        reindexStoresOnStartup();
+    }
+    
+    /**
+     * Reindex products on startup - luôn thực hiện để đảm bảo dữ liệu mới nhất
+     */
+    private void reindexProductsOnStartup() {
         long dbCount = productRepository.count();
-
-        log.info("Elasticsearch index has {} documents, database has {} products", indexCount, dbCount);
-
-        if (indexCount == 0 && dbCount > 0) {
-            log.info("Index is empty. Starting initial sync...");
+        log.info("Starting product reindex. Database has {} products", dbCount);
+        
+        if (dbCount > 0) {
             syncAll();
-        } else if (indexCount < dbCount * 0.9) {
-            // If index has less than 90% of DB records, consider re-syncing
-            log.warn("Index appears incomplete ({} vs {}). Consider running reindex.", indexCount, dbCount);
+        } else {
+            log.info("No products in database. Skipping product reindex.");
+        }
+    }
+    
+    /**
+     * Reindex stores on startup - luôn thực hiện để đảm bảo dữ liệu mới nhất
+     */
+    private void reindexStoresOnStartup() {
+        long storeDbCount = storeRepository.count();
+        log.info("Starting store reindex. Database has {} stores", storeDbCount);
+        
+        if (storeDbCount > 0) {
+            syncAllStoresInternal();
+        } else {
+            log.info("No stores in database. Skipping store reindex.");
         }
     }
 
@@ -268,19 +299,24 @@ public class ElasticsearchSyncService {
      */
     public SyncStats getSyncStats() {
         long indexCount = 0;
+        long storeIndexCount = 0;
         try {
             indexCount = productSearchRepository.count();
+            storeIndexCount = storeSearchRepository.count();
         } catch (Exception e) {
             log.warn("Could not get index count: {}", e.getMessage());
         }
 
         long dbCount = productRepository.count();
+        long storeDbCount = storeRepository.count();
         long deletedCount = 0; // Would need custom query
 
         return new SyncStats(
                 indexCount,
                 dbCount,
                 deletedCount,
+                storeIndexCount,
+                storeDbCount,
                 isSyncing.get(),
                 productSearchService.isHealthy()
         );
@@ -290,7 +326,121 @@ public class ElasticsearchSyncService {
             long indexedCount,
             long totalInDb,
             long deletedCount,
+            long storeIndexedCount,
+            long storeTotalInDb,
             boolean syncInProgress,
             boolean elasticsearchHealthy
     ) {}
+    
+    // ========== Store Sync Methods ==========
+    
+    /**
+     * Full sync stores - reindex tất cả stores (public API)
+     */
+    @Async("elasticsearchTaskExecutor")
+    public void syncAllStores() {
+        syncAllStoresInternal();
+    }
+    
+    /**
+     * Internal method to sync all stores - có thể gọi từ startup hoặc API
+     */
+    private void syncAllStoresInternal() {
+        if (isSyncing.compareAndSet(false, true)) {
+            try {
+                log.info("Starting full Elasticsearch store sync...");
+                long startTime = System.currentTimeMillis();
+
+                // Clear existing store index
+                storeSearchRepository.deleteAll();
+                log.info("Cleared existing store index");
+
+                // Sync in batches
+                int page = 0;
+                long totalSynced = 0;
+
+                while (true) {
+                    List<StoreDocument> documents = self.fetchAndMapStoresBatch(page, BATCH_SIZE);
+
+                    if (documents.isEmpty()) {
+                        break;
+                    }
+
+                    storeSearchRepository.saveAll(documents);
+                    totalSynced += documents.size();
+
+                    log.debug("Synced store batch {} ({} stores)", page + 1, documents.size());
+                    page++;
+                }
+
+                long duration = System.currentTimeMillis() - startTime;
+                log.info("Full store sync completed. {} stores indexed in {} ms", totalSynced, duration);
+
+            } catch (Exception e) {
+                log.error("Error during full store sync: {}", e.getMessage(), e);
+            } finally {
+                isSyncing.set(false);
+            }
+        } else {
+            log.warn("Sync already in progress. Store sync request ignored.");
+        }
+    }
+
+    /**
+     * Fetch và map stores trong transaction riêng
+     */
+    @Transactional(readOnly = true)
+    public List<StoreDocument> fetchAndMapStoresBatch(int page, int size) {
+        Page<Store> storePage = storeRepository.findAllByIsActiveTrue(PageRequest.of(page, size));
+        
+        if (storePage.isEmpty()) {
+            return List.of();
+        }
+
+        return storePage.getContent().stream()
+                .map(storeIndexMapper::toDocument)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Sync một store cụ thể
+     */
+    public void syncStore(String storeId) {
+        try {
+            StoreDocument document = self.fetchAndMapSingleStore(storeId);
+            if (document != null) {
+                storeSearchRepository.save(document);
+                log.debug("Synced store {} to index", storeId);
+            } else {
+                // Store not found or inactive, remove from index
+                storeSearchRepository.deleteById(storeId);
+                log.debug("Store {} removed from index (not found or inactive)", storeId);
+            }
+        } catch (Exception e) {
+            log.error("Error syncing store {}: {}", storeId, e.getMessage());
+        }
+    }
+
+    /**
+     * Fetch và map single store trong transaction
+     */
+    @Transactional(readOnly = true)
+    public StoreDocument fetchAndMapSingleStore(String storeId) {
+        return storeRepository.findById(storeId)
+                .filter(Store::isActive)
+                .map(storeIndexMapper::toDocument)
+                .orElse(null);
+    }
+
+    /**
+     * Xóa store khỏi index
+     */
+    public void removeStoreFromIndex(String storeId) {
+        try {
+            storeSearchRepository.deleteById(storeId);
+            log.debug("Removed store {} from index", storeId);
+        } catch (Exception e) {
+            log.error("Error removing store {} from index: {}", storeId, e.getMessage());
+        }
+    }
 }
