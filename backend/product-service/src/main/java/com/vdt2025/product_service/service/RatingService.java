@@ -73,4 +73,10 @@ public interface RatingService {
      * Đánh dấu đánh giá là helpful
      */
     void markRatingAsHelpful(String ratingId);
+
+    /**
+     * Lấy các đánh giá mới nhất từ tất cả sản phẩm
+     * Dùng cho trang chủ hiển thị testimonials
+     */
+    Page<RatingResponse> getLatestRatings(Pageable pageable);
 }

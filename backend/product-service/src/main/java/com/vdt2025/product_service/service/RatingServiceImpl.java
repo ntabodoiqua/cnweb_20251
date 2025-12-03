@@ -2,11 +2,13 @@ package com.vdt2025.product_service.service;
 
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import com.vdt2025.product_service.client.OrderClient;
+import com.vdt2025.product_service.client.UserClient;
 import com.vdt2025.product_service.dto.request.rating.CreateRatingRequest;
 import com.vdt2025.product_service.dto.request.rating.UpdateRatingRequest;
 import com.vdt2025.product_service.dto.response.RatingImageResponse;
 import com.vdt2025.product_service.dto.response.RatingResponse;
 import com.vdt2025.product_service.dto.response.RatingSummaryResponse;
+import com.vdt2025.product_service.dto.response.UserInfoResponse;
 import com.vdt2025.product_service.entity.Product;
 import com.vdt2025.product_service.entity.ProductRating;
 import com.vdt2025.product_service.entity.ProductVariant;
@@ -21,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +41,7 @@ public class RatingServiceImpl implements RatingService {
     ProductRepository productRepository;
     ProductVariantRepository variantRepository;
     OrderClient orderClient;
+    UserClient userClient;
 
     private static final int MAX_IMAGES_PER_RATING = 5;
 
@@ -284,7 +288,46 @@ public class RatingServiceImpl implements RatingService {
         ratingRepository.save(rating);
     }
 
+    @Override
+    public Page<RatingResponse> getLatestRatings(Pageable pageable) {
+        log.info("Getting latest ratings for homepage");
+        Page<ProductRating> ratingsPage = ratingRepository.findByIsActiveTrueOrderByCreatedAtDesc(pageable);
+        
+        // Get all usernames from ratings
+        List<String> usernames = ratingsPage.getContent().stream()
+                .map(ProductRating::getUserId)
+                .distinct()
+                .collect(Collectors.toList());
+        
+        // Fetch user info in batch
+        Map<String, UserInfoResponse> userInfoMap = fetchUserInfoBatch(usernames);
+        
+        // Convert ratings with user info
+        List<RatingResponse> responses = ratingsPage.getContent().stream()
+                .map(rating -> toRatingResponseWithUserInfo(rating, userInfoMap.get(rating.getUserId())))
+                .collect(Collectors.toList());
+        
+        return new PageImpl<>(responses, pageable, ratingsPage.getTotalElements());
+    }
+
     // ============== Private Helper Methods ==============
+
+    private Map<String, UserInfoResponse> fetchUserInfoBatch(List<String> usernames) {
+        if (usernames == null || usernames.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        
+        try {
+            ApiResponse<Map<String, UserInfoResponse>> response = userClient.getUsersByUsernames(usernames);
+            if (response != null && response.getResult() != null) {
+                return response.getResult();
+            }
+        } catch (Exception e) {
+            log.warn("Error fetching user info batch: {}", e.getMessage());
+        }
+        
+        return Collections.emptyMap();
+    }
 
     private boolean verifyPurchase(String username, String productId) {
         try {
@@ -337,6 +380,48 @@ public class RatingServiceImpl implements RatingService {
         return RatingResponse.builder()
                 .id(rating.getId())
                 .userId(rating.getUserId())
+                .username(rating.getUserId())
+                .userFullName(null)
+                .userAvatarUrl(null)
+                .productId(rating.getProduct().getId())
+                .productName(rating.getProduct().getName())
+                .variantId(rating.getVariant() != null ? rating.getVariant().getId() : null)
+                .variantName(rating.getVariant() != null ? rating.getVariant().getVariantName() : null)
+                .rating(rating.getRating())
+                .comment(rating.getComment())
+                .isVerifiedPurchase(rating.isVerifiedPurchase())
+                .helpfulCount(rating.getHelpfulCount())
+                .images(imageResponses)
+                .createdAt(rating.getCreatedAt())
+                .updatedAt(rating.getUpdatedAt())
+                .build();
+    }
+
+    private RatingResponse toRatingResponseWithUserInfo(ProductRating rating, UserInfoResponse userInfo) {
+        List<RatingImageResponse> imageResponses = rating.getImages().stream()
+                .map(img -> RatingImageResponse.builder()
+                        .id(img.getId())
+                        .imageName(img.getImageName())
+                        .imageUrl(img.getImageUrl())
+                        .displayOrder(img.getDisplayOrder())
+                        .build())
+                .sorted(Comparator.comparing(RatingImageResponse::getDisplayOrder))
+                .collect(Collectors.toList());
+
+        String fullName = null;
+        String avatarUrl = null;
+        
+        if (userInfo != null) {
+            fullName = userInfo.getFullName();
+            avatarUrl = userInfo.getAvatarUrl();
+        }
+
+        return RatingResponse.builder()
+                .id(rating.getId())
+                .userId(rating.getUserId())
+                .username(rating.getUserId())
+                .userFullName(fullName)
+                .userAvatarUrl(avatarUrl)
                 .productId(rating.getProduct().getId())
                 .productName(rating.getProduct().getName())
                 .variantId(rating.getVariant() != null ? rating.getVariant().getId() : null)

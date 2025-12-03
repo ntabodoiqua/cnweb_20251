@@ -72,4 +72,10 @@ public interface ProductRatingRepository extends JpaRepository<ProductRating, St
      * Lấy đánh giá verified purchase
      */
     Page<ProductRating> findByProductIdAndIsVerifiedPurchaseTrueAndIsActiveTrue(String productId, Pageable pageable);
+
+    /**
+     * Lấy tất cả đánh giá mới nhất (không theo product cụ thể)
+     * Dùng cho trang chủ hiển thị reviews
+     */
+    Page<ProductRating> findByIsActiveTrueOrderByCreatedAtDesc(Pageable pageable);
 }
