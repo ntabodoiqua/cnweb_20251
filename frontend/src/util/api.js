@@ -2366,6 +2366,21 @@ const getOrderDetailApi = (orderId) => {
 
 // Public APIs - Không cần authentication
 
+// Lấy các đánh giá mới nhất từ tất cả sản phẩm (cho trang chủ)
+const getLatestRatingsApi = (params = {}) => {
+  const URL_API = `/api/product/public/ratings/latest`;
+  return axios.get(URL_API, {
+    params: {
+      page: params.page || 0,
+      size: params.size || 10,
+      sort: params.sort || "createdAt,desc",
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // Lấy danh sách đánh giá của sản phẩm
 const getProductRatingsApi = (productId, params = {}) => {
   const URL_API = `/api/product/public/ratings/product/${productId}`;
@@ -2782,6 +2797,7 @@ export {
   markNotificationAsReadApi,
   markAllNotificationsAsReadApi,
   // Product Rating APIs
+  getLatestRatingsApi,
   getProductRatingsApi,
   getProductRatingSummaryApi,
   getProductRatingsByStarApi,

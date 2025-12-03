@@ -61,7 +61,7 @@ export const PROTECTED_ROUTES = {
   ADMIN_ORDERS: "/admin/orders",
   ADMIN_PAYMENTS: "/admin/payments",
   ADMIN_REPORTS: "/admin/reports",
-  ADMIN_SETTINGS: "/admin/settings",
+  ADMIN_VIDEO_REVIEWS: "/admin/video-reviews",
 
   // User routes
   USER_ORDERS: "/orders",
@@ -138,7 +138,7 @@ export const ROUTE_TITLES = {
   [PROTECTED_ROUTES.ADMIN_ORDERS]: "Quản lý đơn hàng",
   [PROTECTED_ROUTES.ADMIN_PAYMENTS]: "Quản lý thanh toán",
   [PROTECTED_ROUTES.ADMIN_REPORTS]: "Báo cáo & Thống kê",
-  [PROTECTED_ROUTES.ADMIN_SETTINGS]: "Cài đặt hệ thống",
+  [PROTECTED_ROUTES.ADMIN_VIDEO_REVIEWS]: "Quản lý Video Review",
   [PROTECTED_ROUTES.USER_ORDERS]: "Đơn hàng của tôi",
   [PROTECTED_ROUTES.USER_CART]: "Giỏ hàng",
   [PROTECTED_ROUTES.USER_CHECKOUT]: "Đặt hàng",

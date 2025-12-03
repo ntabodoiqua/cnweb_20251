@@ -1883,3 +1883,102 @@ html {
   will-change: transform;
   contain: strict;
 }
+
+/* ============================================
+   VIDEO REVIEWS SECTION
+   ============================================ */
+.video-reviews-section {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.video-reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  justify-content: center;
+  gap: 24px;
+  margin-top: 24px;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.video-review-item {
+  background: white;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.video-review-item:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.video-wrapper {
+  position: relative;
+  width: 100%;
+  padding-bottom: 177.78%; /* 9:16 aspect ratio for Shorts */
+  background: #000;
+}
+
+.video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.video-title {
+  padding: 12px 14px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Responsive for Video Reviews */
+@media (max-width: 1200px) {
+  .video-reviews-grid {
+    max-width: 1000px;
+    gap: 20px;
+  }
+}
+
+@media (max-width: 992px) {
+  .video-reviews-grid {
+    max-width: 800px;
+    gap: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .video-reviews-grid {
+    grid-template-columns: repeat(2, 1fr);
+    max-width: 450px;
+    gap: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  .video-reviews-grid {
+    max-width: 380px;
+    gap: 14px;
+  }
+
+  .video-title {
+    padding: 10px 12px;
+    font-size: 12px;
+  }
+
+  .video-review-item {
+    border-radius: 12px;
+  }
+}

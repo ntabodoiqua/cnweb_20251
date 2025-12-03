@@ -67,14 +67,29 @@
   color: #1890ff;
 }
 
+.statusShipping {
+  background: rgba(114, 46, 209, 0.1);
+  color: #722ed1;
+}
+
+.statusDelivered {
+  background: rgba(19, 194, 194, 0.1);
+  color: #13c2c2;
+}
+
+.statusCompleted {
+  background: rgba(82, 196, 26, 0.1);
+  color: #52c41a;
+}
+
 .statusCancelled {
   background: rgba(255, 77, 79, 0.1);
   color: #ff4d4f;
 }
 
 .statusReturned {
-  background: rgba(140, 140, 140, 0.1);
-  color: #8c8c8c;
+  background: rgba(235, 47, 150, 0.1);
+  color: #eb2f96;
 }
 
 .paymentUnpaid {
@@ -124,6 +139,28 @@
 
 .adminTableContainer {
   overflow-x: auto;
+}
+
+/* Table column widths */
+.adminTableContainer table {
+  min-width: 1300px;
+}
+
+.adminTableContainer th:nth-child(4),
+.adminTableContainer td:nth-child(4) {
+  min-width: 140px;
+}
+
+.adminTableContainer th:nth-child(6),
+.adminTableContainer td:nth-child(6) {
+  min-width: 130px;
+  white-space: nowrap;
+}
+
+.adminTableContainer th:nth-child(7),
+.adminTableContainer td:nth-child(7) {
+  min-width: 120px;
+  white-space: nowrap;
 }
 
 .adminActionButtons {
@@ -249,6 +286,69 @@ tbody tr:hover .stickyCol {
 .orderItemTotalPrice {
   font-weight: 600;
   color: #ee4d2d;
+}
+
+/* Product Info in Table */
+.orderInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.customerInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.customerName {
+  font-weight: 600;
+  color: #333;
+}
+
+.productInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.productImage {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+  background: #f5f5f5;
+}
+
+.productDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 200px;
+}
+
+.productName {
+  font-weight: 600;
+  color: #333;
+  font-size: 13px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.productVariant {
+  font-size: 12px;
+  color: #666;
+}
+
+.moreItems {
+  font-size: 11px;
+  color: #ee4d2d;
+  font-weight: 500;
+}
+
+.storeName {
+  font-size: 13px;
+  color: #333;
 }
 
 @media (max-width: 768px) {

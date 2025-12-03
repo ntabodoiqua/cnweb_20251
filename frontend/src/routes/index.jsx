@@ -122,8 +122,8 @@ const AdminPaymentsPage = lazy(() =>
   import("../pages/admin/AdminPaymentsPage")
 );
 const AdminReportsPage = lazy(() => import("../pages/admin/AdminReportsPage"));
-const AdminSettingsPage = lazy(() =>
-  import("../pages/admin/AdminSettingsPage")
+const AdminVideoReviewsPage = lazy(() =>
+  import("../pages/admin/AdminVideoReviewsPage")
 );
 
 // Seller Pages
@@ -653,10 +653,10 @@ const router = createBrowserRouter([
             ),
           },
           {
-            path: PROTECTED_ROUTES.ADMIN_SETTINGS,
+            path: PROTECTED_ROUTES.ADMIN_VIDEO_REVIEWS,
             element: (
               <SuspenseWrapper>
-                <AdminSettingsPage />
+                <AdminVideoReviewsPage />
               </SuspenseWrapper>
             ),
           },

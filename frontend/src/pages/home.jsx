@@ -10,6 +10,7 @@ import {
   getPublicPlatformCategoriesApi,
   getBrandsApi,
   getPlatformBannersApi,
+  getLatestRatingsApi,
 } from "../util/api";
 import {
   HeroBanner,
@@ -18,6 +19,7 @@ import {
   ProductsSection,
   BrandsSection,
   TestimonialsSection,
+  VideoReviewsSection,
   TrustBadges,
 } from "../components/home";
 import useIntersectionObserver from "../hooks/useIntersectionObserver";
@@ -87,6 +89,9 @@ const HomePage = () => {
   // Banner slides from API
   const [platformBanners, setPlatformBanners] = useState([]);
 
+  // Customer reviews from API
+  const [customerReviews, setCustomerReviews] = useState([]);
+
   // Track which sections have been loaded
   const [loadedSections, setLoadedSections] = useState({
     categories: false,
@@ -95,6 +100,7 @@ const HomePage = () => {
     dailyDeals: false,
     brands: false,
     banners: false,
+    reviews: false,
   });
 
   // Single intersection observer for better performance
@@ -111,6 +117,9 @@ const HomePage = () => {
     rootMargin: "400px 0px",
   });
   const [brandsRef, brandsVisible] = useIntersectionObserver({
+    rootMargin: "400px 0px",
+  });
+  const [reviewsRef, reviewsVisible] = useIntersectionObserver({
     rootMargin: "400px 0px",
   });
 
@@ -228,6 +237,26 @@ const HomePage = () => {
     }
   }, [loadedSections.brands]);
 
+  // Fetch customer reviews when visible
+  const fetchReviews = useCallback(async () => {
+    if (loadedSections.reviews) return;
+    try {
+      const reviewsResponse = await getLatestRatingsApi({ page: 0, size: 10 });
+      if (reviewsResponse?.code === 1000) {
+        const apiReviews = reviewsResponse.result?.content || [];
+        // Filter reviews that have comments (skip empty reviews)
+        const filteredReviews = apiReviews.filter(
+          (review) => review.comment && review.comment.trim() !== ""
+        );
+        setCustomerReviews(filteredReviews);
+      }
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+    } finally {
+      setLoadedSections((prev) => ({ ...prev, reviews: true }));
+    }
+  }, [loadedSections.reviews]);
+
   // Fetch platform banners on mount
   const fetchBanners = useCallback(async () => {
     if (loadedSections.banners) return;
@@ -267,18 +296,21 @@ const HomePage = () => {
     if (featuredVisible && !loadedSections.featured) fetchFeatured();
     if (dailyDealsVisible && !loadedSections.dailyDeals) fetchDailyDeals();
     if (brandsVisible && !loadedSections.brands) fetchBrands();
+    if (reviewsVisible && !loadedSections.reviews) fetchReviews();
   }, [
     categoriesVisible,
     flashSaleVisible,
     featuredVisible,
     dailyDealsVisible,
     brandsVisible,
+    reviewsVisible,
     loadedSections,
     fetchCategories,
     fetchFlashSale,
     fetchFeatured,
     fetchDailyDeals,
     fetchBrands,
+    fetchReviews,
   ]);
 
   // Simulate loading and wait for critical images
@@ -407,8 +439,24 @@ const HomePage = () => {
             )}
           </section>
 
-          {/* Testimonials Section */}
-          <TestimonialsSection testimonials={testimonials} />
+          {/* Testimonials Section - Lazy Loaded with real reviews */}
+          <section ref={reviewsRef} className="lazy-section">
+            {loadedSections.reviews ? (
+              <TestimonialsSection
+                testimonials={
+                  customerReviews.length > 0 ? customerReviews : testimonials
+                }
+                title="Đánh Giá Gần Đây"
+              />
+            ) : (
+              <div className="section-placeholder" style={{ minHeight: 300 }} />
+            )}
+          </section>
+
+          {/* Video Reviews Section */}
+          <section className="lazy-section">
+            <VideoReviewsSection />
+          </section>
         </div>
 
         {/* Hidden content for SEO */}

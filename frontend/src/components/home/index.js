@@ -11,6 +11,7 @@ export { default as ProductsSection } from "./ProductsSection";
 export { default as ProductCard } from "./ProductCard";
 export { default as BrandsSection } from "./BrandsSection";
 export { default as TestimonialsSection } from "./TestimonialsSection";
+export { default as VideoReviewsSection } from "./VideoReviewsSection";
 export { default as QuickViewModal } from "./QuickViewModal";
 export { default as TrustBadges } from "./TrustBadges";
 export {

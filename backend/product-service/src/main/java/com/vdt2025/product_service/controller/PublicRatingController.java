@@ -118,4 +118,22 @@ public class PublicRatingController {
                 .result(response)
                 .build();
     }
+
+    /**
+     * Lấy các đánh giá mới nhất từ tất cả sản phẩm
+     * GET /public/ratings/latest
+     * Dùng cho trang chủ hiển thị testimonials
+     */
+    @GetMapping("/latest")
+    @Operation(summary = "Get latest ratings", description = "Get latest ratings from all products for homepage testimonials")
+    public ApiResponse<Page<RatingResponse>> getLatestRatings(
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
+        log.info("Public: Getting latest ratings for homepage");
+
+        Page<RatingResponse> response = ratingService.getLatestRatings(pageable);
+
+        return ApiResponse.<Page<RatingResponse>>builder()
+                .result(response)
+                .build();
+    }
 }
