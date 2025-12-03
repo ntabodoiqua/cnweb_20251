@@ -55,10 +55,17 @@ public class SecurityConfig {
             "/categories/public/**",
             "/brands/public/**",
             "/public/**",
+            "/internal/**",
             // Elasticsearch search endpoints - public cho user tìm kiếm
             "/products/search",
             "/products/search/suggest",
             "/products/search/health",
+            // Store search endpoints - public cho user tìm kiếm cửa hàng
+            "/stores/search",
+            "/stores/search/suggest",
+            // Global search endpoints - public cho tìm kiếm tổng hợp
+            "/search",
+            "/search/suggest",
             // Banner slides endpoints - public cho hiển thị banner
             "/banner-slides",
             "/banner-slides/platform",
@@ -68,7 +75,8 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_POST_ENDPOINTS_SEARCH = {
             // POST search endpoint - public cho user tìm kiếm với filters
-            "/products/search"
+            "/products/search",
+            "/stores/search"
     };
 
     CustomJwtDecoder customJwtDecoder;

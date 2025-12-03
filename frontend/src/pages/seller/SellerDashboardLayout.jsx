@@ -12,6 +12,7 @@ import {
   TeamOutlined,
   AppstoreOutlined,
   PictureOutlined,
+  MessageOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../../constants/routes";
 import styles from "./seller-dashboard.module.css";
@@ -67,6 +68,12 @@ const SellerDashboardLayout = () => {
       icon: <TeamOutlined />,
       label: "Khách hàng",
       path: PROTECTED_ROUTES.SELLER_CUSTOMERS,
+    },
+    {
+      key: "chat",
+      icon: <MessageOutlined />,
+      label: "Tin nhắn",
+      path: PROTECTED_ROUTES.SELLER_CHAT,
     },
     {
       key: "statistics",

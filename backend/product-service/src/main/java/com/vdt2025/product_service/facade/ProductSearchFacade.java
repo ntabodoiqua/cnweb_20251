@@ -73,6 +73,13 @@ public class ProductSearchFacade {
         return response;
     }
 
+    /**
+     * Lấy gợi ý tìm kiếm sản phẩm
+     */
+    public List<String> suggest(String prefix, int size) {
+        return productSearchService.suggest(prefix, size);
+    }
+
     public PageCacheDTO<ProductSummaryResponse> searchProductsWithStock(ProductFilterRequest filter, Pageable pageable) {
         // Lấy danh sách sản phẩm cơ bản
         PageCacheDTO<ProductSummaryResponse> cachedResult = productService.searchProductsInternal(filter, pageable);

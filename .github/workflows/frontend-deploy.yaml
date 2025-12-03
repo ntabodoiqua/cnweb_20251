@@ -74,8 +74,8 @@ jobs:
             cd /opt/cnweb2025_1_fe || exit 1
 
             # --- QUAN TRỌNG: ĐỒNG BỘ CODE ---
-            git fetch origin fe/dev
-            git reset --hard origin/fe/dev
+            git fetch origin anhnt/message-service
+            git reset --hard origin/anhnt/message-service
 
             # Login
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
@@ -103,9 +103,9 @@ jobs:
             # Check port 80 health endpoint
             HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/health)
             if [ "$HTTP_CODE" -eq 200 ]; then
-              echo "✅ Frontend is healthy (HTTP 200)"
+              echo "Frontend is healthy (HTTP 200)"
             else
-              echo "❌ Frontend check failed with HTTP $HTTP_CODE"
+              echo "Frontend check failed with HTTP $HTTP_CODE"
               exit 1
             fi
 
@@ -113,7 +113,7 @@ jobs:
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Success tag ${{ needs.prepare.outputs.tag }}"
+            echo "Success tag ${{ needs.prepare.outputs.tag }}"
           else
-            echo "❌ Failed tag ${{ needs.prepare.outputs.tag }}"
+            echo "Failed tag ${{ needs.prepare.outputs.tag }}"
           fi

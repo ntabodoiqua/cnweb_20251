@@ -1937,6 +1937,164 @@ const getSearchHealthApi = () => {
 };
 
 // ============================================
+// Store Search APIs (Elasticsearch)
+// ============================================
+
+// Search Stores API with full-text search (POST)
+const searchStoresApi = (searchRequest, page = 0, size = 20) => {
+  const URL_API = "/api/product/stores/search";
+  return axios.post(URL_API, searchRequest, {
+    params: {
+      page,
+      size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Quick Search Stores API (GET)
+const quickSearchStoresApi = (params = {}) => {
+  const URL_API = "/api/product/stores/search";
+  return axios.get(URL_API, {
+    params: {
+      q: params.q || "",
+      provinceId: params.provinceId || "",
+      wardId: params.wardId || "",
+      minRating: params.minRating || "",
+      minProducts: params.minProducts || "",
+      sortBy: params.sortBy || "relevance",
+      sortDir: params.sortDir || "desc",
+      page: params.page ?? 0,
+      size: params.size ?? 20,
+      aggregations: params.aggregations ?? false,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Store Search Suggest API for autocomplete
+const getStoreSearchSuggestApi = (query, size = 5) => {
+  const URL_API = "/api/product/stores/search/suggest";
+  return axios.get(URL_API, {
+    params: {
+      q: query,
+      size: size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// ============================================
+// Global Search APIs (Products + Stores)
+// ============================================
+
+// Global Search API - returns both products and stores
+const globalSearchApi = (query, productLimit = 10, storeLimit = 5) => {
+  const URL_API = "/api/product/search";
+  return axios.get(URL_API, {
+    params: {
+      q: query,
+      productLimit,
+      storeLimit,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Global Suggest API - returns suggestions for both products and stores
+const globalSuggestApi = (query, productLimit = 5, storeLimit = 3) => {
+  const URL_API = "/api/product/search/suggest";
+  return axios.get(URL_API, {
+    params: {
+      q: query,
+      productLimit,
+      storeLimit,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// ============================================
+// Store Follow APIs
+// ============================================
+
+// Follow a store
+const followStoreApi = (storeId) => {
+  const URL_API = `/api/product/stores/${storeId}/follow`;
+  return axios.post(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Unfollow a store
+const unfollowStoreApi = (storeId) => {
+  const URL_API = `/api/product/stores/${storeId}/follow`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get follow status for a single store
+const getFollowStatusApi = (storeId) => {
+  const URL_API = `/api/product/stores/${storeId}/follow/status`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get follow statuses for multiple stores
+const getFollowStatusesApi = (storeIds) => {
+  const URL_API = "/api/product/stores/follow/statuses";
+  return axios.post(URL_API, storeIds, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+// Get stores that user is following
+const getFollowingStoresApi = (page = 0, size = 20) => {
+  const URL_API = "/api/product/stores/following";
+  return axios.get(URL_API, {
+    params: {
+      page,
+      size,
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Get follower count for a store
+const getFollowerCountApi = (storeId) => {
+  const URL_API = `/api/product/stores/${storeId}/followers/count`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// ============================================
 // Banner Slides APIs
 // ============================================
 
@@ -2638,4 +2796,18 @@ export {
   markRatingHelpfulApi,
   uploadRatingImageApi,
   uploadPublicImageApi,
+  // Store Search APIs
+  searchStoresApi,
+  quickSearchStoresApi,
+  getStoreSearchSuggestApi,
+  // Global Search APIs
+  globalSearchApi,
+  globalSuggestApi,
+  // Store Follow APIs
+  followStoreApi,
+  unfollowStoreApi,
+  getFollowStatusApi,
+  getFollowStatusesApi,
+  getFollowingStoresApi,
+  getFollowerCountApi,
 };

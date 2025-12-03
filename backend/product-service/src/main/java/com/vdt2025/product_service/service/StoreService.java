@@ -3,6 +3,7 @@ package com.vdt2025.product_service.service;
 import com.vdt2025.common_dto.dto.SellerProfileApprovedEvent;
 import com.vdt2025.product_service.dto.request.store.StoreSimpleRequest;
 import com.vdt2025.product_service.dto.response.PageCacheDTO;
+import com.vdt2025.product_service.dto.response.StoreInternalResponse;
 import com.vdt2025.product_service.dto.response.StoreResponse;
 import com.vdt2025.product_service.dto.response.StoreSimpleResponse;
 import com.vdt2025.product_service.entity.Store;
@@ -19,6 +20,8 @@ public interface StoreService {
 
     StoreSimpleResponse getPublicStoreById(String storeId);
 
+    StoreInternalResponse getPublicStoreByIdInternal(String storeId);
+
     void deactivateStoreBySellerProfileId(String sellerProfileId);
 
     PageCacheDTO<StoreResponse> getStoresOfCurrentSeller(Pageable pageable);
@@ -30,4 +33,18 @@ public interface StoreService {
     void activateStoreById(String storeId);
 
     boolean validateStoreOwnership(String storeId, String username);
+
+    /**
+     * Lấy storeId theo username của seller.
+     * @param username username của seller
+     * @return storeId hoặc null nếu không có store
+     */
+    String getStoreIdByUsername(String username);
+
+    /**
+     * Lấy ownerUsername theo storeId.
+     * @param storeId storeId
+     * @return ownerUsername hoặc null nếu không có store
+     */
+    String getOwnerUsernameByStoreId(String storeId);
 }

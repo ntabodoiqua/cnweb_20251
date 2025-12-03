@@ -2,42 +2,59 @@
 
 ## Tổng quan
 
-Tích hợp Elasticsearch vào `product-service` để cung cấp tìm kiếm sản phẩm nhanh và chính xác hơn với:
+Tích hợp Elasticsearch vào `product-service` để cung cấp tìm kiếm sản phẩm và cửa hàng nhanh và chính xác hơn với:
 
 - **Full-text search** với hỗ trợ tiếng Việt
 - **Search trong Description, Specs và Metadata** của product và variant
+- **Search cửa hàng (Store)** theo tên, mô tả, địa chỉ
 - **Autocomplete/Suggestion** cho search box
+- **Global Search** - tìm kiếm cả sản phẩm và cửa hàng cùng lúc
 - **Faceted search** với aggregations
 - **Fuzzy search** cho tìm kiếm gần đúng
 - **Real-time sync** với PostgreSQL
 
 ## Search Fields
 
+### Product Search Fields
+
 Elasticsearch tìm kiếm trong các trường sau với độ ưu tiên khác nhau:
 
-| Field | Boost | Mô tả |
-|-------|-------|-------|
-| `name` | 3.0 | Tên sản phẩm (ưu tiên cao nhất) |
-| `name.autocomplete` | 2.0 | Tên sản phẩm cho autocomplete |
-| `shortDescription` | 1.5 | Mô tả ngắn |
-| `brandName` | 1.5 | Tên thương hiệu |
-| `categoryName` | 1.0 | Tên danh mục |
-| `description` | 1.0 | Mô tả chi tiết |
-| `specsText` | 1.0 | **Thông số kỹ thuật (specs)** |
-| `variants.metadataText` | 1.0 | **Metadata của variants** |
-| `variants.variantName` | 1.0 | **Tên variant** |
+| Field                   | Boost | Mô tả                           |
+| ----------------------- | ----- | ------------------------------- |
+| `name`                  | 3.0   | Tên sản phẩm (ưu tiên cao nhất) |
+| `name.autocomplete`     | 2.0   | Tên sản phẩm cho autocomplete   |
+| `shortDescription`      | 1.5   | Mô tả ngắn                      |
+| `brandName`             | 1.5   | Tên thương hiệu                 |
+| `categoryName`          | 1.0   | Tên danh mục                    |
+| `description`           | 1.0   | Mô tả chi tiết                  |
+| `specsText`             | 1.0   | **Thông số kỹ thuật (specs)**   |
+| `variants.metadataText` | 1.0   | **Metadata của variants**       |
+| `variants.variantName`  | 1.0   | **Tên variant**                 |
+
+### Store Search Fields
+
+| Field                    | Boost | Mô tả                           |
+| ------------------------ | ----- | ------------------------------- |
+| `storeName`              | 3.0   | Tên cửa hàng (ưu tiên cao nhất) |
+| `storeName.autocomplete` | 2.0   | Tên cửa hàng cho autocomplete   |
+| `storeDescription`       | 1.5   | Mô tả cửa hàng                  |
+| `shopAddress`            | 1.0   | Địa chỉ cửa hàng                |
 
 ### Ví dụ Search
 
 ```json
-// Search theo specs (RAM, màn hình, pin...)
+// Search sản phẩm theo specs (RAM, màn hình, pin...)
 {"keyword": "8GB RAM"}
 {"keyword": "AMOLED 120Hz"}
 {"keyword": "pin 5000mAh"}
 
-// Search theo variant metadata (màu sắc, dung lượng...)
+// Search sản phẩm theo variant metadata (màu sắc, dung lượng...)
 {"keyword": "màu xanh 256GB"}
 {"keyword": "Gold 128GB"}
+
+// Search cửa hàng
+{"keyword": "Apple Store"}
+{"keyword": "cửa hàng Hà Nội"}
 ```
 
 ## Kiến trúc
@@ -89,7 +106,7 @@ deploy:
 ### 1. Search Products
 
 ```http
-POST /api/products/v1/search
+POST /api/products/v1/products/search
 Content-Type: application/json
 
 {
@@ -107,35 +124,106 @@ Content-Type: application/json
 }
 ```
 
-### 2. Quick Search (GET)
+### 2. Quick Product Search (GET)
 
 ```http
-GET /api/products/v1/search?q=iphone&categoryId=xxx&sortBy=price&page=0&size=20
+GET /api/products/v1/products/search?q=iphone&categoryId=xxx&sortBy=price&page=0&size=20
 ```
 
-### 3. Autocomplete Suggestions
+### 3. Product Autocomplete Suggestions
 
 ```http
-GET /api/products/v1/search/suggest?q=ip&size=10
+GET /api/products/v1/products/search/suggest?q=ip&size=10
 ```
 
-### 4. Health Check
+### 4. Search Stores
 
 ```http
-GET /api/products/v1/search/health
+POST /api/products/v1/stores/search
+Content-Type: application/json
+
+{
+  "keyword": "Apple Store",
+  "provinceId": 1,
+  "minRating": 4.0,
+  "minProducts": 10,
+  "sortBy": "rating",
+  "sortDirection": "desc",
+  "enableHighlight": true,
+  "enableFuzzy": true,
+  "enableAggregation": false
+}
 ```
 
-### 5. Admin - Reindex
+### 5. Quick Store Search (GET)
 
 ```http
-POST /api/products/v1/search/reindex-all
+GET /api/products/v1/stores/search?q=Apple&provinceId=1&sortBy=rating&page=0&size=20
+```
+
+### 6. Store Autocomplete Suggestions
+
+```http
+GET /api/products/v1/stores/search/suggest?q=App&size=10
+```
+
+### 7. Global Search (Products + Stores)
+
+```http
+GET /api/products/v1/search?q=iphone&productLimit=10&storeLimit=5
+```
+
+Response trả về cả sản phẩm và cửa hàng:
+
+```json
+{
+  "code": 1000,
+  "result": {
+    "products": {
+      "hits": [...],
+      "totalHits": 100,
+      "took": 15
+    },
+    "stores": {
+      "hits": [...],
+      "totalHits": 5,
+      "took": 8
+    },
+    "totalTook": 25
+  }
+}
+```
+
+### 8. Global Suggestions
+
+```http
+GET /api/products/v1/search/suggest?q=app&productLimit=5&storeLimit=3
+```
+
+### 9. Health Check
+
+```http
+GET /api/products/v1/products/search/health
+```
+
+### 10. Admin - Reindex Products
+
+```http
+POST /api/products/v1/products/search/reindex-all
 Authorization: Bearer <admin-token>
 ```
 
-### 6. Admin - Sync Stats
+### 11. Admin - Reindex Stores
 
 ```http
-GET /api/products/v1/search/sync-stats
+POST /api/products/v1/stores/search/reindex-all
+Authorization: Bearer <admin-token>
+```
+
+### 12. Admin - Sync Stats
+
+```http
+GET /api/products/v1/products/search/sync-stats
 Authorization: Bearer <admin-token>
 ```
 
@@ -315,24 +403,36 @@ product-service/
 │   │   ├── configuration/
 │   │   │   └── ElasticsearchConfig.java       # ES client config
 │   │   ├── controller/
-│   │   │   └── ProductSearchController.java   # Search REST API
+│   │   │   ├── ProductSearchController.java   # Product Search REST API
+│   │   │   ├── StoreSearchController.java     # Store Search REST API (MỚI)
+│   │   │   └── GlobalSearchController.java    # Global Search REST API (MỚI)
 │   │   ├── document/
-│   │   │   └── ProductDocument.java           # ES document entity
+│   │   │   ├── ProductDocument.java           # ES document cho Product
+│   │   │   └── StoreDocument.java             # ES document cho Store (MỚI)
 │   │   ├── dto/
 │   │   │   ├── request/search/
-│   │   │   │   └── ProductSearchRequest.java
+│   │   │   │   ├── ProductSearchRequest.java
+│   │   │   │   └── StoreSearchRequest.java    # Request tìm kiếm store (MỚI)
 │   │   │   └── response/search/
-│   │   │       └── ProductSearchResponse.java
+│   │   │       ├── ProductSearchResponse.java
+│   │   │       ├── StoreSearchResponse.java   # Response tìm kiếm store (MỚI)
+│   │   │       └── GlobalSearchResponse.java  # Response tìm kiếm tổng hợp (MỚI)
 │   │   ├── event/
 │   │   │   ├── ProductChangedEvent.java       # Event class
 │   │   │   └── ProductChangedEventListener.java
 │   │   ├── repository/elasticsearch/
-│   │   │   └── ProductSearchRepository.java   # ES repository
+│   │   │   ├── ProductSearchRepository.java   # ES repository cho Product
+│   │   │   └── StoreSearchRepository.java     # ES repository cho Store (MỚI)
+│   │   ├── facade/
+│   │   │   └── ProductSearchFacade.java       # Facade cho product search
 │   │   └── service/search/
 │   │       ├── ProductSearchService.java      # Interface
 │   │       ├── ProductSearchServiceImpl.java  # Implementation
 │   │       ├── ProductIndexMapper.java        # Entity -> Document mapper
-│   │       └── ElasticsearchSyncService.java  # Sync service
+│   │       ├── StoreSearchService.java        # Interface cho store search (MỚI)
+│   │       ├── StoreSearchServiceImpl.java    # Implementation store search (MỚI)
+│   │       ├── StoreIndexMapper.java          # Store Entity -> Document mapper (MỚI)
+│   │       └── ElasticsearchSyncService.java  # Sync service (cập nhật: hỗ trợ cả Store)
 │   └── resources/
 │       ├── application.yaml                   # Thêm ES config
 │       └── elasticsearch/

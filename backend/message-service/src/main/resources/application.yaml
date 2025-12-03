@@ -1,0 +1,89 @@
+﻿server:
+  port: 8087
+
+spring:
+  application:
+    name: message-service
+  # MongoDB configuration
+  data:
+    mongodb:
+      uri: mongodb+srv://doadmin:91O5nL46Fl8Ug3C7@db-mongodb-sgp1-59038-501157b3.mongo.ondigitalocean.com/message_service?authSource=admin&tls=true
+      database: message_service
+    redis:
+      host: db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
+      port: 25061
+      username: default
+      password: AVNS_N-gwsyNb6xBC3fXPdQp
+      ssl:
+        enabled: true
+  cache:
+    type: redis
+  rabbitmq:
+    addresses: amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
+    username: xqjmojji
+    password: hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH
+    virtual-host: xqjmojji
+    ssl:
+      enabled: true
+  # File upload limits
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://discovery-service:8761/eureka/}
+  instance:
+    prefer-ip-address: true
+
+# Management endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# Logging configuration for Loki
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
+  level:
+    root: INFO
+    org.springframework.security: DEBUG
+    org.springframework.web.socket: DEBUG
+    org.springframework.messaging: DEBUG
+
+# JWT Configuration
+jwt:
+  signerKey: cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2
+  valid-duration: 3600
+  refreshable-duration: 86400
+
+internal:
+  service:
+    secret: ${INTERNAL_SERVICE_SECRET:InT3rn@l-S3rv1c3-S3cr3t-K3y-2025-VDT}
+
+# Chat configuration
+chat:
+  message:
+    # Số ngày giữ lại tin nhắn (mặc định 90 ngày)
+    retention-days: ${CHAT_MESSAGE_RETENTION_DAYS:90}
+  cleanup:
+    # Cron expression cho cleanup task (mặc định 2:00 AM mỗi ngày)
+    cron: ${CHAT_CLEANUP_CRON:0 0 2 * * ?}

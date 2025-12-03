@@ -28,10 +28,15 @@ import {
   AppstoreOutlined,
   ShoppingCartOutlined,
   HeartOutlined,
+  HeartFilled,
   EyeOutlined,
   ClockCircleOutlined,
   StarOutlined,
   TagsOutlined,
+  MessageOutlined,
+  UserAddOutlined,
+  UserDeleteOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import {
   getPublicStoreDetailApi,
@@ -39,8 +44,12 @@ import {
   getPublicProductsApi,
   getWardInfoApi,
   getStoreBannersApi,
+  followStoreApi,
+  unfollowStoreApi,
+  getFollowStatusApi,
 } from "../util/api";
 import LoadingSpinner from "../components/LoadingSpinner";
+import ChatButton from "../components/chat/ChatButton";
 import styles from "./StorePage.module.css";
 
 const { Title, Text } = Typography;
@@ -63,6 +72,14 @@ const StorePage = () => {
     searchParams.get("categoryId") || null
   );
 
+  // Follow state
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followerCount, setFollowerCount] = useState(0);
+  const [followLoading, setFollowLoading] = useState(false);
+
+  // Check if user is logged in
+  const isLoggedIn = !!localStorage.getItem("access_token");
+
   // Pagination
   const [pagination, setPagination] = useState({
     current: 1,
@@ -84,8 +101,12 @@ const StorePage = () => {
   useEffect(() => {
     if (storeId) {
       fetchStoreData();
+      // Fetch follow status if user is logged in
+      if (isLoggedIn) {
+        fetchFollowStatus();
+      }
     }
-  }, [storeId]);
+  }, [storeId, isLoggedIn]);
 
   // Fetch products when filters change
   useEffect(() => {
@@ -153,6 +174,51 @@ const StorePage = () => {
       }
     } catch (error) {
       console.error("Error fetching ward info:", error);
+    }
+  };
+
+  const fetchFollowStatus = async () => {
+    try {
+      const response = await getFollowStatusApi(storeId);
+      if (response.code === 1000) {
+        setIsFollowing(response.result.isFollowing);
+        setFollowerCount(response.result.followerCount);
+      }
+    } catch (error) {
+      console.error("Error fetching follow status:", error);
+    }
+  };
+
+  const handleFollowToggle = async () => {
+    if (!isLoggedIn) {
+      message.warning("Vui lòng đăng nhập để theo dõi cửa hàng");
+      navigate("/login", { state: { from: `/store/${storeId}` } });
+      return;
+    }
+
+    setFollowLoading(true);
+    try {
+      if (isFollowing) {
+        const response = await unfollowStoreApi(storeId);
+        if (response.code === 1000) {
+          setIsFollowing(false);
+          setFollowerCount(response.result.followerCount);
+          message.success("Đã hủy theo dõi cửa hàng");
+        }
+      } else {
+        const response = await followStoreApi(storeId);
+        if (response.code === 1000) {
+          setIsFollowing(true);
+          setFollowerCount(response.result.followerCount);
+          message.success("Đã theo dõi cửa hàng thành công!");
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling follow:", error);
+      const errorMessage = error.response?.data?.message || "Có lỗi xảy ra";
+      message.error(errorMessage);
+    } finally {
+      setFollowLoading(false);
     }
   };
 
@@ -437,9 +503,36 @@ const StorePage = () => {
                     {pagination.total} sản phẩm
                   </span>
                   <span className={styles.storeStat}>
+                    <TeamOutlined />
+                    {followerCount} người theo dõi
+                  </span>
+                  <span className={styles.storeStat}>
                     <ClockCircleOutlined />
                     Tham gia: {formatDate(store.createdAt)}
                   </span>
+                </div>
+                <div className={styles.storeActions}>
+                  <Button
+                    type={isFollowing ? "default" : "primary"}
+                    danger={isFollowing}
+                    icon={isFollowing ? <HeartFilled /> : <HeartOutlined />}
+                    onClick={handleFollowToggle}
+                    loading={followLoading}
+                    size="large"
+                    className={
+                      isFollowing ? styles.unfollowButton : styles.followButton
+                    }
+                  >
+                    {isFollowing ? "Đang theo dõi" : "Theo dõi"}
+                  </Button>
+                  <ChatButton
+                    shopId={storeId}
+                    shopName={store.storeName}
+                    type="default"
+                    size="large"
+                  >
+                    Chat với Shop
+                  </ChatButton>
                 </div>
               </div>
             </div>

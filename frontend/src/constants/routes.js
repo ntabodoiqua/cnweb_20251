@@ -45,6 +45,9 @@ export const PROTECTED_ROUTES = {
   // Notifications
   NOTIFICATIONS: "/notifications",
 
+  // Chat
+  CHAT: "/chat",
+
   // Admin routes
   ADMIN_DASHBOARD: "/admin",
   ADMIN_USERS: "/admin/users",
@@ -65,6 +68,7 @@ export const PROTECTED_ROUTES = {
   USER_CART: "/cart",
   USER_CHECKOUT: "/checkout",
   USER_WISHLIST: "/wishlist",
+  USER_FOLLOWING_STORES: "/following-stores",
   PAYMENT_RESULT: "/payment/result",
 
   // Seller routes
@@ -79,6 +83,7 @@ export const PROTECTED_ROUTES = {
   SELLER_BANNERS: "/seller/banners",
   SELLER_PRODUCT_ATTRIBUTES: "/seller/product-attributes",
   SELLER_CUSTOMERS: "/seller/customers",
+  SELLER_CHAT: "/seller/chat",
   SELLER_STATISTICS: "/seller/statistics",
   SELLER_SETTINGS: "/seller/settings",
 };
@@ -120,6 +125,7 @@ export const ROUTE_TITLES = {
   [PROTECTED_ROUTES.PROFILE_HISTORY]: "Lịch sử giao dịch",
   [PROTECTED_ROUTES.PROFILE_SECURITY]: "Bảo mật tài khoản",
   [PROTECTED_ROUTES.NOTIFICATIONS]: "Thông báo",
+  [PROTECTED_ROUTES.CHAT]: "Tin nhắn",
   [PROTECTED_ROUTES.ADMIN_DASHBOARD]: "Bảng điều khiển Admin",
   [PROTECTED_ROUTES.ADMIN_USERS]: "Quản lý người dùng",
   [PROTECTED_ROUTES.ADMIN_BRANDS]: "Quản lý thương hiệu",
@@ -136,6 +142,7 @@ export const ROUTE_TITLES = {
   [PROTECTED_ROUTES.USER_ORDERS]: "Đơn hàng của tôi",
   [PROTECTED_ROUTES.USER_CART]: "Giỏ hàng",
   [PROTECTED_ROUTES.USER_CHECKOUT]: "Đặt hàng",
+  [PROTECTED_ROUTES.USER_FOLLOWING_STORES]: "Cửa hàng đang theo dõi",
   [PROTECTED_ROUTES.SELLER_DASHBOARD]: "Kênh Người Bán",
   [PROTECTED_ROUTES.SELLER_PRODUCTS]: "Quản lý sản phẩm",
   [PROTECTED_ROUTES.SELLER_PRODUCT_DETAIL]: "Chi tiết sản phẩm",
@@ -147,6 +154,7 @@ export const ROUTE_TITLES = {
   [PROTECTED_ROUTES.SELLER_BANNERS]: "Quản lý Banner",
   [PROTECTED_ROUTES.SELLER_PRODUCT_ATTRIBUTES]: "Thuộc tính sản phẩm",
   [PROTECTED_ROUTES.SELLER_CUSTOMERS]: "Khách hàng",
+  [PROTECTED_ROUTES.SELLER_CHAT]: "Tin nhắn khách hàng",
   [PROTECTED_ROUTES.SELLER_STATISTICS]: "Thống kê & Báo cáo",
   [PROTECTED_ROUTES.SELLER_SETTINGS]: "Cài đặt cửa hàng",
 

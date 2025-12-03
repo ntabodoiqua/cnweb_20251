@@ -723,3 +723,157 @@
   border-color: #ee4d2d !important;
   box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1) !important;
 }
+
+/* ==================== Search Tabs ==================== */
+
+.searchTabs {
+  margin-bottom: 24px;
+}
+
+.searchTabs :global(.ant-tabs-nav) {
+  background: white;
+  border-radius: 12px;
+  padding: 8px 16px;
+  box-shadow: 0 4px 20px rgba(238, 77, 45, 0.08);
+}
+
+.searchTabs :global(.ant-tabs-tab) {
+  font-weight: 600;
+  font-size: 15px;
+  padding: 12px 24px;
+  margin: 0 4px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.searchTabs :global(.ant-tabs-tab:hover) {
+  color: #ee4d2d;
+}
+
+.searchTabs :global(.ant-tabs-tab-active) {
+  background: rgba(238, 77, 45, 0.08);
+}
+
+.searchTabs :global(.ant-tabs-tab-active .ant-tabs-tab-btn) {
+  color: #ee4d2d !important;
+}
+
+.searchTabs :global(.ant-tabs-ink-bar) {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  height: 3px;
+  border-radius: 2px;
+}
+
+/* ==================== Store Card ==================== */
+
+.storeCard {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(238, 77, 45, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  overflow: hidden;
+}
+
+.storeCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 40px rgba(238, 77, 45, 0.15);
+  border-color: rgba(238, 77, 45, 0.2);
+}
+
+.storeCardContent {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 8px;
+}
+
+.storeAvatar {
+  flex-shrink: 0;
+  border: 3px solid #ee4d2d;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+}
+
+.storeInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.storeName {
+  margin: 0 0 8px !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  color: #333 !important;
+  line-height: 1.4 !important;
+}
+
+.storeName em {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.15) 0%,
+    rgba(255, 107, 53, 0.15) 100%
+  );
+  color: #ee4d2d;
+  font-style: normal;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 700;
+}
+
+.storeDescription {
+  display: block;
+  margin-bottom: 12px;
+  color: #666;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.storeDescription em {
+  background: rgba(238, 77, 45, 0.1);
+  color: #ee4d2d;
+  font-style: normal;
+  padding: 1px 3px;
+  border-radius: 3px;
+}
+
+.storeStats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.storeStats :global(.ant-tag) {
+  margin: 0;
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 2px 8px;
+  border: none;
+}
+
+.storesGrid {
+  margin-top: 16px;
+}
+
+.storesGrid > div {
+  animation: fadeInUp 0.4s ease-out forwards;
+  opacity: 0;
+}
+
+.storesGrid > div:nth-child(1) {
+  animation-delay: 0.05s;
+}
+.storesGrid > div:nth-child(2) {
+  animation-delay: 0.1s;
+}
+.storesGrid > div:nth-child(3) {
+  animation-delay: 0.15s;
+}
+.storesGrid > div:nth-child(4) {
+  animation-delay: 0.2s;
+}
+.storesGrid > div:nth-child(5) {
+  animation-delay: 0.25s;
+}
+.storesGrid > div:nth-child(6) {
+  animation-delay: 0.3s;
+}
