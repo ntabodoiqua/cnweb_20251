@@ -290,12 +290,24 @@
   overflow: hidden;
   background: white;
   border: 2px solid #f0f0f0;
+  display: block;
+  transition: all 0.2s ease;
+}
+
+.itemImage:hover {
+  border-color: #ee4d2d;
+  transform: scale(1.02);
 }
 
 .itemImage img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.2s ease;
+}
+
+.itemImage:hover img {
+  transform: scale(1.05);
 }
 
 .outOfStockBadge {
@@ -322,6 +334,21 @@
 }
 
 .itemName {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  transition: color 0.2s ease;
+}
+
+.itemName:hover {
+  color: #ee4d2d;
+}
+
+.itemName:hover .itemNameText {
+  color: #ee4d2d;
+}
+
+.itemNameText {
   font-size: 16px;
   font-weight: 600;
   color: #333;
@@ -329,6 +356,11 @@
   line-height: 1.4;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  transition: color 0.2s ease;
+}
+
+.itemName:hover .itemNameText {
+  color: #ee4d2d;
 }
 
 .itemSeller {
