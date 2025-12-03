@@ -9,6 +9,10 @@ import {
   CheckCircleOutlined,
   ClockCircleOutlined,
   CloseCircleOutlined,
+  CarOutlined,
+  GiftOutlined,
+  RollbackOutlined,
+  CreditCardOutlined,
 } from "@ant-design/icons";
 import {
   Input,
@@ -27,6 +31,7 @@ import {
 import dayjs from "dayjs";
 import { getAdminOrdersApi } from "../../util/api";
 import styles from "./AdminOrdersPage.module.css";
+import NoImages from "../../assets/NoImages.webp";
 
 const { RangePicker } = DatePicker;
 
@@ -58,12 +63,15 @@ const AdminOrdersPage = () => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  // Stats - OrderStatus: PENDING, PAID, CONFIRMED, CANCELLED, RETURNED
+  // Stats - OrderStatus: PENDING, PAID, CONFIRMED, SHIPPING, DELIVERED, COMPLETED, CANCELLED, RETURNED
   const [stats, setStats] = useState({
     total: 0,
     pending: 0,
     paid: 0,
     confirmed: 0,
+    shipping: 0,
+    delivered: 0,
+    completed: 0,
     cancelled: 0,
     returned: 0,
     totalRevenue: 0,
@@ -95,16 +103,22 @@ const AdminOrdersPage = () => {
           total: data.totalElements || 0,
         }));
 
-        // Calculate stats from current page - OrderStatus: PENDING, PAID, CONFIRMED, CANCELLED, RETURNED
+        // Calculate stats from current page - OrderStatus: PENDING, PAID, CONFIRMED, SHIPPING, DELIVERED, COMPLETED, CANCELLED, RETURNED
         const orderList = data.content || [];
         setStats({
           total: data.totalElements || 0,
           pending: orderList.filter((o) => o.status === "PENDING").length,
           paid: orderList.filter((o) => o.status === "PAID").length,
           confirmed: orderList.filter((o) => o.status === "CONFIRMED").length,
+          shipping: orderList.filter((o) => o.status === "SHIPPING").length,
+          delivered: orderList.filter((o) => o.status === "DELIVERED").length,
+          completed: orderList.filter((o) => o.status === "COMPLETED").length,
           cancelled: orderList.filter((o) => o.status === "CANCELLED").length,
           returned: orderList.filter((o) => o.status === "RETURNED").length,
-          totalRevenue: orderList.reduce((sum, o) => sum + (o.totalAmount || 0), 0),
+          totalRevenue: orderList.reduce(
+            (sum, o) => sum + (o.totalAmount || 0),
+            0
+          ),
         });
       } else if (response && response.result) {
         // Alternative response structure
@@ -120,9 +134,15 @@ const AdminOrdersPage = () => {
           pending: orderList.filter((o) => o.status === "PENDING").length,
           paid: orderList.filter((o) => o.status === "PAID").length,
           confirmed: orderList.filter((o) => o.status === "CONFIRMED").length,
+          shipping: orderList.filter((o) => o.status === "SHIPPING").length,
+          delivered: orderList.filter((o) => o.status === "DELIVERED").length,
+          completed: orderList.filter((o) => o.status === "COMPLETED").length,
           cancelled: orderList.filter((o) => o.status === "CANCELLED").length,
           returned: orderList.filter((o) => o.status === "RETURNED").length,
-          totalRevenue: orderList.reduce((sum, o) => sum + (o.totalAmount || 0), 0),
+          totalRevenue: orderList.reduce(
+            (sum, o) => sum + (o.totalAmount || 0),
+            0
+          ),
         });
       } else {
         message.error(response?.message || "Không thể tải danh sách đơn hàng");
@@ -197,7 +217,7 @@ const AdminOrdersPage = () => {
     setIsModalVisible(true);
   };
 
-  // Status helpers - OrderStatus: PENDING, PAID, CONFIRMED, CANCELLED, RETURNED
+  // Status helpers - OrderStatus: PENDING, PAID, CONFIRMED, SHIPPING, DELIVERED, COMPLETED, CANCELLED, RETURNED
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case "PENDING":
@@ -206,6 +226,12 @@ const AdminOrdersPage = () => {
         return "statusPaid";
       case "CONFIRMED":
         return "statusConfirmed";
+      case "SHIPPING":
+        return "statusShipping";
+      case "DELIVERED":
+        return "statusDelivered";
+      case "COMPLETED":
+        return "statusCompleted";
       case "CANCELLED":
         return "statusCancelled";
       case "RETURNED":
@@ -223,6 +249,12 @@ const AdminOrdersPage = () => {
         return "Đã thanh toán";
       case "CONFIRMED":
         return "Đã xác nhận";
+      case "SHIPPING":
+        return "Đang giao";
+      case "DELIVERED":
+        return "Đã giao";
+      case "COMPLETED":
+        return "Hoàn thành";
       case "CANCELLED":
         return "Đã hủy";
       case "RETURNED":
@@ -296,11 +328,11 @@ const AdminOrdersPage = () => {
       {/* Stats */}
       <div
         className="admin-stats-grid"
-        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))" }}
+        style={{ gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}
       >
         <div className="admin-stat-card">
           <div className="admin-stat-header">
-            <span className="admin-stat-title">Tổng đơn hàng</span>
+            <span className="admin-stat-title">Tổng đơn</span>
             <div className="admin-stat-icon">
               <ShoppingOutlined />
             </div>
@@ -319,7 +351,7 @@ const AdminOrdersPage = () => {
               <DollarOutlined />
             </div>
           </div>
-          <h2 className="admin-stat-value" style={{ fontSize: "16px" }}>
+          <h2 className="admin-stat-value" style={{ fontSize: "14px" }}>
             ₫{formatCurrency(stats.totalRevenue)}
           </h2>
         </div>
@@ -346,7 +378,7 @@ const AdminOrdersPage = () => {
                 background: "linear-gradient(135deg, #52c41a 0%, #73d13d 100%)",
               }}
             >
-              <CheckCircleOutlined />
+              <CreditCardOutlined />
             </div>
           </div>
           <h2 className="admin-stat-value">{stats.paid}</h2>
@@ -367,6 +399,34 @@ const AdminOrdersPage = () => {
         </div>
         <div className="admin-stat-card">
           <div className="admin-stat-header">
+            <span className="admin-stat-title">Đang giao</span>
+            <div
+              className="admin-stat-icon"
+              style={{
+                background: "linear-gradient(135deg, #722ed1 0%, #9254de 100%)",
+              }}
+            >
+              <CarOutlined />
+            </div>
+          </div>
+          <h2 className="admin-stat-value">{stats.shipping}</h2>
+        </div>
+        <div className="admin-stat-card">
+          <div className="admin-stat-header">
+            <span className="admin-stat-title">Đã giao</span>
+            <div
+              className="admin-stat-icon"
+              style={{
+                background: "linear-gradient(135deg, #13c2c2 0%, #36cfc9 100%)",
+              }}
+            >
+              <GiftOutlined />
+            </div>
+          </div>
+          <h2 className="admin-stat-value">{stats.delivered}</h2>
+        </div>
+        <div className="admin-stat-card">
+          <div className="admin-stat-header">
             <span className="admin-stat-title">Đã hủy</span>
             <div
               className="admin-stat-icon"
@@ -378,6 +438,20 @@ const AdminOrdersPage = () => {
             </div>
           </div>
           <h2 className="admin-stat-value">{stats.cancelled}</h2>
+        </div>
+        <div className="admin-stat-card">
+          <div className="admin-stat-header">
+            <span className="admin-stat-title">Đã trả hàng</span>
+            <div
+              className="admin-stat-icon"
+              style={{
+                background: "linear-gradient(135deg, #eb2f96 0%, #f759ab 100%)",
+              }}
+            >
+              <RollbackOutlined />
+            </div>
+          </div>
+          <h2 className="admin-stat-value">{stats.returned}</h2>
         </div>
       </div>
 
@@ -403,6 +477,9 @@ const AdminOrdersPage = () => {
               <Select.Option value="PENDING">Chờ xác nhận</Select.Option>
               <Select.Option value="PAID">Đã thanh toán</Select.Option>
               <Select.Option value="CONFIRMED">Đã xác nhận</Select.Option>
+              <Select.Option value="SHIPPING">Đang giao</Select.Option>
+              <Select.Option value="DELIVERED">Đã giao</Select.Option>
+              <Select.Option value="COMPLETED">Hoàn thành</Select.Option>
               <Select.Option value="CANCELLED">Đã hủy</Select.Option>
               <Select.Option value="RETURNED">Đã trả hàng</Select.Option>
             </Select>
@@ -484,8 +561,8 @@ const AdminOrdersPage = () => {
                     <tr>
                       <th>Mã đơn</th>
                       <th>Khách hàng</th>
+                      <th>Sản phẩm</th>
                       <th>Cửa hàng</th>
-                      <th>Số SP</th>
                       <th>Tổng tiền</th>
                       <th>Thanh toán</th>
                       <th>Trạng thái</th>
@@ -497,16 +574,56 @@ const AdminOrdersPage = () => {
                     {orders.map((order) => (
                       <tr key={order.id}>
                         <td>
-                          <strong>{order.orderNumber}</strong>
+                          <div className={styles.orderInfo}>
+                            <strong>{order.orderNumber}</strong>
+                            <small style={{ color: "#999", display: "block" }}>
+                              {formatDateTime(order.createdAt).split(" ")[0]}
+                            </small>
+                          </div>
                         </td>
                         <td>
-                          <div>{order.receiverName}</div>
-                          <small style={{ color: "#999" }}>
-                            @{order.username}
-                          </small>
+                          <div className={styles.customerInfo}>
+                            <span className={styles.customerName}>
+                              {order.receiverName}
+                            </span>
+                            <small style={{ color: "#999", display: "block" }}>
+                              @{order.username}
+                            </small>
+                          </div>
                         </td>
-                        <td>{order.storeName}</td>
-                        <td>{order.items?.length || 0}</td>
+                        <td>
+                          {order.items && order.items.length > 0 ? (
+                            <div className={styles.productInfo}>
+                              <img
+                                src={order.items[0].productImage || NoImages}
+                                alt={order.items[0].productName}
+                                className={styles.productImage}
+                              />
+                              <div className={styles.productDetails}>
+                                <span className={styles.productName}>
+                                  {order.items[0].productName}
+                                </span>
+                                {order.items[0].variantName && (
+                                  <span className={styles.productVariant}>
+                                    {order.items[0].variantName}
+                                  </span>
+                                )}
+                                {order.items.length > 1 && (
+                                  <span className={styles.moreItems}>
+                                    +{order.items.length - 1} sản phẩm khác
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ) : (
+                            <span style={{ color: "#999" }}>-</span>
+                          )}
+                        </td>
+                        <td>
+                          <span className={styles.storeName}>
+                            {order.storeName}
+                          </span>
+                        </td>
                         <td>
                           <strong style={{ color: "#ee4d2d" }}>
                             ₫{formatCurrency(order.totalAmount)}
@@ -531,6 +648,15 @@ const AdminOrdersPage = () => {
                           >
                             {getStatusText(order.status)}
                           </span>
+                          {order.returnReason &&
+                            order.refundStatus === "PENDING" && (
+                              <Tag
+                                color="orange"
+                                style={{ marginLeft: 4, fontSize: 11 }}
+                              >
+                                Chờ trả hàng
+                              </Tag>
+                            )}
                         </td>
                         <td>{formatDateTime(order.createdAt)}</td>
                         <td className={styles.stickyCol}>
@@ -575,8 +701,7 @@ const AdminOrdersPage = () => {
       <Modal
         title={
           <span>
-            Chi tiết đơn hàng:{" "}
-            <strong>{selectedOrder?.orderNumber}</strong>
+            Chi tiết đơn hàng: <strong>{selectedOrder?.orderNumber}</strong>
           </span>
         }
         open={isModalVisible}
