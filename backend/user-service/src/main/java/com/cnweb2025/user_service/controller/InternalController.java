@@ -1,6 +1,7 @@
 package com.cnweb2025.user_service.controller;
 
 import com.vdt2025.common_dto.dto.response.ApiResponse;
+import com.cnweb2025.user_service.dto.request.BatchUsernamesRequest;
 import com.cnweb2025.user_service.dto.response.UserInfoSimpleResponse;
 import com.cnweb2025.user_service.service.FileReferenceService;
 import com.cnweb2025.user_service.service.UserService;
@@ -50,16 +51,16 @@ public class InternalController {
      * API internal để lấy thông tin nhiều users theo danh sách usernames
      * Sử dụng cho việc hiển thị thông tin người dùng trong các service khác
      * 
-     * @param usernames Danh sách usernames cần lấy thông tin
+     * @param request Request chứa danh sách usernames cần lấy thông tin
      * @return Map với key là username và value là thông tin user đơn giản
      */
     @PostMapping("/batch")
-    public ApiResponse<Map<String, UserInfoSimpleResponse>> getUsersByUsernames(@RequestBody List<String> usernames) {
-        log.debug("Getting user info for {} usernames", usernames.size());
+    public ApiResponse<Map<String, UserInfoSimpleResponse>> getUsersByUsernames(@RequestBody BatchUsernamesRequest request) {
+        log.debug("Getting user info for {} usernames", request.getUsernames().size());
         
-        Map<String, UserInfoSimpleResponse> users = userService.getUsersByUsernames(usernames);
+        Map<String, UserInfoSimpleResponse> users = userService.getUsersByUsernames(request.getUsernames());
         
-        log.debug("Found {} users out of {} requested", users.size(), usernames.size());
+        log.debug("Found {} users out of {} requested", users.size(), request.getUsernames().size());
         
         return ApiResponse.<Map<String, UserInfoSimpleResponse>>builder()
                 .result(users)

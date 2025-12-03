@@ -19,6 +19,7 @@ import {
   ProductsSection,
   BrandsSection,
   TestimonialsSection,
+  VideoReviewsSection,
   TrustBadges,
 } from "../components/home";
 import useIntersectionObserver from "../hooks/useIntersectionObserver";
@@ -241,8 +242,8 @@ const HomePage = () => {
     if (loadedSections.reviews) return;
     try {
       const reviewsResponse = await getLatestRatingsApi({ page: 0, size: 10 });
-      if (reviewsResponse?.data?.code === 1000) {
-        const apiReviews = reviewsResponse.data.result?.content || [];
+      if (reviewsResponse?.code === 1000) {
+        const apiReviews = reviewsResponse.result?.content || [];
         // Filter reviews that have comments (skip empty reviews)
         const filteredReviews = apiReviews.filter(
           (review) => review.comment && review.comment.trim() !== ""
@@ -445,10 +446,16 @@ const HomePage = () => {
                 testimonials={
                   customerReviews.length > 0 ? customerReviews : testimonials
                 }
+                title="Đánh Giá Gần Đây"
               />
             ) : (
               <div className="section-placeholder" style={{ minHeight: 300 }} />
             )}
+          </section>
+
+          {/* Video Reviews Section */}
+          <section className="lazy-section">
+            <VideoReviewsSection />
           </section>
         </div>
 

@@ -3,6 +3,7 @@ package com.vdt2025.product_service.service;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import com.vdt2025.product_service.client.OrderClient;
 import com.vdt2025.product_service.client.UserClient;
+import com.vdt2025.product_service.dto.request.BatchUsernamesRequest;
 import com.vdt2025.product_service.dto.request.rating.CreateRatingRequest;
 import com.vdt2025.product_service.dto.request.rating.UpdateRatingRequest;
 import com.vdt2025.product_service.dto.response.RatingImageResponse;
@@ -318,7 +319,10 @@ public class RatingServiceImpl implements RatingService {
         }
         
         try {
-            ApiResponse<Map<String, UserInfoResponse>> response = userClient.getUsersByUsernames(usernames);
+            BatchUsernamesRequest request = BatchUsernamesRequest.builder()
+                    .usernames(usernames)
+                    .build();
+            ApiResponse<Map<String, UserInfoResponse>> response = userClient.getUsersByUsernames(request);
             if (response != null && response.getResult() != null) {
                 return response.getResult();
             }

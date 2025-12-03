@@ -563,15 +563,6 @@ const Header = () => {
         ]
       : []),
     {
-      key: "settings",
-      label: (
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <SettingOutlined />
-          <span>Cài đặt</span>
-        </div>
-      ),
-    },
-    {
       type: "divider",
     },
     {

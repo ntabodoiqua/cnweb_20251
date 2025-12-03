@@ -1,10 +1,8 @@
-import React, { useRef } from "react";
+import React from "react";
 import PropTypes from "prop-types";
 import { Carousel, Rate, Avatar } from "antd";
 import {
   HeartOutlined,
-  LeftOutlined,
-  RightOutlined,
   UserOutlined,
   CheckCircleFilled,
 } from "@ant-design/icons";
@@ -20,16 +18,6 @@ const TestimonialsSection = ({
   testimonials,
   title = "Khách Hàng Nói Gì Về Chúng Tôi",
 }) => {
-  const carouselRef = useRef(null);
-
-  const handlePrev = () => {
-    carouselRef.current?.prev();
-  };
-
-  const handleNext = () => {
-    carouselRef.current?.next();
-  };
-
   // Format date for display
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -85,11 +73,13 @@ const TestimonialsSection = ({
       </div>
       <div className="testimonials-carousel">
         <Carousel
-          ref={carouselRef}
           autoplay
           autoplaySpeed={4000}
           dots={true}
           arrows={false}
+          swipe={true}
+          draggable={true}
+          touchMove={true}
         >
           {testimonials.map((testimonial) => {
             const data = getTestimonialData(testimonial);
@@ -141,22 +131,6 @@ const TestimonialsSection = ({
             );
           })}
         </Carousel>
-
-        {/* Custom Navigation Arrows */}
-        <button
-          className="carousel-arrow carousel-arrow-left testimonial-arrow-left"
-          onClick={handlePrev}
-          aria-label="Previous testimonial"
-        >
-          <LeftOutlined />
-        </button>
-        <button
-          className="carousel-arrow carousel-arrow-right testimonial-arrow-right"
-          onClick={handleNext}
-          aria-label="Next testimonial"
-        >
-          <RightOutlined />
-        </button>
       </div>
     </section>
   );

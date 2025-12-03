@@ -21,6 +21,7 @@ import {
   FileTextOutlined,
   DownOutlined,
   RightOutlined,
+  VideoCameraOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../../constants/routes";
 import "./admin-dashboard.css";
@@ -121,6 +122,12 @@ const AdminDashboardLayout = () => {
           icon: <PictureOutlined />,
           label: "Banner",
           path: PROTECTED_ROUTES.ADMIN_BANNERS,
+        },
+        {
+          key: "video-reviews",
+          icon: <VideoCameraOutlined />,
+          label: "Video Review",
+          path: PROTECTED_ROUTES.ADMIN_VIDEO_REVIEWS,
         },
       ],
     },
