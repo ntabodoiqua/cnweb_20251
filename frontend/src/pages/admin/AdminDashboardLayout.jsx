@@ -10,7 +10,6 @@ import {
   AppstoreOutlined,
   DollarOutlined,
   BarChartOutlined,
-  SettingOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
   ControlOutlined,
@@ -153,19 +152,6 @@ const AdminDashboardLayout = () => {
           icon: <BarChartOutlined />,
           label: "Báo cáo & Thống kê",
           path: PROTECTED_ROUTES.ADMIN_REPORTS,
-        },
-      ],
-    },
-    {
-      key: "system",
-      label: "Hệ thống",
-      icon: <SettingOutlined />,
-      items: [
-        {
-          key: "settings",
-          icon: <SettingOutlined />,
-          label: "Cài đặt",
-          path: PROTECTED_ROUTES.ADMIN_SETTINGS,
         },
       ],
     },
