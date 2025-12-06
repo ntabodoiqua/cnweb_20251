@@ -29,7 +29,7 @@ public class ProductStatisticResponse {
     List<ProductSummaryResponse> topRatedProducts;
 
     // Danh sách các cửa hàng
-//    List<StoreSimpleResponse> stores;
+    List<StoreSimpleResponse> stores;
 
     // Số sản phẩm theo danh mục
     List<CategoryStatisticResponse> variantsByCategory;
