@@ -199,6 +199,25 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
             LEFT JOIN inventory_stocks ist ON ist.product_variant_id = pv.id
             GROUP BY b.id
         ),
+        all_stores AS (
+            SELECT
+                s.id,
+                s.store_name,
+                s.store_description,
+                s.logo_name,
+                s.logo_url,
+                s.banner_name,
+                s.banner_url,
+                s.contact_email,
+                s.contact_phone,
+                s.shop_address,
+                s.province_id,
+                s.ward_id,
+                s.is_active,
+                s.created_at,
+                s.updated_at
+            FROM stores s
+        ),
         top_rated_products AS (
             SELECT
                 p.id,
@@ -235,7 +254,6 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
             LEFT JOIN stores s ON p.store_id = s.id
             LEFT JOIN categories c ON p.category_id = c.id
             LEFT JOIN brands b ON p.brand_id = b.id
-            -- Lọc sản phẩm đang hoạt động, có đánh giá trung bình 5.0
             WHERE p.is_active = TRUE AND p.average_rating = 5.0 AND p.rating_count > 0\s
             ORDER BY p.rating_count DESC, p.sold_count DESC
             LIMIT 10
@@ -265,6 +283,24 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
                                         'productVariantActiveCount', product_variant_active_count
                                      ))
                                FROM brand_stats),
+            'stores', (SELECT jsonb_agg(jsonb_build_object(
+                                                'id', s.id,
+                                                'storeName', s.store_name,
+                                                'storeDescription', s.store_description,
+                                                'logoName', s.logo_name,
+                                                'logoUrl', s.logo_url,
+                                                'bannerName', s.banner_name,
+                                                'bannerUrl', s.banner_url,
+                                                'contactEmail', s.contact_email,
+                                                'contactPhone', s.contact_phone,
+                                                'shopAddress', s.shop_address,
+                                                'provinceId', s.province_id,
+                                                'wardId', s.ward_id,
+                                                'isActive', s.is_active,
+                                                'createdAt', s.created_at,
+                                                'updatedAt', s.updated_at
+                                            ))
+                                                 FROM all_stores s),
             'topRatedProducts', (SELECT jsonb_agg(jsonb_build_object(
                                         'id', p.id,
                                         'name', p.name,
