@@ -76,6 +76,7 @@ public class ProductServiceImpl implements ProductService {
 
     //========= Statistics ==========
     @Override
+    @Cacheable(value = "product-statistics-overview")
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('ADMIN')")
     public ProductStatisticResponse getProductStatisticsOverview() {
