@@ -1,5 +1,7 @@
 package com.vdt2025.product_service.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import com.vdt2025.common_dto.dto.response.FileInfoResponse;
 import com.vdt2025.common_dto.service.FileServiceClient;
@@ -7,6 +9,7 @@ import com.vdt2025.common_dto.service.UserServiceClient;
 import com.vdt2025.product_service.dto.request.FindVariantRequest;
 import com.vdt2025.product_service.dto.request.product.*;
 import com.vdt2025.product_service.dto.response.*;
+import com.vdt2025.product_service.dto.response.statistic.ProductStatisticResponse;
 import com.vdt2025.product_service.entity.*;
 import com.vdt2025.product_service.exception.AppException;
 import com.vdt2025.product_service.messaging.ProductEventPublisher;
@@ -70,6 +73,34 @@ public class ProductServiceImpl implements ProductService {
     @Value("${product-images.max-per-product:5}")
     @NonFinal
     private int maxImagesPerProduct;
+
+    //========= Statistics ==========
+    @Override
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('ADMIN')")
+    public ProductStatisticResponse getProductStatisticsOverview() {
+        log.info("Fetching product statistics overview for admin");
+
+        // Gọi native query nhận về JSON
+        String json = productRepository.getProductStatisticsOverviewJson();
+
+        if (json == null || json.isBlank()) {
+            log.error("Statistics JSON is null or empty");
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+            return mapper.readValue(json, ProductStatisticResponse.class);
+
+        } catch (Exception e) {
+            log.error("Failed to parse ProductStatisticResponse JSON", e);
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
+    }
+
+
 
     // ========== CRUD Operations ==========
     
