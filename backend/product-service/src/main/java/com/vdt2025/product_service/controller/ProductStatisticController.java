@@ -36,30 +36,5 @@ public class ProductStatisticController {
                 .build();
     }
 
-//    @GetMapping("/by-shop")
-//    public ApiResponse<List<ProductStatisticResponse>> getProductStatisticsByShop() {
-//        log.info("Fetching product statistics by shop for admin");
-//
-//        List<ProductStatisticResponse> response = productService.getProductStatisticsByShop();
-//
-//        return ApiResponse.<List<ProductStatisticResponse>>builder()
-//                .result(response)
-//                .build();
-//    }
-//
-//    /**
-//     * Lấy thống kê sản phẩm chi tiết của 1 cửa hàng
-//     * GET /admin/products/statistics/shop/{shopId}
-//     * Required: ADMIN role
-//     */
-//    @GetMapping("/shop/{shopId}")
-//    public ApiResponse<ProductStatisticResponse> getProductStatisticsOfShop(@PathVariable String shopId) {
-//        log.info("Fetching product statistics for shopId={}", shopId);
-//
-//        ProductStatisticResponse response = productService.getProductStatisticsOfShop(shopId);
-//
-//        return ApiResponse.<ProductStatisticResponse>builder()
-//                .result(response)
-//                .build();
-//    }
+    // Truy vấn thống kê cửa hàng cho seller
 }
