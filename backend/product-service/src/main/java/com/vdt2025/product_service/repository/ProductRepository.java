@@ -165,4 +165,127 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
         WHERE p.id = :productId
     """)
     java.util.Optional<Product> findByIdForElasticsearch(@Param("productId") String productId);
+
+    /**
+     * Thống kê tổng quan sản phẩm toàn hệ thống
+     */
+    @Query(value = """
+        WITH category_stats AS (
+            SELECT
+                c.id AS category_id,
+                to_jsonb(c.name) AS category_name,
+                to_jsonb(c.image_url) AS image_url,
+                COUNT(DISTINCT p.id) AS product_count,
+                COALESCE(SUM(ist.quantity_on_hand), 0) AS product_variant_count,
+                COALESCE(SUM(CASE WHEN pv.is_active = true THEN ist.quantity_on_hand ELSE 0 END), 0) AS product_variant_active_count
+            FROM categories c
+            LEFT JOIN products p ON p.category_id = c.id
+            LEFT JOIN product_variants pv ON pv.product_id = p.id
+            LEFT JOIN inventory_stocks ist ON ist.product_variant_id = pv.id
+            WHERE c.category_type = 'PLATFORM'  
+            GROUP BY c.id
+        ),
+        brand_stats AS (
+            SELECT
+                b.id AS brand_id,
+                to_jsonb(b.name) AS brand_name,
+                to_jsonb(b.logo_url) AS logo_url,
+                COUNT(DISTINCT p.id) AS product_count,
+                COALESCE(SUM(ist.quantity_on_hand), 0) AS product_variant_count,
+                COALESCE(SUM(CASE WHEN pv.is_active = true THEN ist.quantity_on_hand ELSE 0 END), 0) AS product_variant_active_count
+            FROM brands b
+            LEFT JOIN products p ON p.brand_id = b.id
+            LEFT JOIN product_variants pv ON pv.product_id = p.id
+            LEFT JOIN inventory_stocks ist ON ist.product_variant_id = pv.id
+            GROUP BY b.id
+        ),
+        top_rated_products AS (
+            SELECT
+                p.id,
+                p.name,
+                p.short_description,
+                pi.image_url AS thumbnail_image,
+                p.min_price,
+                p.max_price,
+                p.sold_count,
+                p.average_rating,
+                p.rating_count,
+                p.is_active,
+                (
+                    SELECT s.store_name FROM stores s WHERE s.id = p.store_id
+                ) AS store_name,
+                p.store_id,
+                (
+                    SELECT jsonb_agg(c.name)\s
+                    FROM categories c\s
+                    JOIN product_store_categories psc ON psc.category_id = c.id\s
+                    WHERE psc.product_id = p.id AND c.category_type = 'STORE'
+                ) AS store_category_name,
+                c.name AS platform_category_name,
+                b.name AS brand_name,
+                p.created_at,
+                (
+                    SELECT COALESCE(SUM(ist.quantity_on_hand), 0)
+                    FROM product_variants pv
+                    JOIN inventory_stocks ist ON ist.product_variant_id = pv.id
+                    WHERE pv.product_id = p.id
+                ) AS total_available_stock
+            FROM products p
+            LEFT JOIN product_images pi ON pi.product_id = p.id
+            LEFT JOIN stores s ON p.store_id = s.id
+            LEFT JOIN categories c ON p.category_id = c.id
+            LEFT JOIN brands b ON p.brand_id = b.id
+            -- Lọc sản phẩm đang hoạt động, có đánh giá trung bình 5.0
+            WHERE p.is_active = TRUE AND p.average_rating = 5.0 AND p.rating_count > 0\s
+            ORDER BY p.rating_count DESC, p.sold_count DESC
+            LIMIT 10
+        )
+            
+        SELECT CAST(jsonb_build_object(
+            'totalProducts', (SELECT COUNT(*) FROM products),
+            'activeProducts', (SELECT COUNT(*) FROM products WHERE is_active = true),
+            'totalVariants', (SELECT COALESCE(SUM(quantity_on_hand), 0) FROM inventory_stocks),
+            'activeVariants', (SELECT COALESCE(SUM(ist.quantity_on_hand), 0)
+                               FROM inventory_stocks ist
+                               JOIN product_variants pv ON ist.product_variant_id = pv.id
+                               WHERE pv.is_active = true),
+            'variantsByCategory', (SELECT jsonb_agg(jsonb_build_object(
+                                        'categoryName', category_name,
+                                        'imageUrl', image_url,
+                                        'productCount', product_count,
+                                        'productVariantCount', product_variant_count,
+                                        'productVariantActiveCount', product_variant_active_count
+                                    ))
+                                   FROM category_stats),
+            'variantsByBrand', (SELECT jsonb_agg(jsonb_build_object(
+                                        'brandName', brand_name,
+                                        'logoUrl', logo_url,
+                                        'productCount', product_count,
+                                        'productVariantCount', product_variant_count,
+                                        'productVariantActiveCount', product_variant_active_count
+                                     ))
+                               FROM brand_stats),
+            'topRatedProducts', (SELECT jsonb_agg(jsonb_build_object(
+                                        'id', p.id,
+                                        'name', p.name,
+                                        'shortDescription', p.short_description,
+                                        'thumbnailImage', p.thumbnail_image,
+                                        'minPrice', p.min_price,
+                                        'maxPrice', p.max_price,
+                                        'soldCount', p.sold_count,
+                                        'averageRating', p.average_rating,
+                                        'ratingCount', p.rating_count,
+                                        'active', p.is_active,
+                                        'storeName', p.store_name,
+                                        'storeId', p.store_id,
+                                        'storeCategoryName', p.store_category_name,
+                                        'platformCategoryName', p.platform_category_name,
+                                        'brandName', p.brand_name,
+                                        'createdAt', p.created_at,
+                                        'totalAvailableStock', p.total_available_stock
+                                    ))
+                                         FROM top_rated_products p)
+        ) AS text) AS statistics;
+        """, nativeQuery = true)
+    String getProductStatisticsOverviewJson();
 }
