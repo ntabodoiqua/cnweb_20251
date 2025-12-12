@@ -28,6 +28,9 @@ public class ProductStatisticResponse {
     // Top 10 sản phẩm đc đánh giá 5 sao
     List<ProductSummaryResponse> topRatedProducts;
 
+    // Top 10 sản phẩm bán chạy nhất
+    List<ProductSummaryResponse> topSellingProducts;
+
     // Danh sách các cửa hàng
     List<StoreSimpleResponse> stores;
 
