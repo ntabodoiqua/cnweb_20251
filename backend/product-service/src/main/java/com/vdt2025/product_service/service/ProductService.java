@@ -5,6 +5,7 @@ import com.vdt2025.product_service.dto.request.FindVariantRequest;
 import com.vdt2025.product_service.dto.request.product.*;
 import com.vdt2025.product_service.dto.response.*;
 import com.vdt2025.product_service.dto.response.statistic.ProductStatisticResponse;
+import com.vdt2025.product_service.dto.response.statistic.ProductStatisticResponseForSeller;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -32,6 +33,11 @@ public interface ProductService {
      * Thống kê tổng quan sản phẩm toàn hệ thống
      */
     ProductStatisticResponse getProductStatisticsOverview();
+
+    /**
+     * Thống kê tổng quan sản phẩm cho seller
+     */
+    ProductStatisticResponseForSeller getProductStatisticsForSeller(String storeId);
 
     /**
      * Cập nhật thông tin sản phẩm
