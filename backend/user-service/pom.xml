@@ -111,18 +111,26 @@
 			<version>5.2.3</version>
 		</dependency>
 
-		<!-- Spring AMQP (RabbitMQ) -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-amqp</artifactId>
-		</dependency>
+	<!-- Spring AMQP (RabbitMQ) -->
+	<dependency>
+		<groupId>org.springframework.boot</groupId>
+		<artifactId>spring-boot-starter-amqp</artifactId>
+	</dependency>
+
+	<!-- Spring Retry (for Saga pattern) -->
+	<dependency>
+		<groupId>org.springframework.retry</groupId>
+		<artifactId>spring-retry</artifactId>
+	</dependency>
+	<dependency>
+		<groupId>org.springframework</groupId>
+		<artifactId>spring-aspects</artifactId>
+	</dependency>
 
 	<dependency>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-actuator</artifactId>
-	</dependency>
-
-	<!-- Micrometer Prometheus for Metrics -->
+	</dependency>	<!-- Micrometer Prometheus for Metrics -->
 	<dependency>
 		<groupId>io.micrometer</groupId>
 		<artifactId>micrometer-registry-prometheus</artifactId>

@@ -1,0 +1,259 @@
+{
+  "info": {
+    "name": "Saga Rollback Testing",
+    "description": "Collection để test Saga rollback scenarios trong UserService",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Success Scenarios",
+      "item": [
+        {
+          "name": "Upload Success",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/test/saga/upload-success?userId=test-user-1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["api", "test", "saga", "upload-success"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "test-user-1"
+                }
+              ]
+            },
+            "description": "Test successful upload - all steps complete successfully"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Rollback Scenarios",
+      "item": [
+        {
+          "name": "Test FileService Error",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/test/saga/test-fileservice-error?userId=test-user-2",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["api", "test", "saga", "test-fileservice-error"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "test-user-2"
+                }
+              ]
+            },
+            "description": "Simulate FileService unavailable - should rollback metadata"
+          }
+        },
+        {
+          "name": "Test Database Error",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8081/api/test/saga/test-database-error?userId=test-user-3",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["api", "test", "saga", "test-database-error"],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "test-user-3"
+                }
+              ]
+            },
+            "description": "Simulate database error during status update - should rollback file and metadata"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Monitoring",
+      "item": [
+        {
+          "name": "Get User Files",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/api/test/saga/user-files/test-user-1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["api", "test", "saga", "user-files", "test-user-1"]
+            },
+            "description": "Get all files for a user to verify upload status"
+          }
+        },
+        {
+          "name": "Get Error Flags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/api/test/saga/error-flags",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["api", "test", "saga", "error-flags"]
+            },
+            "description": "Check current error simulation flags"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Configuration",
+      "item": [
+        {
+          "name": "Set FileService Error Flag",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/api/test/saga/error-flags?fileServiceError=true",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["api", "test", "saga", "error-flags"],
+              "query": [
+                {
+                  "key": "fileServiceError",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Enable FileService error simulation"
+          }
+        },
+        {
+          "name": "Set Database Error Flag",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/api/test/saga/error-flags?databaseError=true",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["api", "test", "saga", "error-flags"],
+              "query": [
+                {
+                  "key": "databaseError",
+                  "value": "true"
+                }
+              ]
+            },
+            "description": "Enable database error simulation"
+          }
+        },
+        {
+          "name": "Reset Error Flags",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/api/test/saga/reset-flags",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["api", "test", "saga", "reset-flags"]
+            },
+            "description": "Reset all error simulation flags to false"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Cleanup",
+      "item": [
+        {
+          "name": "Cleanup Test User 1",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/api/test/saga/cleanup/test-user-1",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["api", "test", "saga", "cleanup", "test-user-1"]
+            },
+            "description": "Delete all test data for test-user-1"
+          }
+        },
+        {
+          "name": "Cleanup Test User 2",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/api/test/saga/cleanup/test-user-2",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["api", "test", "saga", "cleanup", "test-user-2"]
+            },
+            "description": "Delete all test data for test-user-2"
+          }
+        },
+        {
+          "name": "Cleanup Test User 3",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8081/api/test/saga/cleanup/test-user-3",
+              "protocol": "http",
+              "host": ["localhost"],
+              "port": "8081",
+              "path": ["api", "test", "saga", "cleanup", "test-user-3"]
+            },
+            "description": "Delete all test data for test-user-3"
+          }
+        }
+      ]
+    }
+  ]
+}

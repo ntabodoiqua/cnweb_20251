@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saga Rollback Testing UI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        
+        .test-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .test-section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .test-section p {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        input[type="text"]:focus,
+        input[type="file"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+            margin-right: 10px;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #5568d3;
+        }
+        
+        button.danger {
+            background: #dc3545;
+        }
+        
+        button.danger:hover {
+            background: #c82333;
+        }
+        
+        button.success {
+            background: #28a745;
+        }
+        
+        button.success:hover {
+            background: #218838;
+        }
+        
+        .response {
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+            display: none;
+        }
+        
+        .response.show {
+            display: block;
+        }
+        
+        .response.success {
+            border-left: 4px solid #28a745;
+            background: #f0fff4;
+        }
+        
+        .response.error {
+            border-left: 4px solid #dc3545;
+            background: #fff5f5;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin: 5px 5px 5px 0;
+        }
+        
+        .status-badge.uploaded {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status-badge.rollback {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        .status-badge.failed {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status-badge.pending {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 Saga Rollback Testing UI</h1>
+        <p class="subtitle">Test interface để verify Saga pattern rollback scenarios trong UserService</p>
+        
+        <!-- Test Section 1: Success -->
+        <div class="test-section">
+            <h2>✅ Test 1: Upload Thành Công</h2>
+            <p>Test flow bình thường - tất cả steps thành công. Expected: Status = UPLOADED</p>
+            
+            <div class="form-group">
+                <label>User ID:</label>
+                <input type="text" id="userId1" value="test-user-1">
+            </div>
+            
+            <div class="form-group">
+                <label>Select File:</label>
+                <input type="file" id="file1">
+            </div>
+            
+            <button onclick="testSuccessUpload()">
+                Upload File
+                <span id="loader1" class="loader hidden"></span>
+            </button>
+            
+            <div id="response1" class="response"></div>
+        </div>
+        
+        <!-- Test Section 2: FileService Error -->
+        <div class="test-section">
+            <h2>❌ Test 2: FileService Error → Rollback Step 1</h2>
+            <p>Simulate FileService unavailable. Expected: Rollback metadata, Status = ROLLBACK</p>
+            
+            <div class="form-group">
+                <label>User ID:</label>
+                <input type="text" id="userId2" value="test-user-2">
+            </div>
+            
+            <div class="form-group">
+                <label>Select File:</label>
+                <input type="file" id="file2">
+            </div>
+            
+            <button onclick="testFileServiceError()">
+                Test FileService Error
+                <span id="loader2" class="loader hidden"></span>
+            </button>
+            
+            <div id="response2" class="response"></div>
+        </div>
+        
+        <!-- Test Section 3: Database Error -->
+        <div class="test-section">
+            <h2>💥 Test 3: Database Error → Full Rollback</h2>
+            <p>Simulate database error ở Step 3. Expected: Rollback file + metadata</p>
+            
+            <div class="form-group">
+                <label>User ID:</label>
+                <input type="text" id="userId3" value="test-user-3">
+            </div>
+            
+            <div class="form-group">
+                <label>Select File:</label>
+                <input type="file" id="file3">
+            </div>
+            
+            <button onclick="testDatabaseError()">
+                Test Database Error
+                <span id="loader3" class="loader hidden"></span>
+            </button>
+            
+            <div id="response3" class="response"></div>
+        </div>
+        
+        <!-- Monitoring Section -->
+        <div class="test-section">
+            <h2>📊 Monitoring & Verification</h2>
+            
+            <div class="form-group">
+                <label>User ID to check:</label>
+                <input type="text" id="userIdCheck" value="test-user-1">
+            </div>
+            
+            <button class="success" onclick="getUserFiles()">
+                Get User Files
+            </button>
+            
+            <button class="success" onclick="getErrorFlags()">
+                Get Error Flags
+            </button>
+            
+            <button onclick="resetErrorFlags()">
+                Reset Error Flags
+            </button>
+            
+            <div id="responseMonitor" class="response"></div>
+        </div>
+        
+        <!-- Cleanup Section -->
+        <div class="test-section">
+            <h2>🧹 Cleanup</h2>
+            
+            <button class="danger" onclick="cleanupUser('test-user-1')">
+                Cleanup User 1
+            </button>
+            
+            <button class="danger" onclick="cleanupUser('test-user-2')">
+                Cleanup User 2
+            </button>
+            
+            <button class="danger" onclick="cleanupUser('test-user-3')">
+                Cleanup User 3
+            </button>
+            
+            <div id="responseCleanup" class="response"></div>
+        </div>
+    </div>
+    
+    <script>
+        const BASE_URL = 'http://localhost:8081/api/test/saga';
+        
+        function showLoader(loaderId) {
+            document.getElementById(loaderId).classList.remove('hidden');
+        }
+        
+        function hideLoader(loaderId) {
+            document.getElementById(loaderId).classList.add('hidden');
+        }
+        
+        function showResponse(responseId, data, isSuccess = true) {
+            const responseEl = document.getElementById(responseId);
+            responseEl.textContent = JSON.stringify(data, null, 2);
+            responseEl.classList.add('show');
+            responseEl.classList.remove('success', 'error');
+            responseEl.classList.add(isSuccess ? 'success' : 'error');
+        }
+        
+        async function testSuccessUpload() {
+            const userId = document.getElementById('userId1').value;
+            const fileInput = document.getElementById('file1');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+            
+            showLoader('loader1');
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`${BASE_URL}/upload-success?userId=${userId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                showResponse('response1', data, data.status === 'UPLOADED');
+            } catch (error) {
+                showResponse('response1', { error: error.message }, false);
+            } finally {
+                hideLoader('loader1');
+            }
+        }
+        
+        async function testFileServiceError() {
+            const userId = document.getElementById('userId2').value;
+            const fileInput = document.getElementById('file2');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+            
+            showLoader('loader2');
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`${BASE_URL}/test-fileservice-error?userId=${userId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                showResponse('response2', data, data.rollbackExecuted === true);
+            } catch (error) {
+                showResponse('response2', { error: error.message }, false);
+            } finally {
+                hideLoader('loader2');
+            }
+        }
+        
+        async function testDatabaseError() {
+            const userId = document.getElementById('userId3').value;
+            const fileInput = document.getElementById('file3');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+            
+            showLoader('loader3');
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch(`${BASE_URL}/test-database-error?userId=${userId}`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                showResponse('response3', data, data.rollbackExecuted === true);
+            } catch (error) {
+                showResponse('response3', { error: error.message }, false);
+            } finally {
+                hideLoader('loader3');
+            }
+        }
+        
+        async function getUserFiles() {
+            const userId = document.getElementById('userIdCheck').value;
+            
+            try {
+                const response = await fetch(`${BASE_URL}/user-files/${userId}`);
+                const data = await response.json();
+                showResponse('responseMonitor', data, true);
+            } catch (error) {
+                showResponse('responseMonitor', { error: error.message }, false);
+            }
+        }
+        
+        async function getErrorFlags() {
+            try {
+                const response = await fetch(`${BASE_URL}/error-flags`);
+                const data = await response.json();
+                showResponse('responseMonitor', data, true);
+            } catch (error) {
+                showResponse('responseMonitor', { error: error.message }, false);
+            }
+        }
+        
+        async function resetErrorFlags() {
+            try {
+                const response = await fetch(`${BASE_URL}/reset-flags`, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                showResponse('responseMonitor', { message: 'Flags reset successfully', flags: data }, true);
+            } catch (error) {
+                showResponse('responseMonitor', { error: error.message }, false);
+            }
+        }
+        
+        async function cleanupUser(userId) {
+            if (!confirm(`Delete all data for ${userId}?`)) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${BASE_URL}/cleanup/${userId}`, {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+                showResponse('responseCleanup', data, true);
+            } catch (error) {
+                showResponse('responseCleanup', { error: error.message }, false);
+            }
+        }
+    </script>
+</body>
+</html>
