@@ -3,6 +3,7 @@ package com.cnweb.order_service.service;
 import com.cnweb.order_service.dto.request.OrderCreationRequest;
 import com.cnweb.order_service.dto.request.ProcessReturnRequest;
 import com.cnweb.order_service.dto.request.ReturnOrderRequest;
+import com.cnweb.order_service.dto.response.CustomerStatisticResponse;
 import com.cnweb.order_service.dto.response.OrderResponse;
 import com.cnweb.order_service.dto.response.OrderPaymentResponse;
 import com.cnweb.order_service.dto.request.OrderFilterRequest;
@@ -37,6 +38,10 @@ public interface OrderService {
      */
     OrderStatisticResponse getOrderStatistics(String storeId);
 
+    /**
+     * Thống kê khách hàng cho seller
+     */
+    CustomerStatisticResponse getCustomerStatistics(String storeId);
     /**
      * Seller xác nhận đơn hàng (PAID -> CONFIRMED)
      */
