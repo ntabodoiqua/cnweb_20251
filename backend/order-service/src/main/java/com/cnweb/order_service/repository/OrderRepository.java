@@ -140,4 +140,110 @@ public interface OrderRepository extends JpaRepository<Order, String>, JpaSpecif
         ) AS text) AS statistics;
         """, nativeQuery = true)
     String getOrderStatisticsJson(@Param("storeId") String storeId);
+
+    @Query(value = """
+WITH store_orders AS (
+    SELECT
+        id,
+        created_at,
+        user_id AS username,      
+        receiver_name,
+        receiver_email,
+        receiver_phone,
+        total_amount,      
+        refund_amount,     
+        status              
+    FROM orders
+    WHERE store_id = :storeId
+),
+
+customer_base AS (
+    SELECT
+        so.username,
+
+        MAX(so.receiver_name) AS receiver_name,
+        MAX(so.receiver_email) AS receiver_email,
+        MAX(so.receiver_phone) AS receiver_phone,
+        
+        COALESCE(SUM(so.total_amount), 0) - COALESCE(SUM(so.refund_amount), 0) AS total_spent,
+        
+        COUNT(CASE WHEN so.status = 'DELIVERED' THEN so.id END) AS total_completed_orders
+        
+    FROM store_orders so
+    GROUP BY so.username
+),
+
+monthly_customer_count AS (
+    SELECT
+        TO_CHAR(so.created_at, 'YYYY-MM') AS time_period,
+        COUNT(DISTINCT so.username) AS customer_count
+    FROM store_orders so
+    WHERE so.status IN ('DELIVERED', 'PAID') 
+    GROUP BY time_period
+    ORDER BY time_period
+),
+
+top_spenders_list AS (
+    SELECT
+        cb.username,
+        cb.receiver_name,
+        cb.receiver_email,
+        cb.receiver_phone,
+        cb.total_spent,
+        cb.total_completed_orders AS total_orders 
+    FROM customer_base cb
+    WHERE cb.total_spent > 0 AND cb.total_completed_orders > 0
+    ORDER BY cb.total_spent DESC
+    LIMIT 10
+),
+
+top_buyers_list AS (
+    SELECT
+        cb.username,
+        cb.receiver_name,
+        cb.receiver_email,
+        cb.receiver_phone,
+        cb.total_spent,
+        cb.total_completed_orders AS total_orders
+    FROM customer_base cb
+    WHERE cb.total_completed_orders > 0
+    ORDER BY cb.total_completed_orders DESC, cb.total_spent DESC 
+    LIMIT 10
+)
+
+SELECT CAST(jsonb_build_object(
+    'totalCustomers', (SELECT COUNT(DISTINCT username) FROM store_orders),
+    'customerCancelledOrders', (SELECT COUNT(DISTINCT username) FROM store_orders WHERE status = 'CANCELLED'),
+    'customerReturnedOrders', (SELECT COUNT(DISTINCT username) FROM store_orders WHERE refund_amount > 0),
+    'customerDeliveredOrders', (SELECT COUNT(DISTINCT username) FROM store_orders WHERE status = 'DELIVERED'),
+    
+    'monthlyCustomerTrend', (SELECT jsonb_agg(jsonb_build_object(
+                                'timePeriod', mcc.time_period,
+                                'customerCount', mcc.customer_count
+                            ))
+                            FROM monthly_customer_count mcc),
+                            
+    'topSpenders', (SELECT jsonb_agg(jsonb_build_object(
+                        'username', tsl.username,
+                        'receiverName', tsl.receiver_name,
+                        'receiverEmail', tsl.receiver_email,
+                        'receiverPhone', tsl.receiver_phone,
+                        'totalSpent', tsl.total_spent,
+                        'totalOrders', tsl.total_orders
+                    ))
+                    FROM top_spenders_list tsl),
+                    
+    'topBuyers', (SELECT jsonb_agg(jsonb_build_object(
+                        'username', tbl.username,
+                        'receiverName', tbl.receiver_name,
+                        'receiverEmail', tbl.receiver_email,
+                        'receiverPhone', tbl.receiver_phone,
+                        'totalSpent', tbl.total_spent,
+                        'totalOrders', tbl.total_orders
+                    ))
+                    FROM top_buyers_list tbl)
+                                                        
+) AS text) AS statistics;
+""", nativeQuery = true)
+    String getCustomerStatisticsJson(@Param("storeId") String storeId);
 }
