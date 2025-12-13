@@ -10,6 +10,7 @@ import com.cnweb.order_service.dto.request.ReturnOrderRequest;
 import com.cnweb.order_service.dto.response.CouponResponse;
 import com.cnweb.order_service.dto.response.CouponValidationResponse;
 import com.cnweb.order_service.dto.response.OrderResponse;
+import com.cnweb.order_service.dto.response.OrderStatisticResponse;
 import com.cnweb.order_service.entity.Order;
 import com.cnweb.order_service.entity.OrderItem;
 import com.cnweb.order_service.enums.OrderStatus;
@@ -21,6 +22,7 @@ import com.cnweb.order_service.repository.OrderRepository;
 import com.cnweb.order_service.specification.OrderSpecification;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.vdt2025.common_dto.dto.response.ApiResponse;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -59,6 +62,33 @@ public class OrderServiceImpl implements OrderService {
     @Value("${payment.redirect-url}")
     @NonFinal
     String paymentRedirectUrl;
+
+    @Override
+//    @Cacheable(value = "seller-revenue-statistics", key = "#storeId")
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('SELLER')")
+    public OrderStatisticResponse getOrderStatistics(String storeId) {
+        log.info("Fetching all-time revenue statistics for seller with storeId: {}.", storeId);
+
+        // 2. Gọi native query nhận về JSON (Chỉ truyền storeId)
+        String json = orderRepository.getOrderStatisticsJson(storeId);
+
+        if (json == null || json.isBlank()) {
+            log.warn("Statistics JSON is null or empty for storeId: {}.", storeId);
+            return new OrderStatisticResponse();
+        }
+
+        // 3. Chuyển đổi JSON sang DTO
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+            return mapper.readValue(json, OrderStatisticResponse.class);
+
+        } catch (Exception e) {
+            log.error("Failed to parse OrderStatisticResponse JSON for storeId: {}", storeId, e);
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
+    }
 
     @Override
     @Transactional
