@@ -6,6 +6,7 @@ import com.cnweb.order_service.dto.request.ReturnOrderRequest;
 import com.cnweb.order_service.dto.response.OrderResponse;
 import com.cnweb.order_service.dto.response.OrderPaymentResponse;
 import com.cnweb.order_service.dto.request.OrderFilterRequest;
+import com.cnweb.order_service.dto.response.OrderStatisticResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -30,6 +31,11 @@ public interface OrderService {
      * Lấy chi tiết đơn hàng theo ID
      */
     OrderResponse getOrderById(String username, String orderId);
+
+    /**
+     * Thống kê đơn hàng và doanh thu cho seller
+     */
+    OrderStatisticResponse getOrderStatistics(String storeId);
 
     /**
      * Seller xác nhận đơn hàng (PAID -> CONFIRMED)
