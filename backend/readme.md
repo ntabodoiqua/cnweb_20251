@@ -172,10 +172,3 @@ Mô tả từng service
 - Thêm log driver, restart policy
 - Ánh xạ cổng tối thiểu
 
-🔗 Luồng hoạt động tổng quát
-Client gửi request → API Gateway
-Gateway định tuyến request đến service tương ứng
-Service giao tiếp qua Discovery Service
-Mỗi service xử lý nghiệp vụ của riêng mình
-Một số service gọi sang service khác (inter-service communication)
-Response trả về client qua Gateway
