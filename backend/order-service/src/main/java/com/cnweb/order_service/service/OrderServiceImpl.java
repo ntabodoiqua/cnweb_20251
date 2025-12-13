@@ -7,10 +7,7 @@ import com.cnweb.order_service.dto.request.OrderFilterRequest;
 import com.cnweb.order_service.dto.request.OrderItemRequest;
 import com.cnweb.order_service.dto.request.ProcessReturnRequest;
 import com.cnweb.order_service.dto.request.ReturnOrderRequest;
-import com.cnweb.order_service.dto.response.CouponResponse;
-import com.cnweb.order_service.dto.response.CouponValidationResponse;
-import com.cnweb.order_service.dto.response.OrderResponse;
-import com.cnweb.order_service.dto.response.OrderStatisticResponse;
+import com.cnweb.order_service.dto.response.*;
 import com.cnweb.order_service.entity.Order;
 import com.cnweb.order_service.entity.OrderItem;
 import com.cnweb.order_service.enums.OrderStatus;
@@ -64,13 +61,12 @@ public class OrderServiceImpl implements OrderService {
     String paymentRedirectUrl;
 
     @Override
-//    @Cacheable(value = "seller-revenue-statistics", key = "#storeId")
+    @Cacheable(value = "seller-revenue-statistics", key = "#storeId")
     @Transactional(readOnly = true)
     @PreAuthorize("hasRole('SELLER')")
     public OrderStatisticResponse getOrderStatistics(String storeId) {
         log.info("Fetching all-time revenue statistics for seller with storeId: {}.", storeId);
 
-        // 2. Gọi native query nhận về JSON (Chỉ truyền storeId)
         String json = orderRepository.getOrderStatisticsJson(storeId);
 
         if (json == null || json.isBlank()) {
@@ -78,11 +74,35 @@ public class OrderServiceImpl implements OrderService {
             return new OrderStatisticResponse();
         }
 
-        // 3. Chuyển đổi JSON sang DTO
         try {
             ObjectMapper mapper = new ObjectMapper();
             mapper.registerModule(new JavaTimeModule());
             return mapper.readValue(json, OrderStatisticResponse.class);
+
+        } catch (Exception e) {
+            log.error("Failed to parse OrderStatisticResponse JSON for storeId: {}", storeId, e);
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
+    }
+
+    @Override
+    @Cacheable(value = "seller-customer-statistics", key = "#storeId")
+    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('SELLER')")
+    public CustomerStatisticResponse getCustomerStatistics(String storeId) {
+        log.info("Fetching all-time customer statistics for seller with storeId: {}.", storeId);
+
+        String json = orderRepository.getCustomerStatisticsJson(storeId);
+
+        if (json == null || json.isBlank()) {
+            log.warn("Statistics JSON is null or empty for storeId: {}.", storeId);
+            return new CustomerStatisticResponse();
+        }
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.registerModule(new JavaTimeModule());
+            return mapper.readValue(json, CustomerStatisticResponse.class);
 
         } catch (Exception e) {
             log.error("Failed to parse OrderStatisticResponse JSON for storeId: {}", storeId, e);
