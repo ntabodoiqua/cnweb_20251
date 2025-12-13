@@ -38,8 +38,8 @@ public class ProductStatisticController {
     }
 
     /**
-     * Lấy thống kê tổng quan sản phẩm cho
-     * GET /products/statistics/overview
+     * Lấy thống kê tổng quan sản phẩm cho seller
+     * GET /products/statistics//seller-overview/{storeId}
      * Required: SELLER role
      */
     @GetMapping("/seller-overview/{storeId}")
