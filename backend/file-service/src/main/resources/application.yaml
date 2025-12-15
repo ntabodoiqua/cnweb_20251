@@ -4,9 +4,9 @@ spring:
   application:
     name: file-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db-postgresql-sgp1-93557-do-user-27848320-0.d.db.ondigitalocean.com:25060/file_service?sslmode=require}
-    username: ${SPRING_DATASOURCE_USERNAME:doadmin}
-    password: ${SPRING_DATASOURCE_PASSWORD:AVNS_GP853Gug731-gzXfmnT}
+    url: ${FILE_SERVICE_DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -19,10 +19,10 @@ spring:
     type: redis
   data:
     redis:
-      host: db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
-      port: 25061
-      username: default
-      password: AVNS_N-gwsyNb6xBC3fXPdQp
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      username: ${REDIS_USERNAME}
+      password: ${REDIS_PASSWORD}
       ssl:
         enabled: true
 eureka:
@@ -32,7 +32,7 @@ eureka:
   instance:
     prefer-ip-address: true
 jwt:
-  signerKey: ${JWT_SIGNERKEY:cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2}
+  signerKey: ${JWT_SIGNER_KEY}
   valid-duration: ${JWT_VALID_DURATION:3600}
   refreshable-duration: ${JWT_REFRESHABLE_DURATION:86400}
 
