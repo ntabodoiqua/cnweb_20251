@@ -1,11 +1,13 @@
-.register-container {
+/* Register.module.css */
+
+.registerContainer {
   display: flex;
   min-height: 100vh;
   width: 100%;
   background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
 }
 
-.register-left {
+.registerLeft {
   flex: 1;
   display: flex;
   align-items: center;
@@ -16,7 +18,7 @@
   overflow: hidden;
 }
 
-.register-left::before {
+.registerLeft::before {
   content: "";
   position: absolute;
   width: 400px;
@@ -27,7 +29,7 @@
   left: -100px;
 }
 
-.register-left::after {
+.registerLeft::after {
   content: "";
   position: absolute;
   width: 300px;
@@ -38,23 +40,22 @@
   right: -50px;
 }
 
-.register-left-content {
+.registerLeftContent {
   max-width: 500px;
   color: white;
   z-index: 1;
   text-align: center;
 }
 
-.register-logo {
+.registerLogo {
   width: 180px;
   height: auto;
   margin-bottom: 30px;
   animation: fadeInDown 0.8s ease;
-  /* Có thể thêm drop-shadow để logo nổi bật hơn trên nền màu */
   filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
 }
 
-.register-welcome {
+.registerWelcome {
   font-size: 42px;
   font-weight: 800;
   margin-bottom: 20px;
@@ -63,7 +64,7 @@
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.register-description {
+.registerDescription {
   font-size: 18px;
   line-height: 1.6;
   opacity: 0.95;
@@ -72,14 +73,14 @@
   animation: fadeInDown 0.8s ease 0.4s both;
 }
 
-.register-features {
+.registerFeatures {
   display: flex;
   flex-direction: column;
   gap: 20px;
   animation: fadeInUp 0.8s ease 0.6s both;
 }
 
-.feature-item {
+.featureItem {
   display: flex;
   align-items: center;
   gap: 15px;
@@ -90,12 +91,12 @@
   transition: all 0.3s ease;
 }
 
-.feature-item:hover {
+.featureItem:hover {
   background: rgba(255, 255, 255, 0.25);
   transform: translateX(10px);
 }
 
-.feature-icon {
+.featureIcon {
   width: 30px;
   height: 30px;
   background: white;
@@ -108,12 +109,12 @@
   font-size: 18px;
 }
 
-.feature-text {
+.featureText {
   font-size: 16px;
   font-weight: 500;
 }
 
-.register-right {
+.registerRight {
   flex: 1;
   display: flex;
   align-items: center;
@@ -122,13 +123,13 @@
   background: white;
 }
 
-.register-form-container {
+.registerFormContainer {
   width: 100%;
   max-width: 480px;
   animation: fadeInUp 0.6s ease;
 }
 
-.register-title {
+.registerTitle {
   font-size: 32px;
   font-weight: 800;
   color: #222;
@@ -136,82 +137,82 @@
   text-align: center;
 }
 
-.register-subtitle {
+.registerSubtitle {
   font-size: 16px;
   color: #666;
   margin-bottom: 32px;
   text-align: center;
 }
 
-.register-form {
+.registerForm {
   margin-top: 24px;
 }
 
-.register-form .ant-form-item-label > label {
+.registerForm :global(.ant-form-item-label > label) {
   font-weight: 600;
   color: #333;
   font-size: 14px;
 }
 
-.register-form .ant-input,
-.register-form .ant-input-password,
-.register-form .ant-picker {
+.registerForm :global(.ant-input),
+.registerForm :global(.ant-input-password),
+.registerForm :global(.ant-picker) {
   border-radius: 8px;
   border: 2px solid #e8e8e8;
   transition: all 0.3s ease;
 }
 
-.register-form .ant-input:hover,
-.register-form .ant-input-password:hover .ant-input,
-.register-form .ant-picker:hover {
+.registerForm :global(.ant-input:hover),
+.registerForm :global(.ant-input-password:hover .ant-input),
+.registerForm :global(.ant-picker:hover) {
   border-color: #ff8c5a;
 }
 
-.register-form .ant-input:focus,
-.register-form .ant-input-password:focus .ant-input,
-.register-form .ant-input-focused,
-.register-form .ant-picker-focused {
+.registerForm :global(.ant-input:focus),
+.registerForm :global(.ant-input-password:focus .ant-input),
+.registerForm :global(.ant-input-focused),
+.registerForm :global(.ant-picker-focused) {
   border-color: #ee4d2d;
   box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
 }
 
-.register-form .ant-input-affix-wrapper {
+.registerForm :global(.ant-input-affix-wrapper) {
   border-radius: 8px;
   border: 2px solid #e8e8e8;
   padding: 8px 11px;
 }
 
-.register-form .ant-input-affix-wrapper:hover {
+.registerForm :global(.ant-input-affix-wrapper:hover) {
   border-color: #ff8c5a;
 }
 
-.register-form .ant-input-affix-wrapper-focused {
+.registerForm :global(.ant-input-affix-wrapper-focused) {
   border-color: #ee4d2d;
   box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
 }
 
-.register-form .ant-input-prefix {
+.registerForm :global(.ant-input-prefix) {
   color: #999;
   font-size: 16px;
   margin-right: 8px;
 }
 
-.register-form .ant-form-item-explain-error {
+.registerForm :global(.ant-form-item-explain-error) {
   font-size: 13px;
   margin-top: 4px;
 }
 
-.form-row {
+.formRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
 }
 
-.form-item-half {
+.formItemHalf {
   margin-bottom: 24px;
 }
 
-.register-button {
+.registerButton {
   height: 48px;
   font-size: 16px;
   font-weight: 600;
@@ -223,17 +224,17 @@
   transition: all 0.3s ease;
 }
 
-.register-button:hover {
+.registerButton:hover {
   background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%) !important;
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(238, 77, 45, 0.4) !important;
 }
 
-.register-button:active {
+.registerButton:active {
   transform: translateY(0);
 }
 
-.register-divider {
+.registerDivider {
   display: flex;
   align-items: center;
   margin: 24px 0 20px;
@@ -241,20 +242,20 @@
   font-size: 14px;
 }
 
-.register-divider::before,
-.register-divider::after {
+.registerDivider::before,
+.registerDivider::after {
   content: "";
   flex: 1;
   height: 1px;
   background: #e8e8e8;
 }
 
-.register-divider span {
+.registerDivider span {
   padding: 0 16px;
   font-weight: 500;
 }
 
-.google-register-button {
+.googleRegisterButton {
   height: 48px;
   font-size: 16px;
   font-weight: 600;
@@ -269,13 +270,13 @@
   margin-bottom: 24px;
 }
 
-.google-register-button .anticon {
+.googleRegisterButton :global(.anticon) {
   font-size: 20px;
   color: #4285f4;
   margin-right: 8px;
 }
 
-.google-register-button:hover {
+.googleRegisterButton:hover {
   border-color: #4285f4 !important;
   color: #4285f4 !important;
   background: #f8f9ff !important;
@@ -283,11 +284,11 @@
   box-shadow: 0 4px 12px rgba(66, 133, 244, 0.2);
 }
 
-.google-register-button:active {
+.googleRegisterButton:active {
   transform: translateY(0);
 }
 
-.google-register-wrapper {
+.googleRegisterWrapper {
   margin-bottom: 32px;
   width: 100%;
   position: relative;
@@ -295,26 +296,23 @@
   min-height: 48px;
 }
 
-/* Custom Google Button Style */
-.google-register-wrapper > div {
+.googleRegisterWrapper > div {
   width: 100% !important;
   display: flex;
   justify-content: center;
 }
 
-.google-register-wrapper > div > div {
+.googleRegisterWrapper > div > div {
   width: 100% !important;
 }
 
-/* Override Google's default styles */
-.google-register-wrapper iframe {
+.googleRegisterWrapper iframe {
   width: 100% !important;
   min-height: 48px !important;
 }
 
-/* Style for the actual Google button */
-.google-register-wrapper button,
-.google-register-wrapper div[role="button"] {
+.googleRegisterWrapper button,
+.googleRegisterWrapper div[role="button"] {
   width: 100% !important;
   min-width: 100% !important;
   max-width: 100% !important;
@@ -331,30 +329,28 @@
   font-family: inherit !important;
 }
 
-.google-register-wrapper button:hover,
-.google-register-wrapper div[role="button"]:hover {
+.googleRegisterWrapper button:hover,
+.googleRegisterWrapper div[role="button"]:hover {
   border-color: #4285f4 !important;
   box-shadow: 0 4px 12px rgba(66, 133, 244, 0.2) !important;
   transform: translateY(-2px);
 }
 
-/* Fix for Google's One Tap shrinking issue */
-.google-register-wrapper > div[style*="width"] {
+.googleRegisterWrapper > div[style*="width"] {
   width: 100% !important;
   max-width: 100% !important;
 }
 
-/* Ensure logo and text are properly aligned */
-.google-register-wrapper img {
+.googleRegisterWrapper img {
   margin-right: 12px !important;
 }
 
-.google-register-wrapper span {
+.googleRegisterWrapper span {
   flex: 1 !important;
   text-align: center !important;
 }
 
-.register-footer {
+.registerFooter {
   text-align: center;
   margin-top: 8px;
   padding-top: 8px;
@@ -364,41 +360,41 @@
   z-index: 2;
 }
 
-.login-link {
+.loginLink {
   color: #ee4d2d;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.3s ease;
 }
 
-.login-link:hover {
+.loginLink:hover {
   color: #ff6b35;
   text-decoration: underline;
 }
 
-.register-home-link {
+.registerHomeLink {
   text-align: center;
   margin-top: 16px;
 }
 
-.register-home-link a {
+.registerHomeLink a {
   color: #999;
   text-decoration: none;
   font-size: 14px;
   transition: all 0.3s ease;
 }
 
-.register-home-link a:hover {
+.registerHomeLink a:hover {
   color: #ee4d2d;
 }
 
 /* Password Strength Indicator */
-.password-strength-container {
+.passwordStrengthContainer {
   margin-top: -16px;
   margin-bottom: 24px;
 }
 
-.password-strength-bar {
+.passwordStrengthBar {
   width: 100%;
   height: 6px;
   background-color: #f0f0f0;
@@ -407,26 +403,26 @@
   margin-bottom: 8px;
 }
 
-.password-strength-fill {
+.passwordStrengthFill {
   height: 100%;
   transition: all 0.3s ease;
   border-radius: 3px;
 }
 
-.password-strength-text {
+.passwordStrengthText {
   font-size: 13px;
   margin-bottom: 8px;
   color: #666;
 }
 
-.password-requirements {
+.passwordRequirements {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 6px;
   margin-top: 8px;
 }
 
-.requirement-item {
+.requirementItem {
   font-size: 12px;
   color: #999;
   display: flex;
@@ -434,7 +430,7 @@
   gap: 4px;
 }
 
-.requirement-item::before {
+.requirementItem::before {
   content: attr(data-check);
 }
 
@@ -463,11 +459,11 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .register-left {
+  .registerLeft {
     display: none;
   }
 
-  .register-right {
+  .registerRight {
     flex: 1;
     background: linear-gradient(
       135deg,
@@ -476,7 +472,7 @@
     );
   }
 
-  .register-form-container {
+  .registerFormContainer {
     max-width: 500px;
     background: white;
     padding: 40px 30px;
@@ -486,67 +482,67 @@
 }
 
 @media (max-width: 768px) {
-  .register-right {
+  .registerRight {
     padding: 20px 16px;
   }
 
-  .register-form-container {
+  .registerFormContainer {
     padding: 32px 24px;
   }
 
-  .register-title {
+  .registerTitle {
     font-size: 28px;
   }
 
-  .register-subtitle {
+  .registerSubtitle {
     font-size: 14px;
   }
 
-  .form-row {
+  .formRow {
     grid-template-columns: 1fr;
     gap: 0;
   }
 
-  .form-item-half {
+  .formItemHalf {
     margin-bottom: 24px;
   }
 }
 
 @media (max-width: 480px) {
-  .register-form-container {
+  .registerFormContainer {
     padding: 24px 20px;
   }
 
-  .register-title {
+  .registerTitle {
     font-size: 24px;
   }
 
-  .register-button {
+  .registerButton {
     height: 44px;
     font-size: 15px;
   }
 }
 
 /* Custom scrollbar */
-::-webkit-scrollbar {
+:global(::-webkit-scrollbar) {
   width: 8px;
 }
 
-::-webkit-scrollbar-track {
+:global(::-webkit-scrollbar-track) {
   background: #f1f1f1;
 }
 
-::-webkit-scrollbar-thumb {
+:global(::-webkit-scrollbar-thumb) {
   background: #ee4d2d;
   border-radius: 4px;
 }
 
-::-webkit-scrollbar-thumb:hover {
+:global(::-webkit-scrollbar-thumb:hover) {
   background: #d73211;
 }
 
 /* Terms Checkbox */
-.terms-checkbox {
+.termsCheckbox {
   font-size: 14px;
   color: #666;
   line-height: 1.6;
@@ -554,27 +550,27 @@
   align-items: flex-start;
 }
 
-.terms-checkbox .ant-checkbox {
+.termsCheckbox :global(.ant-checkbox) {
   margin-top: 0.2em;
 }
 
-.terms-checkbox .ant-checkbox-checked .ant-checkbox-inner {
+.termsCheckbox :global(.ant-checkbox-checked .ant-checkbox-inner) {
   background-color: #ee4d2d;
   border-color: #ee4d2d;
 }
 
-.terms-checkbox .ant-checkbox:hover .ant-checkbox-inner {
+.termsCheckbox :global(.ant-checkbox:hover .ant-checkbox-inner) {
   border-color: #ee4d2d;
 }
 
-.terms-link {
+.termsLink {
   color: #ee4d2d;
   font-weight: 600;
   text-decoration: none;
   transition: all 0.3s ease;
 }
 
-.terms-link:hover {
+.termsLink:hover {
   color: #ff6b35;
   text-decoration: underline;
 }
