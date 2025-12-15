@@ -4,9 +4,9 @@ spring:
   application:
     name: product-service
   datasource:
-    url: jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25061/product_service?sslmode=require
-    username: doadmin
-    password: AVNS_yX_L2SKXt73ktjTiGbU
+    url: ${PRODUCT_SERVICE_DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -19,10 +19,10 @@ spring:
     type: redis
   data:
     redis:
-      host: db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
-      port: 25061
-      username: default
-      password: AVNS_N-gwsyNb6xBC3fXPdQp
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT:25061}
+      username: ${REDIS_USERNAME}
+      password: ${REDIS_PASSWORD}
       ssl:
         enabled: true
   elasticsearch:
@@ -32,14 +32,14 @@ spring:
     connection-timeout: 5s
     socket-timeout: 30s
   rabbitmq:
-    addresses: amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
-    username: xqjmojji
-    password: hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH
-    virtual-host: xqjmojji
+    addresses: ${RABBITMQ_ADDRESSES}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    virtual-host: ${RABBITMQ_VIRTUAL_HOST}
     ssl:
       enabled: true
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
     consumer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -51,16 +51,16 @@ eureka:
   instance:
     prefer-ip-address: true
 jwt:
-  signerKey: cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2
+  signerKey: ${JWT_SIGNER_KEY}
   valid-duration: 3600
   refreshable-duration: 86400
 
 file:
-  directory: ./uploads/
+  directory: ${FILE_DIRECTORY:./uploads/}
   max-size: 10MB
 
 app:
-  default-admin-id: d50f8589-da20-49e8-a3f3-6a115d1f68d7
+  default-admin-id: ${DEFAULT_ADMIN_ID:d50f8589-da20-49e8-a3f3-6a115d1f68d7}
 
 product-images:
   max-per-product: 5
