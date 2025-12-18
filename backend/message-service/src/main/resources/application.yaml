@@ -82,8 +82,8 @@ internal:
 # Chat configuration
 chat:
   message:
-    # S? ng�y gi? l?i tin nh?n (m?c d?nh 90 ng�y)
+    # Message retention days (default 90 days)
     retention-days: ${CHAT_MESSAGE_RETENTION_DAYS:90}
   cleanup:
-    # Cron expression cho cleanup task (m?c d?nh 2:00 AM m?i ng�y)
+    # Cron expression for cleanup task (default 2:00 AM daily)
     cron: ${CHAT_CLEANUP_CRON:0 0 2 * * ?}
