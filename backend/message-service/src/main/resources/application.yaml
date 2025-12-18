@@ -7,8 +7,8 @@ spring:
   # MongoDB configuration
   data:
     mongodb:
-      uri: mongodb+srv://doadmin:91O5nL46Fl8Ug3C7@db-mongodb-sgp1-59038-501157b3.mongo.ondigitalocean.com/message_service?authSource=admin&tls=true
-      database: message_service
+      uri: ${MONGODB_URI:mongodb+srv://doadmin:changeme@db-mongodb-sgp1-59038-501157b3.mongo.ondigitalocean.com/message_service?authSource=admin&tls=true}
+      database: ${MONGODB_DATABASE:message_service}
     redis:
       host: db-valkey-sgp1-03029-do-user-27848320-0.m.db.ondigitalocean.com
       port: 25061
@@ -82,10 +82,8 @@ internal:
 # Chat configuration
 chat:
   message:
-    # S? ngày gi? l?i tin nh?n (m?c d?nh 90 ngày)
+    # S? ngï¿½y gi? l?i tin nh?n (m?c d?nh 90 ngï¿½y)
     retention-days: ${CHAT_MESSAGE_RETENTION_DAYS:90}
   cleanup:
-    # Cron expression cho cleanup task (m?c d?nh 2:00 AM m?i ngày)
+    # Cron expression cho cleanup task (m?c d?nh 2:00 AM m?i ngï¿½y)
     cron: ${CHAT_CLEANUP_CRON:0 0 2 * * ?}
-
-

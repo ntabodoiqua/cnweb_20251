@@ -153,6 +153,10 @@ jobs:
           # SendGrid Configuration
           SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
 
+          # MongoDB Configuration (Message Service)
+          MONGODB_URI=${{ secrets.MONGODB_URI }}
+          MONGODB_DATABASE=${{ secrets.MONGODB_DATABASE }}
+
           # Payment Redirect URL
           PAYMENT_REDIRECT_URL=${{ secrets.PAYMENT_REDIRECT_URL }}
 

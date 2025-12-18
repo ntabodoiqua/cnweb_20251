@@ -417,8 +417,8 @@ services:
     environment:
       - TZ=Asia/Ho_Chi_Minh
       - JAVA_TOOL_OPTIONS=-Duser.timezone=Asia/Ho_Chi_Minh
-      - SPRING_DATA_MONGODB_URI=mongodb+srv://doadmin:91O5nL46Fl8Ug3C7@db-mongodb-sgp1-59038-501157b3.mongo.ondigitalocean.com/message_service?authSource=admin&tls=true
-      - SPRING_DATA_MONGODB_DATABASE=message_service
+      - SPRING_DATA_MONGODB_URI=${MONGODB_URI:-mongodb+srv://doadmin:changeme@db-mongodb-sgp1-59038-501157b3.mongo.ondigitalocean.com/message_service?authSource=admin&tls=true}
+      - SPRING_DATA_MONGODB_DATABASE=${MONGODB_DATABASE:-message_service}
       - SPRING_DATA_REDIS_HOST=db-valkey-sgp1-03029-do-user-27848320-0.m.db.ondigitalocean.com
       - SPRING_DATA_REDIS_PORT=25061
       - SPRING_DATA_REDIS_USERNAME=default
