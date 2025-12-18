@@ -3,6 +3,11 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
+# Build arguments for environment variables
+ARG VITE_BACKEND_URL
+ARG VITE_WS_URL
+ARG VITE_GOOGLE_CLIENT_ID
+
 # Copy package files
 COPY package*.json ./
 
@@ -12,7 +17,12 @@ RUN npm ci
 # Copy source code
 COPY . .
 
-# Build the application (uses .env.production by default)
+# Create .env.production from build args
+RUN echo "VITE_BACKEND_URL=${VITE_BACKEND_URL}" > .env.production && \
+    echo "VITE_WS_URL=${VITE_WS_URL}" >> .env.production && \
+    echo "VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}" >> .env.production
+
+# Build the application
 RUN npm run build
 
 # Stage 2: Serve the application with Nginx
