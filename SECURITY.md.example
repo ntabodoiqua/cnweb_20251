@@ -197,16 +197,16 @@ Giá trị: https://your-domain.com/payment/result
 #### Frontend Configuration
 
 ```
-VITE_BACKEND_URL
-Giá trị: (Để trống cho production, hoặc https://your-backend-domain.com)
-Mô tả: URL của backend API. Để trống để frontend tự động dùng host hiện tại
-
-VITE_WS_URL
-Giá trị: (Để trống cho production, hoặc wss://your-backend-domain.com)
-Mô tả: WebSocket URL cho real-time notifications. Để trống để tự động dùng wss:// với host hiện tại
+GOOGLE_CLIENT_ID
+Giá trị: <your-google-client-id>.apps.googleusercontent.com
+Mô tả: Google OAuth Client ID (đã định nghĩa ở phần Google OAuth phía trên)
 ```
 
-**Lưu ý:** `GOOGLE_CLIENT_ID` đã được định nghĩa ở phần Google OAuth Configuration phía trên, sử dụng chung cho backend và frontend.
+**Lưu ý quan trọng về VITE_BACKEND_URL và VITE_WS_URL:**
+- Các biến này **KHÔNG CẦN** thêm vào GitHub Secrets
+- Trong production, để chúng RỖNG để frontend tự động dùng current host
+- Frontend code đã xử lý: nếu empty → dùng relative URLs và current host
+- Workflow đã cấu hình: `VITE_BACKEND_URL=` và `VITE_WS_URL=` (empty string)
 
 #### Deployment Configuration
 
