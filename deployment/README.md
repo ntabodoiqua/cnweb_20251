@@ -300,7 +300,7 @@ Kiểm tra:
 telnet db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com 25060
 
 # Test Redis connection
-telnet db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com 25061
+telnet db-valkey-sgp1-03029-do-user-27848320-0.m.db.ondigitalocean.com 25061
 ```
 
 ## 🔐 Security Best Practices

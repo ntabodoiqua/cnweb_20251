@@ -1,0 +1,155 @@
+# 🚀 CI/CD Setup Guide - TEMPLATE
+
+> ⚠️ **CẢNH BÁO**: Đây là file TEMPLATE. File `CICD_SETUP.md` thực tế chứa credentials không được commit vào Git!
+
+## 📋 GitHub Secrets Configuration
+
+Để CI/CD hoạt động, bạn cần thêm các secrets sau vào GitHub Repository Settings → Secrets and variables → Actions:
+
+### Backend Services Secrets
+
+| Secret Name | Value | Description |
+|------------|-------|-------------|
+| `DB_PASSWORD` | `<your-main-db-password>` | Mật khẩu DB chính (user,order,payment,product) |
+| `SPRING_DATASOURCE_PASSWORD` | `<your-main-db-password>` | Mật khẩu datasource chính |
+| `NOTIFICATION_DB_PASSWORD` | `<your-notification-db-password>` | Mật khẩu DB notification service |
+| `FILE_DB_PASSWORD` | `<your-file-db-password>` | Mật khẩu DB file service |
+| `RABBITMQ_ADDRESSES` | `amqps://<user>:<pass>@<host>/<vhost>` | RabbitMQ connection string |
+| `RABBITMQ_USERNAME` | `<your-rabbitmq-username>` | RabbitMQ username |
+| `RABBITMQ_PASSWORD` | `<your-rabbitmq-password>` | Mật khẩu RabbitMQ |
+| `RABBITMQ_VIRTUAL_HOST` | `<your-vhost>` | RabbitMQ vhost |
+| `REDIS_HOST` | `<your-redis-host>` | Redis host |
+| `REDIS_PORT` | `25061` | Redis port |
+| `REDIS_USERNAME` | `default` | Redis username |
+| `REDIS_PASSWORD` | `<your-redis-password>` | Redis password |
+| `JWT_SIGNER_KEY` | `<generate-strong-key>` | JWT signing key |
+| `INTERNAL_SERVICE_SECRET` | `<generate-strong-key>` | Internal service auth key |
+
+### S3/DigitalOcean Spaces
+
+| Secret Name | Value | Description |
+|------------|-------|-------------|
+| `S3_ENDPOINT` | `https://<region>.digitaloceanspaces.com` | S3 endpoint |
+| `S3_REGION` | `<region>` | S3 region |
+| `S3_BUCKET_NAME` | `<bucket-name>` | S3 bucket name |
+| `S3_ACCESS_KEY` | `<your-access-key>` | S3 access key |
+| `S3_SECRET_KEY` | `<your-secret-key>` | S3 secret key |
+
+### Google OAuth
+
+| Secret Name | Value | Description |
+|------------|-------|-------------|
+| `GOOGLE_CLIENT_ID` | `<your-client-id>.apps.googleusercontent.com` | Google OAuth Client ID |
+| `GOOGLE_CLIENT_SECRET` | `<your-client-secret>` | Google OAuth Client Secret |
+
+### Payment Gateway (ZaloPay)
+
+| Secret Name | Value | Description |
+|------------|-------|-------------|
+| `ZALOPAY_APP_ID` | `<your-app-id>` | ZaloPay App ID |
+| `ZALOPAY_KEY1` | `<your-key1>` | ZaloPay Key 1 |
+| `ZALOPAY_KEY2` | `<your-key2>` | ZaloPay Key 2 |
+| `ZALOPAY_CREATE_ORDER_URL` | `https://sb-openapi.zalopay.vn/v2/create` | Create order endpoint |
+| `ZALOPAY_QUERY_ORDER_URL` | `https://sb-openapi.zalopay.vn/v2/query` | Query order endpoint |
+| `ZALOPAY_GET_BANK_LIST_URL` | `https://sbgateway.zalopay.vn/api/getlistmerchantbanks` | Bank list endpoint |
+| `ZALOPAY_CALLBACK_URL` | `http://<your-server>/api/payment/v1/payments/zalopay/callback` | Callback URL |
+| `ZALOPAY_REDIRECT_URL` | `http://<your-frontend>/payment/result` | Redirect URL |
+
+### Frontend Secrets
+
+| Secret Name | Value | Description |
+|------------|-------|-------------|
+| `VITE_BACKEND_URL` | (empty for production) | Backend API URL |
+| `VITE_WS_URL` | (empty for production) | WebSocket URL |
+
+### Deployment Secrets
+
+| Secret Name | Value | Description |
+|------------|-------|-------------|
+| `SSH_HOST` | `<your-server-ip>` | Server IP address |
+| `SSH_USERNAME` | `<your-username>` | SSH username |
+| `SSH_PRIVATE_KEY` | `<private-key-content>` | SSH private key |
+| `SSH_PORT` | `22` | SSH port |
+
+---
+
+## 🔄 Deployment Workflow
+
+### Backend Deployment
+
+```mermaid
+graph LR
+    A[Push Tag dev_*] --> B[Build Services]
+    B --> C[Build Docker Images]
+    C --> D[Push to GHCR]
+    D --> E[SSH to Server]
+    E --> F[Create .env]
+    F --> G[Docker Compose Up]
+    G --> H[Health Check]
+```
+
+**Trigger:**
+```bash
+git tag dev_18.12.2025_v1
+git push origin dev_18.12.2025_v1
+```
+
+### Frontend Deployment
+
+```mermaid
+graph LR
+    A[Push Tag fe_dev_*] --> B[Build React App]
+    B --> C[Build Docker Image]
+    C --> D[Push to GHCR]
+    D --> E[SSH to Server]
+    E --> F[Docker Compose Up]
+    F --> G[Health Check]
+```
+
+**Trigger:**
+```bash
+git tag fe_dev_18.12.2025_v1
+git push origin fe_dev_18.12.2025_v1
+```
+
+---
+
+## 🔐 Security Checklist
+
+- [ ] Tất cả GitHub Secrets đã được thêm
+- [ ] File `.env` không được commit (kiểm tra `.gitignore`)
+- [ ] File `SECURITY.md` không được commit
+- [ ] File `CICD_SETUP.md` không được commit
+- [ ] SSH private key chỉ sử dụng cho deployment
+- [ ] Credentials được rotate định kỳ
+- [ ] 2FA đã bật cho GitHub account
+- [ ] Server firewall đã cấu hình đúng
+
+---
+
+## 🆘 Troubleshooting
+
+### Deployment Failed
+
+1. Kiểm tra GitHub Actions logs
+2. Verify tất cả Secrets đã được thêm đúng
+3. Kiểm tra SSH connection
+4. Verify Docker images đã được push
+
+### Health Check Failed
+
+1. Kiểm tra service logs: `docker logs <service-name>`
+2. Verify environment variables
+3. Kiểm tra database connection
+4. Kiểm tra port conflicts
+
+### Cannot Connect to Services
+
+1. Verify service đang chạy: `docker ps`
+2. Kiểm tra network: `docker network ls`
+3. Verify firewall rules
+4. Kiểm tra DNS configuration
+
+---
+
+**Lưu ý:** File này chỉ là template. File `CICD_SETUP.md` thực tế chứa credentials KHÔNG được commit vào Git!

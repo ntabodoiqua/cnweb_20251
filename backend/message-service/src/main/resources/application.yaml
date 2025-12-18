@@ -1,4 +1,4 @@
-﻿server:
+server:
   port: 8087
 
 spring:
@@ -10,18 +10,18 @@ spring:
       uri: mongodb+srv://doadmin:91O5nL46Fl8Ug3C7@db-mongodb-sgp1-59038-501157b3.mongo.ondigitalocean.com/message_service?authSource=admin&tls=true
       database: message_service
     redis:
-      host: db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
+      host: db-valkey-sgp1-03029-do-user-27848320-0.m.db.ondigitalocean.com
       port: 25061
       username: default
-      password: AVNS_N-gwsyNb6xBC3fXPdQp
+      password: ${SPRING_DATA_REDIS_PASSWORD:changeme}
       ssl:
         enabled: true
   cache:
     type: redis
   rabbitmq:
-    addresses: amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
-    username: xqjmojji
-    password: hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH
+    addresses: ${SPRING_RABBITMQ_ADDRESSES:amqps://xqjmojji:changeme@fuji.lmq.cloudamqp.com/xqjmojji}
+    username: ${SPRING_RABBITMQ_USERNAME:xqjmojji}
+    password: ${SPRING_RABBITMQ_PASSWORD:changeme}
     virtual-host: xqjmojji
     ssl:
       enabled: true
@@ -82,8 +82,10 @@ internal:
 # Chat configuration
 chat:
   message:
-    # Số ngày giữ lại tin nhắn (mặc định 90 ngày)
+    # S? ng�y gi? l?i tin nh?n (m?c d?nh 90 ng�y)
     retention-days: ${CHAT_MESSAGE_RETENTION_DAYS:90}
   cleanup:
-    # Cron expression cho cleanup task (mặc định 2:00 AM mỗi ngày)
+    # Cron expression cho cleanup task (m?c d?nh 2:00 AM m?i ng�y)
     cron: ${CHAT_CLEANUP_CRON:0 0 2 * * ?}
+
+

@@ -158,10 +158,10 @@ Already configured in `application.yaml`:
 spring:
   data:
     redis:
-      host: db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
+      host: db-valkey-sgp1-03029-do-user-27848320-0.m.db.ondigitalocean.com
       port: 25061
       username: default
-      password: AVNS_N-gwsyNb6xBC3fXPdQp
+      password: ${SPRING_DATA_REDIS_PASSWORD:changeme}
       ssl:
         enabled: true
 ```

@@ -4,9 +4,9 @@ spring:
   application:
     name: order-service
   datasource:
-    url: jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25061/order_service?sslmode=require
-    username: doadmin
-    password: AVNS_yX_L2SKXt73ktjTiGbU
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25061/order_service?sslmode=require}
+    username: ${SPRING_DATASOURCE_USERNAME:doadmin}
+    password: ${SPRING_DATASOURCE_PASSWORD:changeme}
   jpa:
     hibernate:
       ddl-auto: update
@@ -18,18 +18,18 @@ spring:
   cache:
     type: redis
   rabbitmq:
-    addresses: amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
-    username: xqjmojji
-    password: hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH
+    addresses: ${SPRING_RABBITMQ_ADDRESSES:amqps://xqjmojji:changeme@fuji.lmq.cloudamqp.com/xqjmojji}
+    username: ${SPRING_RABBITMQ_USERNAME:xqjmojji}
+    password: ${SPRING_RABBITMQ_PASSWORD:changeme}
     virtual-host: xqjmojji
     ssl:
       enabled: true
   data:
     redis:
-      host: db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
+      host: db-valkey-sgp1-03029-do-user-27848320-0.m.db.ondigitalocean.com
       port: 25061
       username: default
-      password: AVNS_N-gwsyNb6xBC3fXPdQp
+      password: ${SPRING_DATA_REDIS_PASSWORD:changeme}
       ssl:
         enabled: true
 eureka:
@@ -81,3 +81,5 @@ logging:
   level:
     root: INFO
     org.springframework.data.jpa: DEBUG
+
+

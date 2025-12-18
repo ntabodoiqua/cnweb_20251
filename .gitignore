@@ -40,3 +40,19 @@ zpgateway-html
 logs
 
 # another folder
+
+# Environment Variables - NEVER COMMIT THESE FILES!
+.env
+.env.local
+.env.production
+.env.*.local
+
+# Sensitive configuration files
+**/application-secret.yaml
+**/application-secret.yml
+**/application-production.yaml
+**/application-production.yml
+
+# Documentation with sensitive credentials - NEVER COMMIT!
+SECURITY.md
+CICD_SETUP.md
