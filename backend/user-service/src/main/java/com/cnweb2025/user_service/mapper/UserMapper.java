@@ -1,5 +1,6 @@
 package com.cnweb2025.user_service.mapper;
 
+import com.cnweb2025.user_service.dto.request.user.AdminUserUpdateRequest;
 import com.cnweb2025.user_service.dto.request.user.UserCreationRequest;
 import com.cnweb2025.user_service.dto.request.user.UserUpdateRequest;
 import com.cnweb2025.user_service.dto.response.UserResponse;
@@ -18,4 +19,8 @@ public interface UserMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "roles", ignore = true)
     void updateUser(@MappingTarget User user, UserUpdateRequest request);
+
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "roles", ignore = true)
+    void updateUser(@MappingTarget User user, AdminUserUpdateRequest request);
 }

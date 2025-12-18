@@ -3,7 +3,7 @@ name: CI/CD Pipeline - Frontend Deploy to Production
 on:
   push:
     tags:
-      - "fe_dev_*" # Trigger on tags like fe_dev_23.10.2025_v1
+      - "fe_dev_*"
 
 env:
   REGISTRY: ghcr.io
@@ -30,34 +30,33 @@ jobs:
     permissions:
       contents: read
       packages: write
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
           cache-dependency-path: frontend/package.json
-
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
       - name: Build and push frontend
         uses: docker/build-push-action@v5
         with:
           context: ./frontend
           file: ./frontend/Dockerfile
           push: true
+          build-args: |
+            VITE_BACKEND_URL=
+            VITE_WS_URL=
+            VITE_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
           tags: |
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.prepare.outputs.tag }}
             ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
@@ -67,7 +66,6 @@ jobs:
   deploy:
     needs: [prepare, build-and-push]
     runs-on: ubuntu-latest
-
     steps:
       - name: Deploy to Production Server
         uses: appleboy/ssh-action@v1.0.3
@@ -77,29 +75,23 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            # Navigate to deployment directory
             cd /opt/cnweb2025_1_fe || exit 1
 
-            # Pull latest changes
-            git pull origin fe/dev
+            # --- QUAN TRỌNG: ĐỒNG BỘ CODE ---
+            git fetch origin anhnt/message-service
+            git reset --hard origin/anhnt/message-service
 
-            # Login to GitHub Container Registry
+            # Login
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
-            # Pull latest frontend image
+            # Pull & Deploy
             export TAG=${{ needs.prepare.outputs.tag }}
             docker compose -f frontend/docker-compose.prod.yaml pull
 
-            # Stop and remove old container
-            docker compose -f frontend/docker-compose.prod.yaml down
+            # --- QUAN TRỌNG: TÁI TẠO CONTAINER ---
+            docker compose -f frontend/docker-compose.prod.yaml up -d --force-recreate --remove-orphans
 
-            # Start new container
-            docker compose -f frontend/docker-compose.prod.yaml up -d
-
-            # Clean up old images
             docker image prune -af
-
-            # Show running containers
             docker compose -f frontend/docker-compose.prod.yaml ps
 
       - name: Verify Deployment
@@ -110,20 +102,22 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            # Wait for service to be ready
-            sleep 30
-
-            # Check if frontend is accessible
-            echo "Checking Frontend..."
-            curl -f http://localhost:3000 || curl -f http://localhost:80 || exit 1
-
-            echo "Frontend is healthy!"
+            echo "Waiting for Nginx..."
+            sleep 15
+            # Check port 80 health endpoint
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost/health)
+            if [ "$HTTP_CODE" -eq 200 ]; then
+              echo "Frontend is healthy (HTTP 200)"
+            else
+              echo "Frontend check failed with HTTP $HTTP_CODE"
+              exit 1
+            fi
 
       - name: Notify deployment status
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Frontend deployment successful for tag ${{ needs.prepare.outputs.tag }}"
+            echo "Success tag ${{ needs.prepare.outputs.tag }}"
           else
-            echo "❌ Frontend deployment failed for tag ${{ needs.prepare.outputs.tag }}"
+            echo "Failed tag ${{ needs.prepare.outputs.tag }}"
           fi

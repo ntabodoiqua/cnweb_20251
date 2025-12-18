@@ -1,0 +1,930 @@
+package com.cnweb.order_service.service;
+
+import com.cnweb.order_service.client.*;
+import com.cnweb.order_service.dto.payment.*;
+import com.cnweb.order_service.dto.request.OrderCreationRequest;
+import com.cnweb.order_service.dto.request.OrderFilterRequest;
+import com.cnweb.order_service.dto.request.OrderItemRequest;
+import com.cnweb.order_service.dto.request.ProcessReturnRequest;
+import com.cnweb.order_service.dto.request.ReturnOrderRequest;
+import com.cnweb.order_service.dto.response.CouponResponse;
+import com.cnweb.order_service.dto.response.CouponValidationResponse;
+import com.cnweb.order_service.dto.response.OrderResponse;
+import com.cnweb.order_service.entity.Order;
+import com.cnweb.order_service.entity.OrderItem;
+import com.cnweb.order_service.enums.OrderStatus;
+import com.cnweb.order_service.enums.RefundStatus;
+import com.cnweb.order_service.exception.AppException;
+import com.cnweb.order_service.exception.ErrorCode;
+import com.cnweb.order_service.mapper.OrderMapper;
+import com.cnweb.order_service.repository.OrderRepository;
+import com.cnweb.order_service.specification.OrderSpecification;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vdt2025.common_dto.dto.response.ApiResponse;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
+public class OrderServiceImpl implements OrderService {
+
+    OrderRepository orderRepository;
+    ProductClient productClient;
+    PaymentClient paymentClient;
+    OrderMapper orderMapper;
+    CouponService couponService;
+    ObjectMapper objectMapper;
+    OrderNotificationService orderNotificationService;
+    @Value("${payment.redirect-url}")
+    @NonFinal
+    String paymentRedirectUrl;
+
+    @Override
+    @Transactional
+    public List<OrderResponse> createOrder(String username, OrderCreationRequest request) {
+        // 1. Get all variant IDs
+        List<String> variantIds = request.getItems().stream()
+                .map(OrderItemRequest::getVariantId)
+                .toList();
+
+        // 2. Fetch variant details
+        ApiResponse<List<VariantInternalDTO>> variantResponse = productClient.getVariants(
+                VariantsQueryRequest.builder().variantIds(variantIds).build()
+        );
+
+        if (variantResponse.getResult() == null || variantResponse.getResult().isEmpty()) {
+            throw new RuntimeException("Products not found");
+        }
+
+        List<VariantInternalDTO> variants = variantResponse.getResult();
+        Map<String, VariantInternalDTO> variantMap = variants.stream()
+                .collect(Collectors.toMap(VariantInternalDTO::getId, v -> v));
+
+        // 3. Group items by Store
+        Map<String, List<OrderItemRequest>> itemsByStore = new HashMap<>();
+
+        for (OrderItemRequest itemRequest : request.getItems()) {
+            VariantInternalDTO variant = variantMap.get(itemRequest.getVariantId());
+            if (variant == null) {
+                throw new RuntimeException("Product variant not found: " + itemRequest.getVariantId());
+            }
+            // Check stock
+            if (variant.getStockQuantity() < itemRequest.getQuantity()) {
+                throw new RuntimeException("Insufficient stock for product: " + variant.getProductName());
+            }
+
+            itemsByStore.computeIfAbsent(variant.getStoreId(), k -> new ArrayList<>()).add(itemRequest);
+        }
+
+        List<Order> createdOrders = new ArrayList<>();
+        List<InventoryChangeRequest> inventoryChanges = new ArrayList<>();
+
+        // Prepare orders (calculate subtotal first)
+        for (Map.Entry<String, List<OrderItemRequest>> entry : itemsByStore.entrySet()) {
+            String storeId = entry.getKey();
+            List<OrderItemRequest> storeItems = entry.getValue();
+            VariantInternalDTO firstVariant = variantMap.get(storeItems.getFirst().getVariantId());
+            String storeName = firstVariant.getStoreName();
+            String storeOwnerUsername = firstVariant.getStoreOwnerUsername();
+
+            Order order = orderMapper.toOrder(request);
+            order.setOrderNumber(generateOrderNumber());
+            order.setUsername(username);
+            order.setStoreId(storeId);
+            order.setStoreName(storeName);
+            order.setStoreOwnerUsername(storeOwnerUsername); // Lưu username của seller
+
+            List<OrderItem> orderItems = new ArrayList<>();
+            for (OrderItemRequest itemRequest : storeItems) {
+                VariantInternalDTO variant = variantMap.get(itemRequest.getVariantId());
+                OrderItem orderItem = OrderItem.builder()
+                        .order(order)
+                        .storeId(storeId)
+                        .storeName(storeName)
+                        .productId(variant.getProductId())
+                        .productName(variant.getProductName())
+                        .variantId(variant.getId())
+                        .variantName(variant.getVariantName())
+                        .sku(variant.getSku())
+                        .productImage(variant.getImageUrl())
+                        .price(variant.getPrice())
+                        .quantity(itemRequest.getQuantity())
+                        .build();
+                orderItem.calculateTotalPrice();
+                orderItems.add(orderItem);
+                
+                inventoryChanges.add(InventoryChangeRequest.builder()
+                        .variantId(variant.getId())
+                        .quantity(itemRequest.getQuantity())
+                        .build());
+            }
+            order.setItems(orderItems);
+            order.calculateTotalAmount(); // Calculates subtotal
+            createdOrders.add(order);
+        }
+
+        // 4. Apply Coupon Logic (Initial application if provided)
+        if (request.getCouponCode() != null && !request.getCouponCode().isEmpty()) {
+            applyCoupon(username, request.getCouponCode(), createdOrders);
+        }
+
+        // 5. Reserve stock
+        productClient.reserveBatch(BatchInventoryChangeRequest.builder()
+                .items(inventoryChanges)
+                .build());
+
+        try {
+            // 6. Save orders
+            orderRepository.saveAll(createdOrders);
+
+            // 7. Record Coupon Usage (if applied)
+            if (request.getCouponCode() != null && !request.getCouponCode().isEmpty()) {
+                 // Only record usage if discount was actually applied to at least one order
+                 boolean couponApplied = createdOrders.stream()
+                         .anyMatch(o -> o.getDiscountAmount() != null && o.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0);
+                 
+                 if (couponApplied) {
+                     // Use the first order ID for tracking
+                     couponService.useCoupon(createdOrders.getFirst().getCouponId(), username, createdOrders.get(0).getId());
+                 }
+            }
+            
+            // 8. Map to response (NO PAYMENT INITIATION HERE)
+            List<OrderResponse> responses = createdOrders.stream()
+                    .map(orderMapper::toOrderResponse)
+                    .toList();
+            
+            // 9. Send notifications for each created order
+            for (Order order : createdOrders) {
+                try {
+                    orderNotificationService.notifyOrderCreated(order, request.getReceiverEmail());
+                } catch (Exception e) {
+                    log.error("Failed to send notification for order {}: {}", order.getOrderNumber(), e.getMessage());
+                    // Don't fail the order creation if notification fails
+                }
+            }
+            
+            return responses;
+
+        } catch (Exception e) {
+            log.error("Error saving orders, triggering compensation transaction to release stock", e);
+            // Compensation: Release reserved stock
+            try {
+                productClient.releaseBatch(BatchInventoryChangeRequest.builder()
+                        .items(inventoryChanges)
+                        .build());
+            } catch (Exception ex) {
+                log.error("CRITICAL: Failed to compensate stock for failed order. Manual intervention required.", ex);
+            }
+            throw e; // Re-throw to rollback Order transaction
+        }
+    }
+
+    @Override
+    @Transactional
+    public List<OrderResponse> applyCouponToOrders(String username, String couponCode, List<String> orderIds) {
+        List<Order> orders = orderRepository.findAllById(orderIds);
+        
+        if (orders.isEmpty()) {
+            throw new RuntimeException("Orders not found");
+        }
+        
+        // Validate ownership
+        for (Order order : orders) {
+            if (!order.getUsername().equals(username)) {
+                throw new RuntimeException("Unauthorized access to order: " + order.getId());
+            }
+            // Only allow applying coupon to PENDING/UNPAID orders
+            if (order.getPaymentStatus() == com.cnweb.order_service.enums.PaymentStatus.PAID) {
+                throw new RuntimeException("Cannot apply coupon to paid order: " + order.getId());
+            }
+        }
+        
+        // Reset existing discounts first
+        for (Order order : orders) {
+            order.setDiscountAmount(BigDecimal.ZERO);
+            order.setCouponCode(null);
+            order.setCouponId(null);
+            order.calculateTotalAmount(); // Reset total to subtotal
+        }
+        
+        // Apply new coupon
+        applyCoupon(username, couponCode, orders);
+        
+        // Save updates
+        orderRepository.saveAll(orders);
+        
+        // Record usage? 
+        // Note: If we record usage here, we might need to handle re-application or removal.
+        // For simplicity, we assume usage is recorded/validated. 
+        // Ideally, usage should be "reserved" and finalized on payment, but current CouponService uses "useCoupon" immediately.
+        // We might need to check if user already used this coupon for THESE orders to avoid double counting if they retry.
+        // But CouponService logic is simple. Let's just call useCoupon if applied.
+        
+        boolean couponApplied = orders.stream()
+                .anyMatch(o -> o.getDiscountAmount() != null && o.getDiscountAmount().compareTo(BigDecimal.ZERO) > 0);
+        
+        if (couponApplied) {
+            couponService.useCoupon(orders.getFirst().getCouponId(), username, orders.get(0).getId());
+        }
+        
+        return orders.stream()
+                .map(orderMapper::toOrderResponse)
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public com.cnweb.order_service.dto.response.OrderPaymentResponse initiatePayment(
+            String username, com.cnweb.order_service.dto.request.OrderPaymentRequest request) {
+        List<String> orderIds = request.getOrderIds();
+        List<Order> orders = orderRepository.findAllById(orderIds);
+
+        if (orders.isEmpty()) {
+            throw new RuntimeException("Orders not found");
+        }
+
+        // Validate
+        LocalDateTime now = LocalDateTime.now();
+        for (Order order : orders) {
+            if (!order.getUsername().equals(username)) {
+                throw new RuntimeException("Unauthorized access to order: " + order.getId());
+            }
+            if (order.getPaymentStatus() == com.cnweb.order_service.enums.PaymentStatus.PAID) {
+                throw new RuntimeException("Order already paid: " + order.getId());
+            }
+
+            // Kiểm tra đơn hàng đã hết hạn thanh toán chưa (15 phút)
+            LocalDateTime expiryTime = order.getCreatedAt().plusMinutes(15);
+            if (now.isAfter(expiryTime)) {
+                throw new RuntimeException(
+                        String.format("Đơn hàng %s đã hết hạn thanh toán. Vui lòng tạo đơn hàng mới.",
+                                order.getOrderNumber())
+                );
+            }
+
+            // Kiểm tra đơn hàng đã bị hủy chưa
+            if (order.getStatus() == OrderStatus.CANCELLED) {
+                throw new RuntimeException(
+                        String.format("Đơn hàng %s đã bị hủy", order.getOrderNumber())
+                );
+            }
+        }
+
+        // Calculate total amount for payment
+        BigDecimal totalPaymentAmount = orders.stream()
+                .map(Order::getTotalAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Collect all items for payment request
+        List<PaymentItem> paymentItems = new ArrayList<>();
+        for (Order order : orders) {
+            for (OrderItem item : order.getItems()) {
+                paymentItems.add(PaymentItem.builder()
+                        .itemId(item.getVariantId())
+                        .itemName(item.getProductName() + " - " + item.getVariantName())
+                        .itemPrice(item.getPrice().longValue())
+                        .itemQuantity(item.getQuantity())
+                        .build());
+            }
+        }
+
+        // Create payment request
+        CreatePaymentRequest paymentRequest = CreatePaymentRequest.builder()
+                .appUser(username)
+                .amount(totalPaymentAmount.longValue())
+                .description("Thanh toán cho đơn hàng: " + String.join(", ", orders.stream().map(Order::getOrderNumber).toList()))
+                .items(paymentItems)
+                .expireDurationSeconds(request.getExpireDurationSeconds()) // Truyền thời gian hết hạn từ frontend
+                .embedData(PaymentEmbedData.builder()
+                        .orderIds(orderIds)
+                        .email(orders.getFirst().getReceiverEmail()) // Assume same email for batch
+                        .redirectUrl(paymentRedirectUrl)
+                        .build())
+                .email(orders.getFirst().getReceiverEmail())
+                .phone(orders.getFirst().getReceiverPhone())
+                .address(orders.getFirst().getShippingAddress())
+                .title("Thanh toán cho " + orders.size() + " đơn hàng")
+                .build();
+
+        // Call Payment Service
+        CreatePaymentResponse paymentResponse = paymentClient.createZaloPayOrder(paymentRequest);
+
+        if ("SUCCESS".equals(paymentResponse.getStatus())) {
+            String appTransId = paymentResponse.getAppTransId();
+
+            // Update orders with payment transaction ID
+            for (Order order : orders) {
+                order.setPaymentTransactionId(appTransId);
+                order.setPaymentStatus(com.cnweb.order_service.enums.PaymentStatus.PENDING);
+            }
+            orderRepository.saveAll(orders);
+
+            return com.cnweb.order_service.dto.response.OrderPaymentResponse.builder()
+                    .paymentUrl(paymentResponse.getOrderUrl())
+                    .appTransId(appTransId)
+                    .message("Payment initiated successfully")
+                    .build();
+        } else {
+            throw new RuntimeException("Payment initialization failed: " + paymentResponse.getMessage());
+        }
+    }
+
+    @Override
+    public Page<OrderResponse> getMyOrders(String username, OrderFilterRequest filter, Pageable pageable) {
+        Specification<Order> spec = OrderSpecification.getOrdersByFilter(filter, username, null);
+        Page<Order> orders = orderRepository.findAll(spec, pageable);
+        return orders.map(orderMapper::toOrderResponse);
+    }
+
+    @Override
+    public Page<OrderResponse> getStoreOrders(String requesterUsername, String storeId, OrderFilterRequest filter, Pageable pageable) {
+        // Validate store ownership
+        ApiResponse<Boolean> validationResponse = productClient.validateStoreOwner(storeId, requesterUsername);
+        if (validationResponse.getResult() == null || !validationResponse.getResult()) {
+            throw new RuntimeException("Unauthorized access to store orders");
+        }
+
+        Specification<Order> spec = OrderSpecification.getOrdersByFilter(filter, null, storeId);
+        Page<Order> orders = orderRepository.findAll(spec, pageable);
+        return orders.map(orderMapper::toOrderResponse);
+    }
+
+    private void applyCoupon(String username, String couponCode, List<Order> orders) {
+        CouponResponse coupon = couponService.getCouponByCode(couponCode);
+        
+        // Validate basic rules
+        CouponValidationResponse validation = couponService.validateCoupon(couponCode, java.math.BigDecimal.ZERO, username, null);
+        if (!validation.isValid() && !validation.getMessage().contains("Order amount")) {
+             // Ignore amount validation here, we do it manually below
+             throw new RuntimeException(validation.getMessage());
+        }
+
+        if (coupon.isStoreSpecific()) {
+            // Apply to specific store order
+            for (Order order : orders) {
+                if (order.getStoreId().equals(coupon.getStoreId())) {
+                    if (order.getSubtotal().compareTo(coupon.getMinOrderAmount()) >= 0) {
+                        java.math.BigDecimal discount = calculateDiscount(coupon, order.getSubtotal());
+                        order.setDiscountAmount(discount);
+                        order.setCouponCode(couponCode);
+                        order.setCouponId(coupon.getId());
+                        order.setTotalAmount(order.getSubtotal().subtract(discount));
+                    }
+                }
+            }
+        } else {
+            // Global coupon
+            java.math.BigDecimal grandTotal = orders.stream()
+                    .map(Order::getSubtotal)
+                    .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+            if (grandTotal.compareTo(coupon.getMinOrderAmount()) >= 0) {
+                java.math.BigDecimal totalDiscount = calculateDiscount(coupon, grandTotal);
+                
+                // Distribute discount
+                java.math.BigDecimal remainingDiscount = totalDiscount;
+                for (int i = 0; i < orders.size(); i++) {
+                    Order order = orders.get(i);
+                    java.math.BigDecimal orderDiscount;
+                    
+                    if (i == orders.size() - 1) {
+                        orderDiscount = remainingDiscount; // Last order gets the remainder to avoid rounding issues
+                    } else {
+                        // orderDiscount = totalDiscount * (orderSubtotal / grandTotal)
+                        orderDiscount = totalDiscount.multiply(order.getSubtotal())
+                                .divide(grandTotal, 2, java.math.RoundingMode.HALF_UP);
+                        remainingDiscount = remainingDiscount.subtract(orderDiscount);
+                    }
+                    
+                    // Ensure discount doesn't exceed subtotal
+                    if (orderDiscount.compareTo(order.getSubtotal()) > 0) {
+                        orderDiscount = order.getSubtotal();
+                    }
+
+                    order.setDiscountAmount(orderDiscount);
+                    order.setCouponCode(couponCode);
+                    order.setCouponId(coupon.getId());
+                    order.setTotalAmount(order.getSubtotal().subtract(orderDiscount));
+                }
+            }
+        }
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public Page<OrderResponse> getAllOrdersForAdmin(OrderFilterRequest filter, Pageable pageable) {
+        Specification<Order> spec = OrderSpecification.getOrdersByFilter(filter, null, null);
+        Page<Order> orders = orderRepository.findAll(spec, pageable);
+        return orders.map(orderMapper::toOrderResponse);
+    }
+
+    private java.math.BigDecimal calculateDiscount(CouponResponse coupon, java.math.BigDecimal amount) {
+        java.math.BigDecimal discount = java.math.BigDecimal.ZERO;
+        switch (coupon.getDiscountType()) {
+            case PERCENTAGE:
+                discount = amount.multiply(coupon.getDiscountValue())
+                        .divide(java.math.BigDecimal.valueOf(100));
+                if (coupon.getMaxDiscountAmount() != null && discount.compareTo(coupon.getMaxDiscountAmount()) > 0) {
+                    discount = coupon.getMaxDiscountAmount();
+                }
+                break;
+            case FIXED_AMOUNT:
+                discount = coupon.getDiscountValue();
+                break;
+            case FREE_SHIPPING:
+                // Handle free shipping logic if needed
+                break;
+        }
+        return discount;
+    }
+
+    private String generateOrderNumber() {
+        return "ORD-" + System.currentTimeMillis() + "-" + (int)(Math.random() * 1000);
+    }
+
+    // ==================== Order Status Management ====================
+
+    @Override
+    public OrderResponse getOrderById(String username, String orderId) {
+        Order order = orderRepository.findByIdWithItems(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Check authorization: customer hoặc seller của store đó
+        boolean isCustomer = order.getUsername().equals(username);
+        boolean isSeller = validateStoreOwnership(order.getStoreId(), username);
+
+        if (!isCustomer && !isSeller) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse confirmOrder(String sellerUsername, String orderId) {
+        log.info("Seller {} confirming order {}", sellerUsername, orderId);
+
+        Order order = orderRepository.findByIdWithItems(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Validate seller owns the store
+        if (!validateStoreOwnership(order.getStoreId(), sellerUsername)) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        // Validate order can be confirmed
+        if (!order.canBeConfirmed()) {
+            throw new AppException(ErrorCode.ORDER_CANNOT_BE_CONFIRMED);
+        }
+
+        // Update status
+        order.setStatus(OrderStatus.CONFIRMED);
+        order.setConfirmedAt(LocalDateTime.now());
+
+        order = orderRepository.save(order);
+        log.info("Order {} confirmed by seller {}", orderId, sellerUsername);
+
+        // Send notification to customer
+        try {
+            orderNotificationService.notifyOrderConfirmed(order);
+        } catch (Exception e) {
+            log.error("Failed to send order confirmed notification for order {}: {}", orderId, e.getMessage());
+        }
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse shipOrder(String sellerUsername, String orderId) {
+        log.info("Seller {} shipping order {}", sellerUsername, orderId);
+
+        Order order = orderRepository.findByIdWithItems(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Validate seller owns the store
+        if (!validateStoreOwnership(order.getStoreId(), sellerUsername)) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        // Validate order can be shipped
+        if (!order.canBeShipped()) {
+            throw new AppException(ErrorCode.ORDER_CANNOT_BE_SHIPPED);
+        }
+
+        // Update status
+        order.setStatus(OrderStatus.SHIPPING);
+        order.setShippingAt(LocalDateTime.now());
+
+        order = orderRepository.save(order);
+        log.info("Order {} is now shipping, set by seller {}", orderId, sellerUsername);
+
+        // Send notification to customer
+        try {
+            orderNotificationService.notifyOrderShipped(order);
+        } catch (Exception e) {
+            log.error("Failed to send order shipped notification for order {}: {}", orderId, e.getMessage());
+        }
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse deliverOrder(String customerUsername, String orderId) {
+        log.info("Customer {} confirming delivery of order {}", customerUsername, orderId);
+
+        Order order = orderRepository.findByIdWithItems(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Validate customer owns the order
+        if (!order.getUsername().equals(customerUsername)) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        // Validate order can be delivered
+        if (!order.canBeDelivered()) {
+            throw new AppException(ErrorCode.ORDER_CANNOT_BE_DELIVERED);
+        }
+
+        // Update status
+        order.setStatus(OrderStatus.DELIVERED);
+        order.setDeliveredAt(LocalDateTime.now());
+
+        order = orderRepository.save(order);
+        log.info("Order {} delivered, confirmed by customer {}", orderId, customerUsername);
+
+        // Send notification to customer
+        try {
+            orderNotificationService.notifyOrderDelivered(order);
+        } catch (Exception e) {
+            log.error("Failed to send order delivered notification for order {}: {}", orderId, e.getMessage());
+        }
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse cancelOrder(String username, String orderId, String cancelReason) {
+        log.info("User {} cancelling order {} with reason: {}", username, orderId, cancelReason);
+
+        Order order = orderRepository.findByIdWithItems(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Check authorization: customer hoặc seller của store đó
+        boolean isCustomer = order.getUsername().equals(username);
+        boolean isSeller = validateStoreOwnership(order.getStoreId(), username);
+
+        if (!isCustomer && !isSeller) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        // Validate order can be cancelled
+        if (!order.canBeCancelled()) {
+            throw new AppException(ErrorCode.ORDER_CANNOT_BE_CANCELLED);
+        }
+
+        // Validate cancel reason
+        if (cancelReason == null || cancelReason.trim().isEmpty()) {
+            throw new AppException(ErrorCode.CANCEL_REASON_REQUIRED);
+        }
+
+        // Prepare inventory changes
+        List<InventoryChangeRequest> inventoryChanges = order.getItems().stream()
+                .map(item -> InventoryChangeRequest.builder()
+                        .variantId(item.getVariantId())
+                        .quantity(item.getQuantity())
+                        .build())
+                .toList();
+
+        // Handle inventory based on payment status
+        try {
+            if (order.getPaymentStatus() == com.cnweb.order_service.enums.PaymentStatus.PAID) {
+                // Đơn đã thanh toán: tồn kho đã bị trừ (confirmBatch), cần hoàn lại (returnBatch)
+                log.info("Order {} was PAID - using returnBatch to restore inventory", orderId);
+                productClient.returnBatch(BatchInventoryChangeRequest.builder()
+                        .items(inventoryChanges)
+                        .build());
+            } else {
+                // Đơn chưa thanh toán: tồn kho chỉ bị reserve, cần release (releaseBatch)
+                log.info("Order {} was NOT PAID - using releaseBatch to release reservation", orderId);
+                productClient.releaseBatch(BatchInventoryChangeRequest.builder()
+                        .items(inventoryChanges)
+                        .build());
+            }
+        } catch (Exception e) {
+            log.error("Failed to restore/release inventory for cancelled order {}: {}", orderId, e.getMessage());
+            // Continue with cancellation even if inventory operation fails
+        }
+
+        // Process refund if order was paid
+        if (order.getPaymentStatus() == com.cnweb.order_service.enums.PaymentStatus.PAID
+                && order.getPaymentTransactionId() != null) {
+            log.info("Order {} was PAID, processing refund for cancellation", orderId);
+            processCancellationRefund(order, cancelReason);
+        }
+
+        // Update status
+        order.setStatus(OrderStatus.CANCELLED);
+        order.setCancelReason(cancelReason);
+        order.setCancelledBy(username);
+        order.setCancelledAt(LocalDateTime.now());
+
+        order = orderRepository.save(order);
+        log.info("Order {} cancelled by {}", orderId, username);
+
+        // Send notification to customer
+        try {
+            orderNotificationService.notifyOrderCancelled(order, username);
+        } catch (Exception e) {
+            log.error("Failed to send order cancelled notification for order {}: {}", orderId, e.getMessage());
+        }
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    // ==================== Helper Methods ====================
+
+    private boolean validateStoreOwnership(String storeId, String username) {
+        try {
+            ApiResponse<Boolean> response = productClient.validateStoreOwner(storeId, username);
+            return response.getResult() != null && response.getResult();
+        } catch (Exception e) {
+            log.error("Error validating store ownership: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    // ==================== Return & Refund Management ====================
+
+    @Override
+    @Transactional
+    public OrderResponse requestReturn(String customerUsername, String orderId, ReturnOrderRequest request) {
+        log.info("Customer {} requesting return for order {}", customerUsername, orderId);
+
+        Order order = orderRepository.findByIdWithItems(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Validate customer owns the order
+        if (!order.getUsername().equals(customerUsername)) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        // Check if already requested return
+        if (order.getReturnReason() != null) {
+            throw new AppException(ErrorCode.RETURN_ALREADY_REQUESTED);
+        }
+
+        // Validate order can be returned
+        if (!order.canBeReturned()) {
+            // Check if return period expired
+            if (order.getStatus() == OrderStatus.DELIVERED && order.getDeliveredAt() != null) {
+                LocalDateTime returnDeadline = order.getDeliveredAt().plusDays(7);
+                if (LocalDateTime.now().isAfter(returnDeadline)) {
+                    throw new AppException(ErrorCode.RETURN_PERIOD_EXPIRED);
+                }
+            }
+            throw new AppException(ErrorCode.ORDER_CANNOT_BE_RETURNED);
+        }
+
+        // Validate return reason
+        if (request.getReturnReason() == null) {
+            throw new AppException(ErrorCode.RETURN_REASON_REQUIRED);
+        }
+
+        if (request.getReturnDescription() == null || request.getReturnDescription().trim().isEmpty()) {
+            throw new AppException(ErrorCode.RETURN_DESCRIPTION_REQUIRED);
+        }
+
+        // Update order with return request info
+        order.setReturnReason(request.getReturnReason());
+        order.setReturnDescription(request.getReturnDescription());
+        order.setReturnRequestedAt(LocalDateTime.now());
+        // Set refundStatus to PENDING to indicate a return/refund request is waiting to be processed
+        order.setRefundStatus(RefundStatus.PENDING);
+
+        // Store return images as JSON
+        if (request.getReturnImages() != null && !request.getReturnImages().isEmpty()) {
+            try {
+                order.setReturnImages(objectMapper.writeValueAsString(request.getReturnImages()));
+            } catch (JsonProcessingException e) {
+                log.error("Error serializing return images: {}", e.getMessage());
+            }
+        }
+
+        order = orderRepository.save(order);
+        log.info("Return request submitted for order {} by customer {}", orderId, customerUsername);
+
+        // Send notification to seller
+        try {
+            orderNotificationService.notifyReturnRequested(order);
+        } catch (Exception e) {
+            log.error("Failed to send return requested notification for order {}: {}", orderId, e.getMessage());
+        }
+
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Override
+    @Transactional
+    public OrderResponse processReturn(String sellerUsername, String orderId, ProcessReturnRequest request) {
+        log.info("Seller {} processing return for order {}, approved: {}", sellerUsername, orderId, request.getApproved());
+
+        Order order = orderRepository.findByIdWithItems(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        // Validate seller owns the store
+        if (!validateStoreOwnership(order.getStoreId(), sellerUsername)) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        // Check if return was requested
+        if (order.getReturnReason() == null) {
+            throw new AppException(ErrorCode.RETURN_NOT_REQUESTED);
+        }
+
+        // Check if already processed
+        if (order.getReturnProcessedAt() != null) {
+            throw new AppException(ErrorCode.RETURN_ALREADY_PROCESSED);
+        }
+
+        order.setReturnProcessedAt(LocalDateTime.now());
+        order.setReturnProcessedBy(sellerUsername);
+
+        if (request.getApproved()) {
+            // Approve return request
+            order.setStatus(OrderStatus.RETURNED);
+            order.setReturnedAt(LocalDateTime.now());
+
+            // Restore inventory - Đơn hàng đã DELIVERED nên tồn kho đã bị trừ, cần hoàn lại bằng returnBatch
+            List<InventoryChangeRequest> inventoryChanges = order.getItems().stream()
+                    .map(item -> InventoryChangeRequest.builder()
+                            .variantId(item.getVariantId())
+                            .quantity(item.getQuantity())
+                            .build())
+                    .toList();
+
+            try {
+                productClient.returnBatch(BatchInventoryChangeRequest.builder()
+                        .items(inventoryChanges)
+                        .build());
+                log.info("Inventory restored for returned order {}", orderId);
+            } catch (Exception e) {
+                log.error("Failed to restore inventory for returned order {}: {}", orderId, e.getMessage());
+                // Continue with return even if inventory restore fails
+            }
+
+            // Process refund if order was paid
+            if (order.getPaymentStatus() == com.cnweb.order_service.enums.PaymentStatus.PAID
+                    && order.getPaymentTransactionId() != null) {
+                processRefund(order);
+            }
+
+            log.info("Return approved for order {} by seller {}", orderId, sellerUsername);
+        } else {
+            // Reject return request
+            if (request.getRejectionReason() == null || request.getRejectionReason().trim().isEmpty()) {
+                throw new AppException(ErrorCode.REJECTION_REASON_REQUIRED);
+            }
+            order.setReturnRejectionReason(request.getRejectionReason());
+            // Set refundStatus to REJECTED
+            order.setRefundStatus(RefundStatus.REJECTED);
+            log.info("Return rejected for order {} by seller {}: {}", orderId, sellerUsername, request.getRejectionReason());
+        }
+
+        order = orderRepository.save(order);
+        
+        // Send notification based on approval status
+        try {
+            if (request.getApproved()) {
+                orderNotificationService.notifyReturnApproved(order);
+            } else {
+                orderNotificationService.notifyReturnRejected(order, request.getRejectionReason());
+            }
+        } catch (Exception e) {
+            log.error("Failed to send return process notification for order {}: {}", orderId, e.getMessage());
+        }
+        
+        return orderMapper.toOrderResponse(order);
+    }
+
+    @Override
+    public Page<OrderResponse> getPendingReturnOrders(String sellerUsername, String storeId, Pageable pageable) {
+        // Validate store ownership
+        ApiResponse<Boolean> validationResponse = productClient.validateStoreOwner(storeId, sellerUsername);
+        if (validationResponse.getResult() == null || !validationResponse.getResult()) {
+            throw new AppException(ErrorCode.ORDER_UNAUTHORIZED);
+        }
+
+        // Find orders with pending return requests (return requested but not processed)
+        Specification<Order> spec = (root, query, cb) -> cb.and(
+                cb.equal(root.get("storeId"), storeId),
+                cb.equal(root.get("status"), OrderStatus.DELIVERED),
+                cb.isNotNull(root.get("returnReason")),
+                cb.isNull(root.get("returnProcessedAt"))
+        );
+
+        Page<Order> orders = orderRepository.findAll(spec, pageable);
+        return orders.map(orderMapper::toOrderResponse);
+    }
+
+    /**
+     * Process refund for a returned order
+     */
+    private void processRefund(Order order) {
+        log.info("Processing refund for order {}", order.getId());
+
+        try {
+            order.setRefundStatus(RefundStatus.PROCESSING);
+            order.setRefundAmount(order.getTotalAmount());
+
+            RefundRequest refundRequest = RefundRequest.builder()
+                    .zpTransId(order.getPaymentTransactionId())
+                    .amount(order.getTotalAmount().longValue())
+                    .description("Hoàn tiền cho đơn hàng " + order.getOrderNumber() + " - Lý do: " + order.getReturnReason().name())
+                    .build();
+
+            RefundResponse refundResponse = paymentClient.refundOrder(refundRequest);
+
+            if ("SUCCESS".equals(refundResponse.getStatus()) || "PROCESSING".equals(refundResponse.getStatus())) {
+                order.setRefundTransactionId(refundResponse.getMRefundId());
+                order.setPaymentStatus(com.cnweb.order_service.enums.PaymentStatus.REFUNDED);
+                if ("SUCCESS".equals(refundResponse.getStatus())) {
+                    order.setRefundStatus(RefundStatus.COMPLETED);
+                    order.setRefundedAt(LocalDateTime.now());
+                }
+                log.info("Refund initiated successfully for order {}, mRefundId: {}", 
+                        order.getId(), refundResponse.getMRefundId());
+            } else {
+                order.setRefundStatus(RefundStatus.FAILED);
+                log.error("Refund failed for order {}: {}", order.getId(), refundResponse.getMessage());
+            }
+
+        } catch (Exception e) {
+            order.setRefundStatus(RefundStatus.FAILED);
+            log.error("Error processing refund for order {}: {}", order.getId(), e.getMessage());
+        }
+    }
+
+    /**
+     * Process refund for a cancelled order (different from return - uses cancel reason)
+     */
+    private void processCancellationRefund(Order order, String cancelReason) {
+        log.info("Processing cancellation refund for order {}", order.getId());
+
+        try {
+            order.setRefundStatus(RefundStatus.PROCESSING);
+            order.setRefundAmount(order.getTotalAmount());
+
+            RefundRequest refundRequest = RefundRequest.builder()
+                    .zpTransId(order.getPaymentTransactionId())
+                    .amount(order.getTotalAmount().longValue())
+                    .description("Hoàn tiền do hủy đơn hàng " + order.getOrderNumber() + " - Lý do: " + cancelReason)
+                    .build();
+
+            RefundResponse refundResponse = paymentClient.refundOrder(refundRequest);
+
+            if ("SUCCESS".equals(refundResponse.getStatus()) || "PROCESSING".equals(refundResponse.getStatus())) {
+                order.setRefundTransactionId(refundResponse.getMRefundId());
+                order.setPaymentStatus(com.cnweb.order_service.enums.PaymentStatus.REFUNDED);
+                if ("SUCCESS".equals(refundResponse.getStatus())) {
+                    order.setRefundStatus(RefundStatus.COMPLETED);
+                    order.setRefundedAt(LocalDateTime.now());
+                }
+                log.info("Cancellation refund initiated successfully for order {}, mRefundId: {}", 
+                        order.getId(), refundResponse.getMRefundId());
+            } else {
+                order.setRefundStatus(RefundStatus.FAILED);
+                log.error("Cancellation refund failed for order {}: {}", order.getId(), refundResponse.getMessage());
+            }
+
+        } catch (Exception e) {
+            order.setRefundStatus(RefundStatus.FAILED);
+            log.error("Error processing cancellation refund for order {}: {}", order.getId(), e.getMessage());
+        }
+    }
+}

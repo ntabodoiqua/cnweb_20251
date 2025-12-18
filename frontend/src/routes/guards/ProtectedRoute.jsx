@@ -3,6 +3,7 @@ import { Navigate } from "react-router-dom";
 import { AuthContext } from "../../components/context/auth.context";
 import { notification } from "antd";
 import { PUBLIC_ROUTES } from "../../constants/routes";
+import { hasAnyRole } from "../../constants/roles";
 
 /**
  * Component bảo vệ route dựa trên authentication và role
@@ -37,8 +38,24 @@ const ProtectedRoute = ({
   if (allowedRoles.length > 0) {
     const userRole = auth.user?.role;
 
-    // Kiểm tra xem user có role phù hợp không
-    if (!userRole || !allowedRoles.includes(userRole)) {
+    if (!userRole) {
+      if (showNotification) {
+        notification.error({
+          message: "Không có quyền truy cập",
+          description: "Bạn không có quyền truy cập trang này.",
+          placement: "topRight",
+          duration: 3,
+        });
+      }
+      return <Navigate to={PUBLIC_ROUTES.HOME} replace />;
+    }
+
+    // Sử dụng helper function hasAnyRole để kiểm tra
+    // Xử lý trường hợp role là string chứa nhiều roles (cách nhau bởi dấu cách)
+    // Ví dụ: "ROLE_USER ROLE_SELLER"
+    const hasAllowedRole = hasAnyRole(userRole, allowedRoles);
+
+    if (!hasAllowedRole) {
       if (showNotification) {
         notification.error({
           message: "Không có quyền truy cập",

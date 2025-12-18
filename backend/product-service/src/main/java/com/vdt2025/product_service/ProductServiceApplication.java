@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 
 @SpringBootApplication
 @EnableCaching
-@EnableFeignClients(basePackages = "com.vdt2025.common_dto")
+@EnableFeignClients(basePackages = {"com.vdt2025.common_dto", "com.vdt2025.product_service.client"})
 public class ProductServiceApplication {
 
 	public static void main(String[] args) {

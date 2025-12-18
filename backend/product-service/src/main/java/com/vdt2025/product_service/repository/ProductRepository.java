@@ -40,6 +40,11 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     Page<Product> findByStoreIdAndIsActiveTrue(String storeId, Pageable pageable);
 
     /**
+     * Tìm sản phẩm chưa bị xóa theo store
+     */
+    Page<Product> findByStoreIdAndIsDeletedFalse(String storeId, Pageable pageable);
+
+    /**
      * Tìm sản phẩm active theo category
      */
     Page<Product> findByCategoryIdAndIsActiveTrue(String categoryId, Pageable pageable);
@@ -85,4 +90,79 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     @Modifying
     @Query("UPDATE Product p SET p.averageRating = :averageRating, p.ratingCount = :ratingCount WHERE p.id = :productId")
     int updateRating(@Param("productId") String productId, @Param("averageRating") Double averageRating, @Param("ratingCount") Integer ratingCount);
+
+
+    // Lấy danh sách productId mà user này có quyền sửa
+    @Query(
+            value = """
+            SELECT p.id 
+            FROM products p
+            JOIN stores s ON p.store_id = s.id
+            WHERE p.id IN (:ids)
+              AND s.user_name = :username
+        """,
+            nativeQuery = true
+    )
+    List<String> findAccessibleProductIdsNative(
+            @Param("ids") List<String> ids,
+            @Param("username") String username);
+
+    // Bulk update status product (native)
+    @Modifying
+    @Query(
+            value = """
+            UPDATE products
+            SET is_active = :status
+            WHERE id IN (:ids)
+        """,
+            nativeQuery = true
+    )
+    int bulkUpdateStatusNative(
+            @Param("ids") List<String> ids,
+            @Param("status") boolean status);
+
+    /**
+     * Fetch products với tất cả relations cần thiết cho Elasticsearch indexing
+     * Sử dụng JOIN FETCH để tránh LazyInitializationException
+     * Note: Removed bag fetches to avoid MultipleBagFetchException
+     */
+    @Query("""
+        SELECT DISTINCT p FROM Product p
+        LEFT JOIN FETCH p.category c
+        LEFT JOIN FETCH c.parentCategory
+        LEFT JOIN FETCH p.store
+        LEFT JOIN FETCH p.brand
+        WHERE p.isDeleted = false
+        ORDER BY p.createdAt DESC
+    """)
+    List<Product> findAllForElasticsearchIndexing();
+
+    /**
+     * Fetch products với pagination cho Elasticsearch sync
+     * Note: Cannot use JOIN FETCH with pagination directly, so use EntityGraph
+     */
+    @Query("""
+        SELECT p FROM Product p
+        WHERE p.isDeleted = false
+        ORDER BY p.createdAt DESC
+    """)
+    @org.springframework.data.jpa.repository.EntityGraph(
+        attributePaths = {"category", "store", "brand", "storeCategories"}
+    )
+    Page<Product> findAllForElasticsearchSync(Pageable pageable);
+
+    /**
+     * Fetch single product với tất cả relations cho Elasticsearch
+     * Note: Removed bag fetches (storeCategories, selectionGroups) to avoid MultipleBagFetchException.
+     * These will be lazy loaded within the transaction.
+     */
+    @Query("""
+        SELECT p FROM Product p
+        LEFT JOIN FETCH p.category c
+        LEFT JOIN FETCH c.parentCategory
+        LEFT JOIN FETCH p.store
+        LEFT JOIN FETCH p.brand
+        WHERE p.id = :productId
+    """)
+    java.util.Optional<Product> findByIdForElasticsearch(@Param("productId") String productId);
 }

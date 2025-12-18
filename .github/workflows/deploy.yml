@@ -41,12 +41,16 @@ jobs:
             path: user-service
           - name: product-service
             path: product-service
+          - name: order-service
+            path: order-service
           - name: notification-service
             path: notification-service
           - name: file-service
             path: file-service
           - name: payment-service
             path: payment-service
+          - name: message-service
+            path: message-service
 
     steps:
       - name: Checkout code
@@ -86,6 +90,90 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Create .env file with secrets
+        run: |
+          cat > .env << 'EOF'
+          # Deployment Configuration
+          TAG=${{ needs.prepare.outputs.tag }}
+          REGISTRY=${{ env.REGISTRY }}
+          IMAGE_PREFIX=${{ env.IMAGE_PREFIX }}
+
+          # Database Configuration (order, payment, product, user services)
+          SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }}
+
+          # Database Configuration (notification & file services - separate cluster)
+          NOTIFICATION_DB_PASSWORD=${{ secrets.NOTIFICATION_DB_PASSWORD }}
+          FILE_DB_PASSWORD=${{ secrets.FILE_DB_PASSWORD }}
+
+          # Redis Configuration
+          REDIS_HOST=${{ secrets.REDIS_HOST }}
+          REDIS_PORT=${{ secrets.REDIS_PORT }}
+          REDIS_USERNAME=${{ secrets.REDIS_USERNAME }}
+          REDIS_PASSWORD=${{ secrets.REDIS_PASSWORD }}
+          REDIS_SSL_ENABLED=true
+
+          # RabbitMQ Configuration
+          RABBITMQ_ADDRESSES=${{ secrets.RABBITMQ_ADDRESSES }}
+          RABBITMQ_USERNAME=${{ secrets.RABBITMQ_USERNAME }}
+          RABBITMQ_PASSWORD=${{ secrets.RABBITMQ_PASSWORD }}
+          RABBITMQ_VIRTUAL_HOST=${{ secrets.RABBITMQ_VIRTUAL_HOST }}
+
+          # JWT Configuration
+          JWT_SIGNER_KEY=${{ secrets.JWT_SIGNER_KEY }}
+          JWT_VALID_DURATION=3600
+          JWT_REFRESHABLE_DURATION=86400
+
+          # Internal Service Secret
+          INTERNAL_SERVICE_SECRET=${{ secrets.INTERNAL_SERVICE_SECRET }}
+
+          # S3 Configuration (File Service)
+          S3_ENDPOINT=${{ secrets.S3_ENDPOINT }}
+          S3_REGION=${{ secrets.S3_REGION }}
+          S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+          S3_ACCESS_KEY=${{ secrets.S3_ACCESS_KEY }}
+          S3_SECRET_KEY=${{ secrets.S3_SECRET_KEY }}
+
+          # Google OAuth Configuration (User Service)
+          GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}
+
+          # ZaloPay Configuration
+          ZALOPAY_APP_ID=${{ secrets.ZALOPAY_APP_ID }}
+          ZALOPAY_KEY1=${{ secrets.ZALOPAY_KEY1 }}
+          ZALOPAY_KEY2=${{ secrets.ZALOPAY_KEY2 }}
+          ZALOPAY_CREATE_ORDER_URL=${{ secrets.ZALOPAY_CREATE_ORDER_URL }}
+          ZALOPAY_QUERY_ORDER_URL=${{ secrets.ZALOPAY_QUERY_ORDER_URL }}
+          ZALOPAY_GET_BANK_LIST_URL=${{ secrets.ZALOPAY_GET_BANK_LIST_URL }}
+          ZALOPAY_CALLBACK_URL=${{ secrets.ZALOPAY_CALLBACK_URL }}
+          ZALOPAY_REDIRECT_URL=${{ secrets.ZALOPAY_REDIRECT_URL }}
+
+          # SendGrid Configuration
+          SENDGRID_API_KEY=${{ secrets.SENDGRID_API_KEY }}
+
+          # MongoDB Configuration (Message Service)
+          MONGODB_URI=${{ secrets.MONGODB_URI }}
+          MONGODB_DATABASE=${{ secrets.MONGODB_DATABASE }}
+
+          # Payment Redirect URL
+          PAYMENT_REDIRECT_URL=${{ secrets.PAYMENT_REDIRECT_URL }}
+
+          # Elasticsearch Configuration
+          ELASTICSEARCH_URIS=http://elasticsearch:9200
+          EOF
+
+      - name: Copy .env file to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          source: ".env"
+          target: "/opt/cnweb2025_1/backend/"
+
       - name: Deploy to Production Server
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -98,27 +186,30 @@ jobs:
             cd /opt/cnweb2025_1 || exit 1
 
             # Pull latest changes
-            git pull origin be/dev
             git checkout be/dev
+            git pull origin be/dev
 
             # Login to GitHub Container Registry
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
 
-            # Pull latest images
+            # Navigate to backend directory
+            cd backend
+
+            # Pull latest images with the specific tag
             export TAG=${{ needs.prepare.outputs.tag }}
-            docker compose -f backend/docker-compose.prod.yaml pull
+            docker compose -f docker-compose.prod.yaml pull
 
             # Stop and remove old containers
-            docker compose -f backend/docker-compose.prod.yaml down
+            docker compose -f docker-compose.prod.yaml down
 
-            # Start new containers
-            docker compose -f backend/docker-compose.prod.yaml up -d
+            # Start new containers with environment variables
+            docker compose -f docker-compose.prod.yaml up -d
 
             # Clean up old images
             docker image prune -af
 
             # Show running containers
-            docker compose -f backend/docker-compose.prod.yaml ps
+            docker compose -f docker-compose.prod.yaml ps
 
       - name: Verify Deployment
         uses: appleboy/ssh-action@v1.0.3
@@ -129,7 +220,11 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           script: |
             # Wait for services to be healthy
-            sleep 120
+            sleep 150
+
+            # Check Elasticsearch health first (required by product-service)
+            echo "Checking Elasticsearch..."
+            curl -f http://localhost:9200/_cluster/health || echo "Warning: Elasticsearch not ready"
 
             # Check service health
             echo "Checking Discovery Service..."
@@ -144,14 +239,24 @@ jobs:
             echo "Checking Product Service..."
             curl -f http://localhost:8082/actuator/health || exit 1
 
+            # Verify Elasticsearch search endpoint (internal call to product-service)
+            echo "Checking Product Search Health..."
+            curl -f http://localhost:8082/products/search/health || echo "Warning: Product search not ready"
+
             echo "Checking Notification Service..."
             curl -f http://localhost:8084/actuator/health || exit 1
 
             echo "Checking File Service..."
             curl -f http://localhost:8083/actuator/health || exit 1
 
+            echo "Checking Order Service..."
+            curl -f http://localhost:8085/actuator/health || exit 1
+
             echo "Checking Payment Service..."
             curl -f http://localhost:8086/actuator/health || exit 1
+
+            echo "Checking Message Service..."
+            curl -f http://localhost:8087/actuator/health || exit 1
 
             echo "All services are healthy!"
 
@@ -159,7 +264,7 @@ jobs:
         if: always()
         run: |
           if [ "${{ job.status }}" == "success" ]; then
-            echo "✅ Deployment successful for tag ${{ needs.prepare.outputs.tag }}"
+            echo "Deployment successful for tag ${{ needs.prepare.outputs.tag }}"
           else
-            echo "❌ Deployment failed for tag ${{ needs.prepare.outputs.tag }}"
+            echo "Deployment failed for tag ${{ needs.prepare.outputs.tag }}"
           fi

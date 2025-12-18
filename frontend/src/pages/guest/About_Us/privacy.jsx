@@ -1,5 +1,5 @@
 import React from "react";
-import "../../../styles/privacy.css";
+import styles from "../../../styles/privacy.module.css";
 import useScrollToTop from "../../../hooks/useScrollToTop";
 import {
   LockOutlined,
@@ -169,30 +169,30 @@ const Privacy = () => {
   ];
 
   return (
-    <div className="privacy-container">
+    <div className={styles.container}>
       {/* Hero Section */}
-      <div className="privacy-hero">
-        <div className="hero-background">
-          <div className="hero-circle hero-circle-1"></div>
-          <div className="hero-circle hero-circle-2"></div>
-          <div className="hero-circle hero-circle-3"></div>
+      <div className={styles.hero}>
+        <div className={styles.heroBackground}>
+          <div className={`${styles.heroCircle} ${styles.heroCircle1}`}></div>
+          <div className={`${styles.heroCircle} ${styles.heroCircle2}`}></div>
+          <div className={`${styles.heroCircle} ${styles.heroCircle3}`}></div>
         </div>
-        <div className="hero-content">
-          <img src={logo} alt="HUSTBuy Logo" className="hero-logo" />
-          <h1 className="hero-title">Chính Sách Bảo Mật</h1>
-          <div className="hero-subtitle">
+        <div className={styles.heroContent}>
+          <img src={logo} alt="HUSTBuy Logo" className={styles.heroLogo} />
+          <h1 className={styles.heroTitle}>Chính Sách Bảo Mật</h1>
+          <div className={styles.heroSubtitle}>
             Cam kết bảo vệ quyền riêng tư và thông tin cá nhân của bạn
           </div>
-          <div className="last-updated">
+          <div className={styles.lastUpdated}>
             Cập nhật lần cuối: {lastUpdated}
           </div>
         </div>
       </div>
 
       {/* Introduction */}
-      <div className="privacy-intro">
-        <LockOutlined className="intro-icon" />
-        <div className="intro-content">
+      <div className={styles.privacyIntro}>
+        <LockOutlined className={styles.introIcon} />
+        <div className={styles.introContent}>
           <h3>Quyền riêng tư của bạn rất quan trọng với chúng tôi</h3>
           <p>
             Chính sách bảo mật này giải thích cách HUSTBuy thu thập, sử dụng,
@@ -204,14 +204,14 @@ const Privacy = () => {
       </div>
 
       {/* Privacy Sections */}
-      <div className="privacy-content">
+      <div className={styles.privacyContent}>
         {sections.map((section) => (
-          <div key={section.id} className="privacy-section">
-            <div className="section-header">
-              <div className="section-icon">{section.icon}</div>
+          <div key={section.id} className={styles.privacySection}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionIcon}>{section.icon}</div>
               <h2>{section.title}</h2>
             </div>
-            <div className="section-content">
+            <div className={styles.sectionContent}>
               {section.content.map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
               ))}
@@ -221,9 +221,9 @@ const Privacy = () => {
       </div>
 
       {/* Trust Badge */}
-      <div className="privacy-badge">
-        <SafetyOutlined className="badge-icon" />
-        <div className="badge-content">
+      <div className={styles.privacyBadge}>
+        <SafetyOutlined className={styles.badgeIcon} />
+        <div className={styles.badgeContent}>
           <h3>Cam kết bảo mật</h3>
           <p>
             HUSTBuy sử dụng các công nghệ bảo mật tiên tiến và tuân thủ nghiêm

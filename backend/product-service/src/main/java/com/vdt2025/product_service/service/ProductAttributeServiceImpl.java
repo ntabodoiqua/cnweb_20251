@@ -41,10 +41,12 @@ public class ProductAttributeServiceImpl implements ProductAttributeService {
     AttributeValueMapper attributeValueMapper;
     private final ProductAttributeMapper productAttributeMapper;
     AttributeValueRepository attributeValueRepository;
+    private final CacheEvictService cacheEvictService;
 
     @Transactional
     @Override
     @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "attributesByCategory", allEntries = true)
     public ProductAttributeResponse createAttribute(ProductAttributeRequest request) {
         if (productAttributeRepository.existsByNameIgnoreCase(request.getName())) {
             throw new AppException(ErrorCode.ATTRIBUTE_EXISTS);

@@ -1,0 +1,247 @@
+.productsPage {
+  min-height: calc(100vh - 120px);
+  background: linear-gradient(135deg, #f5f7fa 0%, #fef5f1 100%);
+  padding: 24px 0;
+}
+
+.productsContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.productsContent {
+  background: transparent;
+}
+
+.productsControls {
+  margin-bottom: 24px;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+.productsControls:hover {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+}
+
+.productsGrid {
+  margin-top: 16px;
+}
+
+.productsGrid.listView .productCard {
+  margin-bottom: 16px;
+}
+
+/* Product Card Styles */
+.productCard {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  background: white;
+}
+
+.productCard:hover {
+  box-shadow: 0 6px 24px rgba(238, 77, 45, 0.15);
+  transform: translateY(-6px);
+}
+
+.productCard.listView {
+  display: flex;
+  flex-direction: row;
+  height: auto;
+}
+
+.productCard.listView :global(.ant-card-cover) {
+  width: 200px;
+  flex-shrink: 0;
+}
+
+.productCard.listView :global(.ant-card-body) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.productImageWrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 100%;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.productImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.productCard:hover .productImage {
+  transform: scale(1.05);
+}
+
+.productOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.productCard:hover .productOverlay {
+  opacity: 1;
+}
+
+.productBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: white;
+  z-index: 1;
+}
+
+.productBadge.sold {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6347 100%);
+}
+
+.productBadge.inactive {
+  background: #ff4d4f;
+}
+
+.productTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 8px;
+  height: 40px;
+}
+
+.productDescription {
+  display: block;
+  font-size: 12px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.productPrice {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ff4d4f;
+  margin: 8px 0;
+}
+
+.productDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.productRatingRow {
+  display: flex;
+  align-items: center;
+  margin: 4px 0;
+  flex-wrap: wrap;
+}
+
+.productMeta {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin: 4px 0;
+}
+
+.productStore {
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.storeLink:hover {
+  color: #ee4d2d !important;
+  text-decoration: underline;
+}
+
+.productFooterInfo {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid #f0f0f0;
+  gap: 8px;
+  font-size: 12px;
+}
+
+/* Pagination */
+.productsPagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+  padding: 24px 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .productsPage {
+    padding: 16px 0;
+  }
+
+  .productsControls :global(.ant-row) {
+    flex-direction: column;
+  }
+
+  .productsControls :global(.ant-col) {
+    width: 100%;
+  }
+
+  .productCard.listView {
+    flex-direction: column;
+  }
+
+  .productCard.listView :global(.ant-card-cover) {
+    width: 100%;
+  }
+
+  .productTitle {
+    font-size: 13px;
+    height: 36px;
+  }
+
+  .productPrice {
+    font-size: 16px;
+  }
+}
+
+/* Loading State */
+.ant-spin-nested-loading {
+  min-height: 400px;
+}
+
+/* Empty State */
+.ant-empty {
+  padding: 60px 0;
+}
