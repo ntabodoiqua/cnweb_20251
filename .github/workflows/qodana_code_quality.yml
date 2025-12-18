@@ -4,7 +4,7 @@ on:
   pull_request:
   push:
     branches: # Specify your branches here
-      - 'be/*' # The release branches
+      - main # The 'main' branch
 
 jobs:
   qodana:
