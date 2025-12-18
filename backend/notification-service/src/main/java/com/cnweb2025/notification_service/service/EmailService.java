@@ -8,6 +8,7 @@ import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
+import com.vdt2025.common_dto.dto.OrderEvent;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -17,8 +18,10 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -265,5 +268,28 @@ public class EmailService {
         
         sendEmail(to, subject, htmlContent);
         log.info("Refund failed email sent to {} for refund: {}", to, refundId);
+    }
+
+    /**
+     * Gửi email xác nhận đơn hàng đã được tạo
+     */
+    public void sendOrderCreatedEmail(String to, String orderNumber, String receiverName,
+                                      BigDecimal totalAmount, String shippingAddress,
+                                      List<OrderEvent.OrderItemEvent> items) {
+        final String subject = "Xác nhận đơn hàng " + orderNumber + " - HUSTBuy";
+        String formattedAmount = String.format("%,.0f VNĐ", totalAmount);
+        
+        Context context = new Context();
+        context.setVariable("subject", subject);
+        context.setVariable("orderNumber", orderNumber);
+        context.setVariable("receiverName", receiverName != null ? receiverName : "Quý khách");
+        context.setVariable("totalAmount", formattedAmount);
+        context.setVariable("shippingAddress", shippingAddress);
+        context.setVariable("items", items);
+        
+        String htmlContent = templateEngine.process("order-created-email", context);
+        
+        sendEmail(to, subject, htmlContent);
+        log.info("Order created email sent to {} for order: {}", to, orderNumber);
     }
 }

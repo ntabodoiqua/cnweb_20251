@@ -1,0 +1,892 @@
+/* Careers Container */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px 60px;
+  animation: fadeIn 0.6s ease;
+}
+
+/* Hero Section */
+.hero {
+  position: relative;
+  padding: 80px 20px;
+  margin: 0 -20px 60px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff7337 50%, #ff9a56 100%);
+  overflow: hidden;
+  border-radius: 0 0 32px 32px;
+}
+
+.heroBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.heroCircle {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  animation: float 6s ease-in-out infinite;
+}
+
+.heroCircle1 {
+  width: 400px;
+  height: 400px;
+  top: -100px;
+  left: -100px;
+  animation-delay: 0s;
+}
+
+.heroCircle2 {
+  width: 300px;
+  height: 300px;
+  top: 50%;
+  right: -50px;
+  animation-delay: 2s;
+}
+
+.heroCircle3 {
+  width: 200px;
+  height: 200px;
+  bottom: -50px;
+  left: 30%;
+  animation-delay: 4s;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-20px) scale(1.05);
+  }
+}
+
+.heroContent {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  animation: fadeInDown 1s ease;
+}
+
+.heroLogo {
+  width: 180px;
+  height: auto;
+  margin-bottom: 24px;
+  animation: logoFloat 3s ease-in-out infinite;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.2));
+  transition: transform 0.3s ease;
+}
+
+.heroLogo:hover {
+  transform: scale(1.1) rotate(5deg);
+}
+
+@keyframes logoFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.heroTitle {
+  font-size: 56px;
+  font-weight: 900;
+  color: white;
+  margin-bottom: 16px;
+  text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
+  letter-spacing: 2px;
+  animation: slideInUp 0.8s ease 0.3s both;
+}
+
+.heroSubtitle {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+  text-shadow: 1px 2px 4px rgba(0, 0, 0, 0.2);
+  margin-bottom: 32px;
+  animation: slideInUp 0.8s ease 0.5s both;
+}
+
+.heroStats {
+  display: flex;
+  justify-content: center;
+  gap: 48px;
+  animation: slideInUp 0.8s ease 0.7s both;
+}
+
+.statItem {
+  text-align: center;
+}
+
+.statNumber {
+  font-size: 40px;
+  font-weight: 900;
+  color: white;
+  text-shadow: 2px 4px 8px rgba(0, 0, 0, 0.3);
+  margin-bottom: 8px;
+}
+
+.statLabel {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+/* Section Title */
+.sectionTitle {
+  font-size: 36px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeInDown 0.8s ease;
+}
+
+/* Why Join Us Section */
+.whyJoinSection {
+  margin-bottom: 80px;
+}
+
+.cultureGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+.cultureCard {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  border: 2px solid #f0f0f0;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.08);
+  transition: all 0.4s ease;
+  cursor: pointer;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cultureCard::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #ee4d2d 0%, #ff6b35 100%);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.4s ease;
+}
+
+.cultureCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 32px rgba(238, 77, 45, 0.2);
+  border-color: #ee4d2d;
+}
+
+.cultureCard:hover::before {
+  transform: scaleX(1);
+}
+
+.cultureIcon {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 20px;
+  font-size: 28px;
+  color: white;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.3);
+  transition: all 0.4s ease;
+}
+
+.cultureCard:hover .cultureIcon {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 6px 24px rgba(238, 77, 45, 0.5);
+}
+
+.cultureCard h3 {
+  color: #222;
+  margin-bottom: 12px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.cultureCard p {
+  color: #666;
+  line-height: 1.6;
+  font-size: 15px;
+}
+
+/* Benefits Section */
+.benefitsSection {
+  margin-bottom: 80px;
+}
+
+.benefitsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 24px;
+  animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+.benefitCard {
+  background: white;
+  padding: 32px;
+  border-radius: 16px;
+  border: 2px solid #f0f0f0;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.08);
+  transition: all 0.4s ease;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  position: relative;
+  overflow: hidden;
+}
+
+.benefitCard::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(238, 77, 45, 0.05), transparent);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
+}
+
+.benefitCard:hover::after {
+  width: 500px;
+  height: 500px;
+}
+
+.benefitCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15);
+  border-color: #fee;
+}
+
+.benefitIcon {
+  width: 56px;
+  height: 56px;
+  background: #fff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 1;
+}
+
+.benefitCard:hover .benefitIcon {
+  transform: scale(1.1);
+}
+
+.benefitCard h3 {
+  color: #222;
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 700;
+  position: relative;
+  z-index: 1;
+}
+
+.benefitCard p {
+  color: #666;
+  line-height: 1.6;
+  font-size: 14px;
+  position: relative;
+  z-index: 1;
+}
+
+/* Jobs Section */
+.jobsSection {
+  margin-bottom: 80px;
+}
+
+.jobsList {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: fadeInUp 0.8s ease 0.2s both;
+}
+
+.jobCard {
+  background: white;
+  border-radius: 16px;
+  border: 2px solid #f0f0f0;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.08);
+  transition: all 0.3s ease;
+  overflow: hidden;
+}
+
+.jobCard:hover {
+  border-color: #fee;
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.15);
+}
+
+.jobCard.expanded {
+  border-color: #ee4d2d;
+  box-shadow: 0 8px 32px rgba(238, 77, 45, 0.2);
+}
+
+.jobHeader {
+  padding: 24px 32px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.jobHeader:hover {
+  background: #fafafa;
+}
+
+.jobHeaderLeft {
+  flex: 1;
+}
+
+.jobTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.jobTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #222;
+  margin: 0;
+}
+
+.hotBadge {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7a45 100%);
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.jobMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.jobMetaItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #666;
+  font-size: 14px;
+}
+
+.jobMetaItem.salary {
+  color: #ee4d2d;
+  font-weight: 600;
+}
+
+.jobHeaderRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.jobLevel {
+  padding: 6px 16px;
+  background: #f0f0f0;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+}
+
+.expandIcon {
+  font-size: 16px;
+  color: #999;
+  transition: all 0.3s ease;
+}
+
+.expandIcon.rotated {
+  transform: rotate(90deg);
+  color: #ee4d2d;
+}
+
+.jobDetails {
+  padding: 0 32px 32px;
+  animation: slideDown 0.4s ease;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.jobDescription,
+.jobRequirements,
+.jobResponsibilities {
+  margin-bottom: 24px;
+}
+
+.jobDetails h4 {
+  color: #222;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.jobDetails h4::before {
+  content: "";
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(180deg, #ee4d2d 0%, #ff6b35 100%);
+  border-radius: 2px;
+}
+
+.jobDetails p {
+  color: #666;
+  line-height: 1.8;
+  font-size: 15px;
+}
+
+.jobDetails ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.jobDetails ul li {
+  color: #666;
+  line-height: 1.8;
+  font-size: 15px;
+  padding-left: 28px;
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.checkIcon {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  color: #52c41a;
+  font-size: 16px;
+}
+
+.jobActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.applyBtn {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+}
+
+.applyBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.4);
+}
+
+.applyBtn:active {
+  transform: translateY(0);
+}
+
+.shareBtn {
+  background: white;
+  color: #666;
+  border: 2px solid #e0e0e0;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.shareBtn:hover {
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+  background: #fff5f5;
+}
+
+/* CTA Section */
+.ctaSection {
+  text-align: center;
+  padding: 60px 40px;
+  background: linear-gradient(135deg, #fff5f5 0%, #fff 100%);
+  border-radius: 24px;
+  border: 2px solid #fee;
+  animation: fadeInUp 0.8s ease 0.4s both;
+}
+
+.ctaSection h2 {
+  font-size: 32px;
+  font-weight: 800;
+  color: #222;
+  margin-bottom: 16px;
+}
+
+.ctaSection p {
+  font-size: 18px;
+  color: #666;
+  margin-bottom: 32px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.ctaBtn {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  color: white;
+  border: none;
+  padding: 16px 48px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
+}
+
+.ctaBtn:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 28px rgba(238, 77, 45, 0.4);
+}
+
+.ctaBtn:active {
+  transform: translateY(-2px);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .container {
+    padding: 0 20px 48px;
+  }
+
+  .hero {
+    padding: 60px 20px;
+    margin: 0 -20px 48px;
+  }
+
+  .heroLogo {
+    width: 160px;
+  }
+
+  .heroTitle {
+    font-size: 48px;
+  }
+
+  .heroSubtitle {
+    font-size: 18px;
+  }
+
+  .heroStats {
+    gap: 32px;
+  }
+
+  .statNumber {
+    font-size: 36px;
+  }
+
+  .sectionTitle {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px 40px;
+  }
+
+  .hero {
+    padding: 48px 16px;
+    margin: 0 -16px 40px;
+    border-radius: 0 0 24px 24px;
+  }
+
+  .heroLogo {
+    width: 140px;
+  }
+
+  .heroTitle {
+    font-size: 40px;
+  }
+
+  .heroSubtitle {
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+
+  .heroStats {
+    gap: 24px;
+  }
+
+  .statNumber {
+    font-size: 32px;
+  }
+
+  .statLabel {
+    font-size: 14px;
+  }
+
+  .heroCircle1 {
+    width: 300px;
+    height: 300px;
+  }
+
+  .heroCircle2 {
+    width: 200px;
+    height: 200px;
+  }
+
+  .heroCircle3 {
+    width: 150px;
+    height: 150px;
+  }
+
+  .sectionTitle {
+    font-size: 28px;
+    margin-bottom: 32px;
+  }
+
+  .cultureGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .cultureCard {
+    padding: 24px;
+  }
+
+  .benefitsGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .benefitCard {
+    padding: 24px;
+  }
+
+  .jobHeader {
+    padding: 20px 24px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .jobHeaderRight {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .jobTitle {
+    font-size: 20px;
+  }
+
+  .jobMeta {
+    gap: 12px;
+  }
+
+  .jobMetaItem {
+    font-size: 13px;
+  }
+
+  .jobDetails {
+    padding: 0 24px 24px;
+  }
+
+  .jobActions {
+    flex-direction: column;
+  }
+
+  .applyBtn,
+  .shareBtn {
+    width: 100%;
+  }
+
+  .ctaSection {
+    padding: 40px 24px;
+  }
+
+  .ctaSection h2 {
+    font-size: 26px;
+  }
+
+  .ctaSection p {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 40px 16px;
+    margin: 0 -16px 32px;
+    border-radius: 0 0 20px 20px;
+  }
+
+  .heroLogo {
+    width: 120px;
+  }
+
+  .heroTitle {
+    font-size: 32px;
+  }
+
+  .heroSubtitle {
+    font-size: 15px;
+  }
+
+  .heroStats {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .statNumber {
+    font-size: 28px;
+  }
+
+  .sectionTitle {
+    font-size: 24px;
+  }
+
+  .cultureCard,
+  .benefitCard {
+    padding: 20px;
+  }
+
+  .cultureIcon {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+
+  .benefitIcon {
+    width: 48px;
+    height: 48px;
+    font-size: 20px;
+  }
+
+  .jobHeader {
+    padding: 16px 20px;
+  }
+
+  .jobTitle {
+    font-size: 18px;
+  }
+
+  .jobDetails {
+    padding: 0 20px 20px;
+  }
+
+  .ctaSection {
+    padding: 32px 20px;
+  }
+
+  .ctaSection h2 {
+    font-size: 24px;
+  }
+
+  .ctaBtn {
+    padding: 14px 32px;
+    font-size: 16px;
+  }
+}

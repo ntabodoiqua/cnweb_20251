@@ -5,13 +5,14 @@ import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Response đơn giản cho danh sách sản phẩm (list/grid view)
  * Không bao gồm thông tin chi tiết để tối ưu performance
  */
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -41,11 +42,13 @@ public class ProductSummaryResponse {
 
     String storeId;
 
-    String storeCategoryName;
+    List<String> storeCategoryName;
 
     String platformCategoryName;
 
     String brandName;
 
     LocalDateTime createdAt;
+
+    Integer totalAvailableStock;
 }

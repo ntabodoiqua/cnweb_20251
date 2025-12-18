@@ -1,7 +1,10 @@
 package com.cnweb.payment_service.repository;
 
 import com.cnweb.payment_service.entity.ZaloPayTransaction;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -14,7 +17,8 @@ import java.util.Optional;
  * Repository cho ZaloPayTransaction
  */
 @Repository
-public interface ZaloPayTransactionRepository extends JpaRepository<ZaloPayTransaction, Long> {
+public interface ZaloPayTransactionRepository extends JpaRepository<ZaloPayTransaction, Long>, 
+        JpaSpecificationExecutor<ZaloPayTransaction> {
     
     /**
      * Tìm transaction theo app_trans_id
@@ -49,4 +53,10 @@ public interface ZaloPayTransactionRepository extends JpaRepository<ZaloPayTrans
      */
     @Query("SELECT t FROM ZaloPayTransaction t WHERE t.status = 'PENDING' AND t.createdAt > :createdAfter ORDER BY t.createdAt ASC")
     List<ZaloPayTransaction> findPendingTransactionsAfter(@Param("createdAfter") LocalDateTime createdAfter);
+
+    /**
+     * Tìm các giao dịch Pending tạo TRƯỚC thời gian threshold (createdAt <= threshold)
+     */
+    @Query("SELECT t FROM ZaloPayTransaction t WHERE t.status = 'PENDING' AND t.createdAt <= :threshold")
+    List<ZaloPayTransaction> findPendingTransactionsBefore(@Param("threshold") LocalDateTime threshold);
 }

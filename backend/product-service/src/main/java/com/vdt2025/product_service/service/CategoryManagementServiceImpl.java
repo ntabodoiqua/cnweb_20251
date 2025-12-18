@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -291,11 +292,12 @@ public class CategoryManagementServiceImpl implements CategoryManagementService 
 
         // Validate loại file (chỉ cho phép ảnh)
         String contentType = file.getContentType();
-        if (contentType == null ||
-                !(contentType.equals("image/jpeg") || contentType.equals("image/png") || contentType.equals("image/gif"))) {
+        List<String> allowedTypes = Arrays.asList(
+                "image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"
+        );
+        if (contentType == null || !allowedTypes.contains(contentType.toLowerCase())) {
             throw new AppException(ErrorCode.INVALID_IMAGE_TYPE);
         }
-
         // Kiểm tra người dùng có quyền cập nhật ảnh thumbnail không
         // Admin có quyền cập nhật platform categories
         // Seller chỉ có quyền cập nhật store categories của mình

@@ -15,10 +15,19 @@ public class UserStatisticResponse {
     long totalUsers;
 
     // Người dùng đang hoạt động
-    long activeUsers;
+    long enabledUsers;
 
     // Người dùng bị khóa
     long disabledUsers;
+
+    // Số lượng user nam
+    long maleUsers;
+
+    // Số lượng user nữ
+    long femaleUsers;
+
+    // Số lượng user khác
+    long otherUsers;
 
     // Số lượng user theo vai trò
     Map<String, Long> usersByRole;

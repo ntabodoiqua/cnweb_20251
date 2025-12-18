@@ -1,0 +1,237 @@
+.adminVideoReviews {
+  padding: 0;
+}
+
+.adminSection {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.adminToolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pageTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pageDescription {
+  margin: 12px 0 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.toolbarActions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.adminSectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1a1a2e;
+  margin: 0 0 20px;
+}
+
+/* Videos Grid */
+.videosGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.videoCard {
+  background: #f8f9fa;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  border: 1px solid #e8e8e8;
+}
+
+.videoCard:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.videoPreview {
+  position: relative;
+  width: 100%;
+  padding-bottom: 177.78%; /* 9:16 aspect ratio */
+  background: #000;
+}
+
+.videoPreview iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.videoInfo {
+  padding: 16px;
+}
+
+.videoTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.videoId {
+  font-size: 12px;
+  color: #888;
+  margin: 0 0 12px;
+  font-family: monospace;
+}
+
+.videoActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.actionBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  font-size: 14px;
+}
+
+.actionBtn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.actionBtn.moveUp,
+.actionBtn.moveDown {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.actionBtn.moveUp:hover:not(:disabled),
+.actionBtn.moveDown:hover:not(:disabled) {
+  background: #1890ff;
+  color: white;
+}
+
+.actionBtn.edit {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+.actionBtn.edit:hover {
+  background: #fa8c16;
+  color: white;
+}
+
+.actionBtn.delete {
+  background: #fff1f0;
+  color: #ff4d4f;
+}
+
+.actionBtn.delete:hover {
+  background: #ff4d4f;
+  color: white;
+}
+
+/* Empty State */
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.emptyState p {
+  margin: 16px 0 24px;
+  font-size: 16px;
+}
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}
+
+/* Form */
+.videoForm {
+  margin-top: 16px;
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #f0f0f0;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .videosGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 992px) {
+  .videosGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .adminToolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .toolbarActions {
+    width: 100%;
+  }
+
+  .videosGrid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+}
+
+@media (max-width: 576px) {
+  .videosGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminSection {
+    padding: 16px;
+  }
+
+  .pageTitle {
+    font-size: 20px;
+  }
+}

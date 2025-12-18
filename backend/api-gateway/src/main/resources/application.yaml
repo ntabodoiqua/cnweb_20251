@@ -42,9 +42,66 @@ spring:
             - Path=/api/payment/**
           filters:
             - StripPrefix=2
+        # notification-service
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/notification/**
+          filters:
+            - StripPrefix=2
+        # notification-service WebSocket
+        - id: notification-websocket
+          uri: lb://notification-service
+          predicates:
+            - Path=/ws/notifications/**
+          metadata:
+            response-timeout: 3600000
+            connect-timeout: 30000
+        # message-service
+        - id: message-service
+          uri: lb://message-service
+          predicates:
+            - Path=/api/chat/**
+          filters:
+            - StripPrefix=1
+        # message-service WebSocket
+        - id: message-websocket
+          uri: lb://message-service
+          predicates:
+            - Path=/ws/chat/**
+          metadata:
+            response-timeout: 3600000
+            connect-timeout: 30000
 eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://discovery-service:8761/eureka/}
   instance:
     prefer-ip-address: true
+
+# Management endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+
+# Logging configuration for Loki
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
+  level:
+    root: INFO
+    org.springframework.cloud.gateway: DEBUG

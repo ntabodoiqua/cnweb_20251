@@ -1,0 +1,847 @@
+/* ========================================
+   Seller Products Page Styles
+   Giao diện trang quản lý sản phẩm
+   ======================================== */
+
+.sellerProducts {
+  animation: fadeInUp 0.5s ease-out;
+  padding: 0;
+  margin: 0;
+  max-width: 100%;
+  overflow: hidden;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== Header Section ==================== */
+
+.sellerProductsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  max-width: 100%;
+  overflow: hidden;
+  padding: 0;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* ==================== Search Box ==================== */
+
+.sellerSearchBox {
+  position: relative;
+  flex: 1;
+  min-width: 280px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 18px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 12px 16px 12px 48px;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.searchInput:hover {
+  border-color: rgba(238, 77, 45, 0.4);
+}
+
+.searchInput:focus {
+  outline: none;
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+}
+
+.searchInput::placeholder {
+  color: #bbb;
+}
+
+/* ==================== Filter Group ==================== */
+
+.sellerFilterGroup {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.filterSelect {
+  padding: 12px 16px;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 180px;
+}
+
+.filterSelect:hover {
+  border-color: #ee4d2d;
+}
+
+.filterSelect:focus {
+  outline: none;
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+}
+
+/* ==================== Button Styles ==================== */
+
+.sellerBtn {
+  padding: 12px 24px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.sellerBtn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.sellerBtn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.sellerBtnPrimary {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+}
+
+.sellerBtnPrimary:hover {
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(238, 77, 45, 0.4);
+}
+
+.sellerBtnPrimary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+}
+
+.sellerBtnSuccess {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+}
+
+.sellerBtnSuccess:hover {
+  background: linear-gradient(135deg, #3da80e 0%, #5fb82b 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.4);
+}
+
+.sellerBtnDanger {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.3);
+}
+
+.sellerBtnDanger:hover {
+  background: linear-gradient(135deg, #d9363e 0%, #ff5b5d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 77, 79, 0.4);
+}
+
+.sellerBtnDefault {
+  background: white;
+  color: #666;
+  border: 2px solid #e8e8e8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.sellerBtnDefault:hover {
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ==================== Bulk Actions Bar ==================== */
+
+.bulkActionsBar {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 2px solid #91d5ff;
+  border-radius: 12px;
+  padding: 16px 24px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.1);
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.bulkActionsInfo {
+  font-size: 14px;
+  color: #0958d9;
+  font-weight: 600;
+}
+
+.bulkActionsInfo strong {
+  color: #003eb3;
+  font-size: 16px;
+}
+
+.bulkActionsButtons {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.bulkActionsButtons .sellerBtn {
+  padding: 10px 20px;
+  font-size: 13px;
+}
+
+/* ==================== Table Container ==================== */
+
+.sellerTableContainer {
+  background: white;
+  border-radius: 12px;
+  overflow-x: auto;
+  overflow-y: visible;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 1px solid #f0f0f0;
+  margin-bottom: 24px;
+  position: relative;
+  max-width: 100%;
+  width: 100%;
+  box-sizing: border-box;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+/* Scrollbar styling for table container */
+.sellerTableContainer::-webkit-scrollbar {
+  height: 8px;
+}
+
+.sellerTableContainer::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 0 0 12px 12px;
+}
+
+.sellerTableContainer::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  border-radius: 4px;
+}
+
+.sellerTableContainer::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
+}
+
+/* ==================== Loading Overlay ==================== */
+
+.loadingOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.95);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  gap: 16px;
+  border-radius: 12px;
+}
+
+.loadingOverlay p {
+  margin: 0;
+  font-size: 16px;
+  color: #666;
+  font-weight: 600;
+}
+
+.loadingOverlay :global(.anticon) {
+  font-size: 48px;
+  color: #ee4d2d;
+}
+
+/* ==================== Table Styles ==================== */
+
+.sellerTable {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 900px; /* Minimum width to maintain table structure */
+  position: relative;
+}
+
+.sellerTable thead {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.05) 0%,
+    rgba(255, 107, 53, 0.05) 100%
+  );
+}
+
+.sellerTable thead tr th {
+  padding: 16px;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 700;
+  color: #333;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.15);
+  white-space: nowrap;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.05) 0%,
+    rgba(255, 107, 53, 0.05) 100%
+  );
+  position: relative;
+}
+
+/* Cố định cột Thao tác */
+.sellerTable thead tr th:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 10;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
+  background: #fef5f3;
+}
+
+.sellerTable tbody tr {
+  transition: all 0.3s ease;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.sellerTable tbody tr:hover {
+  background-color: rgba(238, 77, 45, 0.02);
+}
+
+.sellerTable tbody tr td {
+  padding: 16px;
+  font-size: 14px;
+  color: #333;
+  vertical-align: middle;
+  background: white;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Cố định cột Thao tác trong tbody */
+.sellerTable tbody tr td:last-child {
+  position: sticky;
+  right: 0;
+  z-index: 5;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.08);
+  background: white;
+}
+
+.sellerTable tbody tr:hover td:last-child {
+  background: #fef5f3;
+}
+
+/* ==================== Product Info Cell ==================== */
+
+.productInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 250px;
+}
+
+.productImage {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 2px solid #f0f0f0;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.productImage:hover {
+  transform: scale(1.1);
+  border-color: #ee4d2d;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+}
+
+.productInfo strong {
+  font-weight: 600;
+  color: #333;
+  line-height: 1.4;
+  display: block;
+}
+
+/* ==================== Stock Text ==================== */
+
+.lowStockText {
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
+/* ==================== Status Badges ==================== */
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.statusActive {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+  box-shadow: 0 2px 6px rgba(82, 196, 26, 0.3);
+}
+
+.statusInactive {
+  background: linear-gradient(135deg, #8c8c8c 0%, #bfbfbf 100%);
+  color: white;
+  box-shadow: 0 2px 6px rgba(140, 140, 140, 0.3);
+}
+
+.statusLowStock {
+  background: linear-gradient(135deg, #faad14 0%, #ffc53d 100%);
+  color: white;
+  box-shadow: 0 2px 6px rgba(250, 173, 20, 0.3);
+}
+
+.statusOutOfStock {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  color: white;
+  box-shadow: 0 2px 6px rgba(255, 77, 79, 0.3);
+}
+
+/* ==================== Action Buttons ==================== */
+
+.actionButtons {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.statusToggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(238, 77, 45, 0.05);
+  border-radius: 8px;
+  border: 1px solid rgba(238, 77, 45, 0.15);
+}
+
+.toggleLabel {
+  font-size: 12px;
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
+}
+
+.actionBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: #f5f5f5;
+  color: #666;
+}
+
+.actionBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.actionBtn:active {
+  transform: translateY(0);
+}
+
+.viewBtn:hover {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  color: white;
+}
+
+.editBtn:hover {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+}
+
+.deleteBtn:hover {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  color: white;
+}
+
+/* ==================== No Data State ==================== */
+
+.noData {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+}
+
+.noData :global(.anticon) {
+  font-size: 48px;
+  color: #ccc;
+  margin-bottom: 16px;
+}
+
+.noData p {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 12px 0 0;
+  color: #999;
+}
+
+/* ==================== Summary Section ==================== */
+
+.productsSummary {
+  display: flex;
+  justify-content: flex-end;
+  gap: 32px;
+  padding: 20px 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.02) 0%,
+    rgba(255, 107, 53, 0.02) 100%
+  );
+  border-radius: 12px;
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  flex-wrap: wrap;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  width: 100%;
+}
+
+.summaryItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.summaryLabel {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.summaryValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: #ee4d2d;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ==================== Responsive Design ==================== */
+
+/* Tablet (768px - 1023px) */
+@media (max-width: 1023px) {
+  .sellerProducts {
+    margin: 0;
+    max-width: 100%;
+  }
+
+  .sellerProductsHeader {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .sellerSearchBox {
+    min-width: 100%;
+  }
+
+  .sellerFilterGroup {
+    justify-content: space-between;
+  }
+
+  .filterSelect {
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .sellerTableContainer {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .sellerTable {
+    min-width: 850px;
+  }
+
+  .sellerTable thead tr th,
+  .sellerTable tbody tr td {
+    padding: 12px;
+    font-size: 13px;
+  }
+
+  .productImage {
+    width: 50px;
+    height: 50px;
+  }
+
+  .actionBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 14px;
+  }
+
+  .productsSummary {
+    margin: 0;
+    width: 100%;
+  }
+}
+
+/* Mobile Landscape (640px - 767px) */
+@media (max-width: 767px) {
+  .sellerProducts {
+    margin: 0;
+    max-width: 100%;
+  }
+
+  .sellerProductsHeader {
+    padding: 0;
+  }
+
+  .sellerTableContainer {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    border-radius: 8px;
+  }
+
+  .sellerTable {
+    font-size: 12px;
+    min-width: 800px;
+  }
+
+  .sellerTable thead tr th,
+  .sellerTable tbody tr td {
+    padding: 10px 8px;
+  }
+
+  .productInfo {
+    min-width: 200px;
+    gap: 10px;
+  }
+
+  .productImage {
+    width: 45px;
+    height: 45px;
+  }
+
+  .statusBadge {
+    padding: 4px 10px;
+    font-size: 11px;
+  }
+
+  .actionButtons {
+    gap: 6px;
+  }
+
+  .actionBtn {
+    width: 30px;
+    height: 30px;
+    font-size: 13px;
+  }
+
+  .productsSummary {
+    gap: 20px;
+    padding: 16px 20px;
+    margin: 0;
+    width: 100%;
+  }
+
+  .summaryLabel {
+    font-size: 13px;
+  }
+
+  .summaryValue {
+    font-size: 16px;
+  }
+}
+
+/* Mobile Portrait (480px - 639px) */
+@media (max-width: 639px) {
+  .sellerProducts {
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+  }
+
+  .sellerProductsHeader {
+    padding: 0;
+  }
+
+  .sellerSearchBox {
+    min-width: 100%;
+  }
+
+  .filterSelect {
+    width: 100%;
+  }
+
+  .sellerBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .sellerTableContainer {
+    border-radius: 0;
+    overflow-x: auto;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sellerTable {
+    min-width: 750px;
+  }
+
+  .productsSummary {
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    margin: 0;
+    width: 100%;
+    border-radius: 0;
+  }
+
+  .summaryItem {
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: white;
+    border-radius: 8px;
+  }
+}
+
+/* Small Mobile (< 480px) */
+@media (max-width: 479px) {
+  .sellerProducts {
+    margin: 0;
+    max-width: 100%;
+  }
+
+  .searchInput {
+    padding: 10px 12px 10px 42px;
+    font-size: 13px;
+  }
+
+  .searchIcon {
+    left: 12px;
+    font-size: 16px;
+  }
+
+  .filterSelect {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .sellerBtn {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  .sellerTableContainer {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+  }
+
+  .sellerTable {
+    min-width: 700px;
+  }
+
+  .productImage {
+    width: 40px;
+    height: 40px;
+  }
+
+  .actionBtn {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .summaryLabel {
+    font-size: 12px;
+  }
+
+  .summaryValue {
+    font-size: 15px;
+  }
+}
