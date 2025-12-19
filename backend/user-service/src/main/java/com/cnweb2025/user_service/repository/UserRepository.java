@@ -55,4 +55,27 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
        """)
     List<Object[]> countUsersByCreatedMonth();
 
+    // ============== Soft Delete Methods ==============
+
+    // Tìm user theo ID và chưa bị xóa
+    @Query("SELECT u FROM User u WHERE u.id = :id AND u.deleted = false")
+    Optional<User> findByIdAndNotDeleted(@Param("id") String id);
+
+    // Tìm user theo username và chưa bị xóa
+    @Query("SELECT u FROM User u WHERE u.username = :username AND u.deleted = false")
+    Optional<User> findByUsernameAndNotDeleted(@Param("username") String username);
+
+    // Tìm tất cả users đã soft delete trước một thời điểm
+    @Query("SELECT u FROM User u WHERE u.deleted = true AND u.deletedAt < :cutoffDate")
+    List<User> findSoftDeletedUsersBeforeDate(@Param("cutoffDate") LocalDateTime cutoffDate);
+
+    // Hard delete users đã soft delete trước một thời điểm
+    @Modifying
+    @Query("DELETE FROM User u WHERE u.deleted = true AND u.deletedAt < :cutoffDate")
+    int hardDeleteSoftDeletedUsersBeforeDate(@Param("cutoffDate") LocalDateTime cutoffDate);
+
+    // Đếm số lượng users đã soft delete
+    @Query("SELECT COUNT(u) FROM User u WHERE u.deleted = true")
+    long countSoftDeletedUsers();
+
 }

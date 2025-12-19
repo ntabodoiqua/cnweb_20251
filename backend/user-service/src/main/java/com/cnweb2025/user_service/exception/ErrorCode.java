@@ -25,6 +25,7 @@ public enum ErrorCode {
     USER_ALREADY_DISABLED(1212, "error.1212", HttpStatus.BAD_REQUEST),
     ADMIN_CANNOT_DISABLE_SELF(1213, "error.1213", HttpStatus.BAD_REQUEST),
     EMAIL_NOT_VERIFIED(1214, "error.1214", HttpStatus.FORBIDDEN),
+    USER_ALREADY_DELETED(1215, "error.1215", HttpStatus.BAD_REQUEST),
     // Lỗi OTP (13xx)
     OTP_EXPIRED(1301, "error.1301", HttpStatus.BAD_REQUEST),
     OTP_INVALID(1302, "error.1302", HttpStatus.BAD_REQUEST),

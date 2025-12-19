@@ -78,5 +78,32 @@ public class AdminController {
                 .build();
     }
 
+    // Lấy danh sách users đã soft delete
+    @GetMapping("/users/soft-deleted")
+    public ApiResponse<List<UserResponse>> getSoftDeletedUsers() {
+        return ApiResponse.<List<UserResponse>>builder()
+                .result(adminService.getSoftDeletedUsers())
+                .message("Soft deleted users retrieved successfully")
+                .build();
+    }
+
+    // Đếm số lượng users đã soft delete
+    @GetMapping("/users/soft-deleted/count")
+    public ApiResponse<Long> countSoftDeletedUsers() {
+        return ApiResponse.<Long>builder()
+                .result(adminService.countSoftDeletedUsers())
+                .message("Count retrieved successfully")
+                .build();
+    }
+
+    // Khôi phục user đã soft delete
+    @PutMapping("/users/{userId}/restore")
+    public ApiResponse<String> restoreUser(@PathVariable String userId) {
+        return ApiResponse.<String>builder()
+                .result(adminService.restoreUser(userId))
+                .message("User restored successfully")
+                .build();
+    }
+
 
 }

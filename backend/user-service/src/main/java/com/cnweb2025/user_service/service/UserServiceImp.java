@@ -201,6 +201,39 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
+    @Transactional
+    public String softDeleteMyAccount() {
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Kiểm tra xem user đã bị soft delete chưa
+        if (user.isDeleted()) {
+            log.warn("User {} already soft deleted", username);
+            throw new AppException(ErrorCode.USER_ALREADY_DELETED);
+        }
+
+        // Đánh dấu user là đã soft delete
+        user.setDeleted(true);
+        user.setDeletedAt(java.time.LocalDateTime.now());
+        user.setEnabled(false); // Cũng disable account
+        userRepository.save(user);
+
+        // Gửi sự kiện USER_SOFT_DELETED qua RabbitMQ
+        UserSoftDeletedEvent event = UserSoftDeletedEvent.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .deletedAt(user.getDeletedAt())
+                .build();
+        messagePublisher.publish(MessageType.USER_SOFT_DELETED, event);
+
+        log.info("User {} soft deleted their account successfully. Will be hard deleted after 30 days", username);
+        return "Account has been deleted. Your data will be permanently removed after 30 days. Contact support if you want to restore your account.";
+    }
+
+    @Override
     public String verifyEmail(String username, String otpCode) {
         log.info("Verifying email for user: {}", username);
         

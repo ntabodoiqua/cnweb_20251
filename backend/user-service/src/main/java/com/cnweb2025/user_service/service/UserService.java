@@ -21,6 +21,8 @@ public interface UserService {
 
     String disableMyAccount();
     
+    String softDeleteMyAccount();
+
     String verifyEmail(String username, String otpCode);
     
     String resendOtp(String username);
