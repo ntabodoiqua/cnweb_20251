@@ -1,0 +1,102 @@
+{
+  "index": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0,
+    "max_ngram_diff": 10,
+    "refresh_interval": "5s"
+  },
+  "analysis": {
+    "filter": {
+      "vietnamese_stop": {
+        "type": "stop",
+        "stopwords": [
+          "và",
+          "của",
+          "cho",
+          "là",
+          "với",
+          "các",
+          "được",
+          "trong",
+          "có",
+          "một",
+          "này",
+          "những",
+          "để",
+          "từ",
+          "đến",
+          "như",
+          "không",
+          "khi",
+          "còn",
+          "theo",
+          "về",
+          "cũng",
+          "đã",
+          "sẽ",
+          "bởi",
+          "vì",
+          "nếu",
+          "thì",
+          "mà",
+          "hay",
+          "hoặc"
+        ]
+      },
+      "vietnamese_synonym": {
+        "type": "synonym",
+        "synonyms": [
+          "điện thoại, smartphone, phone, dt",
+          "laptop, máy tính xách tay, notebook",
+          "máy tính, computer, pc",
+          "tai nghe, headphone, earphone",
+          "đồng hồ, watch",
+          "áo, shirt, top",
+          "quần, pants, trousers",
+          "giày, shoes, sneaker",
+          "túi, bag, balo, backpack",
+          "rẻ, giá rẻ, cheap, sale, giảm giá, khuyến mãi",
+          "tốt, chất lượng, quality, good",
+          "mới, new, latest",
+          "chính hãng, authentic, original"
+        ]
+      },
+      "edge_ngram_filter": {
+        "type": "edge_ngram",
+        "min_gram": 2,
+        "max_gram": 10
+      },
+      "ascii_folding": {
+        "type": "asciifolding",
+        "preserve_original": true
+      }
+    },
+    "tokenizer": {
+      "vi_tokenizer": {
+        "type": "standard"
+      }
+    },
+    "analyzer": {
+      "vietnamese_analyzer": {
+        "type": "custom",
+        "tokenizer": "standard",
+        "filter": [
+          "lowercase",
+          "ascii_folding",
+          "vietnamese_stop",
+          "vietnamese_synonym"
+        ]
+      },
+      "autocomplete_analyzer": {
+        "type": "custom",
+        "tokenizer": "standard",
+        "filter": ["lowercase", "ascii_folding", "edge_ngram_filter"]
+      },
+      "search_analyzer": {
+        "type": "custom",
+        "tokenizer": "standard",
+        "filter": ["lowercase", "ascii_folding", "vietnamese_synonym"]
+      }
+    }
+  }
+}

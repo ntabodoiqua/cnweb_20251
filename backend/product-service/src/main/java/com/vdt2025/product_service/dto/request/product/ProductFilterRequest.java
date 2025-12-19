@@ -39,9 +39,13 @@ public class ProductFilterRequest {
     BigDecimal priceTo;
 
     // Stock filter
-    Integer stockFrom;
+    Boolean inStockOnly; // Checkbox: "Chỉ hiện hàng còn"
+    Integer minStock;    // Input: "Số lượng tối thiểu"
 
-    Integer stockTo;
+    // Helper để Service biết khi nào cần bypass cache
+    public boolean hasStockFilter() {
+        return (inStockOnly != null && inStockOnly) || minStock != null;
+    }
 
     // Rating filter
     Double ratingFrom;

@@ -1,0 +1,364 @@
+# 🔐 Hướng dẫn Bảo mật & Cấu hình Secrets
+
+> ⚠️ **CẢNH BÁO**: File này là TEMPLATE. Không bao giờ commit file `SECURITY.md` thực tế chứa credentials vào Git!
+
+## 📋 Tổng quan
+
+File này hướng dẫn cách cấu hình GitHub Secrets và environment variables để deploy ứng dụng một cách an toàn.
+
+---
+
+## 🚨 Trước khi bắt đầu
+
+### 1. Kiểm tra .gitignore
+
+Đảm bảo các file sau **KHÔNG BAO GIỜ** được commit:
+
+```
+.env
+.env.*
+!.env.example
+SECURITY.md
+CICD_SETUP.md
+```
+
+### 2. Nếu đã commit nhầm credentials
+
+```bash
+# Xóa khỏi Git index (giữ lại file local)
+git rm --cached .env SECURITY.md
+
+# Xóa hoàn toàn khỏi Git history
+git filter-branch --force --index-filter \
+  'git rm --cached --ignore-unmatch .env SECURITY.md CICD_SETUP.md' \
+  --prune-empty --tag-name-filter cat -- --all
+
+# Dọn dẹp repository
+git reflog expire --expire=now --all
+git gc --prune=now --aggressive
+
+# Force push (cẩn thận!)
+git push --force
+```
+
+### 3. Đổi tất cả mật khẩu đã bị lộ
+
+⚠️ **QUAN TRỌNG**: Đổi ngay tất cả mật khẩu đã từng commit lên Git, bao gồm:
+
+- Database passwords
+- API keys
+- JWT secret keys
+- S3/Object storage credentials
+- Payment gateway keys
+- Email credentials
+- OAuth credentials
+
+---
+
+## 🔑 Cấu hình GitHub Secrets
+
+### Truy cập GitHub Secrets
+
+1. Vào repository trên GitHub
+2. Chọn **Settings** → **Secrets and variables** → **Actions**
+3. Click **New repository secret**
+
+### Danh sách Secrets cần thêm
+
+#### Database Configuration
+
+```
+DB_PASSWORD
+Giá trị: <your-database-password>
+Mô tả: Mật khẩu cho database của order_service, payment_service, product_service, user_service
+
+NOTIFICATION_DB_PASSWORD
+Giá trị: <your-notification-db-password>
+Mô tả: Mật khẩu cho database của notification_service (cluster riêng)
+
+FILE_DB_PASSWORD
+Giá trị: <your-file-db-password>
+Mô tả: Mật khẩu cho database của file_service (cluster riêng)
+```
+
+#### Redis Configuration
+
+```
+REDIS_HOST
+Giá trị: <your-redis-host>
+
+REDIS_PORT
+Giá trị: 25061
+
+REDIS_USERNAME
+Giá trị: default
+
+REDIS_PASSWORD
+Giá trị: <your-redis-password>
+```
+
+#### RabbitMQ Configuration
+
+```
+RABBITMQ_ADDRESSES
+Giá trị: amqps://<username>:<password>@<host>/<vhost>
+
+RABBITMQ_USERNAME
+Giá trị: <your-rabbitmq-username>
+
+RABBITMQ_PASSWORD
+Giá trị: <your-rabbitmq-password>
+
+RABBITMQ_VIRTUAL_HOST
+Giá trị: <your-vhost>
+```
+
+#### JWT Configuration
+
+```
+JWT_SIGNER_KEY
+Giá trị: <generate-strong-random-key>
+
+INTERNAL_SERVICE_SECRET
+Giá trị: <generate-strong-random-key>
+```
+
+#### S3/Object Storage (File Service)
+
+```
+S3_ENDPOINT
+Giá trị: https://<region>.digitaloceanspaces.com
+
+S3_REGION
+Giá trị: <your-region>
+
+S3_BUCKET_NAME
+Giá trị: <your-bucket-name>
+
+S3_ACCESS_KEY
+Giá trị: <your-s3-access-key>
+
+S3_SECRET_KEY
+Giá trị: <your-s3-secret-key>
+```
+
+#### Google OAuth (User Service)
+
+```
+GOOGLE_CLIENT_ID
+Giá trị: <your-google-client-id>.apps.googleusercontent.com
+
+GOOGLE_CLIENT_SECRET
+Giá trị: <your-google-client-secret>
+```
+
+#### Payment Gateway (ZaloPay)
+
+```
+ZALOPAY_APP_ID
+Giá trị: <your-zalopay-app-id>
+
+ZALOPAY_KEY1
+Giá trị: <your-zalopay-key1>
+
+ZALOPAY_KEY2
+Giá trị: <your-zalopay-key2>
+
+ZALOPAY_CREATE_ORDER_URL
+Giá trị: https://sb-openapi.zalopay.vn/v2/create
+
+ZALOPAY_QUERY_ORDER_URL
+Giá trị: https://sb-openapi.zalopay.vn/v2/query
+
+ZALOPAY_GET_BANK_LIST_URL
+Giá trị: https://sbgateway.zalopay.vn/api/getlistmerchantbanks
+
+ZALOPAY_CALLBACK_URL
+Giá trị: http://your-server-ip:8080/api/payment/v1/payments/zalopay/callback
+
+ZALOPAY_REDIRECT_URL
+Giá trị: http://your-frontend-url/payment/result
+```
+
+#### SendGrid (Email Service)
+
+```
+SENDGRID_API_KEY
+Giá trị: <your-sendgrid-api-key>
+```
+
+#### Payment Redirect
+
+```
+PAYMENT_REDIRECT_URL
+Giá trị: https://your-domain.com/payment/result
+```
+
+#### Frontend Configuration
+
+```
+GOOGLE_CLIENT_ID
+Giá trị: <your-google-client-id>.apps.googleusercontent.com
+Mô tả: Google OAuth Client ID (đã định nghĩa ở phần Google OAuth phía trên)
+```
+
+**Lưu ý quan trọng về VITE_BACKEND_URL và VITE_WS_URL:**
+- Các biến này **KHÔNG CẦN** thêm vào GitHub Secrets
+- Trong production, để chúng RỖNG để frontend tự động dùng current host
+- Frontend code đã xử lý: nếu empty → dùng relative URLs và current host
+- Workflow đã cấu hình: `VITE_BACKEND_URL=` và `VITE_WS_URL=` (empty string)
+
+#### Deployment Configuration
+
+```
+SSH_HOST
+Giá trị: <your-server-ip>
+
+SSH_USERNAME
+Giá trị: <your-ssh-username>
+
+SSH_PRIVATE_KEY
+Giá trị: <nội-dung-private-key-ssh>
+
+SSH_PORT
+Giá trị: 22
+```
+
+---
+
+## 📝 Cấu hình Local Development
+
+### Tạo file .env từ template
+
+```bash
+# Copy file template
+cp .env.example .env
+
+# Chỉnh sửa file .env với thông tin thực tế
+nano .env  # hoặc sử dụng editor khác
+```
+
+### Cập nhật .env với thông tin thực
+
+```dotenv
+# Database Configuration
+SPRING_DATASOURCE_PASSWORD=<your-db-password>
+
+# Redis Configuration
+REDIS_HOST=<your-redis-host>
+REDIS_PORT=25061
+REDIS_USERNAME=default
+REDIS_PASSWORD=<your-redis-password>
+
+# ... (các biến khác)
+```
+
+### Chạy ứng dụng local
+
+```bash
+# Backend services
+cd backend
+docker-compose up -d
+
+# Frontend
+cd frontend
+
+# Copy .env.example và cấu hình
+cp .env.example .env.development
+
+# Chỉnh sửa .env.development với thông tin development
+nano .env.development
+
+# Cài đặt dependencies và chạy
+npm install
+npm run dev
+```
+
+---
+
+## 🚀 CI/CD Pipeline
+
+### Backend Deployment Workflow
+
+**File:** `.github/workflows/deploy.yml`  
+**Trigger:** Push tag với pattern `dev_*` (ví dụ: `dev_18.12.2025_v1`)
+
+Workflow sẽ tự động:
+
+1. ✅ Build Docker images cho tất cả 9 microservices
+2. ✅ Push images lên GitHub Container Registry (GHCR)
+3. ✅ SSH vào server và deploy
+4. ✅ Inject environment variables từ GitHub Secrets
+5. ✅ Health check tất cả services
+
+**Cách trigger:**
+```bash
+git tag dev_18.12.2025_v1
+git push origin dev_18.12.2025_v1
+```
+
+### Frontend Deployment Workflow
+
+**File:** `.github/workflows/frontend-deploy.yaml`  
+**Trigger:** Push tag với pattern `fe_dev_*` (ví dụ: `fe_dev_18.12.2025_v1`)
+
+Workflow sẽ tự động:
+
+1. ✅ Build React application với environment variables từ GitHub Secrets
+2. ✅ Tạo Docker image chứa static files (Nginx)
+3. ✅ Push image lên GHCR
+4. ✅ SSH vào server và deploy
+5. ✅ Health check frontend endpoint
+
+**Cách trigger:**
+```bash
+git tag fe_dev_18.12.2025_v1
+git push origin fe_dev_18.12.2025_v1
+```
+
+### Bảo mật trong CI/CD
+
+- ✅ **Không commit .env files** vào Git (đã có trong .gitignore)
+- ✅ **Build-time injection:** Frontend nhận environment variables qua Docker build arguments
+- ✅ **Runtime injection:** Backend nhận environment variables khi container khởi động
+- ✅ **Secrets từ GitHub:** Tất cả thông tin nhạy cảm được lưu trong GitHub Secrets
+- ✅ **No hardcoded credentials:** Tất cả credentials đều dùng ${VARIABLE} hoặc build args
+
+---
+
+## 🔐 Best Practices
+
+### 1. Quản lý Secrets
+
+- ✅ Không bao giờ commit credentials vào Git
+- ✅ Sử dụng GitHub Secrets cho CI/CD
+- ✅ Sử dụng environment variables trong code
+- ✅ Rotate credentials định kỳ
+
+### 2. Access Control
+
+- ✅ Giới hạn quyền truy cập GitHub Secrets
+- ✅ Sử dụng SSH keys riêng cho deployment
+- ✅ Enable 2FA cho tất cả accounts quan trọng
+
+### 3. Monitoring
+
+- ✅ Monitor deployment logs
+- ✅ Set up alerts cho failed deployments
+- ✅ Kiểm tra health checks sau mỗi deployment
+
+### 4. Backup
+
+- ✅ Backup credentials ở nơi an toàn (password manager)
+- ✅ Document recovery procedures
+- ✅ Test disaster recovery plan
+
+---
+
+## 📞 Support
+
+Nếu gặp vấn đề về bảo mật hoặc cần hỗ trợ cấu hình, vui lòng liên hệ team.
+
+---
+
+**Lưu ý cuối cùng:** File SECURITY.md thực tế chứa credentials **KHÔNG BAO GIỜ** được commit vào Git. Chỉ file template này (.example) mới được commit.

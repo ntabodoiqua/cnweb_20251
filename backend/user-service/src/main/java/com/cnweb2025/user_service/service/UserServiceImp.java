@@ -8,6 +8,7 @@ import com.vdt2025.common_dto.service.FileServiceClient;
 import com.cnweb2025.user_service.constant.PredefinedRole;
 import com.cnweb2025.user_service.dto.request.user.UserCreationRequest;
 import com.cnweb2025.user_service.dto.request.user.UserUpdateRequest;
+import com.cnweb2025.user_service.dto.response.UserInfoSimpleResponse;
 import com.cnweb2025.user_service.dto.response.UserResponse;
 import com.cnweb2025.user_service.entity.Role;
 import com.cnweb2025.user_service.entity.User;
@@ -33,6 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -137,6 +140,8 @@ public class UserServiceImp implements UserService{
 
     @Override
     @Transactional
+    @CacheEvict(value = "userCache",
+            key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()")
     public String setMyAvatar(MultipartFile file) {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
@@ -179,6 +184,8 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
+    @CacheEvict(value = "userCache",
+            key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()")
     public String disableMyAccount() {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
@@ -340,5 +347,100 @@ public class UserServiceImp implements UserService{
         return user.getAvatarName();
     }
 
+    @Override
+    @Transactional
+    public User findOrCreateGoogleUser(String email, String name, String picture) {
+        log.info("Finding or creating Google user with email: {}", email);
+
+        // Tìm user theo email
+        var existingUser = userRepository.findByEmail(email);
+
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+
+            // Kiểm tra xem user có bị vô hiệu hóa không
+            if (!user.isEnabled()) {
+                log.warn("User {} is disabled and cannot login via Google", email);
+                throw new AppException(ErrorCode.USER_DISABLED);
+            }
+
+            // Nếu user chưa verify, tự động verify qua Google
+            if (!user.isVerified()) {
+                user.setVerified(true);
+                log.info("Verified existing user {} via Google login", email);
+            }
+
+            // Cập nhật avatar nếu có và chưa có avatar
+            if (picture != null && !picture.isEmpty() &&
+                    (user.getAvatarName() == null || user.getAvatarName().isEmpty())
+                    && (user.getAvatarUrl() == null || user.getAvatarUrl().isEmpty())) {
+                user.setAvatarName(picture);
+                user.setAvatarUrl(picture);
+            }
+
+            return userRepository.save(user);
+        }
+
+        // Tạo user mới nếu chưa tồn tại
+        User newUser = new User();
+        newUser.setUsername(email); // Sử dụng email làm username
+        newUser.setEmail(email);
+        newUser.setFullName(name != null ? name : email.split("@")[0]);
+        newUser.setAvatarName(picture);
+        newUser.setVerified(true); // Google đã verify email
+        newUser.setEnabled(true);
+
+        // Tạo password ngẫu nhiên vì user đăng nhập bằng Google
+        String randomPassword = java.util.UUID.randomUUID().toString();
+        newUser.setPassword(passwordEncoder.encode(randomPassword));
+
+        // Gán role USER mặc định
+        Role userRole = roleRepository.findByName(PredefinedRole.USER_ROLE)
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOT_FOUND));
+        Set<Role> roles = new HashSet<>();
+        roles.add(userRole);
+        newUser.setRoles(roles);
+
+        try {
+            User savedUser = userRepository.save(newUser);
+            // gửi email chào mừng
+            com.vdt2025.common_dto.dto.UserCreatedEvent event = UserCreatedEvent.builder()
+                    .id(savedUser.getId())
+                    .username(savedUser.getUsername())
+                    .email(savedUser.getEmail())
+                    .otpCode(null)
+                    .build();
+            messagePublisher.publish(MessageType.USER_CREATED, event);
+            log.info("Created new user {} from Google login", email);
+            return savedUser;
+        } catch (DataIntegrityViolationException e) {
+            log.error("Error creating user from Google login: {}", e.getMessage());
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+    }
+
+    @Override
+    public Map<String, UserInfoSimpleResponse> getUsersByUsernames(List<String> usernames) {
+        log.info("Getting user info for {} usernames", usernames.size());
+        
+        if (usernames == null || usernames.isEmpty()) {
+            return Map.of();
+        }
+        
+        List<User> users = userRepository.findByUsernameIn(usernames);
+        
+        return users.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        User::getUsername,
+                        user -> UserInfoSimpleResponse.builder()
+                                .id(user.getId())
+                                .username(user.getUsername())
+                                .firstName(user.getFirstName())
+                                .lastName(user.getLastName())
+                                .avatarUrl(user.getAvatarUrl())
+                                .build(),
+                        (existing, replacement) -> existing
+                ));
+    }
 
 }

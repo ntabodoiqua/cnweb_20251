@@ -1,0 +1,40 @@
+package com.cnweb20251.message_service.config;
+
+import com.cnweb20251.message_service.exception.ErrorCode;
+import com.cnweb20251.message_service.service.MessageService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.vdt2025.common_dto.dto.response.ApiResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+
+@Component
+@RequiredArgsConstructor
+public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
+
+    private final MessageService messageService;
+
+    @Override
+    public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
+        ErrorCode errorcode = ErrorCode.UNAUTHENTICATED;
+        response.setStatus(errorcode.getStatusCode().value());
+        // Thiết lập kiểu dữ liệu trả về là JSON
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+
+        ApiResponse<?> apiResponse = ApiResponse.builder()
+                .code(errorcode.getCode())
+                .message(messageService.getMessage(errorcode.getMessageKey()))
+                .build();
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        // Chuyển đổi ApiResponse thành JSON và ghi vào response
+        response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+        response.flushBuffer();
+    }
+}

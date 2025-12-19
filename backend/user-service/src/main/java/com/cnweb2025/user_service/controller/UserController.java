@@ -50,6 +50,14 @@ public class UserController {
                 .build();
     }
 
+    // Internal endpoint for service-to-service communication (no authentication required)
+    @GetMapping("/internal/{username}")
+    ApiResponse<UserResponse> getUserByUsernameInternal(@PathVariable String username) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.getUserByUsername(username))
+                .build();
+    }
+
     @PutMapping("/changePassword")
     ApiResponse<String> changeMyPassword(@RequestBody @Valid UserChangePasswordRequest request) {
         var result = userService.changeMyPassword(request.getOldPassword(), request.getNewPassword());

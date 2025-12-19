@@ -1,12 +1,21 @@
 server:
-  port: 8084 # Port m?i cho service
+  port: 8084 # Port mới cho service
 spring:
   application:
     name: notification-service
+  # Database configuration
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db-postgresql-sgp1-93557-do-user-27848320-0.d.db.ondigitalocean.com:25060/notification_service}
+    username: ${SPRING_DATASOURCE_USERNAME:doadmin}
+    password: ${SPRING_DATASOURCE_PASSWORD:changeme}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: ${SPRING_JPA_SHOW_SQL:true}
   rabbitmq:
-    addresses: amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
-    username: xqjmojji
-    password: hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH
+    addresses: ${SPRING_RABBITMQ_ADDRESSES:amqps://xqjmojji:changeme@fuji.lmq.cloudamqp.com/xqjmojji}
+    username: ${SPRING_RABBITMQ_USERNAME:xqjmojji}
+    password: ${SPRING_RABBITMQ_PASSWORD:changeme}
     virtual-host: xqjmojji
     ssl:
       enabled: true
@@ -21,7 +30,7 @@ spring:
 # SendGrid Configuration
 sendgrid:
   api:
-    key: ${SENDGRID_API_KEY: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}
+    key: ${SENDGRID_API_KEY:changeme}
   from:
     email: noreply@nguyentheanh-nta.id.vn
 
@@ -29,3 +38,35 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_CLIENT_SERVICEURL_DEFAULTZONE:http://discovery-service:8761/eureka/}
+
+# Management endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# Logging configuration for Loki
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
+  level:
+    root: INFO
+    org.springframework.amqp: DEBUG
+
+# JWT Configuration
+jwt:
+  signerKey: ${JWT_SIGNERKEY:cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2}

@@ -10,7 +10,10 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableCaching
 @EnableAsync
 @EnableScheduling
-@EnableFeignClients(basePackages = "com.vdt2025.common_dto")
+@EnableFeignClients(basePackages = {
+        "com.vdt2025.common_dto",
+        "com.cnweb.order_service.client"
+})
 @SpringBootApplication
 public class OrderServiceApplication {
 

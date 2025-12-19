@@ -3,10 +3,12 @@ package com.cnweb2025.user_service.repository;
 import com.cnweb2025.user_service.entity.Province;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface ProvinceRepository extends JpaRepository<Province, Integer> {
     // Tìm province theo name hoặc nameSlug
     Optional<Province> findByNameIgnoreCaseOrNameSlugIgnoreCase(String name, String nameSlug);

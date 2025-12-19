@@ -1,0 +1,524 @@
+/* AdminStoresPage.module.css */
+
+.adminStores {
+  padding: 20px;
+  min-height: 100vh;
+}
+
+.adminSection {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.adminToolbar {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.adminSearchBox {
+  position: relative;
+  flex: 1;
+  min-width: 250px;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #999;
+  font-size: 16px;
+}
+
+.adminSearchInput {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.adminSearchInput:focus {
+  outline: none;
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+}
+
+.toolbarActions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.adminFilters {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.filterItem {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filterItem label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+
+.filterItem input,
+.filterItem select {
+  padding: 8px 12px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.filterItem input:focus,
+.filterItem select:focus {
+  outline: none;
+  border-color: #1890ff;
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.1);
+}
+
+.adminSectionTitle {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.adminTableContainer {
+  overflow-x: auto;
+  margin: 0 -20px;
+  padding: 0 20px;
+}
+
+.adminTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.adminTable thead {
+  background: #fafafa;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.adminTable th {
+  padding: 12px;
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #f0f0f0;
+  white-space: nowrap;
+}
+
+.adminTable td {
+  padding: 12px;
+  border-bottom: 1px solid #f0f0f0;
+  vertical-align: middle;
+}
+
+.adminTable tbody tr:hover {
+  background: #fafafa;
+}
+
+.storeLogo {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #f0f0f0;
+}
+
+.storeLogoPlaceholder {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 8px;
+  color: #999;
+  font-size: 24px;
+}
+
+.storeName {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.storeName strong {
+  color: #333;
+  font-size: 14px;
+}
+
+.storeDescription {
+  color: #999;
+  font-size: 12px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 250px;
+}
+
+.address {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 16px;
+}
+
+.statusActive {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.statusInactive {
+  background: #fff1f0;
+  color: #ff4d4f;
+}
+
+.stickyColumn {
+  position: sticky;
+  right: 0;
+  background: white;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.05);
+}
+
+.adminTable tbody tr:hover .stickyColumn {
+  background: #fafafa;
+}
+
+.adminActionButtons {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  align-items: center;
+}
+
+.adminActionBtn {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s;
+  font-size: 14px;
+}
+
+.adminActionBtn.view {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.adminActionBtn.view:hover {
+  background: #1890ff;
+  color: white;
+}
+
+.adminActionBtn.lock {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+.adminActionBtn.lock:hover {
+  background: #fa8c16;
+  color: white;
+}
+
+.adminEmptyState {
+  text-align: center;
+  padding: 40px 20px;
+  color: #999;
+}
+
+.adminEmptyState p {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.adminPagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #f0f0f0;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.paginationInfo {
+  font-size: 14px;
+  color: #666;
+}
+
+.pageSizeSelector {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.pageSizeSelect {
+  padding: 6px 10px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* Modal Styles */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+.modalContent {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.modalHeader {
+  padding: 20px 24px;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalHeader h3 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.modalClose {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #999;
+  padding: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.3s;
+}
+
+.modalClose:hover {
+  background: #f5f5f5;
+  color: #333;
+}
+
+.modalBody {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.modalFooter {
+  padding: 16px 24px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.storeDetail {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.storeDetailHeader {
+  display: flex;
+  gap: 20px;
+  align-items: start;
+}
+
+.storeDetailLogo {
+  flex-shrink: 0;
+}
+
+.storeDetailLogo img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid #f0f0f0;
+}
+
+.storeDetailBanner {
+  flex: 1;
+}
+
+.storeDetailBanner img {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 2px solid #f0f0f0;
+}
+
+.storeDetailInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.storeDetailInfo h4 {
+  margin: 0;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #1890ff;
+  color: #333;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.infoRow {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.infoRow:last-child {
+  border-bottom: none;
+}
+
+.infoRow label {
+  font-weight: 500;
+  color: #666;
+  font-size: 14px;
+}
+
+.infoRow span {
+  color: #333;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.idText {
+  font-family: monospace;
+  font-size: 12px;
+  color: #666;
+}
+
+.textSuccess {
+  color: #52c41a !important;
+  font-weight: 600;
+}
+
+.textDanger {
+  color: #ff4d4f !important;
+  font-weight: 600;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .adminToolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .adminSearchBox {
+    width: 100%;
+  }
+
+  .toolbarActions {
+    justify-content: stretch;
+  }
+
+  .toolbarActions button {
+    flex: 1;
+  }
+
+  .filterGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .adminPagination {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .pageSizeSelector {
+    justify-content: center;
+  }
+
+  .infoRow {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+
+  .storeDetailHeader {
+    flex-direction: column;
+  }
+
+  .storeDetailBanner img {
+    height: 150px;
+  }
+}

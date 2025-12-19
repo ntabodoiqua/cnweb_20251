@@ -43,6 +43,7 @@ public class SecurityConfig {
     private static final String[] PUBLIC_GET_ENDPOINTS = {
             "/wards/**",
             "/provinces/**",
+            "/users/internal/**",  // Allow internal service-to-service calls
     };
 
     @Autowired
@@ -59,9 +60,11 @@ public class SecurityConfig {
                         request
                                 // Allow Swagger endpoints (highest priority)
                                 .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
-                                // Allow actuator endpoints
-                                .requestMatchers("/actuator/health").permitAll()
-                                .requestMatchers("/actuator/info").permitAll()
+                                // Allow actuator endpoints for monitoring
+                                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                                .requestMatchers("/actuator/info", "/actuator/info/**").permitAll()
+                                .requestMatchers("/actuator/prometheus", "/actuator/prometheus/**").permitAll()
+                                .requestMatchers("/actuator/metrics", "/actuator/metrics/**").permitAll()
                                 // Allow auth endpoints
                                 .requestMatchers(AUTH_ENDPOINTS).permitAll()
                                 // Allow POST to create users
@@ -88,10 +91,5 @@ public class SecurityConfig {
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
         return jwtAuthenticationConverter;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

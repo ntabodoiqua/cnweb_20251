@@ -25,7 +25,12 @@ export const useRoutes = () => {
     verifyEmail: () => navigate(PUBLIC_ROUTES.VERIFY_EMAIL),
     forgotPassword: () => navigate(PUBLIC_ROUTES.FORGOT_PASSWORD),
     resetPassword: () => navigate(PUBLIC_ROUTES.RESET_PASSWORD),
-
+      help: () => navigate(PUBLIC_ROUTES.HELP),
+      orders: () => navigate(PUBLIC_ROUTES.ORDERS),
+      payment: () => navigate(PUBLIC_ROUTES.PAYMENT),
+      returns: () => navigate(PUBLIC_ROUTES.RETURNS),
+      shipping: () => navigate(PUBLIC_ROUTES.SHIPPING),
+      warranty: () => navigate(PUBLIC_ROUTES.WARRANTY),
     // Protected routes
     profile: () => navigate(PROTECTED_ROUTES.PROFILE),
     user: () => navigate(PROTECTED_ROUTES.USER),
