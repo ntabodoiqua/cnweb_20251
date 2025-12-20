@@ -6,7 +6,7 @@ spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db-postgresql-sgp1-93557-do-user-27848320-0.d.db.ondigitalocean.com:25060/file_service?sslmode=require}
     username: ${SPRING_DATASOURCE_USERNAME:doadmin}
-    password: ${SPRING_DATASOURCE_PASSWORD:AVNS_GP853Gug731-gzXfmnT}
+    password: ${SPRING_DATASOURCE_PASSWORD:changeme}
   jpa:
     hibernate:
       ddl-auto: update
@@ -19,10 +19,10 @@ spring:
     type: redis
   data:
     redis:
-      host: db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
+      host: db-valkey-sgp1-03029-do-user-27848320-0.m.db.ondigitalocean.com
       port: 25061
       username: default
-      password: AVNS_N-gwsyNb6xBC3fXPdQp
+      password: ${SPRING_DATA_REDIS_PASSWORD:changeme}
       ssl:
         enabled: true
 eureka:
@@ -35,15 +35,14 @@ jwt:
   signerKey: ${JWT_SIGNERKEY:cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2}
   valid-duration: ${JWT_VALID_DURATION:3600}
   refreshable-duration: ${JWT_REFRESHABLE_DURATION:86400}
-
 file:
   max-size: 10485760
   s3:
     endpoint: ${S3_ENDPOINT:https://sgp1.digitaloceanspaces.com}
     region: ${S3_REGION:sgp1}
     bucket-name: ${S3_BUCKET_NAME:hla}
-    access-key: ${S3_ACCESS_KEY:DO007GZR7WN63YHWKLVU}
-    secret-key: ${S3_SECRET_KEY:LPB+xqPNyJ8RTN7Syg3932nDFqZOsGb2X3wa6jWV+yA}
+    access-key: ${S3_ACCESS_KEY:changeme}
+    secret-key: ${S3_SECRET_KEY:changeme}
   cleanup:
     enabled: ${FILE_CLEANUP_ENABLED:true}
     cron: ${FILE_CLEANUP_CRON:0 0 2 * * *} # 2:00 AM mỗi ngày
@@ -51,3 +50,35 @@ file:
 
 app:
   default-admin-id: ${DEFAULT_ADMIN_ID:d50f8589-da20-49e8-a3f3-6a115d1f68d7}
+
+internal:
+  service:
+    secret: ${INTERNAL_SERVICE_SECRET:InT3rn@l-S3rv1c3-S3cr3t-K3y-2025-VDT}
+
+# Management endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+# Logging configuration for Loki
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
+  level:
+    root: INFO
+    com.amazonaws: DEBUG

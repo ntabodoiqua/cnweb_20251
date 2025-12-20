@@ -39,7 +39,13 @@ public class SecurityConfig {
 
     private static final String[] PUBLIC_ACTUATOR_ENDPOINTS = {
             "/actuator/health",
-            "/actuator/info"
+            "/actuator/health/**",
+            "/actuator/info",
+            "/actuator/info/**",
+            "/actuator/prometheus",
+            "/actuator/prometheus/**",
+            "/actuator/metrics",
+            "/actuator/metrics/**"
     };
 
     CustomJwtDecoder customJwtDecoder;
