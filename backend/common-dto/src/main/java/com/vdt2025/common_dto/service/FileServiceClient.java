@@ -17,4 +17,8 @@ public interface FileServiceClient {
     ApiResponse<FileInfoResponse> uploadPublicFile(@RequestPart("file") MultipartFile file);
     @PostMapping(value = "/upload/private", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     ApiResponse<FileInfoResponse> uploadPrivateFile(@RequestPart("file") MultipartFile file);
+    @GetMapping(value = "/view/{fileName}")
+    ApiResponse<String> viewPrivateFile(
+            @PathVariable String fileName,
+            @RequestParam(defaultValue = "60") int expirationMinutes);
 }
