@@ -1,0 +1,141 @@
+.modalFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footerStats {
+  color: #666;
+  font-size: 13px;
+}
+
+.footerStats strong {
+  color: #1890ff;
+}
+
+.divider {
+  color: #d9d9d9;
+  margin: 0 4px;
+}
+
+.toLink {
+  color: #52c41a;
+  font-weight: 500;
+}
+
+.toMove {
+  color: #722ed1;
+  font-weight: 500;
+}
+
+.toUnlink {
+  color: #ff4d4f;
+  font-weight: 500;
+}
+
+.infoAlert {
+  margin-bottom: 16px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.searchInput {
+  max-width: 300px;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 60px 0;
+}
+
+.variantInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.variantImage {
+  border-radius: 6px;
+  border: 1px solid #f0f0f0;
+}
+
+.variantDetails {
+  display: flex;
+  flex-direction: column;
+}
+
+.variantName {
+  font-weight: 500;
+  color: #262626;
+  margin-bottom: 2px;
+}
+
+.variantSku {
+  font-size: 12px;
+  color: #8c8c8c;
+}
+
+.priceCell {
+  display: flex;
+  flex-direction: column;
+}
+
+.price {
+  font-weight: 600;
+  color: #ff4d4f;
+}
+
+.originalPrice {
+  font-size: 12px;
+  color: #8c8c8c;
+  text-decoration: line-through;
+}
+
+.linkedRow {
+  background-color: #f6ffed !important;
+}
+
+.linkedRow:hover td {
+  background-color: #e6ffe6 !important;
+}
+
+.linkedOtherRow {
+  background-color: #fff7e6 !important;
+}
+
+.linkedOtherRow:hover td {
+  background-color: #fff1cc !important;
+}
+
+.linkedOtherTag {
+  cursor: help;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .searchInput {
+    max-width: 100%;
+  }
+
+  .modalFooter {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .footerStats {
+    text-align: center;
+  }
+}

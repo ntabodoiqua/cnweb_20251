@@ -1,0 +1,393 @@
+/* Variant Management Modal Styles */
+
+.variantModal :global(.ant-modal-content) {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.variantModal :global(.ant-modal-header) {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 50%, #ff8c42 100%);
+  border-bottom: none;
+  padding: 24px 32px;
+}
+
+.variantModal :global(.ant-modal-title) {
+  color: white;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.variantModal :global(.ant-modal-close) {
+  top: 16px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.variantModal :global(.ant-modal-close:hover) {
+  color: white;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  color: white;
+}
+
+.modalHeader :global(.anticon) {
+  font-size: 24px;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.modalHeader span {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.modalContent {
+  padding: 28px;
+  max-height: 70vh;
+  overflow-y: auto;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+}
+
+.tableHeader {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.addBtn {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  border: none;
+  height: 42px;
+  padding: 0 28px;
+  font-weight: 600;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(82, 196, 26, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.addBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(82, 196, 26, 0.4);
+  background: linear-gradient(135deg, #3da80e 0%, #5fb82b 100%);
+}
+
+/* Form Container */
+.formContainer {
+  background: white;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 24px;
+  border: 1px solid #e8ecf0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.formContainer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #52c41a 0%, #73d13d 50%, #95de64 100%);
+}
+
+.formTitle {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #1a1a2e;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.formTitle::before {
+  content: "";
+  width: 6px;
+  height: 24px;
+  background: linear-gradient(180deg, #52c41a 0%, #73d13d 100%);
+  border-radius: 3px;
+}
+
+.variantForm {
+  background: linear-gradient(135deg, #fafbfc 0%, #f5f7fa 100%);
+  padding: 28px;
+  border-radius: 14px;
+  border: 1px solid #e8ecf0;
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* Attributes Section */
+.attributesSection {
+  margin-top: 28px;
+  padding-top: 24px;
+  border-top: 2px dashed #e8ecf0;
+}
+
+.attributesTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a1a2e;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.attributesTitle :global(.anticon) {
+  color: #ee4d2d;
+  font-size: 18px;
+}
+
+.attributesCollapse {
+  background: white;
+  border: 1px solid #e8ecf0;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.attributesCollapse :global(.ant-collapse-header) {
+  font-weight: 600;
+  color: #1a1a2e;
+  padding: 16px 20px !important;
+  background: linear-gradient(135deg, #fafbfc 0%, #f5f7fa 100%);
+}
+
+.attributesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 18px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+}
+
+.attributeItem {
+  margin-bottom: 0;
+}
+
+.attributeItem :global(.ant-form-item-label > label) {
+  font-weight: 600;
+  color: #374151;
+  font-size: 13px;
+}
+
+/* Form Actions */
+.formActions {
+  margin-top: 28px;
+  margin-bottom: 0;
+  text-align: right;
+  padding-top: 20px;
+  border-top: 1px solid #e8ecf0;
+}
+
+.formActions :global(.ant-btn) {
+  height: 42px;
+  padding: 0 24px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.formActions :global(.ant-btn-primary) {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  border: none;
+  box-shadow: 0 4px 12px rgba(82, 196, 26, 0.3);
+}
+
+.formActions :global(.ant-btn-primary:hover) {
+  background: linear-gradient(135deg, #3da80e 0%, #5fb82b 100%);
+  box-shadow: 0 6px 16px rgba(82, 196, 26, 0.4);
+}
+
+/* Table Customization */
+.variantModal :global(.ant-table) {
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e8ecf0;
+}
+
+.variantModal :global(.ant-table-thead > tr > th) {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 50%, #ff8c42 100%);
+  color: white;
+  font-weight: 700;
+  border: none;
+  padding: 16px 12px;
+  font-size: 13px;
+}
+
+.variantModal :global(.ant-table-tbody > tr:hover > td) {
+  background: rgba(238, 77, 45, 0.04);
+}
+
+.variantModal :global(.ant-table-tbody > tr > td) {
+  border-bottom: 1px solid #f0f2f5;
+  padding: 14px 12px;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .variantModal {
+    width: 95vw !important;
+  }
+
+  .formRow {
+    grid-template-columns: 1fr;
+  }
+
+  .attributesGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .modalContent {
+    padding: 16px;
+  }
+
+  .formContainer {
+    padding: 16px;
+  }
+
+  .variantForm {
+    padding: 16px;
+  }
+
+  .tableHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .addBtn {
+    width: 100%;
+  }
+}
+
+/* Custom Scrollbar */
+.modalContent::-webkit-scrollbar {
+  width: 8px;
+}
+
+.modalContent::-webkit-scrollbar-track {
+  background: #f5f5f5;
+  border-radius: 4px;
+}
+
+.modalContent::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #ee4d2d 0%, #ff6b35 100%);
+  border-radius: 4px;
+}
+
+.modalContent::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #d73211 0%, #ee5a2d 100%);
+}
+
+/* Tag Styling */
+.variantModal :global(.ant-tag) {
+  margin-bottom: 4px;
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+/* Button Styling */
+.variantModal :global(.ant-btn-link) {
+  padding: 6px 12px;
+  height: auto;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.variantModal :global(.ant-btn-link:hover) {
+  background: rgba(24, 144, 255, 0.08);
+}
+
+.variantModal :global(.ant-btn-link.ant-btn-dangerous:hover) {
+  background: rgba(255, 77, 79, 0.08);
+}
+
+/* Input Number Styling */
+.variantForm :global(.ant-input-number) {
+  border-radius: 10px;
+  border: 2px solid #e8ecf0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.variantForm :global(.ant-input-number:hover) {
+  border-color: rgba(238, 77, 45, 0.4);
+}
+
+.variantForm :global(.ant-input-number-focused) {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+}
+
+/* Select Styling */
+.variantForm :global(.ant-select-selector) {
+  border-radius: 10px;
+  border: 2px solid #e8ecf0 !important;
+  min-height: 42px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.variantForm :global(.ant-select-focused .ant-select-selector) {
+  border-color: #ee4d2d !important;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1) !important;
+}
+
+/* Input Styling */
+.variantForm :global(.ant-input) {
+  border-radius: 10px;
+  border: 2px solid #e8ecf0;
+  padding: 10px 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.variantForm :global(.ant-input:hover) {
+  border-color: rgba(238, 77, 45, 0.4);
+}
+
+.variantForm :global(.ant-input:focus) {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+}
+
+.variantForm :global(.ant-form-item-label > label) {
+  font-weight: 600;
+  color: #1a1a2e;
+  font-size: 14px;
+}
+
+/* Loading State */
+.variantModal :global(.ant-spin) {
+  color: #ee4d2d;
+}
+
+.variantModal :global(.ant-spin-dot-item) {
+  background-color: #ee4d2d;
+}

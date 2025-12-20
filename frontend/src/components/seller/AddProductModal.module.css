@@ -1,0 +1,993 @@
+/* ========================================
+   Add Product Modal Styles
+   Giao diện modal thêm sản phẩm mới
+   ======================================== */
+
+/* ==================== Modal Container ==================== */
+
+.addProductModal :global(.ant-modal-content) {
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+.addProductModal :global(.ant-modal-body) {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding: 32px;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+}
+
+.addProductModal :global(.ant-modal-header) {
+  border-bottom: none;
+  padding: 24px 32px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 50%, #ff8c42 100%);
+  margin: 0;
+}
+
+.addProductModal :global(.ant-modal-title) {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+}
+
+.addProductModal :global(.ant-modal-footer) {
+  border-top: 2px solid rgba(238, 77, 45, 0.1);
+  padding: 16px 24px;
+}
+
+.addProductModal :global(.ant-modal-close) {
+  top: 16px;
+  right: 20px;
+  width: 40px;
+  height: 40px;
+}
+
+.addProductModal :global(.ant-modal-close-x) {
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addProductModal :global(.ant-modal-close:hover .ant-modal-close-x) {
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+}
+
+/* ==================== Modal Header ==================== */
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.modalHeaderIcon {
+  font-size: 28px;
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 10px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.95;
+  }
+}
+
+/* ==================== Form Styles ==================== */
+
+.addProductModal :global(.ant-form) {
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.addProductModal :global(.ant-form-item) {
+  margin-bottom: 32px;
+}
+
+.addProductModal :global(.ant-form-item-control-input) {
+  min-height: 44px;
+}
+
+.addProductModal :global(.ant-form-item-label) > label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.addProductModal
+  :global(.ant-form-item-label)
+  > label.ant-form-item-required::before {
+  color: #ff4d4f;
+  font-size: 16px;
+}
+
+.inputIcon {
+  color: rgba(238, 77, 45, 0.6);
+  font-size: 16px;
+}
+
+.addProductModal :global(.ant-input),
+.addProductModal :global(.ant-input-number),
+.addProductModal :global(.ant-select-selector),
+.addProductModal :global(.ant-input-number-input) {
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 14px;
+  padding: 12px 16px;
+  font-weight: 500;
+  background: white;
+}
+
+.addProductModal :global(.ant-input::placeholder),
+.addProductModal :global(.ant-input-number-input::placeholder) {
+  color: #bbb;
+  font-weight: 400;
+}
+
+.addProductModal :global(.ant-input:hover),
+.addProductModal :global(.ant-input-number:hover),
+.addProductModal :global(.ant-select-selector:hover) {
+  border-color: rgba(238, 77, 45, 0.4);
+}
+
+.addProductModal :global(.ant-input:focus),
+.addProductModal :global(.ant-input-number:focus),
+.addProductModal :global(.ant-input-number-focused),
+.addProductModal :global(.ant-select-focused .ant-select-selector) {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.addProductModal :global(.ant-input-affix-wrapper) {
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  padding: 8px 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.addProductModal :global(.ant-input-affix-wrapper:hover) {
+  border-color: rgba(238, 77, 45, 0.4);
+}
+
+.addProductModal :global(.ant-input-affix-wrapper-focused) {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+  transform: translateY(-1px);
+}
+
+.addProductModal :global(.ant-input-affix-wrapper .ant-input) {
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.addProductModal :global(.ant-input-affix-wrapper .ant-input:focus) {
+  box-shadow: none;
+  transform: none;
+}
+
+.addProductModal :global(.ant-input-textarea-show-count::after) {
+  color: #999;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.addProductModal :global(textarea.ant-input) {
+  padding: 12px 16px;
+  line-height: 1.6;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  resize: vertical;
+  min-height: 80px;
+}
+
+.addProductModal :global(textarea.ant-input:hover) {
+  border-color: rgba(238, 77, 45, 0.4);
+}
+
+.addProductModal :global(textarea.ant-input:focus) {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.addProductModal :global(textarea.ant-input::placeholder) {
+  color: #bbb;
+  font-weight: 400;
+}
+
+/* ==================== Form Sections ==================== */
+
+.formSection {
+  background: white;
+  border: 1px solid #e8ecf0;
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.formSection::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ee4d2d 0%, #ff6b35 50%, #ff8c42 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.formSection:hover {
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.1);
+  border-color: rgba(238, 77, 45, 0.2);
+  transform: translateY(-2px);
+}
+
+.formSection:hover::before {
+  opacity: 1;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #f0f2f5;
+}
+
+.sectionIcon {
+  font-size: 22px;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.25);
+}
+
+.formSection:hover .sectionIcon {
+  transform: scale(1.08) rotate(3deg);
+  box-shadow: 0 6px 16px rgba(238, 77, 45, 0.35);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1a1a2e;
+  line-height: 1.4;
+  letter-spacing: -0.3px;
+}
+
+.addProductModal :global(.ant-divider) {
+  margin: 32px 0;
+  border-top-color: rgba(238, 77, 45, 0.15);
+}
+
+/* ==================== Variants Section ==================== */
+
+.variantsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.addVariantBtn {
+  font-weight: 600;
+  height: 40px;
+  padding: 0 24px;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.variantItem {
+  background: linear-gradient(135deg, #fafbfc 0%, #f5f7fa 100%);
+  padding: 24px;
+  border-radius: 14px;
+  margin-bottom: 16px;
+  border: 2px solid #e8ecf0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.variantItem::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 60%;
+  background: linear-gradient(180deg, #ee4d2d 0%, #ff6b35 100%);
+  border-radius: 0 4px 4px 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.variantItem:hover {
+  border-color: rgba(238, 77, 45, 0.3);
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.1);
+  transform: translateY(-3px);
+}
+
+.variantItem:hover::before {
+  opacity: 1;
+}
+
+.variantGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 18px;
+  margin-bottom: 16px;
+}
+
+.removeVariantBtn {
+  margin-top: 12px;
+  font-weight: 600;
+  height: 38px;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.removeVariantBtn:hover {
+  transform: translateX(4px);
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.25);
+  background: rgba(255, 77, 79, 0.08);
+}
+
+/* ==================== Button Styles ==================== */
+
+.addProductModal :global(.ant-btn) {
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: none;
+  height: 40px;
+  padding: 0 24px;
+  font-size: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.addProductModal :global(.ant-btn::before) {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.addProductModal :global(.ant-btn:hover::before) {
+  width: 300px;
+  height: 300px;
+}
+
+.addProductModal :global(.ant-btn-primary) {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  box-shadow: 0 4px 14px rgba(238, 77, 45, 0.35);
+  color: white;
+}
+
+.addProductModal :global(.ant-btn-primary:hover) {
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.45);
+}
+
+.addProductModal :global(.ant-btn-primary:active) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+}
+
+.addProductModal :global(.ant-btn-dashed) {
+  border: 2px dashed rgba(238, 77, 45, 0.35);
+  color: #ee4d2d;
+  background: rgba(238, 77, 45, 0.03);
+  font-weight: 600;
+}
+
+.addProductModal :global(.ant-btn-dashed:hover) {
+  border-color: #ee4d2d;
+  background: rgba(238, 77, 45, 0.08);
+  color: #d73211;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.2);
+}
+
+.addProductModal :global(.ant-btn-default) {
+  background: #f5f5f5;
+  color: #333;
+  border: 2px solid #e8e8e8;
+}
+
+.addProductModal :global(.ant-btn-default:hover) {
+  background: #e8e8e8;
+  border-color: #d9d9d9;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.addProductModal :global(.ant-btn-text.ant-btn-dangerous) {
+  color: #ff4d4f;
+}
+
+.addProductModal :global(.ant-btn-text.ant-btn-dangerous:hover) {
+  background: rgba(255, 77, 79, 0.08);
+  color: #cf1322;
+}
+
+/* ==================== Form Actions ==================== */
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 2px solid rgba(238, 77, 45, 0.1);
+}
+
+.formActions :global(.ant-btn) {
+  min-width: 140px;
+  height: 44px;
+  font-size: 15px;
+}
+
+/* ==================== Input Number Formatting ==================== */
+
+.addProductModal :global(.ant-input-number) {
+  width: 100%;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.addProductModal :global(.ant-input-number:hover) {
+  border-color: rgba(238, 77, 45, 0.4);
+}
+
+.addProductModal :global(.ant-input-number-focused) {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+  transform: translateY(-1px);
+}
+
+.addProductModal :global(.ant-input-number-input) {
+  font-weight: 500;
+  color: #333;
+  padding: 12px 16px;
+  font-size: 14px;
+  height: auto;
+}
+
+.addProductModal :global(.ant-input-number-input::placeholder) {
+  color: #bbb;
+  font-weight: 400;
+}
+
+.addProductModal :global(.ant-input-number-handler-wrap) {
+  border-left: 2px solid #e8e8e8;
+  border-radius: 0 8px 8px 0;
+  opacity: 1;
+}
+
+.addProductModal :global(.ant-input-number-handler) {
+  border: none;
+  height: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addProductModal :global(.ant-input-number-handler:hover) {
+  background: rgba(238, 77, 45, 0.05);
+}
+
+.addProductModal :global(.ant-input-number-handler-up-inner),
+.addProductModal :global(.ant-input-number-handler-down-inner) {
+  color: rgba(238, 77, 45, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ==================== Select Dropdown ==================== */
+
+.addProductModal :global(.ant-select) {
+  font-size: 14px;
+}
+
+.addProductModal :global(.ant-select-suffix) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addProductModal :global(.ant-select-selector) {
+  padding: 8px 12px !important;
+  height: auto !important;
+  min-height: 44px;
+  border: 2px solid #e8e8e8 !important;
+  border-radius: 8px !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+/* Select Multiple Mode */
+.addProductModal :global(.ant-select-multiple .ant-select-selector) {
+  padding: 4px 8px !important;
+}
+
+.addProductModal :global(.ant-select-multiple .ant-select-selection-search) {
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0 !important;
+}
+
+.addProductModal
+  :global(.ant-select-multiple .ant-select-selection-search-input) {
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 28px !important;
+}
+
+.addProductModal
+  :global(.ant-select-multiple .ant-select-selection-placeholder) {
+  padding-inline-start: 0 !important;
+  padding-inline-end: 0 !important;
+  margin-inline-start: 0 !important;
+}
+
+.addProductModal :global(.ant-select-multiple .ant-select-selection-item) {
+  background: rgba(238, 77, 45, 0.1);
+  border: 1px solid rgba(238, 77, 45, 0.3);
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin: 2px 4px 2px 0;
+  font-size: 13px;
+  height: auto;
+  line-height: 20px;
+}
+
+.addProductModal
+  :global(.ant-select-multiple .ant-select-selection-item-remove) {
+  color: rgba(238, 77, 45, 0.7);
+  font-size: 12px;
+}
+
+.addProductModal
+  :global(.ant-select-multiple .ant-select-selection-item-remove:hover) {
+  color: #ee4d2d;
+}
+
+.addProductModal :global(.ant-select-selection-search) {
+  display: flex !important;
+  align-items: center !important;
+}
+
+.addProductModal :global(.ant-select-selection-search-input) {
+  height: 28px !important;
+  font-weight: 500;
+  margin: 0 !important;
+}
+
+.addProductModal :global(.ant-select-selection-placeholder) {
+  color: #bbb;
+  font-weight: 400;
+  line-height: 28px;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.addProductModal :global(.ant-select-selection-item) {
+  line-height: 28px;
+  font-weight: 500;
+  color: #333;
+  display: flex !important;
+  align-items: center !important;
+}
+
+.addProductModal :global(.ant-select-arrow) {
+  color: rgba(238, 77, 45, 0.6);
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-top: 0;
+  inset-inline-end: 11px;
+}
+
+.addProductModal :global(.ant-select-dropdown) {
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  border: 1px solid #f0f0f0;
+  z-index: 1050 !important;
+}
+
+.addProductModal :global(.ant-select-item) {
+  font-size: 14px;
+  padding: 10px 16px;
+  font-weight: 500;
+}
+
+.addProductModal :global(.ant-select-item-option-selected) {
+  background: rgba(238, 77, 45, 0.1);
+  color: #ee4d2d;
+  font-weight: 600;
+}
+
+.addProductModal :global(.ant-select-item-option:hover) {
+  background: rgba(238, 77, 45, 0.05);
+}
+
+.addProductModal :global(.ant-select-item-option-active) {
+  background: rgba(238, 77, 45, 0.08);
+}
+
+/* ==================== Form Error Messages ==================== */
+
+.addProductModal :global(.ant-form-item-explain-error) {
+  font-size: 12px;
+  color: #ff4d4f;
+  margin-top: 8px;
+  padding-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.5;
+  min-height: 20px;
+  position: relative;
+  z-index: 1;
+}
+
+.addProductModal :global(.ant-form-item-has-error) {
+  margin-bottom: 36px;
+}
+
+.addProductModal :global(.ant-form-item-has-error .ant-input),
+.addProductModal :global(.ant-form-item-has-error .ant-input-number),
+.addProductModal :global(.ant-form-item-has-error .ant-select-selector) {
+  border-color: #ff4d4f;
+  margin-bottom: 0;
+}
+
+.addProductModal :global(.ant-form-item-has-error .ant-input:focus),
+.addProductModal :global(.ant-form-item-has-error .ant-input-number:focus),
+.addProductModal
+  :global(.ant-form-item-has-error .ant-select-focused .ant-select-selector) {
+  box-shadow: 0 0 0 3px rgba(255, 77, 79, 0.1);
+}
+
+/* ==================== Loading State ==================== */
+
+.addProductModal :global(.ant-btn-loading) {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.addProductModal :global(.ant-btn-loading::before) {
+  display: inline-block;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==================== Responsive Design ==================== */
+
+/* Tablet (768px - 1023px) */
+@media (max-width: 1023px) {
+  .addProductModal :global(.ant-modal) {
+    max-width: 90%;
+    margin: 0 auto;
+  }
+
+  .addProductModal :global(.ant-modal-body) {
+    padding: 24px;
+  }
+
+  .formSection {
+    padding: 20px;
+  }
+
+  .variantGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .variantItem {
+    padding: 16px;
+  }
+}
+
+/* Mobile Landscape (640px - 767px) */
+@media (max-width: 767px) {
+  .addProductModal :global(.ant-modal) {
+    max-width: 95%;
+  }
+
+  .addProductModal :global(.ant-modal-body) {
+    max-height: 65vh;
+    padding: 20px;
+  }
+
+  .addProductModal :global(.ant-modal-header) {
+    padding: 20px;
+  }
+
+  .formSection {
+    padding: 18px;
+    margin-bottom: 20px;
+  }
+
+  .sectionHeader {
+    margin-bottom: 20px;
+    padding-bottom: 14px;
+  }
+
+  .sectionIcon {
+    width: 38px;
+    height: 38px;
+    font-size: 22px;
+  }
+
+  .sectionTitle {
+    font-size: 16px;
+  }
+
+  .variantsHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .addVariantBtn {
+    width: 100%;
+  }
+
+  .variantGrid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .variantItem {
+    padding: 14px;
+  }
+
+  .formActions {
+    margin-top: 24px;
+    padding-top: 20px;
+  }
+}
+
+/* Mobile Portrait (480px - 639px) */
+@media (max-width: 639px) {
+  .addProductModal :global(.ant-modal) {
+    max-width: 100%;
+    margin: 0;
+    top: 0;
+  }
+
+  .addProductModal :global(.ant-modal-body) {
+    max-height: calc(100vh - 140px);
+    padding: 16px;
+  }
+
+  .addProductModal :global(.ant-modal-header) {
+    padding: 16px;
+  }
+
+  .addProductModal :global(.ant-modal-title) {
+    font-size: 18px;
+  }
+
+  .modalHeaderIcon {
+    font-size: 22px;
+  }
+
+  .formSection {
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .sectionHeader {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+  }
+
+  .sectionIcon {
+    width: 36px;
+    height: 36px;
+    font-size: 20px;
+  }
+
+  .sectionTitle {
+    font-size: 15px;
+  }
+
+  .addProductModal :global(.ant-form-item) {
+    margin-bottom: 16px;
+  }
+
+  .addProductModal :global(.ant-form-item-label) > label {
+    font-size: 13px;
+  }
+
+  .addProductModal :global(.ant-input),
+  .addProductModal :global(.ant-input-number-input),
+  .addProductModal :global(textarea.ant-input) {
+    font-size: 13px;
+    padding: 9px 12px;
+  }
+
+  .addProductModal :global(.ant-btn) {
+    font-size: 13px;
+    height: 36px;
+    padding: 0 20px;
+  }
+
+  .formActions :global(.ant-btn) {
+    min-width: 120px;
+    height: 40px;
+    font-size: 14px;
+  }
+
+  .variantItem {
+    padding: 12px;
+  }
+
+  .addProductModal :global(.ant-divider) {
+    margin: 24px 0;
+  }
+}
+
+/* Small Mobile (< 480px) */
+@media (max-width: 479px) {
+  .addProductModal :global(.ant-modal-body) {
+    padding: 12px;
+  }
+
+  .addProductModal :global(.ant-modal-header) {
+    padding: 14px;
+  }
+
+  .addProductModal :global(.ant-modal-title) {
+    font-size: 16px;
+  }
+
+  .modalHeaderIcon {
+    font-size: 20px;
+  }
+
+  .formSection {
+    padding: 14px;
+    margin-bottom: 14px;
+  }
+
+  .sectionHeader {
+    gap: 10px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+  }
+
+  .sectionIcon {
+    width: 34px;
+    height: 34px;
+    font-size: 18px;
+  }
+
+  .sectionTitle {
+    font-size: 14px;
+  }
+
+  .addProductModal :global(.ant-form-item) {
+    margin-bottom: 14px;
+  }
+
+  .addProductModal :global(.ant-form-item-label) > label {
+    font-size: 12px;
+  }
+
+  .addProductModal :global(.ant-input),
+  .addProductModal :global(.ant-input-number-input),
+  .addProductModal :global(textarea.ant-input) {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .addProductModal :global(.ant-btn) {
+    font-size: 12px;
+    height: 34px;
+    padding: 0 16px;
+  }
+
+  .formActions {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+  }
+
+  .formActions :global(.ant-btn) {
+    width: 100%;
+    min-width: 100%;
+    height: 38px;
+    font-size: 13px;
+  }
+
+  .variantGrid {
+    gap: 10px;
+  }
+
+  .variantItem {
+    padding: 10px;
+  }
+
+  .addProductModal :global(.ant-divider) {
+    margin: 20px 0;
+  }
+}
