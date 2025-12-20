@@ -14,13 +14,3 @@ git fetch --all
 git checkout anhnt/fe-test-deploy
 git pull origin anhnt/fe-test-deploy
 
-# 4. Kiểm tra các file cần thiết có tồn tại không
-ls -la frontend/Dockerfile
-ls -la frontend/docker-compose.prod.yaml
-ls -la frontend/nginx.conf
-
-# 5. Kiểm tra Docker đang chạy
-docker ps
-
-# 6. Test login GitHub Container Registry (cần PAT token)
-# echo "YOUR_GITHUB_TOKEN" | docker login ghcr.io -u ntabodoiqua --password-stdin

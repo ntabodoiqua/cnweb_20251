@@ -1,0 +1,82 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[vietnamese]{babel}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{float}
+\usepackage{alltt}
+\usepackage{longtable}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{multirow}
+\usepackage{booktabs}
+\usepackage{placeins}
+\usepackage{amsmath}
+\usepackage{tabularx}
+\usepackage{hyperref}
+\usepackage{ragged2e}
+\usepackage{fancyhdr}  % Thêm gói để tạo header, footer
+\usepackage{titlesec}   % Để thay đổi kích thước của title section
+\usepackage{tocloft}    % Để tùy chỉnh table of contents
+\usepackage{geometry}
+\geometry{a4paper, total={170mm,257mm}, left=20mm, top=20mm}
+
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\textbf{Báo Cáo Web}}
+\fancyhead[R]{Nhóm 1}
+\fancyfoot[L]{}
+\fancyfoot[C]{\thepage}
+\fancyfoot[R]{HustShop}
+
+\setlength{\headheight}{20pt}
+\setlength{\footskip}{30pt}
+
+\begin{document}
+
+\begin{titlepage}
+\begin{center}
+    \textbf{\Large ĐẠI HỌC BÁCH KHOA HÀ NỘI}\\[0.5em]
+    \textbf{\large TRƯỜNG CÔNG NGHỆ THÔNG TIN \& TRUYỀN THÔNG}
+
+    \includegraphics[width=0.2\textwidth]{divider.png}\\[2em]
+
+    \includegraphics[width=0.7\textwidth]{soict.jpg}
+
+    \vspace{1cm}
+
+    \textbf{\Large GVHD: PGS.TS. }\\[1em]
+
+    \textbf{\Large Chủ đề thực hiện:}\\[0.5em]
+    {\Large \textbf{XÂY DUNG WEB BBAN HANG}}\\[1em]
+
+    \normalsize
+    Mã lớp: \textbf{157520} \hspace{2em}
+    Nhóm: \textbf{25} \hspace{2em} \\[1em]
+
+    Môn học: \textbf{Nhập môn Học máy \& Khai phá dữ liệu} \hspace{0.5em} Mã môn học: \textbf{IT3190}\\[2em]
+
+    \textbf{Các thành viên trong nhóm:}
+
+    \vspace{1em}
+    \setlength{\tabcolsep}{5pt} % Khoảng cách giữa các cột
+    \renewcommand{\arraystretch}{1.2} % Giãn dòng
+    \begin{tabular}{|c|>{\RaggedRight}p{3.5cm}|c|>{\RaggedRight}p{4.5cm}|c|}
+        \hline
+        \textbf{STT} & \textbf{Họ và tên} & \textbf{MSSV} & \textbf{Nhiệm vụ} & \textbf{ĐG} \\
+        \hline
+        1 & nGUYỄN vĂN A & MSSVXXXX & BE \\
+        2 & nGUYỄN vĂN A & MSSVXXXX & BE \\
+        3 & nGUYỄN vĂN A & MSSVXXXX & BE \\
+        4 & nGUYỄN vĂN A & MSSVXXXX & BE \\
+        5 & nGUYỄN vĂN A & MSSVXXXX & BE \\
+        \hline
+    \end{tabular}
+\end{center}
+
+\vfill
+\begin{center}
+    \textit{Hà Nội, tháng 5 năm 2025}
+\end{center}
+
+\end{titlepage}
