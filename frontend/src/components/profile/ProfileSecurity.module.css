@@ -1,0 +1,1010 @@
+/* ========================================
+   Profile Security Component Styles
+   Giao diện trang bảo mật hồ sơ
+   ======================================== */
+
+.profileSecurity {
+  animation: fadeInUp 0.5s ease-out;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+/* ==================== Layout Grid ==================== */
+
+.securityLayout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Security Columns */
+.securityLeftColumn,
+.securityRightColumn {
+  animation: fadeInUp 0.5s ease-out;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.securityRightColumn {
+  animation-delay: 0.1s;
+}
+
+/* ==================== Security Section ==================== */
+
+.securitySection {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.02) 0%,
+    rgba(255, 107, 53, 0.02) 100%
+  );
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  border-radius: 16px;
+  padding: 28px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  height: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.securitySection:hover {
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.12);
+  border-color: rgba(238, 77, 45, 0.2);
+  transform: translateY(-2px);
+}
+
+/* ==================== Section Header ==================== */
+
+.sectionHeader {
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.1);
+}
+
+.sectionTitleWrapper {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.sectionIcon {
+  font-size: 28px;
+  color: #ee4d2d;
+  margin-top: 2px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.9;
+  }
+}
+
+.sectionTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 6px 0;
+  line-height: 1.3;
+}
+
+.sectionSubtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ==================== Password Form ==================== */
+
+.passwordForm {
+  width: 100%;
+  max-width: 100%;
+}
+
+.profileFormGroup {
+  margin-bottom: 24px;
+  animation: fadeIn 0.4s ease-out;
+  width: 100%;
+  max-width: 100%;
+}
+
+.profileFormLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.profileFormLabel :global(.anticon) {
+  color: #ee4d2d;
+  font-size: 16px;
+}
+
+.profileFormLabel .required {
+  color: #ff4d4f;
+  margin-left: 2px;
+  font-size: 16px;
+}
+
+.passwordInputWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.profileFormInput {
+  width: 100%;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 2px solid #e8e8e8;
+  border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  background: white;
+}
+
+.profileFormInput:hover {
+  border-color: rgba(238, 77, 45, 0.4);
+}
+
+.profileFormInput:focus {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 3px rgba(238, 77, 45, 0.1);
+  transform: translateY(-1px);
+}
+
+.passwordInput {
+  padding-right: 45px;
+}
+
+.passwordToggleBtn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #999;
+  font-size: 18px;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  border-radius: 6px;
+}
+
+.passwordToggleBtn:hover {
+  color: #ee4d2d;
+  background: rgba(238, 77, 45, 0.08);
+}
+
+.passwordToggleBtn:active {
+  transform: scale(0.95);
+}
+
+/* ==================== Password Strength Indicator ==================== */
+
+.passwordStrengthContainer {
+  margin-top: 14px;
+  padding: 14px;
+  background: rgba(238, 77, 45, 0.03);
+  border-radius: 10px;
+  border: 1px solid rgba(238, 77, 45, 0.08);
+  animation: fadeIn 0.3s ease-out;
+}
+
+.passwordStrengthBar {
+  height: 6px;
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.passwordStrengthFill {
+  height: 100%;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+    background-color 0.4s ease;
+  border-radius: 10px;
+  box-shadow: 0 0 8px currentColor;
+}
+
+.passwordStrengthText {
+  font-size: 13px;
+  color: #333;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.passwordRequirements {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+  width: 100%;
+  max-width: 100%;
+}
+
+.requirementItem {
+  font-size: 13px;
+  color: #999;
+  transition: all 0.3s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: white;
+  font-weight: 500;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.requirementItem.valid {
+  color: #52c41a;
+  font-weight: 600;
+  background: rgba(82, 196, 26, 0.08);
+  border-left: 3px solid #52c41a;
+}
+
+/* ==================== Password Match/Mismatch Messages ==================== */
+
+.passwordMismatchError,
+.passwordMatchSuccess {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.passwordMismatchError {
+  color: #ff4d4f;
+  background: rgba(255, 77, 79, 0.08);
+  border-left: 3px solid #ff4d4f;
+}
+
+.passwordMatchSuccess {
+  color: #52c41a;
+  background: rgba(82, 196, 26, 0.08);
+  border-left: 3px solid #52c41a;
+}
+
+.passwordMismatchError :global(.anticon),
+.passwordMatchSuccess :global(.anticon) {
+  font-size: 16px;
+}
+
+/* ==================== Form Actions ==================== */
+
+.profileFormActions {
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(238, 77, 45, 0.1);
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.profileBtn {
+  padding: 12px 28px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 150px;
+  justify-content: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.2);
+}
+
+.profileBtn::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.profileBtn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.profileBtn:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+  transform: none !important;
+}
+
+.profileBtnPrimary {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  color: white;
+}
+
+.profileBtnPrimary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(238, 77, 45, 0.4);
+}
+
+.profileBtnPrimary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+}
+
+/* ==================== Spinner ==================== */
+
+.spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==================== Login History Section ==================== */
+
+.loginHistoryContent {
+  margin-top: 20px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.loginHistoryTable {
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+  max-width: 100%;
+}
+
+.loginHistoryTable :global(.ant-table) {
+  border-radius: 10px;
+}
+
+.loginHistoryTable :global(.ant-table-thead > tr > th) {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.05) 0%,
+    rgba(255, 107, 53, 0.05) 100%
+  );
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.15);
+  padding: 14px 16px;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.loginHistoryTable :global(.ant-table-tbody > tr) {
+  transition: all 0.3s ease;
+}
+
+.loginHistoryTable :global(.ant-table-tbody > tr:hover > td) {
+  background-color: rgba(238, 77, 45, 0.03) !important;
+}
+
+.loginHistoryTable :global(.ant-table-tbody > tr > td) {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* ==================== Table Cell Styles ==================== */
+
+.loginTimeCell {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  word-break: break-word;
+}
+
+.loginTimePrimary {
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+  word-break: break-word;
+}
+
+.loginTimeRelative {
+  font-size: 12px;
+  color: #999;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  word-break: break-word;
+}
+
+.loginTimeRelative :global(.anticon) {
+  color: #ee4d2d;
+  font-size: 13px;
+}
+
+.deviceInfoCell {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+}
+
+.deviceIconWrapper {
+  font-size: 22px;
+  color: #ee4d2d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.1) 0%,
+    rgba(255, 107, 53, 0.1) 100%
+  );
+  border-radius: 10px;
+  flex-shrink: 0;
+  transition: all 0.3s ease;
+}
+
+.deviceInfoCell:hover .deviceIconWrapper {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.2);
+}
+
+.deviceDetails {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.deviceBrowser {
+  font-size: 14px;
+  color: #333;
+  font-weight: 600;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.deviceOs {
+  font-size: 12px;
+  color: #999;
+  font-weight: 500;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.ipAddressCell {
+  font-size: 14px;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.ipAddressCell :global(.anticon) {
+  color: #ee4d2d;
+  font-size: 16px;
+}
+
+.statusTag {
+  font-weight: 600;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 13px;
+  border: none;
+}
+
+/* ==================== Table Pagination ==================== */
+
+.tablePagination {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 16px;
+  border-top: 1px solid rgba(238, 77, 45, 0.1);
+}
+
+.tablePagination :global(.ant-pagination) {
+  font-weight: 500;
+}
+
+.tablePagination :global(.ant-pagination-item-active) {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  border-color: #ee4d2d;
+}
+
+.tablePagination :global(.ant-pagination-item-active a) {
+  color: white;
+}
+
+/* ==================== Animations ==================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ==================== Responsive Design ==================== */
+
+/* Large Desktop (1440px+) */
+@media (min-width: 1440px) {
+  .securityLayout {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .securitySection {
+    padding: 32px;
+  }
+
+  .sectionTitle {
+    font-size: 24px;
+  }
+}
+
+/* Laptop/Desktop (1024px - 1439px) */
+@media (max-width: 1439px) {
+  .securityLayout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .securitySection {
+    padding: 24px;
+  }
+}
+
+/* Tablet (768px - 1023px) */
+@media (max-width: 1023px) {
+  .securityLayout {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .securityLeftColumn,
+  .securityRightColumn {
+    animation: fadeInUp 0.5s ease-out;
+  }
+
+  .securitySection {
+    padding: 24px;
+  }
+
+  .sectionTitle {
+    font-size: 20px;
+  }
+
+  .sectionSubtitle {
+    font-size: 13px;
+  }
+
+  .passwordRequirements {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  .loginHistoryTable :global(.ant-table-thead > tr > th) {
+    font-size: 13px;
+    padding: 12px;
+  }
+
+  .loginHistoryTable :global(.ant-table-tbody > tr > td) {
+    padding: 12px;
+  }
+
+  .deviceIconWrapper {
+    width: 38px;
+    height: 38px;
+    font-size: 20px;
+  }
+}
+
+/* Mobile Landscape (640px - 767px) */
+@media (max-width: 767px) {
+  .securitySection {
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  .sectionHeader {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+  }
+
+  .sectionTitleWrapper {
+    gap: 10px;
+  }
+
+  .sectionIcon {
+    font-size: 24px;
+  }
+
+  .sectionTitle {
+    font-size: 18px;
+  }
+
+  .sectionSubtitle {
+    font-size: 13px;
+  }
+
+  .profileFormGroup {
+    margin-bottom: 20px;
+  }
+
+  .profileFormLabel {
+    font-size: 13px;
+    margin-bottom: 8px;
+  }
+
+  .profileFormInput {
+    padding: 11px 14px;
+    font-size: 14px;
+  }
+
+  .passwordInput {
+    padding-right: 42px;
+  }
+
+  .passwordRequirements {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .requirementItem {
+    font-size: 12px;
+    padding: 6px 10px;
+  }
+
+  .profileFormActions {
+    margin-top: 24px;
+    padding-top: 20px;
+  }
+
+  .profileBtn {
+    width: 100%;
+    padding: 13px 24px;
+    font-size: 14px;
+  }
+
+  .loginHistoryTable {
+    font-size: 13px;
+  }
+
+  .loginTimePrimary {
+    font-size: 13px;
+  }
+
+  .loginTimeRelative {
+    font-size: 11px;
+  }
+
+  .deviceBrowser {
+    font-size: 13px;
+  }
+
+  .deviceOs {
+    font-size: 11px;
+  }
+
+  .deviceIconWrapper {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+
+  .deviceInfoCell {
+    gap: 10px;
+  }
+
+  .ipAddressCell {
+    font-size: 13px;
+  }
+
+  .statusTag {
+    font-size: 12px;
+    padding: 3px 10px;
+  }
+
+  .tablePagination {
+    justify-content: center;
+    margin-top: 20px;
+  }
+
+  .tablePagination :global(.ant-pagination) {
+    font-size: 13px;
+  }
+}
+
+/* Mobile Portrait (480px - 639px) */
+@media (max-width: 639px) {
+  .securitySection {
+    padding: 16px;
+    border-radius: 10px;
+  }
+
+  .sectionHeader {
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+  }
+
+  .sectionIcon {
+    font-size: 22px;
+  }
+
+  .sectionTitle {
+    font-size: 17px;
+  }
+
+  .sectionSubtitle {
+    font-size: 12px;
+  }
+
+  .profileFormLabel {
+    font-size: 13px;
+  }
+
+  .profileFormLabel :global(.anticon) {
+    font-size: 15px;
+  }
+
+  .profileFormInput {
+    padding: 10px 12px;
+    font-size: 13px;
+    border-width: 1.5px;
+  }
+
+  .passwordInput {
+    padding-right: 40px;
+  }
+
+  .passwordToggleBtn {
+    right: 10px;
+    font-size: 16px;
+  }
+
+  .passwordStrengthContainer {
+    padding: 12px;
+  }
+
+  .passwordStrengthBar {
+    height: 5px;
+  }
+
+  .passwordStrengthText {
+    font-size: 12px;
+  }
+
+  .requirementItem {
+    font-size: 11px;
+    padding: 5px 8px;
+  }
+
+  .passwordMismatchError,
+  .passwordMatchSuccess {
+    font-size: 12px;
+    padding: 8px 10px;
+  }
+
+  .profileBtn {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+
+  .loginHistoryTable :global(.ant-table-thead > tr > th) {
+    font-size: 12px;
+    padding: 10px 8px;
+  }
+
+  .loginHistoryTable :global(.ant-table-tbody > tr > td) {
+    padding: 10px 8px;
+  }
+
+  .deviceIconWrapper {
+    width: 34px;
+    height: 34px;
+    font-size: 16px;
+    border-radius: 8px;
+  }
+
+  .deviceInfoCell {
+    gap: 8px;
+  }
+
+  .loginTimePrimary {
+    font-size: 12px;
+  }
+
+  .deviceBrowser {
+    font-size: 12px;
+  }
+
+  .ipAddressCell {
+    font-size: 12px;
+  }
+}
+
+/* Small Mobile (< 480px) */
+@media (max-width: 479px) {
+  .securitySection {
+    padding: 14px;
+  }
+
+  .sectionHeader {
+    margin-bottom: 14px;
+    padding-bottom: 12px;
+  }
+
+  .sectionTitleWrapper {
+    gap: 8px;
+  }
+
+  .sectionIcon {
+    font-size: 20px;
+  }
+
+  .sectionTitle {
+    font-size: 16px;
+  }
+
+  .sectionSubtitle {
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .profileFormGroup {
+    margin-bottom: 18px;
+  }
+
+  .profileFormLabel {
+    font-size: 12px;
+  }
+
+  .profileFormInput {
+    padding: 9px 11px;
+    font-size: 13px;
+  }
+
+  .passwordInput {
+    padding-right: 38px;
+  }
+
+  .passwordToggleBtn {
+    font-size: 15px;
+  }
+
+  .passwordStrengthContainer {
+    padding: 10px;
+  }
+
+  .passwordStrengthBar {
+    height: 4px;
+  }
+
+  .passwordStrengthText {
+    font-size: 11px;
+  }
+
+  .requirementItem {
+    font-size: 11px;
+    padding: 4px 6px;
+  }
+
+  .passwordMismatchError,
+  .passwordMatchSuccess {
+    font-size: 11px;
+    padding: 7px 9px;
+  }
+
+  .profileFormActions {
+    margin-top: 20px;
+    padding-top: 16px;
+  }
+
+  .profileBtn {
+    padding: 11px 18px;
+    font-size: 13px;
+    min-width: 100%;
+  }
+
+  .deviceIconWrapper {
+    width: 32px;
+    height: 32px;
+    font-size: 15px;
+  }
+
+  .tablePagination {
+    margin-top: 16px;
+  }
+
+  .tablePagination :global(.ant-pagination) {
+    font-size: 12px;
+  }
+
+  .tablePagination :global(.ant-pagination-item),
+  .tablePagination :global(.ant-pagination-prev),
+  .tablePagination :global(.ant-pagination-next) {
+    min-width: 28px;
+    height: 28px;
+    line-height: 26px;
+  }
+}

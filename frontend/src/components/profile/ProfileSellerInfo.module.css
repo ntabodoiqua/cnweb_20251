@@ -1,0 +1,1138 @@
+/* ========================================
+   Profile Seller Info Component Styles
+   Giao diện trang hồ sơ người bán
+   ======================================== */
+
+.sellerProfileContainer {
+  animation: fadeInUp 0.5s ease-out;
+}
+
+/* ==================== Compact View ==================== */
+
+.sellerProfileCompact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: white;
+  border: 2px solid rgba(238, 77, 45, 0.15);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.sellerProfileCompact:hover {
+  border-color: #ee4d2d;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.15);
+  transform: translateY(-2px);
+}
+
+.compactLeft {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.compactLogo {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 28px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+  overflow: hidden;
+}
+
+.compactLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.compactInfo {
+  flex: 1;
+}
+
+.compactStoreName {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 8px;
+}
+
+.sellerStatusBadge.compact {
+  font-size: 12px;
+  padding: 4px 10px;
+}
+
+.compactRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.compactMeta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+}
+
+.compactDate {
+  font-size: 13px;
+  color: #666;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.compactDate :global(.anticon) {
+  color: #ee4d2d;
+}
+
+.expandButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.3);
+}
+
+.expandButton:hover {
+  background: linear-gradient(135deg, #d73211 0%, #ee5a2d 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.4);
+}
+
+.expandButton:active {
+  transform: translateY(0);
+}
+
+/* ==================== Expanded View ==================== */
+
+.sellerProfileExpanded {
+  margin-top: 16px;
+  padding: 24px;
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.02) 0%,
+    rgba(255, 107, 53, 0.02) 100%
+  );
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  border-radius: 12px;
+  animation: fadeInDown 0.15s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0.5;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== Status Badge ==================== */
+
+.sellerStatusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  animation: scaleIn 0.4s ease-out;
+}
+
+.sellerStatusBadge.created {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  color: white;
+}
+
+.sellerStatusBadge.pending {
+  background: linear-gradient(135deg, #faad14 0%, #ffc53d 100%);
+  color: white;
+}
+
+.sellerStatusBadge.verified {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+}
+
+.sellerStatusBadge.rejected {
+  background: linear-gradient(135deg, #ff4d4f 0%, #ff7875 100%);
+  color: white;
+}
+
+.sellerStatusBadge :global(.anticon) {
+  font-size: 16px;
+}
+
+/* ==================== Shop Info Section ==================== */
+
+.shopInfoSection {
+  background: linear-gradient(
+    135deg,
+    rgba(238, 77, 45, 0.03) 0%,
+    rgba(255, 107, 53, 0.03) 100%
+  );
+  border: 1px solid rgba(238, 77, 45, 0.1);
+  border-radius: 16px;
+  padding: 28px;
+  margin-bottom: 24px;
+  transition: all 0.3s ease;
+  animation: slideInFromLeft 0.5s ease-out;
+}
+
+.shopInfoSection:hover {
+  box-shadow: 0 8px 24px rgba(238, 77, 45, 0.12);
+  border-color: rgba(238, 77, 45, 0.2);
+  transform: translateY(-2px);
+}
+
+.shopInfoHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.1);
+}
+
+.shopLogoWrapper {
+  position: relative;
+  flex-shrink: 0;
+  animation: scaleIn 0.6s ease-out;
+}
+
+.shopLogo {
+  width: 100px;
+  height: 100px;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 3px solid white;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shopLogo:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
+}
+
+.shopLogoPlaceholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 40px;
+  border: 3px solid white;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.2);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.shopLogoPlaceholder:hover {
+  transform: scale(1.05) rotate(5deg);
+  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.3);
+}
+
+.shopBasicInfo {
+  flex: 1;
+}
+
+.shopName {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 12px;
+}
+
+.shopDescription {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  margin: 12px 0;
+  padding: 12px;
+  background: rgba(238, 77, 45, 0.05);
+  border-radius: 8px;
+  border-left: 3px solid #ee4d2d;
+}
+
+.shopContactInfo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.shopContactItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+  padding: 6px 12px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid rgba(238, 77, 45, 0.15);
+  transition: all 0.3s ease;
+}
+
+.shopContactItem:hover {
+  border-color: #ee4d2d;
+  color: #ee4d2d;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.15);
+}
+
+.shopContactItem :global(.anticon) {
+  color: #ee4d2d;
+  font-size: 16px;
+}
+
+/* ==================== Address Info ==================== */
+
+.shopAddressSection {
+  margin-top: 16px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  border: 1px solid rgba(238, 77, 45, 0.1);
+}
+
+.shopAddressTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shopAddressTitle :global(.anticon) {
+  color: #ee4d2d;
+}
+
+.shopAddressText {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+}
+
+/* ==================== Registration Form ==================== */
+
+.sellerRegistrationForm {
+  max-width: 900px;
+  animation: fadeInUp 0.5s ease-out;
+}
+
+.formSectionTitle {
+  font-size: 18px;
+  font-weight: 700;
+  color: #333;
+  margin: 32px 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.1);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.formSectionTitle:first-child {
+  margin-top: 0;
+}
+
+.formSectionTitle :global(.anticon) {
+  color: #ee4d2d;
+  font-size: 20px;
+}
+
+.locationSelects {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.locationSelectGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.locationSelectLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.locationSelectLabel :global(.anticon) {
+  color: #ee4d2d;
+  font-size: 16px;
+}
+
+.locationSelectLabel .required {
+  color: #ff4d4f;
+  margin-left: 2px;
+}
+
+/* ==================== Empty State ==================== */
+
+.sellerEmptyState {
+  text-align: center;
+  padding: 80px 20px;
+  animation: fadeIn 0.6s ease-out;
+}
+
+.sellerEmptyState :global(.anticon) {
+  font-size: 80px;
+  color: #ee4d2d;
+  margin-bottom: 20px;
+  opacity: 0.8;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+.sellerEmptyState h3 {
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.sellerEmptyState p {
+  font-size: 15px;
+  color: #666;
+  line-height: 1.6;
+  max-width: 480px;
+  margin: 0 auto 20px;
+}
+
+.sellerEmptyState button {
+  font-size: 15px;
+}
+
+.sellerEmptyState button :global(.anticon) {
+  font-size: 15px;
+}
+
+/* ==================== Loading State ==================== */
+
+.sellerLoading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  gap: 20px;
+}
+
+.sellerLoading :global(.anticon) {
+  font-size: 48px;
+  color: #ee4d2d;
+  animation: spin 1s linear infinite;
+}
+
+.sellerLoading p {
+  font-size: 16px;
+  color: #666;
+}
+
+/* ==================== Rejection Reason ==================== */
+
+.rejectionReasonSection {
+  margin-top: 24px;
+  padding: 16px;
+  background: rgba(255, 77, 79, 0.05);
+  border: 1px solid rgba(255, 77, 79, 0.2);
+  border-radius: 12px;
+  animation: shake 0.5s ease-out;
+}
+
+.rejectionReasonTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #ff4d4f;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.rejectionReasonText {
+  font-size: 14px;
+  color: #666;
+  line-height: 1.6;
+  padding: 12px;
+  background: white;
+  border-radius: 8px;
+}
+
+/* ==================== Document Upload Section ==================== */
+
+.documentUploadSection {
+  margin-top: 24px;
+  padding: 20px;
+  background: linear-gradient(
+    135deg,
+    rgba(24, 144, 255, 0.03) 0%,
+    rgba(64, 169, 255, 0.03) 100%
+  );
+  border: 1px solid rgba(24, 144, 255, 0.2);
+  border-radius: 12px;
+  animation: fadeInUp 0.4s ease-out;
+}
+
+.documentUploadHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid rgba(24, 144, 255, 0.1);
+}
+
+.documentUploadHeader h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.documentInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  background: white;
+  border: 1px solid rgba(24, 144, 255, 0.15);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.documentInfo:hover {
+  border-color: #1890ff;
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.1);
+}
+
+.documentDetails {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.documentMeta {
+  flex: 1;
+  min-width: 0;
+}
+
+.documentName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+.documentSizeDate {
+  font-size: 13px;
+  color: #999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.documentSizeDate .separator {
+  color: #ddd;
+}
+
+.documentActions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.documentBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.documentBtnView {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  color: white;
+  box-shadow: 0 2px 6px rgba(24, 144, 255, 0.3);
+}
+
+.documentBtnView:hover {
+  background: linear-gradient(135deg, #096dd9 0%, #1890ff 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(24, 144, 255, 0.4);
+}
+
+.documentBtnUpload {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: white;
+  box-shadow: 0 2px 6px rgba(82, 196, 26, 0.3);
+}
+
+.documentBtnUpload:hover {
+  background: linear-gradient(135deg, #389e0d 0%, #52c41a 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(82, 196, 26, 0.4);
+}
+
+.documentBtnUpload input {
+  display: none;
+}
+
+.documentEmpty {
+  text-align: center;
+  padding: 32px 20px;
+}
+
+.documentEmptyIcon {
+  font-size: 48px;
+  color: #1890ff;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.documentEmptyText {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.documentBtnPrimary {
+  background: linear-gradient(135deg, #1890ff 0%, #40a9ff 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(24, 144, 255, 0.3);
+}
+
+.documentBtnPrimary:hover {
+  background: linear-gradient(135deg, #096dd9 0%, #1890ff 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(24, 144, 255, 0.4);
+}
+
+.documentBtnUploadLarge {
+  padding: 12px 24px;
+  font-size: 15px;
+  min-width: 200px;
+  height: 44px;
+}
+
+.documentBtnUploadLarge:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* ==================== Timestamps ==================== */
+
+.timestampsSection {
+  margin-top: 24px;
+  padding: 16px;
+  background: rgba(238, 77, 45, 0.03);
+  border-radius: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.timestampItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timestampLabel {
+  font-size: 12px;
+  color: #999;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.timestampValue {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.timestampValue :global(.anticon) {
+  color: #ee4d2d;
+  font-size: 14px;
+}
+
+/* ==================== Action Buttons ==================== */
+
+.sellerProfileContainer :global(.profile-form-actions) {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding-top: 24px;
+  border-top: 2px solid rgba(238, 77, 45, 0.1);
+}
+
+.sellerProfileContainer :global(.profile-btn) {
+  min-width: 180px;
+}
+
+/* ==================== Animations ==================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInFromLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+/* ==================== Responsive Design ==================== */
+
+@media (max-width: 1024px) {
+  .shopInfoSection {
+    padding: 24px;
+  }
+
+  .shopContactInfo {
+    gap: 12px;
+  }
+
+  .documentInfo {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .sellerProfileCompact {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .compactLeft {
+    width: 100%;
+  }
+
+  .compactRight {
+    width: 100%;
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .compactMeta {
+    align-items: flex-start;
+  }
+
+  .expandButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .shopInfoHeader {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+
+  .shopLogo,
+  .shopLogoPlaceholder {
+    width: 80px;
+    height: 80px;
+  }
+
+  .shopContactInfo {
+    flex-direction: column;
+    align-items: stretch;
+    width: 100%;
+  }
+
+  .shopContactItem {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .locationSelects {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .timestampsSection {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .formSectionTitle {
+    font-size: 16px;
+  }
+
+  .shopName {
+    font-size: 20px;
+  }
+
+  .documentUploadSection {
+    padding: 16px;
+  }
+
+  .documentInfo {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .documentDetails {
+    flex-direction: row;
+    align-items: center;
+    text-align: left;
+  }
+
+  .documentName {
+    font-size: 13px;
+  }
+
+  .documentSizeDate {
+    font-size: 12px;
+  }
+
+  .documentActions {
+    flex-direction: row;
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .documentBtn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .sellerProfileContainer :global(.profile-form-actions) {
+    flex-direction: column-reverse;
+  }
+
+  .sellerProfileContainer :global(.profile-btn) {
+    width: 100%;
+  }
+}
+
+/* ==================== Form Validation Styles ==================== */
+
+.inputError {
+  border-color: #ff4d4f !important;
+  background-color: #fff2f0 !important;
+}
+
+.inputError:focus {
+  border-color: #ff4d4f !important;
+  box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.1) !important;
+}
+
+.errorMessage {
+  display: block;
+  color: #ff4d4f;
+  font-size: 13px;
+  margin-top: 6px;
+  font-weight: 400;
+  line-height: 1.4;
+  animation: fadeInDown 0.3s ease-out;
+}
+
+.errorMessage::before {
+  content: "⚠ ";
+  margin-right: 4px;
+}
+
+:global(.profile-form-group) {
+  position: relative;
+}
+
+:global(.profile-form-input).inputError,
+:global(.profile-form-textarea).inputError {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  10%,
+  30%,
+  50%,
+  70%,
+  90% {
+    transform: translateX(-4px);
+  }
+  20%,
+  40%,
+  60%,
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@media (max-width: 480px) {
+  .shopInfoSection {
+    padding: 16px 12px;
+  }
+
+  .sellerProfileExpanded {
+    padding: 16px 12px;
+  }
+
+  .sellerEmptyState {
+    padding: 60px 16px;
+  }
+
+  .sellerEmptyState :global(.anticon) {
+    font-size: 80px;
+  }
+
+  .sellerEmptyState h3 {
+    font-size: 20px;
+  }
+
+  .sellerEmptyState p {
+    font-size: 14px;
+  }
+
+  .compactLogo {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+
+  .compactStoreName {
+    font-size: 16px;
+  }
+
+  .shopLogo,
+  .shopLogoPlaceholder {
+    width: 70px;
+    height: 70px;
+    font-size: 32px;
+  }
+
+  .shopName {
+    font-size: 18px;
+  }
+
+  .sellerStatusBadge {
+    font-size: 12px;
+    padding: 6px 12px;
+  }
+
+  .shopDescription {
+    font-size: 13px;
+  }
+
+  .shopContactItem {
+    font-size: 13px;
+  }
+
+  .shopAddressSection {
+    padding: 12px;
+  }
+
+  .shopAddressTitle {
+    font-size: 14px;
+  }
+
+  .shopAddressText {
+    font-size: 13px;
+  }
+
+  .formSectionTitle {
+    font-size: 15px;
+    margin: 24px 0 16px;
+  }
+
+  .documentUploadSection {
+    padding: 12px;
+  }
+
+  .documentUploadHeader h3 {
+    font-size: 14px;
+  }
+
+  .documentDetails {
+    gap: 8px;
+  }
+
+  .documentName {
+    font-size: 12px;
+  }
+
+  .documentSizeDate {
+    font-size: 11px;
+  }
+
+  .documentActions {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .documentBtn {
+    font-size: 13px;
+    padding: 10px 14px;
+  }
+
+  .documentEmpty {
+    padding: 24px 12px;
+  }
+
+  .documentEmptyIcon {
+    font-size: 40px;
+  }
+
+  .documentEmptyText {
+    font-size: 13px;
+  }
+
+  .timestampsSection {
+    padding: 12px;
+    gap: 10px;
+  }
+
+  .timestampLabel {
+    font-size: 11px;
+  }
+
+  .timestampValue {
+    font-size: 13px;
+  }
+
+  .rejectionReasonSection {
+    padding: 12px;
+  }
+
+  .rejectionReasonTitle {
+    font-size: 14px;
+  }
+
+  .rejectionReasonText {
+    font-size: 13px;
+  }
+
+  .sellerProfileContainer :global(.profile-btn) {
+    min-width: 100%;
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}
