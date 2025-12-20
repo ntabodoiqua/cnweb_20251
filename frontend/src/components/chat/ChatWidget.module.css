@@ -1,0 +1,763 @@
+/* Chat Widget Styles */
+
+/* Floating Button */
+.floatingButton {
+  position: fixed;
+  bottom: 100px;
+  right: 24px;
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.chatButton {
+  width: 56px !important;
+  height: 56px !important;
+  font-size: 24px !important;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b4a 100%) !important;
+  border: none !important;
+  box-shadow: 0 4px 16px rgba(238, 77, 45, 0.4) !important;
+  transition: all 0.3s ease !important;
+}
+
+.chatButton:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(238, 77, 45, 0.5) !important;
+}
+
+/* Chat Widget Container */
+.chatWidget {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: 380px;
+  height: 550px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  z-index: 1001;
+  overflow: hidden;
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header */
+.chatHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b4a 100%);
+  color: #fff;
+}
+
+.backButton {
+  color: #fff !important;
+  padding: 4px !important;
+  font-size: 18px !important;
+}
+
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.headerIcon {
+  font-size: 24px;
+}
+
+.headerTitle {
+  flex: 1;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.headerInfo {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.headerName {
+  font-size: 14px;
+  font-weight: 600;
+  flex: 1;
+}
+
+.headerActions {
+  display: flex;
+  gap: 4px;
+}
+
+.headerBtn {
+  color: #fff !important;
+  opacity: 0.8;
+}
+
+.headerBtn:hover {
+  opacity: 1;
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+/* Connection Status Icons */
+.connectedIcon {
+  color: #52c41a;
+  font-size: 14px;
+}
+
+.connectingIcon {
+  color: #faad14;
+  font-size: 14px;
+}
+
+.disconnectedIcon {
+  color: #ff4d4f;
+  font-size: 14px;
+}
+
+/* Chat Body */
+.chatBody {
+  flex: 1;
+  overflow-y: auto;
+  background: #f5f5f5;
+}
+
+/* Conversation List */
+.conversationList {
+  padding: 8px 0;
+}
+
+.conversationItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: background 0.2s;
+  background: #fff;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.conversationItem:hover {
+  background: #fafafa;
+}
+
+.conversationItem.active {
+  background: #fff5f0;
+}
+
+.avatar {
+  flex-shrink: 0;
+}
+
+.conversationInfo {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.conversationHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.participantName {
+  font-weight: 600;
+  color: #333;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.conversationTime {
+  font-size: 12px;
+  color: #999;
+  flex-shrink: 0;
+}
+
+.lastMessage {
+  font-size: 13px;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Messages Container */
+.messagesContainer {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 100%;
+}
+
+.emptyMessages {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Message Wrapper */
+.messageWrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  max-width: 85%;
+}
+
+.messageWrapper.own {
+  margin-left: auto;
+  flex-direction: row-reverse;
+}
+
+.messageAvatar {
+  flex-shrink: 0;
+}
+
+/* Message Bubble */
+.messageBubble {
+  background: #fff;
+  padding: 10px 14px;
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  max-width: 100%;
+  word-wrap: break-word;
+}
+
+.messageWrapper.own .messageBubble {
+  background: #ee4d2d;
+  color: #fff;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 4px;
+}
+
+/* Reply To */
+.replyTo {
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border-left: 3px solid #ee4d2d;
+}
+
+.messageWrapper.own .replyTo {
+  background: rgba(255, 255, 255, 0.15);
+  border-left-color: #fff;
+}
+
+.replyToName {
+  font-size: 12px;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.replyToText {
+  font-size: 12px;
+  opacity: 0.8;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  display: block;
+}
+
+/* Message Text */
+.messageText {
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+/* Message Image */
+.messageImage {
+  margin: -6px -10px;
+}
+
+.messageImage img {
+  max-width: 200px;
+  max-height: 200px;
+  border-radius: 12px;
+  cursor: pointer;
+  display: block;
+}
+
+.imageCaption {
+  padding: 8px 10px 0;
+  font-size: 13px;
+}
+
+/* Message Product */
+.messageProduct {
+  min-width: 200px;
+}
+
+.productCard {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.messageWrapper.own .productCard {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.productImage {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.productInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.productName {
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.productPriceRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.productPrice {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ee4d2d;
+}
+
+.messageWrapper.own .productPrice {
+  color: #fff;
+}
+
+.productOriginalPrice {
+  font-size: 11px;
+  color: #999;
+  text-decoration: line-through;
+}
+
+.messageWrapper.own .productOriginalPrice {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.productMeta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.productRating {
+  font-size: 11px;
+  color: #faad14;
+}
+
+.messageWrapper.own .productRating {
+  color: #ffd666;
+}
+
+.productSold {
+  font-size: 10px;
+  color: #666;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.messageWrapper.own .productSold {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.productNote {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+/* Message Order */
+.messageOrder {
+  min-width: 200px;
+}
+
+.orderCard {
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 8px;
+}
+
+.messageWrapper.own .orderCard {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.orderHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.orderCodeWrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.orderCode {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.orderItemCount {
+  font-size: 10px;
+  color: #999;
+}
+
+.messageWrapper.own .orderItemCount {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.orderStatus {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #f0f0f0;
+  color: #666;
+}
+
+.orderStatus.pending {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+.orderStatus.confirmed {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.orderStatus.shipping {
+  background: #e6fffb;
+  color: #13c2c2;
+}
+
+.orderStatus.delivered {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.orderStatus.cancelled {
+  background: #fff1f0;
+  color: #ff4d4f;
+}
+
+.orderStatus.returned {
+  background: #f5f5f5;
+  color: #8c8c8c;
+}
+
+/* Order Products List */
+.orderProducts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  margin-bottom: 8px;
+}
+
+.messageWrapper.own .orderProducts {
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+.orderProductItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.orderProductImage {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.messageWrapper.own .orderProductImage {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.orderProductInfo {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.orderProductName {
+  font-size: 11px;
+  color: #333;
+  font-weight: 500;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.messageWrapper.own .orderProductName {
+  color: #fff;
+}
+
+.orderProductDetails {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.orderProductPrice {
+  font-size: 11px;
+  color: #ee4d2d;
+  font-weight: 500;
+}
+
+.messageWrapper.own .orderProductPrice {
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.orderProductQty {
+  font-size: 10px;
+  color: #666;
+  background: rgba(0, 0, 0, 0.05);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.messageWrapper.own .orderProductQty {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.orderMoreProducts {
+  font-size: 10px;
+  color: #999;
+  font-style: italic;
+  padding-left: 44px;
+}
+
+.messageWrapper.own .orderMoreProducts {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Order Footer */
+.orderFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.orderAmount {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ee4d2d;
+}
+
+.messageWrapper.own .orderAmount {
+  color: #fff;
+}
+
+.orderNote {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+/* Message Footer */
+.messageFooter {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.messageTime {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+.messageStatus {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.readIcon {
+  color: #52c41a;
+}
+
+.messageWrapper.own .readIcon {
+  color: #fff;
+}
+
+/* Typing Indicator */
+.typingIndicator {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  background: #fff;
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+}
+
+.typingDot {
+  width: 8px;
+  height: 8px;
+  background: #999;
+  border-radius: 50%;
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typingDot:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typingDot:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes typingBounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Input Container */
+.inputContainer {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+}
+
+.inputActions {
+  display: flex;
+  gap: 4px;
+}
+
+.inputActionBtn {
+  color: #666 !important;
+  padding: 8px !important;
+}
+
+.inputActionBtn:hover {
+  color: #ee4d2d !important;
+  background: #fff5f0 !important;
+}
+
+.messageInput {
+  flex: 1;
+  border-radius: 20px !important;
+  resize: none !important;
+  padding: 8px 16px !important;
+}
+
+.messageInput:focus {
+  border-color: #ee4d2d !important;
+  box-shadow: 0 0 0 2px rgba(238, 77, 45, 0.1) !important;
+}
+
+.sendButton {
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  padding: 0 !important;
+  background: #ee4d2d !important;
+  border-color: #ee4d2d !important;
+}
+
+.sendButton:hover:not(:disabled) {
+  background: #ff6b4a !important;
+  border-color: #ff6b4a !important;
+}
+
+.sendButton:disabled {
+  background: #f5f5f5 !important;
+  border-color: #d9d9d9 !important;
+  color: #bfbfbf !important;
+}
+
+/* Loading & Empty States */
+.loadingContainer {
+  padding: 40px;
+  text-align: center;
+}
+
+.emptyState {
+  padding: 40px;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .chatWidget {
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    right: 0;
+    border-radius: 0;
+  }
+
+  .floatingButton {
+    bottom: 80px;
+    right: 16px;
+  }
+
+  .chatButton {
+    width: 50px !important;
+    height: 50px !important;
+    font-size: 20px !important;
+  }
+}
