@@ -5,7 +5,7 @@ on:
     paths:
       - "monitoring/**" # Chỉ chạy khi thư mục monitoring thay đổi
     branches:
-      - "be/dev" # Hoặc nhánh main tùy bạn
+      - "main"
 
 jobs:
   deploy-monitoring:
