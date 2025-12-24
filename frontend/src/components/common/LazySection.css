@@ -1,0 +1,79 @@
+.lazy-section {
+  width: 100%;
+  transition: min-height 0.3s ease;
+}
+
+.lazy-section__placeholder {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 20px;
+  background: linear-gradient(
+    90deg,
+    rgba(248, 249, 250, 0.5) 0%,
+    rgba(248, 249, 250, 0.8) 50%,
+    rgba(248, 249, 250, 0.5) 100%
+  );
+  border-radius: 12px;
+  min-height: inherit;
+}
+
+.lazy-section__content {
+  opacity: 0;
+  animation: lazySectionFadeIn 0.4s ease forwards;
+}
+
+@keyframes lazySectionFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Skeleton customization */
+.lazy-section__placeholder .ant-skeleton {
+  max-width: 100%;
+}
+
+.lazy-section__placeholder .ant-skeleton-content {
+  padding: 0;
+}
+
+.lazy-section__placeholder .ant-skeleton-title {
+  margin-bottom: 16px;
+  height: 24px;
+  width: 200px !important;
+}
+
+.lazy-section__placeholder .ant-skeleton-paragraph {
+  margin-top: 0;
+}
+
+.lazy-section__placeholder .ant-skeleton-paragraph > li {
+  height: 16px;
+  margin-top: 12px;
+}
+
+/* Product grid skeleton */
+.lazy-section--products .lazy-section__placeholder {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .lazy-section__placeholder {
+    background: linear-gradient(
+      90deg,
+      rgba(30, 30, 30, 0.5) 0%,
+      rgba(40, 40, 40, 0.8) 50%,
+      rgba(30, 30, 30, 0.5) 100%
+    );
+  }
+}
