@@ -37,19 +37,46 @@ public class SecurityConfig {
         "/actuator/health",
         "/actuator/health/**",
         "/actuator/info",
-        "/actuator/info/**"
+        "/actuator/info/**",
+        "/actuator/prometheus",
+        "/actuator/prometheus/**",
+        "/actuator/metrics",
+        "/actuator/metrics/**"
 }; 
 
     private static final String[] PUBLIC_POST_ENDPOINTS = {
             "/users",
-            "/public/**"
+            "/public/**",
+            "/internal/**"
     };
 
     private static final String[] PUBLIC_GET_ENDPOINTS = {
             "/products/public/**",
             "/categories/public/**",
             "/brands/public/**",
-            "/public/**"
+            "/public/**",
+            "/internal/**",
+            // Elasticsearch search endpoints - public cho user tìm kiếm
+            "/products/search",
+            "/products/search/suggest",
+            "/products/search/health",
+            // Store search endpoints - public cho user tìm kiếm cửa hàng
+            "/stores/search",
+            "/stores/search/suggest",
+            // Global search endpoints - public cho tìm kiếm tổng hợp
+            "/search",
+            "/search/suggest",
+            // Banner slides endpoints - public cho hiển thị banner
+            "/banner-slides",
+            "/banner-slides/platform",
+            "/banner-slides/store/**",
+            "/banner-slides/{bannerId}"
+    };
+
+    private static final String[] PUBLIC_POST_ENDPOINTS_SEARCH = {
+            // POST search endpoint - public cho user tìm kiếm với filters
+            "/products/search",
+            "/stores/search"
     };
 
     CustomJwtDecoder customJwtDecoder;
@@ -71,6 +98,8 @@ public class SecurityConfig {
                                 .requestMatchers(AUTH_ENDPOINTS).permitAll()
                                 // Allow POST to create users
                                 .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS).permitAll()
+                                // Allow POST to search endpoints
+                                .requestMatchers(HttpMethod.POST, PUBLIC_POST_ENDPOINTS_SEARCH).permitAll()
                                 // Allow GET requests to public endpoints
                                 .requestMatchers(HttpMethod.GET, PUBLIC_GET_ENDPOINTS).permitAll()
                                 // All other requests need authentication
