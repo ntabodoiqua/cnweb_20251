@@ -84,16 +84,14 @@ public class AuthenticationController {
             ipAddress = httpRequest.getRemoteAddr();
         }
         String userAgent = httpRequest.getHeader("User-Agent");
-
+        var result = authenticationService.authenticateWithGoogle(request.getToken());
         try {
-            var result = authenticationService.authenticateWithGoogle(request.getToken());
-            // Extract username from result token if needed for logging
-            loginHistoryService.recordLogin("google_user", ipAddress, userAgent, SigninStatus.SUCCESS);
+            loginHistoryService.recordLogin(result.getUsername(), ipAddress, userAgent, SigninStatus.SUCCESS);
             return ApiResponse.<AuthenticationResponse>builder()
                     .result(result)
                     .build();
         } catch (Exception e) {
-            loginHistoryService.recordLogin("google_user", ipAddress, userAgent, SigninStatus.FAILED);
+            loginHistoryService.recordLogin(result.getUsername(), ipAddress, userAgent, SigninStatus.FAILED);
             throw e;
         }
     }

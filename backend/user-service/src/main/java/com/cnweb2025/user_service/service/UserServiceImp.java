@@ -8,6 +8,7 @@ import com.vdt2025.common_dto.service.FileServiceClient;
 import com.cnweb2025.user_service.constant.PredefinedRole;
 import com.cnweb2025.user_service.dto.request.user.UserCreationRequest;
 import com.cnweb2025.user_service.dto.request.user.UserUpdateRequest;
+import com.cnweb2025.user_service.dto.response.UserInfoSimpleResponse;
 import com.cnweb2025.user_service.dto.response.UserResponse;
 import com.cnweb2025.user_service.entity.Role;
 import com.cnweb2025.user_service.entity.User;
@@ -33,6 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Service
@@ -137,6 +140,8 @@ public class UserServiceImp implements UserService{
 
     @Override
     @Transactional
+    @CacheEvict(value = "userCache",
+            key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()")
     public String setMyAvatar(MultipartFile file) {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
@@ -179,6 +184,8 @@ public class UserServiceImp implements UserService{
     }
 
     @Override
+    @CacheEvict(value = "userCache",
+            key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()")
     public String disableMyAccount() {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
@@ -377,6 +384,30 @@ public class UserServiceImp implements UserService{
             log.error("Error creating user from Google login: {}", e.getMessage());
             throw new AppException(ErrorCode.USER_EXISTED);
         }
+    }
+
+    @Override
+    public Map<String, UserInfoSimpleResponse> getUsersByUsernames(List<String> usernames) {
+        log.info("Getting user info for {} usernames", usernames.size());
+        
+        if (usernames == null || usernames.isEmpty()) {
+            return Map.of();
+        }
+        
+        List<User> users = userRepository.findByUsernameIn(usernames);
+        
+        return users.stream()
+                .collect(java.util.stream.Collectors.toMap(
+                        User::getUsername,
+                        user -> UserInfoSimpleResponse.builder()
+                                .id(user.getId())
+                                .username(user.getUsername())
+                                .firstName(user.getFirstName())
+                                .lastName(user.getLastName())
+                                .avatarUrl(user.getAvatarUrl())
+                                .build(),
+                        (existing, replacement) -> existing
+                ));
     }
 
 }

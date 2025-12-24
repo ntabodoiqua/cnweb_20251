@@ -1,9 +1,8 @@
 package com.cnweb2025.user_service.controller;
 
 import com.cnweb2025.user_service.dto.ApiResponse;
+import com.cnweb2025.user_service.dto.request.user.AdminUserUpdateRequest;
 import com.cnweb2025.user_service.dto.request.user.UserFilterRequest;
-import com.cnweb2025.user_service.dto.request.user.UserRoleChangeRequest;
-import com.cnweb2025.user_service.dto.request.user.UserUpdateRequest;
 import com.cnweb2025.user_service.dto.response.UserResponse;
 import com.cnweb2025.user_service.dto.response.UserStatisticResponse;
 import com.cnweb2025.user_service.service.AdminServiceImp;
@@ -46,7 +45,7 @@ public class AdminController {
     @PutMapping("/{userId}")
     public ApiResponse<UserResponse> updateUser(
             @PathVariable("userId") String userId,
-            @RequestBody UserUpdateRequest request
+            @RequestBody AdminUserUpdateRequest request
     ) {
         return ApiResponse.<UserResponse>builder()
                 .result(adminService.updateUser(userId, request))
@@ -77,6 +76,4 @@ public class AdminController {
                 .result(adminService.getUserStatistic())
                 .build();
     }
-
-
 }

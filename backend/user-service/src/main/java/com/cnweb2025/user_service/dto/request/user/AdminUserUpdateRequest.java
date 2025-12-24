@@ -13,13 +13,13 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserUpdateRequest {
+public class AdminUserUpdateRequest {
     String firstName;
     String lastName;
     @DobConstrain(min = 16, message = "INVALID_DOB")
     LocalDate dob;
     String phone;
-    String avatarName;
+    String email;
     Gender gender;
     List<String> roles;
 }
