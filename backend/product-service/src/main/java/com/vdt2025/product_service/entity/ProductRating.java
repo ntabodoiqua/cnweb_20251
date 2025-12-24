@@ -9,6 +9,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -17,14 +19,23 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "product_ratings")
+@Table(name = "product_ratings",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_product_rating_user_product",
+                columnNames = {"user_id", "product_id"}
+        ),
+        indexes = {
+                @Index(name = "idx_rating_product_id", columnList = "product_id"),
+                @Index(name = "idx_rating_user_id", columnList = "user_id"),
+                @Index(name = "idx_rating_created_at", columnList = "created_at")
+        })
 public class ProductRating {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
     @Column(name = "user_id", nullable = false)
-    String userId; // ID của user đánh giá (từ user-service)
+    String userId; // Username của user đánh giá (từ user-service)
 
     @Column(name = "order_id")
     String orderId; // ID đơn hàng (để verify user đã mua hàng)
@@ -66,4 +77,25 @@ public class ProductRating {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "variant_id")
     ProductVariant variant;
+
+    // Relationship với RatingImage - ảnh đánh giá
+    @OneToMany(mappedBy = "productRating", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    List<RatingImage> images = new ArrayList<>();
+
+    // Helper methods
+    public void addImage(RatingImage image) {
+        images.add(image);
+        image.setProductRating(this);
+    }
+
+    public void removeImage(RatingImage image) {
+        images.remove(image);
+        image.setProductRating(null);
+    }
+
+    public void clearImages() {
+        images.forEach(image -> image.setProductRating(null));
+        images.clear();
+    }
 }
