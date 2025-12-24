@@ -3,7 +3,6 @@ package com.vdt2025.product_service.service;
 import com.vdt2025.product_service.dto.request.FindVariantRequest;
 import com.vdt2025.product_service.dto.request.product.*;
 import com.vdt2025.product_service.dto.response.*;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -43,7 +42,7 @@ public interface ProductService {
      * Xóa ảnh sản phẩm theo ID ảnh
      * @return void
      */
-    void deleteProductImage(String imageId);
+    void deleteProductImage(String productId, String imageId);
 
     /**
      * Cập nhật thứ tự hiển thị ảnh sản phẩm
@@ -67,22 +66,8 @@ public interface ProductService {
      * Tìm kiếm sản phẩm với filter và pagination
      * Trả về ProductSummaryResponse để tối ưu performance
      */
-    PageCacheDTO<ProductSummaryResponse> searchProductsCacheable(ProductFilterRequest filter, Pageable pageable);
+    PageCacheDTO<ProductSummaryResponse> searchProductsInternal(ProductFilterRequest filter, Pageable pageable);
 
-    /**
-     * Tìm kiếm sản phẩm theo store
-     */
-    Page<ProductSummaryResponse> getProductsByStoreId(String storeId, Pageable pageable);
-
-    /**
-     * Tìm kiếm sản phẩm theo category
-     */
-    Page<ProductSummaryResponse> getProductsByCategoryId(String categoryId, Pageable pageable);
-
-    /**
-     * Tìm kiếm sản phẩm theo brand
-     */
-    Page<ProductSummaryResponse> getProductsByBrandId(String brandId, Pageable pageable);
     // ========== Variant Management ==========
 
     /**
@@ -116,6 +101,23 @@ public interface ProductService {
      */
     VariantResponse removeVariantAttribute(String productId, String variantId, VariantAttributeRequest request);
 
+    /**
+     * Cập nhật ảnh cho variant
+     * @param productId ID sản phẩm
+     * @param variantId ID variant
+     * @param file File ảnh
+     * @return VariantResponse sau khi cập nhật
+     */
+    VariantResponse updateVariantImage(String productId, String variantId, MultipartFile file);
+
+    /**
+     * Xóa ảnh của variant
+     * @param productId ID sản phẩm
+     * @param variantId ID variant
+     * @return VariantResponse sau khi xóa ảnh
+     */
+    VariantResponse deleteVariantImage(String productId, String variantId);
+
     // ========== Status Management ==========
 
     /**
@@ -126,24 +128,17 @@ public interface ProductService {
     /**
      * Cập nhật trạng thái nhiều sản phẩm cùng lúc
      */
-    List<ProductResponse> bulkUpdateStatus(BulkStatusUpdateRequest request);
-
-    // ========== Inventory Management ==========
+    void bulkUpdateStatus(BulkStatusUpdateRequest request);
 
     /**
-     * Cập nhật số lượng tồn kho cho variant
+     * Cập nhật trạng thái variant (active/inactive)
      */
-    VariantResponse updateVariantStock(String productId, String variantId, Integer quantity);
+    VariantResponse updateVariantStatus(String productId, String variantId, boolean isActive);
 
     /**
-     * Giảm số lượng tồn kho khi có đơn hàng (reserved stock)
+     * Cập nhật trạng thái nhiều variant cùng lúc
      */
-    void decreaseStock(String variantId, Integer quantity);
-
-    /**
-     * Tăng số lượng tồn kho khi hủy đơn hàng
-     */
-    void increaseStock(String variantId, Integer quantity);
+    List<VariantResponse> bulkUpdateVariantStatus(String productId, BulkVariantStatusUpdateRequest request);
 
     // ========== Statistics & Metrics ==========
 
@@ -156,6 +151,14 @@ public interface ProductService {
      * Cập nhật sold count khi hoàn thành đơn hàng
      */
     void updateSoldCount(String productId, Integer quantity);
+
+    /**
+     * Cập nhật sold count cho nhiều variants cùng lúc (batch operation)
+     * Sẽ cập nhật cả soldQuantity của ProductVariant và soldCount của Product tương ứng
+     * 
+     * @param variantQuantityMap Map chứa variantId -> quantity đã bán
+     */
+    void updateSoldCountBatch(java.util.Map<String, Integer> variantQuantityMap);
 
     // ========== Variant Selection (for E-commerce UI) ==========
 
@@ -181,4 +184,48 @@ public interface ProductService {
      * @throws com.vdt2025.product_service.exception.AppException nếu không tìm thấy variant
      */
     VariantResponse findVariantByAttributes(String productId, FindVariantRequest request);
+
+    // ========== Internal Service Communication ==========
+    /**
+     * Get lightweight variant info for internal service calls
+     */
+    List<VariantInternalDTO> getVariantsForInternal(List<String> variantIds);
+
+    /**
+     * Validate multiple variants
+     * Used by order-service to check product availability before creating order
+     */
+    List<VariantValidationDTO> validateVariants(List<String> variantIds);
+
+    // ========== Specs & Metadata Management ==========
+
+    /**
+     * Cập nhật thông tin đặc tả kỹ thuật (specs) của Product
+     */
+    ProductSpecsResponse updateProductSpecs(String productId, ProductSpecsUpdateRequest request);
+
+    /**
+     * Lấy thông tin đặc tả kỹ thuật (specs) của Product
+     */
+    ProductSpecsResponse getProductSpecs(String productId);
+
+    /**
+     * Xóa toàn bộ specs của Product
+     */
+    void deleteProductSpecs(String productId);
+
+    /**
+     * Cập nhật metadata của ProductVariant
+     */
+    VariantMetadataResponse updateVariantMetadata(String productId, String variantId, VariantMetadataUpdateRequest request);
+
+    /**
+     * Lấy metadata của ProductVariant
+     */
+    VariantMetadataResponse getVariantMetadata(String productId, String variantId);
+
+    /**
+     * Xóa toàn bộ metadata của ProductVariant
+     */
+    void deleteVariantMetadata(String productId, String variantId);
 }
