@@ -18,4 +18,6 @@ public interface ProductImageRepository extends JpaRepository<ProductImage, Stri
     List<ProductImage> findAllByProductId(String productId);
 
     Optional<ProductImage> findFirstByProductIdOrderByDisplayOrderAsc(String productId);
+
+    List<ProductImage> findAllByProductIdOrderByDisplayOrderAsc(String productId);
 }
