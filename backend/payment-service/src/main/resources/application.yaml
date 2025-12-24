@@ -4,9 +4,9 @@ spring:
   application:
     name: payment-service
   datasource:
-    url: jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25061/payment_service?sslmode=require
-    username: doadmin
-    password: AVNS_yX_L2SKXt73ktjTiGbU
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://db-postgresql-sgp1-29269-do-user-23301452-0.k.db.ondigitalocean.com:25061/payment_service?sslmode=require}
+    username: ${SPRING_DATASOURCE_USERNAME:doadmin}
+    password: ${SPRING_DATASOURCE_PASSWORD:changeme}
   jpa:
     hibernate:
       ddl-auto: none
@@ -18,18 +18,18 @@ spring:
   cache:
     type: redis
   rabbitmq:
-    addresses: amqps://xqjmojji:hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH@fuji.lmq.cloudamqp.com/xqjmojji
-    username: xqjmojji
-    password: hn8Iv-4Aa0YFZRmZuLtz6jMB0xoZl8TH
+    addresses: ${SPRING_RABBITMQ_ADDRESSES:amqps://xqjmojji:changeme@fuji.lmq.cloudamqp.com/xqjmojji}
+    username: ${SPRING_RABBITMQ_USERNAME:xqjmojji}
+    password: ${SPRING_RABBITMQ_PASSWORD:changeme}
     virtual-host: xqjmojji
     ssl:
       enabled: true
   data:
     redis:
-      host: db-valkey-sgp1-50141-do-user-27848320-0.k.db.ondigitalocean.com
+      host: db-valkey-sgp1-03029-do-user-27848320-0.m.db.ondigitalocean.com
       port: 25061
       username: default
-      password: AVNS_N-gwsyNb6xBC3fXPdQp
+      password: ${SPRING_DATA_REDIS_PASSWORD:changeme}
       ssl:
         enabled: true
 eureka:
@@ -42,11 +42,6 @@ jwt:
   signerKey: cnf61zcey4yE0RfDwk3yOAgi+CRVsjb1LPQP0O9e0GyLworFq8IthDFERD/0bxy2
   valid-duration: 3600
   refreshable-duration: 86400
-
-logging:
-  level:
-    org.springframework.data.redis: DEBUG
-    io.lettuce.core: DEBUG
 
 # ZaloPay Configuration
 zalopay:
@@ -78,3 +73,33 @@ zalopay:
   redirect-url: ${ZALOPAY_REDIRECT_URL:http://localhost:3000/payment/result}
   # Thời gian hết hạn đơn hàng (giây) - 15 phút
   expire-duration-seconds: 900
+
+# Management endpoints for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name}
+
+# Logging configuration for Loki
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %logger{36} - %msg%n"
+  level:
+    root: INFO
+    org.springframework.data.redis: DEBUG
+    io.lettuce.core: DEBUG
+
+
