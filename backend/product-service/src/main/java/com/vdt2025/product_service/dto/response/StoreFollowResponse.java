@@ -10,22 +10,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class StoreResponse {
+public class StoreFollowResponse {
     String id;
-    String sellerProfileId;
-    String userName;
+    String storeId;
     String storeName;
     String storeDescription;
-    String logoName;
     String logoUrl;
-    String bannerName;
     String bannerUrl;
-    String contactEmail;
-    String contactPhone;
-    String shopAddress;
-    Integer provinceId;
-    Integer wardId;
-    Boolean isActive;
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
+    Integer totalProducts;
+    Integer totalSold;
+    Double averageRating;
+    Integer followerCount;
+    LocalDateTime followedAt;
 }

@@ -10,10 +10,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class StoreResponse {
+public class StoreSimpleResponse {
     String id;
-    String sellerProfileId;
-    String userName;
     String storeName;
     String storeDescription;
     String logoName;

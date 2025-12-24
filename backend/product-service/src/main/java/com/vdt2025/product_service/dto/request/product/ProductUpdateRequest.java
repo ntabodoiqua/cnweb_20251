@@ -35,8 +35,5 @@ public class ProductUpdateRequest {
 
     String brandId;
 
-    @Min(value = 0, message = "WEIGHT_MUST_BE_POSITIVE")
-    BigDecimal weight;
-
     Boolean isActive;
 }
