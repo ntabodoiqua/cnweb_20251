@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../../../styles/contact.css";
+import styles from "../../../styles/contact.module.css";
 import useScrollToTop from "../../../hooks/useScrollToTop";
 import {
   MailOutlined,
@@ -125,35 +125,35 @@ const Contact = () => {
   };
 
   return (
-    <div className="contact-container">
+    <div className={styles.container}>
       {/* Hero Section */}
-      <div className="contact-hero">
-        <div className="hero-background">
-          <div className="hero-circle hero-circle-1"></div>
-          <div className="hero-circle hero-circle-2"></div>
-          <div className="hero-circle hero-circle-3"></div>
+      <div className={styles.hero}>
+        <div className={styles.heroBackground}>
+          <div className={`${styles.heroCircle} ${styles.heroCircle1}`}></div>
+          <div className={`${styles.heroCircle} ${styles.heroCircle2}`}></div>
+          <div className={`${styles.heroCircle} ${styles.heroCircle3}`}></div>
         </div>
-        <div className="hero-content">
-          <img src={logo} alt="HUSTBuy Logo" className="hero-logo" />
-          <h1 className="hero-title">Liên Hệ Với Chúng Tôi</h1>
-          <div className="hero-subtitle">
+        <div className={styles.heroContent}>
+          <img src={logo} alt="HUSTBuy Logo" className={styles.heroLogo} />
+          <h1 className={styles.heroTitle}>Liên Hệ Với Chúng Tôi</h1>
+          <div className={styles.heroSubtitle}>
             Chúng tôi luôn sẵn sàng lắng nghe và hỗ trợ bạn
           </div>
         </div>
       </div>
 
       {/* Contact Info Cards */}
-      <div className="contact-info-section">
-        <div className="contact-info-grid">
+      <div className={styles.contactInfoSection}>
+        <div className={styles.contactInfoGrid}>
           {contactInfo.map((info, index) => (
-            <div key={index} className="contact-info-card">
-              <div className="info-icon" style={{ color: info.color }}>
+            <div key={index} className={styles.contactInfoCard}>
+              <div className={styles.infoIcon} style={{ color: info.color }}>
                 {info.icon}
               </div>
               <h3>{info.title}</h3>
-              <p className="info-content">{info.content}</p>
+              <p className={styles.infoContent}>{info.content}</p>
               {info.subContent && (
-                <p className="info-subcontent">{info.subContent}</p>
+                <p className={styles.infoSubcontent}>{info.subContent}</p>
               )}
             </div>
           ))}
@@ -161,11 +161,11 @@ const Contact = () => {
       </div>
 
       {/* Main Content */}
-      <div className="contact-main">
+      <div className={styles.contactMain}>
         {/* Contact Form */}
-        <div className="contact-form-section">
-          <h2 className="section-title">Gửi Tin Nhắn</h2>
-          <p className="section-description">
+        <div className={styles.contactFormSection}>
+          <h2 className={styles.sectionTitle}>Gửi Tin Nhắn</h2>
+          <p className={styles.sectionDescription}>
             Điền thông tin bên dưới và chúng tôi sẽ phản hồi sớm nhất có thể
           </p>
 
@@ -174,7 +174,7 @@ const Contact = () => {
             layout="vertical"
             onFinish={onFinish}
             requiredMark={false}
-            className="contact-form"
+            className={styles.contactForm}
           >
             <div className="form-row">
               <Form.Item
@@ -183,7 +183,7 @@ const Contact = () => {
                 rules={[
                   { required: true, message: "Vui lòng nhập họ và tên!" },
                 ]}
-                className="form-item-half"
+                className={styles.formItemHalf}
               >
                 <Input size="large" placeholder="Nhập họ và tên" />
               </Form.Item>
@@ -195,7 +195,7 @@ const Contact = () => {
                   { required: true, message: "Vui lòng nhập email!" },
                   { type: "email", message: "Email không hợp lệ!" },
                 ]}
-                className="form-item-half"
+                className={styles.formItemHalf}
               >
                 <Input size="large" placeholder="Nhập email" />
               </Form.Item>
@@ -212,7 +212,7 @@ const Contact = () => {
                     message: "Số điện thoại phải có 10 chữ số!",
                   },
                 ]}
-                className="form-item-half"
+                className={styles.formItemHalf}
               >
                 <Input size="large" placeholder="Nhập số điện thoại" />
               </Form.Item>
@@ -221,7 +221,7 @@ const Contact = () => {
                 label="Chủ đề"
                 name="subject"
                 rules={[{ required: true, message: "Vui lòng chọn chủ đề!" }]}
-                className="form-item-half"
+                className={styles.formItemHalf}
               >
                 <Select size="large" placeholder="Chọn chủ đề">
                   <Option value="general">Câu hỏi chung</Option>
@@ -260,7 +260,7 @@ const Contact = () => {
                 size="large"
                 block
                 loading={loading}
-                className="submit-btn"
+                className={styles.submitBtn}
                 icon={<SendOutlined />}
               >
                 Gửi tin nhắn
@@ -270,19 +270,19 @@ const Contact = () => {
         </div>
 
         {/* Sidebar */}
-        <div className="contact-sidebar">
+        <div className={styles.contactSidebar}>
           {/* FAQ Categories */}
-          <div className="sidebar-section">
+          <div className={styles.sidebarSection}>
             <h3>Cần trợ giúp nhanh?</h3>
-            <div className="faq-categories">
+            <div className={styles.faqCategories}>
               {faqCategories.map((category, index) => (
                 <a
                   key={index}
                   href={category.link}
-                  className="faq-category-card"
+                  className={styles.faqCategoryCard}
                 >
-                  <div className="faq-icon">{category.icon}</div>
-                  <div className="faq-content">
+                  <div className={styles.faqIcon}>{category.icon}</div>
+                  <div className={styles.faqContent}>
                     <h4>{category.title}</h4>
                     <p>{category.description}</p>
                   </div>
@@ -292,16 +292,16 @@ const Contact = () => {
           </div>
 
           {/* Social Media */}
-          <div className="sidebar-section">
+          <div className={styles.sidebarSection}>
             <h3>Theo dõi chúng tôi</h3>
-            <div className="social-links">
+            <div className={styles.socialLinks}>
               {socialLinks.map((social, index) => (
                 <a
                   key={index}
                   href={social.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="social-link"
+                  className={styles.socialLink}
                   style={{ backgroundColor: social.color }}
                 >
                   {social.icon}
@@ -312,18 +312,18 @@ const Contact = () => {
           </div>
 
           {/* Business Hours */}
-          <div className="sidebar-section business-hours">
+          <div className={`${styles.sidebarSection} ${styles.businessHours}`}>
             <h3>Giờ làm việc</h3>
-            <div className="hours-list">
-              <div className="hours-item">
+            <div className={styles.hoursList}>
+              <div className={styles.hoursItem}>
                 <span className="day">Thứ 2 - Thứ 6</span>
                 <span className="time">8:00 - 21:00</span>
               </div>
-              <div className="hours-item">
+              <div className={styles.hoursItem}>
                 <span className="day">Thứ 7</span>
                 <span className="time">8:00 - 21:00</span>
               </div>
-              <div className="hours-item">
+              <div className={styles.hoursItem}>
                 <span className="day">Chủ nhật</span>
                 <span className="time">9:00 - 18:00</span>
               </div>
@@ -333,9 +333,9 @@ const Contact = () => {
       </div>
 
       {/* Map Section */}
-      <div className="map-section">
-        <h2 className="section-title">Vị Trí Của Chúng Tôi</h2>
-        <div className="map-container">
+      <div className={styles.mapSection}>
+        <h2 className={styles.sectionTitle}>Vị Trí Của Chúng Tôi</h2>
+        <div className={styles.mapContainer}>
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3724.4849932765906!2d105.8412459!3d21.0047875!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135ab86cece9ac5%3A0xbd3e934ce076123a!2zxJDhuqFpIGjhu41jIELDoWNoIGtob2EgSMOgIE7hu5lp!5e0!3m2!1svi!2s!4v1699999999999!5m2!1svi!2s"
             width="100%"
