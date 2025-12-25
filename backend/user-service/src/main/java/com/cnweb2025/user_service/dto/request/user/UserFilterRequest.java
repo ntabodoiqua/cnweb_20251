@@ -1,6 +1,6 @@
 package com.cnweb2025.user_service.dto.request.user;
 
-import com.cnweb2025.user_service.entity.Role;
+import com.cnweb2025.user_service.enums.Gender;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,5 +24,6 @@ public class UserFilterRequest {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     LocalDateTime createdTo;
 
-    Role role;
+    String role;
+    Gender gender;
 }

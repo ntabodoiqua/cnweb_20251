@@ -9,8 +9,6 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -43,6 +41,7 @@ public class SecurityConfig {
     private static final String[] PUBLIC_GET_ENDPOINTS = {
             "/wards/**",
             "/provinces/**",
+            "/users/internal/**",  // Allow internal service-to-service calls
     };
 
     @Autowired
@@ -59,9 +58,11 @@ public class SecurityConfig {
                         request
                                 // Allow Swagger endpoints (highest priority)
                                 .requestMatchers(SWAGGER_ENDPOINTS).permitAll()
-                                // Allow actuator endpoints
-                                .requestMatchers("/actuator/health").permitAll()
-                                .requestMatchers("/actuator/info").permitAll()
+                                // Allow actuator endpoints for monitoring
+                                .requestMatchers("/actuator/health", "/actuator/health/**").permitAll()
+                                .requestMatchers("/actuator/info", "/actuator/info/**").permitAll()
+                                .requestMatchers("/actuator/prometheus", "/actuator/prometheus/**").permitAll()
+                                .requestMatchers("/actuator/metrics", "/actuator/metrics/**").permitAll()
                                 // Allow auth endpoints
                                 .requestMatchers(AUTH_ENDPOINTS).permitAll()
                                 // Allow POST to create users

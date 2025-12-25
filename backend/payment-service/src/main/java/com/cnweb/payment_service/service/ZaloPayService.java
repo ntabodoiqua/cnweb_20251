@@ -1,5 +1,7 @@
 package com.cnweb.payment_service.service;
 
+import com.cnweb.payment_service.dto.transaction.TransactionHistoryFilterRequest;
+import com.cnweb.payment_service.dto.transaction.TransactionHistoryResponse;
 import com.cnweb.payment_service.dto.zalopay.*;
 import com.cnweb.payment_service.entity.ZaloPayTransaction;
 import com.cnweb.payment_service.entity.ZaloPayRefundTransaction;
@@ -90,4 +92,12 @@ public interface ZaloPayService {
     void sendRefundFailedNotification(ZaloPayRefundTransaction refundTransaction,
                                       ZaloPayTransaction originalTransaction,
                                       String failureReason);
+
+    /**
+     * Lấy lịch sử giao dịch với bộ lọc
+     *
+     * @param filter Các tham số lọc
+     * @return Response chứa danh sách giao dịch với phân trang
+     */
+    TransactionHistoryResponse getTransactionHistory(TransactionHistoryFilterRequest filter);
 }
