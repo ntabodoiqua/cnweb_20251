@@ -78,8 +78,8 @@ jobs:
             cd /opt/cnweb2025_1_fe || exit 1
 
             # --- QUAN TRỌNG: ĐỒNG BỘ CODE ---
-            git fetch origin anhnt/message-service
-            git reset --hard origin/anhnt/message-service
+            git fetch origin fe/dev
+            git reset --hard origin/fe/dev
 
             # Login
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
