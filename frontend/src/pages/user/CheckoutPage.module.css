@@ -654,6 +654,162 @@
   transform: scale(1.1);
 }
 
+/* Available Coupons Section */
+.availableCouponsSection {
+  margin-top: 16px;
+}
+
+.availableCouponsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.availableCouponsTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+
+.toggleCouponListBtn {
+  padding: 0;
+  height: auto;
+  font-size: 13px;
+}
+
+.availableCouponsList {
+  max-height: 400px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-right: 4px;
+}
+
+.availableCouponsList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.availableCouponsList::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.availableCouponsList::-webkit-scrollbar-thumb {
+  background: #ee4d2d;
+  border-radius: 3px;
+}
+
+.availableCouponsList::-webkit-scrollbar-thumb:hover {
+  background: #d43d1e;
+}
+
+.couponCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  background: linear-gradient(135deg, #fff9f5 0%, #fff5f0 100%);
+  border: 2px solid #ffe8dd;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.couponCard:hover {
+  border-color: #ee4d2d;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.15);
+  transform: translateY(-2px);
+}
+
+.couponCardDisabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #f5f5f5;
+  border-color: #d9d9d9;
+}
+
+.couponCardDisabled:hover {
+  border-color: #d9d9d9;
+  box-shadow: none;
+  transform: none;
+}
+
+.couponCardIcon {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b4a 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.couponCardContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.couponCardCode {
+  font-size: 15px;
+  font-weight: 700;
+  color: #ee4d2d;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.couponCardBadge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  background: #1890ff;
+  color: white;
+  border-radius: 10px;
+}
+
+.couponCardName {
+  font-size: 13px;
+  font-weight: 600;
+  color: #333;
+}
+
+.couponCardDesc {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.couponCardWarning {
+  font-size: 11px;
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
+.couponCardCheck {
+  color: #52c41a;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .checkoutContent {
