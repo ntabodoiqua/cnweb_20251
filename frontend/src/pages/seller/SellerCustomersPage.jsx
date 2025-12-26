@@ -29,21 +29,11 @@ const SellerCustomersPage = () => {
       try {
         const response = await getMyStoresApi(0, 1);
         console.log("[SellerCustomersPage] getMyStoresApi response:", response);
-        console.log("[SellerCustomersPage] response.data:", response?.data);
-        console.log(
-          "[SellerCustomersPage] response.data.code:",
-          response?.data?.code
-        );
-        console.log(
-          "[SellerCustomersPage] response.data.result:",
-          response?.data?.result
-        );
+        console.log("[SellerCustomersPage] response.code:", response?.code);
+        console.log("[SellerCustomersPage] response.result:", response?.result);
 
-        if (
-          response?.data?.code === 200 &&
-          response?.data?.result?.content?.length > 0
-        ) {
-          const myStore = response.data.result.content[0];
+        if (response?.code === 1000 && response?.result?.content?.length > 0) {
+          const myStore = response.result.content[0];
           console.log("[SellerCustomersPage] Found store:", myStore);
           setStoreId(myStore.id);
         } else {
@@ -83,18 +73,11 @@ const SellerCustomersPage = () => {
         "[SellerCustomersPage] getStoreFollowersApi response:",
         response
       );
-      console.log("[SellerCustomersPage] response.data:", response?.data);
-      console.log(
-        "[SellerCustomersPage] response.data.code:",
-        response?.data?.code
-      );
-      console.log(
-        "[SellerCustomersPage] response.data.result:",
-        response?.data?.result
-      );
+      console.log("[SellerCustomersPage] response.code:", response?.code);
+      console.log("[SellerCustomersPage] response.result:", response?.result);
 
-      if (response?.data?.code === 200) {
-        const result = response.data.result;
+      if (response?.code === 1000) {
+        const result = response.result;
         console.log("[SellerCustomersPage] Followers data:", result);
         setFollowers(result.content);
         setPagination({
@@ -103,7 +86,7 @@ const SellerCustomersPage = () => {
           total: result.totalElements,
         });
       } else {
-        console.log("[SellerCustomersPage] Invalid response or non-200 code");
+        console.log("[SellerCustomersPage] Invalid response or non-1000 code");
       }
     } catch (error) {
       console.error("[SellerCustomersPage] Error fetching followers:", error);
