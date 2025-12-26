@@ -1,5 +1,5 @@
 import React, { useState, useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { notification, Modal } from "antd";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import {
@@ -899,31 +899,40 @@ const CartPage = () => {
                           </button>
                         </div>
 
-                        <div className={styles.itemImage}>
+                        <Link 
+                          to={`/product/${item.productId}`}
+                          className={styles.itemImage}
+                        >
                           <img src={item.image} alt={item.name} />
                           {!item.inStock && (
                             <div className={styles.outOfStockBadge}>
                               Hết hàng
                             </div>
                           )}
-                        </div>
+                        </Link>
 
                         <div className={styles.itemInfo}>
-                          <h3 className={styles.itemName}>
-                            {item.name}
-                            {item.variantName && (
-                              <span
-                                style={{
-                                  fontSize: "0.85em",
-                                  color: "#666",
-                                  fontWeight: "normal",
-                                  marginLeft: "8px",
-                                }}
-                              >
-                                ({item.variantName})
-                              </span>
-                            )}
-                          </h3>
+                          <Link 
+                            to={`/product/${item.productId}`}
+                            className={styles.itemName}
+                            style={{ textDecoration: 'none' }}
+                          >
+                            <h3 className={styles.itemNameText}>
+                              {item.name}
+                              {item.variantName && (
+                                <span
+                                  style={{
+                                    fontSize: "0.85em",
+                                    color: "#666",
+                                    fontWeight: "normal",
+                                    marginLeft: "8px",
+                                  }}
+                                >
+                                  ({item.variantName})
+                                </span>
+                              )}
+                            </h3>
+                          </Link>
                           <div
                             style={{
                               display: "flex",

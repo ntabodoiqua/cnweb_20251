@@ -11,7 +11,6 @@ import {
   ShoppingOutlined,
   LogoutOutlined,
   LoginOutlined,
-  UserAddOutlined,
   MenuOutlined,
   SettingOutlined,
   ProfileOutlined,
@@ -637,11 +636,6 @@ const Header = () => {
             icon: <LoginOutlined />,
             label: <Link to="/login">Đăng nhập</Link>,
           },
-          {
-            key: "register",
-            icon: <UserAddOutlined />,
-            label: <Link to="/register">Đăng ký</Link>,
-          },
         ]),
   ];
 
@@ -762,22 +756,13 @@ const Header = () => {
                 </div>
               </Dropdown>
             ) : (
-              <Space size="small">
-                <button
-                  className={styles.headerLoginBtn}
-                  onClick={() => navigate("/login")}
-                >
-                  <LoginOutlined />
-                  Đăng nhập
-                </button>
-                <button
-                  className={styles.headerRegisterBtn}
-                  onClick={() => navigate("/register")}
-                >
-                  <UserAddOutlined />
-                  Đăng ký
-                </button>
-              </Space>
+              <button
+                className={styles.headerLoginBtn}
+                onClick={() => navigate("/login")}
+              >
+                <LoginOutlined />
+                Đăng nhập
+              </button>
             )}
           </div>
         </div>
