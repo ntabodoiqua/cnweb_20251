@@ -74,6 +74,5 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
       ) AS statistics
       FROM users;
     """, nativeQuery = true)
-
     String getUserStatisticsJson();
 }
