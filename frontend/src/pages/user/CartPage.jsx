@@ -112,51 +112,9 @@ const CartPage = () => {
     }
   };
 
-  // Mock data voucher sàn
-  const availablePlatformVouchers = [
-    {
-      code: "HUSTBUY100K",
-      discount: 100000,
-      type: "fixed",
-      minOrder: 500000,
-      description: "Giảm 100K cho đơn từ 500K",
-      expiry: "31/12/2025",
-    },
-    {
-      code: "SALE20",
-      discount: 20,
-      type: "percent",
-      minOrder: 300000,
-      maxDiscount: 200000,
-      description: "Giảm 20% tối đa 200K cho đơn từ 300K",
-      expiry: "31/12/2025",
-    },
-  ];
-
-  // Mock data voucher shop
-  const availableShopVouchers = {
-    "Dell Official Store": [
-      {
-        code: "DELL50K",
-        discount: 50000,
-        type: "fixed",
-        minOrder: 2000000,
-        description: "Giảm 50K cho đơn từ 2tr",
-        expiry: "31/12/2025",
-      },
-    ],
-    "Apple Store": [
-      {
-        code: "APPLE10",
-        discount: 10,
-        type: "percent",
-        minOrder: 1000000,
-        maxDiscount: 100000,
-        description: "Giảm 10% tối đa 100K",
-        expiry: "31/12/2025",
-      },
-    ],
-  };
+  // Danh sách voucher có sẵn (sẽ được fetch từ API nếu cần)
+  const availablePlatformVouchers = [];
+  const availableShopVouchers = {};
 
   // Format currency VND
   const formatCurrency = (amount) => {
@@ -899,7 +857,7 @@ const CartPage = () => {
                           </button>
                         </div>
 
-                        <Link 
+                        <Link
                           to={`/product/${item.productId}`}
                           className={styles.itemImage}
                         >
@@ -912,10 +870,10 @@ const CartPage = () => {
                         </Link>
 
                         <div className={styles.itemInfo}>
-                          <Link 
+                          <Link
                             to={`/product/${item.productId}`}
                             className={styles.itemName}
-                            style={{ textDecoration: 'none' }}
+                            style={{ textDecoration: "none" }}
                           >
                             <h3 className={styles.itemNameText}>
                               {item.name}

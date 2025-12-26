@@ -528,6 +528,132 @@
   font-weight: 600;
 }
 
+/* Coupon Section */
+.couponSection {
+  padding: 16px 0;
+}
+
+.couponTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 12px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.couponTitle :global(.anticon) {
+  color: #ee4d2d;
+}
+
+.couponInput {
+  display: flex;
+  gap: 8px;
+}
+
+.couponInput :global(.ant-input-affix-wrapper) {
+  flex: 1;
+  border-radius: 8px;
+  border: 2px solid #e8e8e8;
+  transition: all 0.3s ease;
+}
+
+.couponInput :global(.ant-input-affix-wrapper:hover),
+.couponInput :global(.ant-input-affix-wrapper:focus),
+.couponInput :global(.ant-input-affix-wrapper-focused) {
+  border-color: #ee4d2d;
+  box-shadow: 0 0 0 2px rgba(238, 77, 45, 0.1);
+}
+
+.couponInput :global(.ant-input-prefix) {
+  color: #ee4d2d;
+}
+
+.applyCouponBtn {
+  border-radius: 8px;
+  height: 40px;
+  padding: 0 20px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b4a 100%);
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.applyCouponBtn:hover {
+  background: linear-gradient(135deg, #d43d1e 0%, #ee4d2d 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.4);
+}
+
+.appliedCoupon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fff7f5 0%, #fff2ef 100%);
+  border: 2px solid #ee4d2d;
+  border-radius: 12px;
+  animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.appliedCouponInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.appliedCouponCode {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ee4d2d;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.appliedCouponName {
+  font-size: 13px;
+  color: #666;
+}
+
+.appliedCouponDiscount {
+  font-size: 14px;
+  font-weight: 700;
+  color: #52c41a;
+}
+
+.removeCouponBtn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: #ff4d4f;
+  color: white;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.removeCouponBtn:hover {
+  background: #d43d1e;
+  transform: scale(1.1);
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .checkoutContent {

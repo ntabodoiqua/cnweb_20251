@@ -33,6 +33,7 @@ import {
   createOrderApi,
   initiateOrderPaymentApi,
   removeCartItemsApi,
+  getCouponByCodeApi,
 } from "../../util/api";
 import { PROTECTED_ROUTES } from "../../constants/routes";
 import styles from "./CheckoutPage.module.css";
@@ -61,6 +62,12 @@ const CheckoutPage = () => {
 
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState("zalopay");
+
+  // Coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponDiscount, setCouponDiscount] = useState(0);
 
   // Saved addresses state
   const [savedAddresses, setSavedAddresses] = useState([]);
@@ -213,6 +220,163 @@ const CheckoutPage = () => {
     }).format(amount);
   };
 
+  // Tính giảm giá từ coupon
+  const calculateCouponDiscount = (coupon, orderTotal) => {
+    if (!coupon || !coupon.active) return 0;
+
+    // Kiểm tra thời hạn
+    const now = new Date();
+    const validFrom = new Date(coupon.validFrom);
+    const validTo = new Date(coupon.validTo);
+    if (now < validFrom || now > validTo) return 0;
+
+    // Kiểm tra giá trị đơn hàng tối thiểu
+    if (orderTotal < coupon.minOrderAmount) return 0;
+
+    let discount = 0;
+    if (coupon.discountType === "PERCENTAGE") {
+      discount = (orderTotal * coupon.discountValue) / 100;
+      // Áp dụng giới hạn giảm giá tối đa nếu có
+      if (coupon.maxDiscountAmount && discount > coupon.maxDiscountAmount) {
+        discount = coupon.maxDiscountAmount;
+      }
+    } else if (coupon.discountType === "FIXED_AMOUNT") {
+      discount = coupon.discountValue;
+    }
+
+    return Math.min(discount, orderTotal); // Không giảm quá tổng đơn hàng
+  };
+
+  // Xử lý áp dụng mã giảm giá
+  const handleApplyCoupon = async () => {
+    if (!couponCode.trim()) {
+      notification.warning({
+        message: "Vui lòng nhập mã",
+        description: "Hãy nhập mã giảm giá để áp dụng!",
+        placement: "topRight",
+      });
+      return;
+    }
+
+    setCouponLoading(true);
+    try {
+      const response = await getCouponByCodeApi(
+        couponCode.trim().toUpperCase()
+      );
+
+      if (response && response.code === 200 && response.result) {
+        const coupon = response.result;
+
+        // Kiểm tra coupon có active không
+        if (!coupon.active) {
+          notification.error({
+            message: "Mã không khả dụng",
+            description: "Mã giảm giá này hiện không hoạt động!",
+            placement: "topRight",
+          });
+          return;
+        }
+
+        // Kiểm tra thời hạn
+        const now = new Date();
+        const validFrom = new Date(coupon.validFrom);
+        const validTo = new Date(coupon.validTo);
+
+        if (now < validFrom) {
+          notification.warning({
+            message: "Mã chưa có hiệu lực",
+            description: `Mã giảm giá này sẽ có hiệu lực từ ${validFrom.toLocaleDateString(
+              "vi-VN"
+            )}!`,
+            placement: "topRight",
+          });
+          return;
+        }
+
+        if (now > validTo) {
+          notification.error({
+            message: "Mã đã hết hạn",
+            description: "Mã giảm giá này đã hết hạn sử dụng!",
+            placement: "topRight",
+          });
+          return;
+        }
+
+        // Kiểm tra giá trị đơn hàng tối thiểu
+        if (subtotal < coupon.minOrderAmount) {
+          notification.warning({
+            message: "Chưa đủ điều kiện",
+            description: `Đơn hàng tối thiểu ${formatCurrency(
+              coupon.minOrderAmount
+            )} để áp dụng mã này!`,
+            placement: "topRight",
+          });
+          return;
+        }
+
+        // Kiểm tra số lần sử dụng
+        if (coupon.maxUsageTotal && coupon.usedCount >= coupon.maxUsageTotal) {
+          notification.error({
+            message: "Mã đã hết lượt",
+            description: "Mã giảm giá này đã được sử dụng hết!",
+            placement: "topRight",
+          });
+          return;
+        }
+
+        // Tính giảm giá
+        const discount = calculateCouponDiscount(coupon, subtotal);
+
+        setAppliedCoupon(coupon);
+        setCouponDiscount(discount);
+
+        notification.success({
+          message: "Áp dụng thành công!",
+          description: `Bạn được giảm ${formatCurrency(discount)}`,
+          placement: "topRight",
+          duration: 3,
+        });
+      } else {
+        notification.error({
+          message: "Mã không hợp lệ",
+          description:
+            response?.message || "Mã giảm giá không tồn tại hoặc đã hết hạn!",
+          placement: "topRight",
+        });
+      }
+    } catch (error) {
+      console.error("Error applying coupon:", error);
+      notification.error({
+        message: "Lỗi áp dụng mã",
+        description:
+          error.response?.data?.message ||
+          "Không thể áp dụng mã giảm giá. Vui lòng thử lại!",
+        placement: "topRight",
+      });
+    } finally {
+      setCouponLoading(false);
+    }
+  };
+
+  // Xử lý xóa mã giảm giá
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponDiscount(0);
+    setCouponCode("");
+    notification.info({
+      message: "Đã hủy mã giảm giá",
+      description: "Bạn có thể nhập mã khác!",
+      placement: "topRight",
+      duration: 2,
+    });
+  };
+
+  // Tính tổng tiền sau khi áp dụng mã giảm giá
+  const calculateFinalAmount = () => {
+    const baseTotal = finalTotal || subtotal || 0;
+    return Math.max(0, baseTotal - couponDiscount);
+  };
+
   // Xử lý đặt hàng và thanh toán
   const handlePlaceOrder = async (values) => {
     setIsProcessingPayment(true);
@@ -243,7 +407,7 @@ const CheckoutPage = () => {
         shippingProvince: selectedProvince?.fullName || "",
         shippingWard: selectedWard?.nameWithType || "",
         paymentMethod: paymentMethod === "zalopay" ? "ZALO_PAY" : "COD",
-        couponCode: "", // Có thể thêm coupon sau
+        couponCode: appliedCoupon?.code || "",
         note: values.note || "",
       };
 
@@ -681,6 +845,60 @@ const CheckoutPage = () => {
 
             <div className={styles.summaryDivider}></div>
 
+            {/* Coupon Section */}
+            <div className={styles.couponSection}>
+              <h3 className={styles.couponTitle}>
+                <TagOutlined /> Mã giảm giá
+              </h3>
+
+              {appliedCoupon ? (
+                <div className={styles.appliedCoupon}>
+                  <div className={styles.appliedCouponInfo}>
+                    <div className={styles.appliedCouponCode}>
+                      <GiftOutlined /> {appliedCoupon.code}
+                    </div>
+                    <div className={styles.appliedCouponName}>
+                      {appliedCoupon.name}
+                    </div>
+                    <div className={styles.appliedCouponDiscount}>
+                      -{formatCurrency(couponDiscount)}
+                    </div>
+                  </div>
+                  <button
+                    className={styles.removeCouponBtn}
+                    onClick={handleRemoveCoupon}
+                    type="button"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <div className={styles.couponInput}>
+                  <Input
+                    placeholder="Nhập mã giảm giá"
+                    value={couponCode}
+                    onChange={(e) =>
+                      setCouponCode(e.target.value.toUpperCase())
+                    }
+                    onPressEnter={handleApplyCoupon}
+                    prefix={<GiftOutlined />}
+                    disabled={couponLoading}
+                    style={{ flex: 1 }}
+                  />
+                  <Button
+                    type="primary"
+                    onClick={handleApplyCoupon}
+                    loading={couponLoading}
+                    className={styles.applyCouponBtn}
+                  >
+                    Áp dụng
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <div className={styles.summaryDivider}></div>
+
             {/* Price Summary */}
             <div className={styles.priceSummary}>
               <div className={styles.summaryItem}>
@@ -710,6 +928,17 @@ const CheckoutPage = () => {
                 </div>
               )}
 
+              {couponDiscount > 0 && (
+                <div className={styles.summaryItem}>
+                  <span className={styles.discountLabel}>
+                    <GiftOutlined /> Mã giảm giá ({appliedCoupon?.code})
+                  </span>
+                  <span className={styles.discountAmount}>
+                    -{formatCurrency(couponDiscount)}
+                  </span>
+                </div>
+              )}
+
               <div className={styles.summaryItem}>
                 <span>Phí vận chuyển</span>
                 <span className={styles.freeShipping}>Miễn phí</span>
@@ -720,14 +949,18 @@ const CheckoutPage = () => {
               <div className={styles.summaryTotal}>
                 <span>Tổng cộng</span>
                 <span className={styles.totalAmount}>
-                  {formatCurrency(finalTotal)}
+                  {formatCurrency(calculateFinalAmount())}
                 </span>
               </div>
 
-              {(shopDiscounts > 0 || platformDiscount > 0) && (
+              {(shopDiscounts > 0 ||
+                platformDiscount > 0 ||
+                couponDiscount > 0) && (
                 <div className={styles.savingsBadge}>
                   🎉 Tiết kiệm{" "}
-                  {formatCurrency(shopDiscounts + platformDiscount)}
+                  {formatCurrency(
+                    shopDiscounts + platformDiscount + couponDiscount
+                  )}
                 </div>
               )}
             </div>
