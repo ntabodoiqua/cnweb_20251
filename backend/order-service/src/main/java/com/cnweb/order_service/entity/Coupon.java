@@ -45,7 +45,7 @@ public class Coupon {
     // Loại giảm giá
     @Enumerated(EnumType.STRING)
     @Column(name = "discount_type", nullable = false, length = 20)
-    DiscountType discountType; // PERCENTAGE, FIXED_AMOUNT, FREE_SHIPPING
+    DiscountType discountType; // PERCENTAGE, FIXED_AMOUNT
 
     // Giá trị giảm giá
     @Column(name = "discount_value", nullable = false, precision = 19, scale = 2)
@@ -147,10 +147,6 @@ public class Coupon {
                 break;
             case FIXED_AMOUNT:
                 discount = discountValue;
-                break;
-            case FREE_SHIPPING:
-                // Xử lý riêng ở service layer
-                discount = BigDecimal.ZERO;
                 break;
         }
 
