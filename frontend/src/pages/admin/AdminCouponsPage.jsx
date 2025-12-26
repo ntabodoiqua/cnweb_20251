@@ -19,6 +19,7 @@ import {
   getAllCouponsApi,
   createCouponApi,
   deleteCouponApi,
+  getPublicStoreDetailApi,
 } from "../../util/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import styles from "./AdminCouponsPage.module.css";
@@ -30,6 +31,7 @@ import styles from "./AdminCouponsPage.module.css";
 const AdminCouponsPage = () => {
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [storeNames, setStoreNames] = useState({});
 
   // Filter states
   const [filters, setFilters] = useState({
@@ -70,7 +72,29 @@ const AdminCouponsPage = () => {
       const response = await getAllCouponsApi();
 
       if (response && response.code === 200) {
-        setCoupons(response.result || []);
+        const couponData = response.result || [];
+        setCoupons(couponData);
+
+        // Fetch store names for store-specific coupons
+        const storeIds = [
+          ...new Set(couponData.map((c) => c.storeId).filter(Boolean)),
+        ];
+        const storeNamesMap = {};
+
+        await Promise.all(
+          storeIds.map(async (storeId) => {
+            try {
+              const storeResponse = await getPublicStoreDetailApi(storeId);
+              if (storeResponse && storeResponse.result) {
+                storeNamesMap[storeId] = storeResponse.result.name;
+              }
+            } catch (err) {
+              console.error(`Error fetching store ${storeId}:`, err);
+            }
+          })
+        );
+
+        setStoreNames(storeNamesMap);
       } else if (response && response.result) {
         setCoupons(response.result || []);
       }
@@ -114,7 +138,7 @@ const AdminCouponsPage = () => {
 
     const matchIsActive =
       filters.isActive === "" ||
-      coupon.isActive === (filters.isActive === "true");
+      coupon.active === (filters.isActive === "true");
 
     return matchSearch && matchDiscountType && matchIsActive;
   });
@@ -173,7 +197,7 @@ const AdminCouponsPage = () => {
     const validFrom = new Date(coupon.validFrom);
     const validTo = new Date(coupon.validTo);
     return (
-      coupon.isActive &&
+      coupon.active &&
       now >= validFrom &&
       now <= validTo &&
       (coupon.maxUsageTotal === null || coupon.usedCount < coupon.maxUsageTotal)
@@ -185,7 +209,7 @@ const AdminCouponsPage = () => {
     const validFrom = new Date(coupon.validFrom);
     const validTo = new Date(coupon.validTo);
 
-    if (!coupon.isActive) {
+    if (!coupon.active) {
       return { label: "Vô hiệu", className: styles.statusInactive };
     }
     if (now < validFrom) {
@@ -694,8 +718,11 @@ const AdminCouponsPage = () => {
                   <div className={styles.infoRow}>
                     <label>Phạm vi áp dụng:</label>
                     <span>
-                      {selectedCoupon.isStoreSpecific
-                        ? `Cửa hàng: ${selectedCoupon.storeId}`
+                      {selectedCoupon.storeSpecific
+                        ? `Cửa hàng: ${
+                            storeNames[selectedCoupon.storeId] ||
+                            selectedCoupon.storeId
+                          }`
                         : "Toàn sàn"}
                     </span>
                   </div>
@@ -757,7 +784,7 @@ const AdminCouponsPage = () => {
                         })
                       }
                       placeholder="VD: SUMMER2025"
-                      pattern="^[A-Z0-9_-]+$"
+                      pattern="^[A-Z0-9_\-]+$"
                       title="Chỉ chấp nhận chữ in hoa, số, dấu gạch ngang và gạch dưới"
                     />
                     <small>Chỉ bao gồm chữ in hoa, số, _ và -</small>

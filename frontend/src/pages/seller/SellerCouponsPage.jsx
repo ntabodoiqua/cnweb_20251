@@ -103,7 +103,7 @@ const SellerCouponsPage = () => {
         const storeCoupons = allCoupons.filter(
           (coupon) =>
             coupon.storeId === selectedStoreId ||
-            (coupon.isStoreSpecific && coupon.storeId === selectedStoreId)
+            (coupon.storeSpecific && coupon.storeId === selectedStoreId)
         );
         setCoupons(storeCoupons);
       }
@@ -147,7 +147,7 @@ const SellerCouponsPage = () => {
 
     const matchIsActive =
       filters.isActive === "" ||
-      coupon.isActive === (filters.isActive === "true");
+      coupon.active === (filters.isActive === "true");
 
     return matchSearch && matchDiscountType && matchIsActive;
   });
@@ -206,7 +206,7 @@ const SellerCouponsPage = () => {
     const validFrom = new Date(coupon.validFrom);
     const validTo = new Date(coupon.validTo);
     return (
-      coupon.isActive &&
+      coupon.active &&
       now >= validFrom &&
       now <= validTo &&
       (coupon.maxUsageTotal === null || coupon.usedCount < coupon.maxUsageTotal)
@@ -218,7 +218,7 @@ const SellerCouponsPage = () => {
     const validFrom = new Date(coupon.validFrom);
     const validTo = new Date(coupon.validTo);
 
-    if (!coupon.isActive) {
+    if (!coupon.active) {
       return { label: "Vô hiệu", className: styles.statusInactive };
     }
     if (now < validFrom) {
@@ -838,7 +838,7 @@ const SellerCouponsPage = () => {
                         })
                       }
                       placeholder="VD: SHOPTET2025"
-                      pattern="^[A-Z0-9_-]+$"
+                      pattern="^[A-Z0-9_\-]+$"
                       title="Chỉ chấp nhận chữ in hoa, số, dấu gạch ngang và gạch dưới"
                     />
                     <small>Chỉ bao gồm chữ in hoa, số, _ và -</small>
