@@ -28,17 +28,33 @@ const SellerCustomersPage = () => {
     const fetchStoreId = async () => {
       try {
         const response = await getMyStoresApi(0, 1);
+        console.log("[SellerCustomersPage] getMyStoresApi response:", response);
+        console.log("[SellerCustomersPage] response.data:", response?.data);
+        console.log(
+          "[SellerCustomersPage] response.data.code:",
+          response?.data?.code
+        );
+        console.log(
+          "[SellerCustomersPage] response.data.result:",
+          response?.data?.result
+        );
+
         if (
-          response.data.code === 200 &&
-          response.data.result?.content?.length > 0
+          response?.data?.code === 200 &&
+          response?.data?.result?.content?.length > 0
         ) {
           const myStore = response.data.result.content[0];
+          console.log("[SellerCustomersPage] Found store:", myStore);
           setStoreId(myStore.id);
         } else {
+          console.log(
+            "[SellerCustomersPage] No store found or invalid response"
+          );
           message.error("Không tìm thấy cửa hàng của bạn");
         }
       } catch (error) {
-        console.error("Error fetching store:", error);
+        console.error("[SellerCustomersPage] Error fetching store:", error);
+        console.error("[SellerCustomersPage] Error response:", error.response);
         message.error("Không thể tải thông tin cửa hàng");
       }
     };
@@ -58,18 +74,40 @@ const SellerCustomersPage = () => {
 
     setLoading(true);
     try {
+      console.log(
+        "[SellerCustomersPage] Fetching followers for storeId:",
+        storeId
+      );
       const response = await getStoreFollowersApi(storeId, page, size);
-      if (response.data.code === 200) {
+      console.log(
+        "[SellerCustomersPage] getStoreFollowersApi response:",
+        response
+      );
+      console.log("[SellerCustomersPage] response.data:", response?.data);
+      console.log(
+        "[SellerCustomersPage] response.data.code:",
+        response?.data?.code
+      );
+      console.log(
+        "[SellerCustomersPage] response.data.result:",
+        response?.data?.result
+      );
+
+      if (response?.data?.code === 200) {
         const result = response.data.result;
+        console.log("[SellerCustomersPage] Followers data:", result);
         setFollowers(result.content);
         setPagination({
           current: result.number + 1,
           pageSize: result.size,
           total: result.totalElements,
         });
+      } else {
+        console.log("[SellerCustomersPage] Invalid response or non-200 code");
       }
     } catch (error) {
-      console.error("Error fetching followers:", error);
+      console.error("[SellerCustomersPage] Error fetching followers:", error);
+      console.error("[SellerCustomersPage] Error response:", error.response);
       message.error("Không thể tải danh sách khách hàng");
     } finally {
       setLoading(false);
