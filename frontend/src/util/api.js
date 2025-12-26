@@ -2094,6 +2094,21 @@ const getFollowerCountApi = (storeId) => {
   });
 };
 
+// Get followers list for a store (seller only)
+const getStoreFollowersApi = (storeId, page = 0, size = 20) => {
+  const URL_API = `/api/product/stores/${storeId}/followers`;
+  return axios.get(URL_API, {
+    params: {
+      page,
+      size,
+      sort: "createdAt,desc",
+    },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // ============================================
 // Banner Slides APIs
 // ============================================
@@ -2877,6 +2892,7 @@ export {
   getFollowStatusesApi,
   getFollowingStoresApi,
   getFollowerCountApi,
+  getStoreFollowersApi,
   // Coupon Management APIs
   getAllCouponsApi,
   getCouponByCodeApi,

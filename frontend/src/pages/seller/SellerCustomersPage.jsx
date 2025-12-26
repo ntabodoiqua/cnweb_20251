@@ -1,49 +1,177 @@
-import { TeamOutlined, UserAddOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
+import {
+  TeamOutlined,
+  UserOutlined,
+  CalendarOutlined,
+  LoadingOutlined,
+  MailOutlined,
+} from "@ant-design/icons";
+import { Table, Avatar, Empty, Spin, message, Tag } from "antd";
+import { getMyStoresApi, getStoreFollowersApi } from "../../util/api";
+import styles from "./seller-customers.module.css";
 
 /**
  * SellerCustomersPage - Trang quản lý khách hàng của người bán
  */
 const SellerCustomersPage = () => {
+  const [loading, setLoading] = useState(true);
+  const [followers, setFollowers] = useState([]);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 20,
+    total: 0,
+  });
+  const [storeId, setStoreId] = useState(null);
+
+  // Fetch store ID của seller
+  useEffect(() => {
+    const fetchStoreId = async () => {
+      try {
+        const response = await getMyStoresApi(0, 1);
+        if (
+          response.data.code === 200 &&
+          response.data.result?.content?.length > 0
+        ) {
+          const myStore = response.data.result.content[0];
+          setStoreId(myStore.id);
+        } else {
+          message.error("Không tìm thấy cửa hàng của bạn");
+        }
+      } catch (error) {
+        console.error("Error fetching store:", error);
+        message.error("Không thể tải thông tin cửa hàng");
+      }
+    };
+
+    fetchStoreId();
+  }, []);
+
+  // Fetch followers khi có storeId
+  useEffect(() => {
+    if (storeId) {
+      fetchFollowers(pagination.current - 1, pagination.pageSize);
+    }
+  }, [storeId]);
+
+  const fetchFollowers = async (page = 0, size = 20) => {
+    if (!storeId) return;
+
+    setLoading(true);
+    try {
+      const response = await getStoreFollowersApi(storeId, page, size);
+      if (response.data.code === 200) {
+        const result = response.data.result;
+        setFollowers(result.content);
+        setPagination({
+          current: result.number + 1,
+          pageSize: result.size,
+          total: result.totalElements,
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching followers:", error);
+      message.error("Không thể tải danh sách khách hàng");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleTableChange = (newPagination) => {
+    fetchFollowers(newPagination.current - 1, newPagination.pageSize);
+  };
+
+  const columns = [
+    {
+      title: "Khách hàng",
+      dataIndex: "userName",
+      key: "userName",
+      render: (text, record) => (
+        <div className={styles.customerInfo}>
+          <Avatar
+            size={48}
+            src={record.avatarUrl}
+            icon={<UserOutlined />}
+            className={styles.avatar}
+          />
+          <div className={styles.customerDetails}>
+            <div className={styles.customerName}>{text || record.userId}</div>
+            {record.email && (
+              <div className={styles.customerEmail}>
+                <MailOutlined /> {record.email}
+              </div>
+            )}
+          </div>
+        </div>
+      ),
+    },
+    {
+      title: "User ID",
+      dataIndex: "userId",
+      key: "userId",
+      render: (text) => <Tag color="blue">{text}</Tag>,
+    },
+    {
+      title: "Ngày theo dõi",
+      dataIndex: "followedAt",
+      key: "followedAt",
+      render: (date) => (
+        <div className={styles.dateInfo}>
+          <CalendarOutlined />
+          <span>{new Date(date).toLocaleDateString("vi-VN")}</span>
+        </div>
+      ),
+      sorter: (a, b) => new Date(a.followedAt) - new Date(b.followedAt),
+    },
+  ];
+
+  if (!storeId) {
+    return (
+      <div className={styles.loadingContainer}>
+        <Spin
+          indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />}
+          tip="Đang tải thông tin cửa hàng..."
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="seller-customers">
-      <div className="page-placeholder">
-        <TeamOutlined style={{ fontSize: "80px", color: "#ee4d2d" }} />
-        <h2>Quản lý Khách hàng</h2>
-        <p>Tính năng đang được phát triển</p>
-        <button className="seller-btn seller-btn-primary">
-          <UserAddOutlined />
-          Thêm khách hàng
-        </button>
+    <div className={styles.container}>
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <TeamOutlined className={styles.headerIcon} />
+          <div>
+            <h2 className={styles.title}>Khách hàng theo dõi</h2>
+            <p className={styles.subtitle}>
+              Danh sách khách hàng đang theo dõi cửa hàng của bạn
+            </p>
+          </div>
+        </div>
+        <div className={styles.statsCard}>
+          <div className={styles.statsNumber}>{pagination.total}</div>
+          <div className={styles.statsLabel}>Tổng số khách hàng</div>
+        </div>
       </div>
 
-      <style jsx>{`
-        .seller-customers {
-          animation: fadeIn 0.5s ease-out;
-        }
-
-        .page-placeholder {
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-          min-height: 400px;
-          text-align: center;
-          gap: 20px;
-        }
-
-        .page-placeholder h2 {
-          font-size: 28px;
-          font-weight: 700;
-          color: #333;
-          margin: 0;
-        }
-
-        .page-placeholder p {
-          font-size: 16px;
-          color: #888;
-          margin: 0;
-        }
-      `}</style>
+      <div className={styles.tableContainer}>
+        <Table
+          columns={columns}
+          dataSource={followers}
+          rowKey="userId"
+          loading={loading}
+          pagination={pagination}
+          onChange={handleTableChange}
+          locale={{
+            emptyText: (
+              <Empty
+                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                description="Chưa có khách hàng nào theo dõi cửa hàng"
+              />
+            ),
+          }}
+          className={styles.table}
+        />
+      </div>
     </div>
   );
 };
