@@ -1,7 +1,11 @@
 package com.vdt2025.product_service.service;
 
+import com.vdt2025.product_service.client.UserClient;
+import com.vdt2025.product_service.dto.request.BatchUsernamesRequest;
 import com.vdt2025.product_service.dto.response.FollowStatusResponse;
 import com.vdt2025.product_service.dto.response.StoreFollowResponse;
+import com.vdt2025.product_service.dto.response.StoreFollowerResponse;
+import com.vdt2025.product_service.dto.response.UserInfoResponse;
 import com.vdt2025.product_service.entity.Store;
 import com.vdt2025.product_service.entity.StoreFollow;
 import com.vdt2025.product_service.exception.AppException;
@@ -20,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -31,6 +36,7 @@ public class StoreFollowServiceImpl implements StoreFollowService {
     
     StoreFollowRepository storeFollowRepository;
     StoreRepository storeRepository;
+    UserClient userClient;
     
     @Override
     @Transactional
@@ -173,6 +179,65 @@ public class StoreFollowServiceImpl implements StoreFollowService {
         }
         
         return storeFollowRepository.countByStoreId(storeId);
+    }
+    
+    @Override
+    public Page<StoreFollowerResponse> getFollowers(String storeId, Pageable pageable) {
+        // Kiểm tra store có tồn tại không
+        if (!storeRepository.existsById(storeId)) {
+            throw new AppException(ErrorCode.STORE_NOT_FOUND);
+        }
+        
+        // Lấy danh sách followers với pagination
+        Page<StoreFollow> followersPage = storeFollowRepository.findByStoreIdOrderByCreatedAtDesc(storeId, pageable);
+        
+        // Lấy danh sách userIds
+        List<String> userIds = followersPage.getContent().stream()
+                .map(StoreFollow::getUserId)
+                .collect(Collectors.toList());
+        
+        // Nếu không có follower nào, trả về trang rỗng
+        if (userIds.isEmpty()) {
+            return followersPage.map(sf -> StoreFollowerResponse.builder()
+                    .userId(sf.getUserId())
+                    .followedAt(sf.getCreatedAt())
+                    .build());
+        }
+        
+        // Gọi user-service để lấy thông tin users
+        Map<String, UserInfoResponse> userInfoMap;
+        try {
+            BatchUsernamesRequest request = BatchUsernamesRequest.builder()
+                    .usernames(userIds)
+                    .build();
+            userInfoMap = userClient.getUsersByUsernames(request).getResult();
+        } catch (Exception e) {
+            log.error("Error fetching user info from user-service", e);
+            // Nếu không lấy được thông tin user, vẫn trả về danh sách với userId
+            return followersPage.map(sf -> StoreFollowerResponse.builder()
+                    .userId(sf.getUserId())
+                    .followedAt(sf.getCreatedAt())
+                    .build());
+        }
+        
+        // Map thành StoreFollowerResponse
+        return followersPage.map(sf -> {
+            UserInfoResponse userInfo = userInfoMap.get(sf.getUserId());
+            if (userInfo != null) {
+                return StoreFollowerResponse.builder()
+                        .userId(sf.getUserId())
+                        .userName(userInfo.getFullName())
+                        .email(null) // Email không có trong UserInfoResponse
+                        .avatarUrl(userInfo.getAvatarUrl())
+                        .followedAt(sf.getCreatedAt())
+                        .build();
+            } else {
+                return StoreFollowerResponse.builder()
+                        .userId(sf.getUserId())
+                        .followedAt(sf.getCreatedAt())
+                        .build();
+            }
+        });
     }
     
     private String getCurrentUsername() {
