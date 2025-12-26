@@ -11,7 +11,7 @@ import java.util.List;
  * Best practice: bao gồm đầy đủ thông tin cho e-commerce
  */
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -49,9 +49,6 @@ public class ProductResponse {
     // Danh sách ảnh
     List<ProductImageResponse> images;
 
-    // Thuộc tính sản phẩm (specifications)
-    List<ProductAttributeResponse> attributes;
-
     // Thông tin tạo/cập nhật
     String createdBy;
 
@@ -64,5 +61,5 @@ public class ProductResponse {
 
     BigDecimal maxPrice;
 
-    Integer totalStock;
+    List<CategoryResponse> storeCategories;
 }

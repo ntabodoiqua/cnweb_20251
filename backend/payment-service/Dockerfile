@@ -43,9 +43,14 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost:8086/actuator/health || exit 1
 
 # Run the application with optimized JVM settings
+# Add --add-opens for Elasticsearch to access BigDecimal fields (Java module system)
 ENTRYPOINT ["java", \
     "-Xms256m", \
     "-Xmx512m", \
     "-XX:+UseG1GC", \
     "-XX:MaxGCPauseMillis=200", \
+    "--add-opens=java.base/java.math=ALL-UNNAMED", \
+    "--add-opens=java.base/java.lang=ALL-UNNAMED", \
+    "--add-opens=java.base/java.util=ALL-UNNAMED", \
+    "--add-opens=java.base/java.time=ALL-UNNAMED", \
     "-jar", "/app/app.jar"]

@@ -1,5 +1,5 @@
 import React from "react";
-import "../../../styles/terms.css";
+import styles from "../../../styles/terms.module.css";
 import useScrollToTop from "../../../hooks/useScrollToTop";
 import {
   SafetyOutlined,
@@ -139,28 +139,28 @@ const Terms = () => {
   ];
 
   return (
-    <div className="terms-container">
+    <div className={styles.container}>
       {/* Hero Section */}
-      <div className="terms-hero">
-        <div className="hero-background">
-          <div className="hero-circle hero-circle-1"></div>
-          <div className="hero-circle hero-circle-2"></div>
-          <div className="hero-circle hero-circle-3"></div>
+      <div className={styles.hero}>
+        <div className={styles.heroBackground}>
+          <div className={`${styles.heroCircle} ${styles.heroCircle1}`}></div>
+          <div className={`${styles.heroCircle} ${styles.heroCircle2}`}></div>
+          <div className={`${styles.heroCircle} ${styles.heroCircle3}`}></div>
         </div>
-        <div className="hero-content">
-          <img src={logo} alt="HUSTBuy Logo" className="hero-logo" />
-          <h1 className="hero-title">Điều Khoản Sử Dụng</h1>
-          <div className="hero-subtitle">
+        <div className={styles.heroContent}>
+          <img src={logo} alt="HUSTBuy Logo" className={styles.heroLogo} />
+          <h1 className={styles.heroTitle}>Điều Khoản Sử Dụng</h1>
+          <div className={styles.heroSubtitle}>
             Vui lòng đọc kỹ các điều khoản trước khi sử dụng dịch vụ
           </div>
-          <div className="last-updated">
+          <div className={styles.lastUpdated}>
             Cập nhật lần cuối: {lastUpdated}
           </div>
         </div>
       </div>
 
       {/* Introduction */}
-      <div className="terms-intro">
+      <div className={styles.termsIntro}>
         <p>
           Các điều khoản và điều kiện sau đây quy định việc sử dụng dịch vụ của
           HUSTBuy. Bằng cách truy cập và sử dụng website, bạn đồng ý tuân thủ
@@ -170,14 +170,14 @@ const Terms = () => {
       </div>
 
       {/* Terms Sections */}
-      <div className="terms-content">
+      <div className={styles.termsContent}>
         {sections.map((section) => (
-          <div key={section.id} className="terms-section">
-            <div className="section-header">
-              <div className="section-icon">{section.icon}</div>
+          <div key={section.id} className={styles.termsSection}>
+            <div className={styles.sectionHeader}>
+              <div className={styles.sectionIcon}>{section.icon}</div>
               <h2>{section.title}</h2>
             </div>
-            <div className="section-content">
+            <div className={styles.sectionContent}>
               {section.content.map((paragraph, index) => (
                 <p key={index}>{paragraph}</p>
               ))}
@@ -187,9 +187,9 @@ const Terms = () => {
       </div>
 
       {/* Important Notice */}
-      <div className="terms-notice">
-        <WarningOutlined className="notice-icon" />
-        <div className="notice-content">
+      <div className={styles.termsNotice}>
+        <WarningOutlined className={styles.noticeIcon} />
+        <div className={styles.noticeContent}>
           <h3>Lưu ý quan trọng</h3>
           <p>
             Bằng việc sử dụng dịch vụ của HUSTBuy, bạn xác nhận rằng đã đọc,

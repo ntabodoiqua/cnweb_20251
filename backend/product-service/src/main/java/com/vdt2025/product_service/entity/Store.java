@@ -38,8 +38,14 @@ public class Store {
     @Column(name = "logo_name")
     String logoName;
 
+    @Column(name = "logo_url")
+    String logoUrl;
+
     @Column(name = "banner_name")
     String bannerName;
+
+    @Column(name = "banner_url")
+    String bannerUrl;
 
     @Column(name = "contact_email", nullable = false)
     String contactEmail;

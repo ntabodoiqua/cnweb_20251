@@ -238,6 +238,7 @@ public class AuthenticationService {
             return AuthenticationResponse.builder()
                     .token(token)
                     .authenticated(true)
+                    .username(user.getUsername())
                     .build();
         } catch (AppException e) {
             log.error("Google authentication failed: {}", e.getMessage());

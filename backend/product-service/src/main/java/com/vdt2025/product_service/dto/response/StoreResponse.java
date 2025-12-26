@@ -17,7 +17,9 @@ public class StoreResponse {
     String storeName;
     String storeDescription;
     String logoName;
+    String logoUrl;
     String bannerName;
+    String bannerUrl;
     String contactEmail;
     String contactPhone;
     String shopAddress;

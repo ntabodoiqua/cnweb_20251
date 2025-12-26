@@ -121,4 +121,72 @@ public class OrderStatusQueryScheduler {
             log.error("Error updating transaction to expired: {}", e.getMessage(), e);
         }
     }
+
+    /**
+     * Job chạy định kỳ để hủy các đơn hàng đã quá hạn 15 phút.
+     * Chạy mỗi 5 phút một lần (không cần chạy quá dày đặc như job query).
+     */
+    @Scheduled(cron = "0 */5 * * * *") // Chạy vào phút thứ 0, 5, 10, 15... mỗi giờ
+    public void scanAndExpireOverdueOrders() {
+        log.info("Starting job to expire overdue transactions...");
+        try {
+            // Xác định mốc thời gian: Tất cả đơn tạo trước thời điểm này đều bị coi là quá hạn
+            // Thêm 1 phút buffer (16 phút) để tránh xung đột với các đơn vừa chạm mốc 15p đang được query
+            LocalDateTime expirationThreshold = LocalDateTime.now().minusMinutes(16);
+
+            // Lấy danh sách các đơn "treo" quá lâu
+            List<ZaloPayTransaction> overdueTransactions = transactionRepository
+                    .findPendingTransactionsBefore(expirationThreshold);
+
+            if (overdueTransactions.isEmpty()) {
+                log.info("No overdue pending transactions found.");
+                return;
+            }
+
+            log.info("Found {} overdue transactions to expire.", overdueTransactions.size());
+
+            for (ZaloPayTransaction transaction : overdueTransactions) {
+                try {
+                    // Logic xử lý hủy đơn
+                    processExpireTransaction(transaction);
+                } catch (Exception e) {
+                    log.error("Failed to expire transaction {}: {}", transaction.getAppTransId(), e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error in expiration scheduler: ", e);
+        }
+    }
+
+    /**
+     * Logic chi tiết hủy đơn
+     */
+    private void processExpireTransaction(ZaloPayTransaction transaction) {
+        // [QUAN TRỌNG] Nên query ZaloPay lần cuối cùng (Final Check) để chắc chắn khách không vừa thanh toán xong
+        // Nếu muốn nhanh, bỏ qua bước này. Nhưng an toàn thì nên giữ.
+        try {
+            QueryOrderResponse response = zaloPayService.queryOrderStatus(
+                    QueryOrderRequest.builder().appTransId(transaction.getAppTransId()).build()
+            );
+
+            // Nếu ZaloPay bảo đã thành công rồi -> Update Success chứ KHÔNG hủy
+            if (response.getStatus().equals("SUCCESS")) {
+                log.info("Transaction {} actually succeeded at last minute. Updating to SUCCESS.", transaction.getAppTransId());
+                // updateTransactionToSuccess(transaction); // Gọi hàm update thành công của bạn
+                return;
+            }
+        } catch (Exception ex) {
+            log.warn("Could not perform final check for {}, proceeding to expire.", transaction.getAppTransId());
+        }
+
+        // Tiến hành hủy đơn
+        transaction.setStatus(ZaloPayTransaction.TransactionStatus.EXPIRED);
+        transaction.setReturnMessage("System auto-expired after 15 minutes"); // Nếu có field này
+        transactionRepository.save(transaction);
+
+        log.info("Auto-expired transaction: {}", transaction.getAppTransId());
+
+        // Gửi thông báo hoặc hoàn tồn kho (Rollback Inventory) nếu cần
+        // inventoryService.releaseStock(transaction.getOrderId());
+    }
 }

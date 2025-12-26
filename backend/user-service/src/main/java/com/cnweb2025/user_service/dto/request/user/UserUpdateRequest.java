@@ -16,7 +16,6 @@ import java.util.List;
 public class UserUpdateRequest {
     String firstName;
     String lastName;
-    String email;
     @DobConstrain(min = 16, message = "INVALID_DOB")
     LocalDate dob;
     String phone;
