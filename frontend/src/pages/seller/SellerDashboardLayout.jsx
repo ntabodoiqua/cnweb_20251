@@ -13,6 +13,7 @@ import {
   AppstoreOutlined,
   PictureOutlined,
   MessageOutlined,
+  GiftOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../../constants/routes";
 import styles from "./seller-dashboard.module.css";
@@ -62,6 +63,12 @@ const SellerDashboardLayout = () => {
       icon: <AppstoreOutlined />,
       label: "Thuộc tính sản phẩm",
       path: PROTECTED_ROUTES.SELLER_PRODUCT_ATTRIBUTES,
+    },
+    {
+      key: "coupons",
+      icon: <GiftOutlined />,
+      label: "Mã giảm giá",
+      path: PROTECTED_ROUTES.SELLER_COUPONS,
     },
     {
       key: "customers",

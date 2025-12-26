@@ -125,6 +125,7 @@ const AdminReportsPage = lazy(() => import("../pages/admin/AdminReportsPage"));
 const AdminVideoReviewsPage = lazy(() =>
   import("../pages/admin/AdminVideoReviewsPage")
 );
+const AdminCouponsPage = lazy(() => import("../pages/admin/AdminCouponsPage"));
 
 // Seller Pages
 const SellerDashboardLayout = lazy(() =>
@@ -162,6 +163,9 @@ const SellerSettingsPage = lazy(() =>
   import("../pages/seller/SellerSettingsPage")
 );
 const SellerChatPage = lazy(() => import("../pages/seller/SellerChatPage"));
+const SellerCouponsPage = lazy(() =>
+  import("../pages/seller/SellerCouponsPage")
+);
 
 // Error Pages
 const NotFoundPage = lazy(() => import("../pages/not-found"));
@@ -653,6 +657,14 @@ const router = createBrowserRouter([
             ),
           },
           {
+            path: PROTECTED_ROUTES.ADMIN_COUPONS,
+            element: (
+              <SuspenseWrapper>
+                <AdminCouponsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
             path: PROTECTED_ROUTES.ADMIN_VIDEO_REVIEWS,
             element: (
               <SuspenseWrapper>
@@ -783,6 +795,14 @@ const router = createBrowserRouter([
             element: (
               <SuspenseWrapper>
                 <SellerSettingsPage />
+              </SuspenseWrapper>
+            ),
+          },
+          {
+            path: PROTECTED_ROUTES.SELLER_COUPONS,
+            element: (
+              <SuspenseWrapper>
+                <SellerCouponsPage />
               </SuspenseWrapper>
             ),
           },
