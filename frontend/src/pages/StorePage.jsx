@@ -181,7 +181,7 @@ const StorePage = () => {
     try {
       const response = await getFollowStatusApi(storeId);
       if (response.code === 1000) {
-        setIsFollowing(response.result.isFollowing);
+        setIsFollowing(response.result.following);
         setFollowerCount(response.result.followerCount);
       }
     } catch (error) {
