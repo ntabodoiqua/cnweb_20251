@@ -173,3 +173,69 @@ Dự án HUSTBuy được nhóm chúng em triển khai nhằm áp dụng kiến 
 \textbf{Sự phát triển của thương mại điện tử:}
 
 Theo báo cáo của các tổ chức nghiên cứu thị trường, ngành thương mại điện tử tại Việt Nam đang tăng trưởng với tốc độ hơn 20\% mỗi năm. Người tiêu dùng, đặc biệt là thế hệ trẻ, ngày càng quen thuộc với việc mua sắm trực tuyến. Điều này tạo ra nhu cầu cấp thiết về các nền tảng thương mại điện tử đáng tin cậy, nhanh chóng và dễ sử dụng.
+
+\textbf{Thách thức của kiến trúc truyền thống:}
+
+Các hệ thống thương mại điện tử truyền thống thường được xây dựng theo mô hình monolithic, nơi tất cả các chức năng được tích hợp trong một ứng dụng duy nhất. Mô hình này gặp phải nhiều hạn chế:
+
+\begin{itemize}
+    \item Khó mở rộng khi lưu lượng truy cập tăng cao
+    \item Một lỗi nhỏ có thể làm sập toàn bộ hệ thống
+    \item Khó khăn trong việc áp dụng công nghệ mới cho từng module
+    \item Thời gian triển khai và bảo trì kéo dài
+    \item Không tận dụng được tài nguyên một cách hiệu quả
+\end{itemize}
+
+\textbf{Nhu cầu áp dụng Microservice:}
+
+Kiến trúc Microservice ra đời để giải quyết các vấn đề trên bằng cách:
+
+\begin{itemize}
+    \item Phân tách hệ thống thành các dịch vụ nhỏ, độc lập
+    \item Mỗi dịch vụ có thể được phát triển, triển khai và mở rộng riêng biệt
+    \item Tăng tính sẵn sàng của hệ thống nhờ cơ chế fault isolation
+    \item Cho phép các team phát triển song song, tăng năng suất
+    \item Dễ dàng áp dụng các công nghệ phù hợp cho từng dịch vụ
+\end{itemize}
+
+Từ những nhu cầu và thách thức thực tiễn trên, nhóm chúng em quyết định xây dựng HUSTBuy theo kiến trúc Microservice để không chỉ đáp ứng yêu cầu của đề tài mà còn nghiên cứu sâu về một xu hướng công nghệ đang được ứng dụng rộng rãi trong các doanh nghiệp lớn.
+
+\subsection{Mục tiêu hệ thống}
+
+\textbf{Mục tiêu tổng quát:}
+
+Xây dựng một nền tảng thương mại điện tử hoàn chỉnh áp dụng kiến trúc Microservice, đảm bảo tính mở rộng, bảo mật và hiệu năng cao, phục vụ nhu cầu mua bán trực tuyến của cộng đồng.
+
+\noindent \textbf{Mục tiêu cụ thể:}
+
+Về mặt \textit{chức năng}, dự án tập trung xây dựng một hệ thống quản lý sản phẩm toàn diện với đầy đủ thông tin chi tiết, hình ảnh và phân loại khoa học. Hệ thống sẽ triển khai các tính năng thương mại điện tử cốt lõi bao gồm giỏ hàng, đặt hàng trực tuyến và tích hợp các phương thức thanh toán an toàn. Bên cạnh đó, các module về xác thực và phân quyền người dùng sẽ được thiết lập chặt chẽ cùng với hệ thống quản lý đơn hàng, cho phép theo dõi trạng thái giao hàng theo thời gian thực. Để hỗ trợ công tác vận hành, dự án cũng phát triển các dashboard quản trị chuyên sâu dành riêng cho người bán và quản trị viên.
+
+Về \textit{kiến trúc và công nghệ}, hệ thống được định hướng phát triển dựa trên kiến trúc Microservices với các dịch vụ hoạt động độc lập, sử dụng API Gateway để quản lý và định tuyến các yêu cầu. Dự án sẽ triển khai các cơ chế hiện đại như Service Discovery, Load Balancing và áp dụng linh hoạt các design pattern phù hợp như Database per service, Distributed Caching hoặc Saga để đảm bảo tính nhất quán của dữ liệu. Ngoài ra, một hệ thống monitoring và logging tập trung sẽ được xây dựng để theo dõi sức khỏe và hiệu suất của toàn bộ các service.
+
+Đối với \textit{hiệu năng và bảo mật}, mục tiêu trọng tâm là đảm bảo hệ thống có khả năng xử lý tốt trong điều kiện số lượng người dùng đồng thời cao, đồng thời tối ưu hóa thời gian phản hồi và tốc độ tải trang. Các biện pháp bảo mật tiên tiến như giao thức HTTPS, cơ chế xác thực JWT và kiểm soát dữ liệu đầu vào (input validation) sẽ được áp dụng triệt để. Hệ thống cũng được thiết kế để chống lại các cuộc tấn công phổ biến như SQL Injection, XSS, CSRF và thực hiện mã hóa các thông tin nhạy cảm để bảo vệ quyền riêng tư của khách hàng.
+
+Cuối cùng, về \textit{trải nghiệm người dùng}, dự án hướng tới việc thiết kế giao diện thân thiện, dễ sử dụng và có tính tương thích (responsive) trên nhiều loại thiết bị và nền tảng khác nhau. Trải nghiệm mua sắm sẽ được tối ưu hóa thông qua hệ thống tìm kiếm và bộ lọc sản phẩm hiệu quả, kết hợp với các thông báo thời gian thực (real-time) về tình trạng đơn hàng, giúp nâng cao mức độ hài lòng của người dùng.
+
+Thông qua việc đạt được các mục tiêu trên, dự án không chỉ tạo ra một sản phẩm thực tế mà còn giúp nhóm nắm vững kiến thức về kiến trúc Microservice và các công nghệ web hiện đại.
+
+\subsection{Quản lý tiến độ công việc}
+
+Nhóm đã lựa chọn áp dụng quy trình \textbf{Agile} (theo mô hình Scrum) để đảm bảo tính linh hoạt và khả năng ứng biến nhanh với các thay đổi trong quá trình phát triển dự án. Công cụ \textbf{Jira} được sử dụng làm nền tảng chính để quản lý và theo dõi tiến độ công việc một cách trực quan.
+
+Cụ thể, nhóm thực hiện quản lý công việc thông qua các hoạt động sau:
+\begin{itemize}
+    \item \textbf{Product Backlog:} Toàn bộ các yêu cầu chức năng và phi chức năng được lưu trữ tập trung trên Jira.
+    \item \textbf{Sprint Planning:} Nhóm chia dự án thành các giai đoạn nhỏ (Sprints), mỗi giai đoạn kéo dài từ 1-2 tuần để hoàn thành một số lượng công việc nhất định.
+    \item \textbf{Quản lý Task:} Mỗi công việc được chia thành các \textit{Task} cụ thể gắn với từng thành viên, kèm theo thời hạn (deadline) và mức độ ưu tiên.
+\end{itemize}
+
+Tiến độ được theo dõi với các trạng thái:
+\begin{itemize}
+    \item \textbf{To Do:} Các công việc đã được lập kế hoạch nhưng chưa bắt đầu.
+    \item \textbf{In Progress:} Các công việc đang trong quá trình thực hiện.
+    \item \textbf{In Review:} Các công việc đã xong phần code và đang được kiểm thử hoặc đợi review.
+    \item \textbf{Done:} Các công việc đã hoàn thành.
+\end{itemize}
+
+
+\end{document}
