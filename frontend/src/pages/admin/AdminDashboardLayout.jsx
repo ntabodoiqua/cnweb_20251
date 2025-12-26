@@ -148,6 +148,12 @@ const AdminDashboardLayout = () => {
           path: PROTECTED_ROUTES.ADMIN_PAYMENTS,
         },
         {
+          key: "coupons",
+          icon: <TagsOutlined />,
+          label: "Mã giảm giá",
+          path: PROTECTED_ROUTES.ADMIN_COUPONS,
+        },
+        {
           key: "reports",
           icon: <BarChartOutlined />,
           label: "Báo cáo & Thống kê",

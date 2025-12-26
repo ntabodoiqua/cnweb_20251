@@ -60,6 +60,7 @@ export const PROTECTED_ROUTES = {
   ADMIN_PRODUCTS: "/admin/products",
   ADMIN_ORDERS: "/admin/orders",
   ADMIN_PAYMENTS: "/admin/payments",
+  ADMIN_COUPONS: "/admin/coupons",
   ADMIN_REPORTS: "/admin/reports",
   ADMIN_VIDEO_REVIEWS: "/admin/video-reviews",
 
@@ -82,6 +83,7 @@ export const PROTECTED_ROUTES = {
   SELLER_CATEGORIES: "/seller/categories",
   SELLER_BANNERS: "/seller/banners",
   SELLER_PRODUCT_ATTRIBUTES: "/seller/product-attributes",
+  SELLER_COUPONS: "/seller/coupons",
   SELLER_CUSTOMERS: "/seller/customers",
   SELLER_CHAT: "/seller/chat",
   SELLER_STATISTICS: "/seller/statistics",

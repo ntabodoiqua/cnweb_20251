@@ -2601,6 +2601,57 @@ const markAllNotificationsAsReadApi = () => {
   });
 };
 
+// ==================== Coupon Management APIs ====================
+
+/**
+ * Lấy danh sách tất cả coupon (Admin)
+ */
+const getAllCouponsApi = () => {
+  const URL_API = "/api/order/api/v1/coupons";
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+/**
+ * Lấy thông tin coupon theo code
+ */
+const getCouponByCodeApi = (code) => {
+  const URL_API = `/api/order/api/v1/coupons/${encodeURIComponent(code)}`;
+  return axios.get(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+/**
+ * Tạo coupon mới (Admin/Seller)
+ */
+const createCouponApi = (couponData) => {
+  const URL_API = "/api/order/api/v1/coupons";
+  return axios.post(URL_API, couponData, {
+    headers: {
+      "Accept-Language": "vi",
+      "Content-Type": "application/json",
+    },
+  });
+};
+
+/**
+ * Xóa coupon (Admin/Seller)
+ */
+const deleteCouponApi = (couponId) => {
+  const URL_API = `/api/order/api/v1/coupons/${couponId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 export {
   createUserApi,
   loginApi,
@@ -2826,4 +2877,9 @@ export {
   getFollowStatusesApi,
   getFollowingStoresApi,
   getFollowerCountApi,
+  // Coupon Management APIs
+  getAllCouponsApi,
+  getCouponByCodeApi,
+  createCouponApi,
+  deleteCouponApi,
 };

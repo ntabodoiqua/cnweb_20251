@@ -453,9 +453,6 @@ public class OrderServiceImpl implements OrderService {
             case FIXED_AMOUNT:
                 discount = coupon.getDiscountValue();
                 break;
-            case FREE_SHIPPING:
-                // Handle free shipping logic if needed
-                break;
         }
         return discount;
     }
