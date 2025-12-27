@@ -105,6 +105,16 @@ public class UserController {
                 .build();
     }
 
+    // Controller người dùng soft delete tài khoản
+    @DeleteMapping("/soft-delete")
+    public ApiResponse<String> softDeleteMyAccount() {
+        var result = userService.softDeleteMyAccount();
+        return ApiResponse.<String>builder()
+                .message("Account soft deleted successfully")
+                .result(result)
+                .build();
+    }
+
     // Controller xác thực email bằng OTP
     @PostMapping("/verify-email")
     public ApiResponse<String> verifyEmail(@RequestBody @Valid VerifyEmailRequest request) {

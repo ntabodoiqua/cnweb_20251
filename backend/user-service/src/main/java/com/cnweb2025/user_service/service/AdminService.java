@@ -23,4 +23,11 @@ public interface AdminService {
 
     String disableUser(String id);
 
+    // Soft Delete Management
+    List<UserResponse> getSoftDeletedUsers();
+
+    long countSoftDeletedUsers();
+
+    String restoreUser(String id);
+
 }

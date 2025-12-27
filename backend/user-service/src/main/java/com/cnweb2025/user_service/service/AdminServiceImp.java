@@ -188,4 +188,49 @@ public class AdminServiceImp implements AdminService{
         }
     }
 
+    @Override
+    public List<UserResponse> getSoftDeletedUsers() {
+        log.info("Admin fetching soft deleted users");
+
+        // Tìm tất cả users đã soft delete
+        List<User> softDeletedUsers = userRepository.findAll()
+                .stream()
+                .filter(User::isDeleted)
+                .toList();
+
+        return softDeletedUsers.stream()
+                .map(userMapper::toUserResponse)
+                .toList();
+    }
+
+    @Override
+    public long countSoftDeletedUsers() {
+        log.info("Admin counting soft deleted users");
+        return userRepository.countSoftDeletedUsers();
+    }
+
+    @Override
+    @Transactional
+    public String restoreUser(String id) {
+        log.info("Admin restoring user: {}", id);
+
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        if (!user.isDeleted()) {
+            log.warn("User {} is not soft deleted", id);
+            throw new AppException(ErrorCode.USER_NOT_FOUND);
+        }
+
+        // Khôi phục user
+        user.setDeleted(false);
+        user.setDeletedAt(null);
+        user.setEnabled(true);
+        userRepository.save(user);
+
+        log.info("User {} restored successfully", id);
+        return "User restored successfully";
+    }
+
+
 }

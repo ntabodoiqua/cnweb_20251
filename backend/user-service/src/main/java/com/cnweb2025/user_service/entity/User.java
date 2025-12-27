@@ -69,6 +69,12 @@ public class User {
     @Column(name = "is_verified", nullable = false)
     boolean isVerified; // Trạng thái xác thực email
 
+    @Column(name = "deleted", nullable = false)
+    boolean deleted = false; // Trạng thái soft delete
+
+    @Column(name = "deleted_at")
+    LocalDateTime deletedAt; // Thời điểm soft delete
+
     @ManyToMany
     @JoinTable(
             name = "user_role", // tên bảng trung gian
