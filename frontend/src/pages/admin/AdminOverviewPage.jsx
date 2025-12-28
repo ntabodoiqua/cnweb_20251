@@ -50,14 +50,15 @@ const AdminOverviewPage = () => {
         getUserStatisticsApi(),
       ]);
 
-      if (orderRes?.data?.code === 1000) {
-        setOrderStats(orderRes.data.result);
+      // Note: axios interceptor đã unwrap response.data, nên orderRes đã là data
+      if (orderRes?.code === 1000) {
+        setOrderStats(orderRes.result);
       }
-      if (productRes?.data?.code === 1000) {
-        setProductStats(productRes.data.result);
+      if (productRes?.code === 1000) {
+        setProductStats(productRes.result);
       }
-      if (userRes?.data?.code === 1000) {
-        setUserStats(userRes.data.result);
+      if (userRes?.code === 1000) {
+        setUserStats(userRes.result);
       }
     } catch (error) {
       console.error("Error fetching statistics:", error);
