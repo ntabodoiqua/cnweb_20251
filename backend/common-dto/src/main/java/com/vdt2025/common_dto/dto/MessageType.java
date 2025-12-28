@@ -7,6 +7,8 @@ public enum MessageType {
     USER_CREATED("user.created", "welcome-email-queue"),
     USER_DISABLED("user.disabled", "user-disable-queue"),
     USER_DELETED("user.deleted", "user-delete-queue"),
+    USER_DELETION_REQUESTED("user.deletion.requested", "user-deletion-requested-queue"),
+    USER_RECOVERED("user.recovered", "user-recovered-queue"),
     PASSWORD_RESET("user.password.reset", "password-reset-queue"),
     EMAIL_VERIFICATION("user.email.verification", "email-verification-queue"),
     SELLER_PROFILE_APPROVED("seller.profile.approved", "seller-profile-approved-queue"),

@@ -78,4 +78,57 @@ public class AdminController {
                 .result(adminService.getUserStatistic())
                 .build();
     }
+
+    // ==================== Account Deletion Endpoints ====================
+
+    /**
+     * Lấy danh sách users đã bị soft delete (pending deletion)
+     * GET /admin/deleted-users
+     */
+    @GetMapping("/deleted-users")
+    public ApiResponse<Page<UserResponse>> getDeletedUsers(Pageable pageable) {
+        return ApiResponse.<Page<UserResponse>>builder()
+                .result(adminService.getDeletedUsers(pageable))
+                .message("Deleted users retrieved successfully")
+                .build();
+    }
+
+    /**
+     * Admin soft delete user - Bắt đầu grace period 30 ngày
+     * DELETE /admin/{userId}/soft-delete
+     */
+    @DeleteMapping("/{userId}/soft-delete")
+    public ApiResponse<String> softDeleteUser(
+            @PathVariable String userId,
+            @RequestParam(required = false) String reason
+    ) {
+        return ApiResponse.<String>builder()
+                .result(adminService.softDeleteUser(userId, reason))
+                .message("User soft deleted successfully")
+                .build();
+    }
+
+    /**
+     * Admin hard delete user - Xóa vĩnh viễn
+     * DELETE /admin/{userId}/hard-delete
+     */
+    @DeleteMapping("/{userId}/hard-delete")
+    public ApiResponse<String> hardDeleteUser(@PathVariable String userId) {
+        return ApiResponse.<String>builder()
+                .result(adminService.hardDeleteUser(userId))
+                .message("User permanently deleted")
+                .build();
+    }
+
+    /**
+     * Admin khôi phục user đã bị soft delete
+     * POST /admin/{userId}/recover
+     */
+    @PostMapping("/{userId}/recover")
+    public ApiResponse<String> recoverUser(@PathVariable String userId) {
+        return ApiResponse.<String>builder()
+                .result(adminService.recoverUser(userId))
+                .message("User recovered successfully")
+                .build();
+    }
 }
