@@ -366,8 +366,14 @@ public class ProductServiceImpl implements ProductService {
             Sort.Direction direction = "asc".equalsIgnoreCase(filter.getSortDirection())
                     ? Sort.Direction.ASC : Sort.Direction.DESC;
 
+            // Fix: Null values should be at the bottom (NULLS_LAST)
+            // Đặc biệt quan trọng với averageRating, nếu null mà sort DESC thì nó lên đầu (Postgres/Default)
+            Sort.Order order = (direction == Sort.Direction.ASC)
+                    ? Sort.Order.asc(sortField)
+                    : Sort.Order.desc(sortField);
+
             pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                    Sort.by(direction, sortField));
+                    Sort.by(order.nullsLast()));
         }
 
         // Query DB (Nặng nhất -> Cần Cache)
