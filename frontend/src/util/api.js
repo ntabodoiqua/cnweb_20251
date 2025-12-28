@@ -1652,6 +1652,63 @@ const getUserStatisticsApi = () => {
   });
 };
 
+// Admin User Deletion APIs
+const softDeleteUserAdminApi = (userId, reason = "") => {
+  const URL_API = `/api/user/admin/${userId}/soft-delete`;
+  return axios.delete(URL_API, {
+    params: { reason },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const hardDeleteUserAdminApi = (userId) => {
+  const URL_API = `/api/user/admin/${userId}/hard-delete`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const recoverUserAdminApi = (userId) => {
+  const URL_API = `/api/user/admin/${userId}/recover`;
+  return axios.post(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const getDeletedUsersAdminApi = (params) => {
+  const URL_API = "/api/user/admin/deleted-users";
+  return axios.get(URL_API, {
+    params,
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const enableUserAdminApi = (userId) => {
+  const URL_API = `/api/user/admin/${userId}/enable`;
+  return axios.put(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+const disableUserAdminApi = (userId) => {
+  const URL_API = `/api/user/admin/${userId}/disable`;
+  return axios.put(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // ============================================
 // Brand Management APIs (Admin)
 // ============================================
@@ -2809,6 +2866,12 @@ export {
   getUsersAdminApi,
   getUserByIdAdminApi,
   getUserStatisticsApi,
+  softDeleteUserAdminApi,
+  hardDeleteUserAdminApi,
+  recoverUserAdminApi,
+  getDeletedUsersAdminApi,
+  enableUserAdminApi,
+  disableUserAdminApi,
   // Brand Management APIs
   getBrandsAdminApi,
   createBrandApi,

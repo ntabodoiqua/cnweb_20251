@@ -1,11 +1,14 @@
 package com.cnweb2025.user_service.repository;
 
 import com.cnweb2025.user_service.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -75,4 +78,24 @@ public interface UserRepository extends JpaRepository<User, String>, JpaSpecific
       FROM users;
     """, nativeQuery = true)
     String getUserStatisticsJson();
+
+    // ==================== Deletion Related Methods ====================
+
+    /**
+     * Tìm tất cả users đã bị soft delete
+     */
+    Page<User> findByIsDeletedTrue(Pageable pageable);
+
+    /**
+     * Tìm users đã bị soft delete và đã hết grace period (30 ngày)
+     * Dùng cho scheduled job để hard delete
+     */
+    @Query("SELECT u FROM User u WHERE u.isDeleted = true AND u.deletionRequestedAt < :cutoffDate")
+    List<User> findUsersForPermanentDeletion(LocalDateTime cutoffDate);
+
+    /**
+     * Đếm số users đang pending deletion
+     */
+    @Query("SELECT COUNT(u) FROM User u WHERE u.isDeleted = true")
+    long countDeletedUsers();
 }

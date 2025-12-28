@@ -2,6 +2,7 @@ package com.vdt2025.product_service.service;
 
 import com.vdt2025.product_service.dto.response.FollowStatusResponse;
 import com.vdt2025.product_service.dto.response.StoreFollowResponse;
+import com.vdt2025.product_service.dto.response.StoreFollowerResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -50,4 +51,12 @@ public interface StoreFollowService {
      * @return Số lượng follower
      */
     long getFollowerCount(String storeId);
+    
+    /**
+     * Lấy danh sách follower của một cửa hàng
+     * @param storeId ID của cửa hàng
+     * @param pageable Phân trang
+     * @return Page<StoreFollowerResponse>
+     */
+    Page<StoreFollowerResponse> getFollowers(String storeId, Pageable pageable);
 }

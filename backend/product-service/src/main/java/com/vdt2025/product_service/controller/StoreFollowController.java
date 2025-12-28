@@ -3,6 +3,7 @@ package com.vdt2025.product_service.controller;
 import com.vdt2025.product_service.dto.response.ApiResponse;
 import com.vdt2025.product_service.dto.response.FollowStatusResponse;
 import com.vdt2025.product_service.dto.response.StoreFollowResponse;
+import com.vdt2025.product_service.dto.response.StoreFollowerResponse;
 import com.vdt2025.product_service.service.StoreFollowService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -102,6 +103,20 @@ public class StoreFollowController {
         return ApiResponse.<Long>builder()
                 .result(result)
                 .message(messageSource.getMessage("success.store.follower.count", null, locale))
+                .build();
+    }
+    
+    @GetMapping("/{storeId}/followers")
+    @Operation(summary = "Get store followers", description = "Get list of followers for a store (seller only)")
+    public ApiResponse<Page<StoreFollowerResponse>> getStoreFollowers(
+            @Parameter(description = "Store ID") @PathVariable String storeId,
+            Pageable pageable,
+            Locale locale) {
+        log.info("Request to get followers for store: {}", storeId);
+        var result = storeFollowService.getFollowers(storeId, pageable);
+        return ApiResponse.<Page<StoreFollowerResponse>>builder()
+                .result(result)
+                .message(messageSource.getMessage("success.store.followers.retrieved", null, locale))
                 .build();
     }
 }

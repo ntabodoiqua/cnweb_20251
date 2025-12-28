@@ -4,6 +4,7 @@ import com.cnweb2025.user_service.dto.ApiResponse;
 import com.cnweb2025.user_service.dto.request.otp.ResendOtpRequest;
 import com.cnweb2025.user_service.dto.request.otp.ResetPasswordRequest;
 import com.cnweb2025.user_service.dto.request.otp.VerifyEmailRequest;
+import com.cnweb2025.user_service.dto.request.user.DeleteAccountRequest;
 import com.cnweb2025.user_service.dto.request.user.UserChangePasswordRequest;
 import com.cnweb2025.user_service.dto.request.user.UserCreationRequest;
 import com.cnweb2025.user_service.dto.request.user.UserUpdateRequest;
@@ -141,6 +142,73 @@ public class UserController {
         var result = userService.resetPassword(request.getUsername(), request.getOtpCode(), request.getNewPassword());
         return ApiResponse.<String>builder()
                 .message("Password reset successful")
+                .result(result)
+                .build();
+    }
+
+    // ==================== Account Deletion Endpoints ====================
+
+    /**
+     * Yêu cầu xóa tài khoản - Gửi OTP xác nhận qua email
+     * POST /users/request-deletion
+     */
+    @PostMapping("/request-deletion")
+    public ApiResponse<String> requestAccountDeletion() {
+        var result = userService.requestAccountDeletion();
+        return ApiResponse.<String>builder()
+                .message("Account deletion OTP sent")
+                .result(result)
+                .build();
+    }
+
+    /**
+     * Xác nhận xóa tài khoản với OTP - Bắt đầu grace period 30 ngày
+     * POST /users/confirm-deletion
+     */
+    @PostMapping("/confirm-deletion")
+    public ApiResponse<String> confirmAccountDeletion(@RequestBody @Valid DeleteAccountRequest request) {
+        var result = userService.confirmAccountDeletion(request.getOtpCode(), request.getReason());
+        return ApiResponse.<String>builder()
+                .message("Account marked for deletion")
+                .result(result)
+                .build();
+    }
+
+    /**
+     * Hủy yêu cầu xóa tài khoản (trong grace period khi đã đăng nhập)
+     * POST /users/cancel-deletion
+     */
+    @PostMapping("/cancel-deletion")
+    public ApiResponse<String> cancelAccountDeletion() {
+        var result = userService.cancelAccountDeletion();
+        return ApiResponse.<String>builder()
+                .message("Account deletion cancelled")
+                .result(result)
+                .build();
+    }
+
+    /**
+     * Gửi OTP để khôi phục tài khoản đã xóa (cho user chưa đăng nhập)
+     * POST /users/recovery/send-otp
+     */
+    @PostMapping("/recovery/send-otp")
+    public ApiResponse<String> sendRecoveryOtp(@RequestBody @Valid ResendOtpRequest request) {
+        var result = userService.sendRecoveryOtp(request.getUsername());
+        return ApiResponse.<String>builder()
+                .message("Recovery OTP sent")
+                .result(result)
+                .build();
+    }
+
+    /**
+     * Khôi phục tài khoản đã xóa với OTP (cho user chưa đăng nhập)
+     * POST /users/recovery/confirm
+     */
+    @PostMapping("/recovery/confirm")
+    public ApiResponse<String> recoverAccount(@RequestBody @Valid VerifyEmailRequest request) {
+        var result = userService.recoverAccount(request.getUsername(), request.getOtpCode());
+        return ApiResponse.<String>builder()
+                .message("Account recovered successfully")
                 .result(result)
                 .build();
     }

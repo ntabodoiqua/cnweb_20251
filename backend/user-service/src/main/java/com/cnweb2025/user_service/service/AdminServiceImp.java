@@ -2,16 +2,21 @@ package com.cnweb2025.user_service.service;
 
 import com.cnweb2025.user_service.dto.request.user.AdminUserUpdateRequest;
 import com.cnweb2025.user_service.dto.request.user.UserFilterRequest;
-import com.cnweb2025.user_service.dto.request.user.UserUpdateRequest;
 import com.cnweb2025.user_service.dto.response.UserResponse;
 import com.cnweb2025.user_service.dto.response.UserStatisticResponse;
 import com.cnweb2025.user_service.entity.Role;
+import com.cnweb2025.user_service.entity.User;
 import com.cnweb2025.user_service.exception.AppException;
 import com.cnweb2025.user_service.exception.ErrorCode;
 import com.cnweb2025.user_service.mapper.UserMapper;
 import com.cnweb2025.user_service.repository.RoleRepository;
 import com.cnweb2025.user_service.repository.UserRepository;
 import com.cnweb2025.user_service.specification.UserSpecification;
+import com.cnweb2025.user_service.messaging.RabbitMQMessagePublisher;
+import com.vdt2025.common_dto.dto.MessageType;
+import com.vdt2025.common_dto.dto.UserDeletedEvent;
+import com.vdt2025.common_dto.dto.UserDeletionRequestedEvent;
+import com.vdt2025.common_dto.dto.UserRecoveredEvent;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,8 +30,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +49,7 @@ public class AdminServiceImp implements AdminService{
     RoleRepository roleRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    RabbitMQMessagePublisher messagePublisher;
 
     // Lấy danh sách người dùng
     @Override
@@ -186,6 +194,132 @@ public class AdminServiceImp implements AdminService{
             log.error("Unexpected error getting user statistics", e);
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
+    }
+
+    // ==================== Account Deletion Methods ====================
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public String softDeleteUser(String userId, String reason) {
+        log.info("Admin soft deleting user with ID: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Kiểm tra nếu user đã bị xóa
+        if (user.isDeleted()) {
+            throw new AppException(ErrorCode.USER_ALREADY_DELETED);
+        }
+
+        // Không cho phép xóa tài khoản admin
+        boolean isAdmin = user.getRoles().stream()
+                .anyMatch(role -> "ADMIN".equals(role.getName()));
+        if (isAdmin) {
+            throw new AppException(ErrorCode.CANNOT_DELETE_ADMIN);
+        }
+
+        // Soft delete
+        LocalDateTime now = LocalDateTime.now();
+        user.setDeleted(true);
+        user.setDeletionRequestedAt(now);
+        user.setDeletedAt(now);
+        user.setEnabled(false);
+        userRepository.save(user);
+
+        // Gửi event thông báo
+        UserDeletionRequestedEvent event = UserDeletionRequestedEvent.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .deletionRequestedAt(now)
+                .scheduledDeletionAt(now.plusDays(30))
+                .reason(reason)
+                .build();
+        messagePublisher.publish(MessageType.USER_DELETION_REQUESTED, event);
+
+        log.info("User {} soft deleted by admin. Grace period ends at: {}", userId, now.plusDays(30));
+        return "User has been marked for deletion. Permanent deletion will occur after 30 days.";
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public String hardDeleteUser(String userId) {
+        log.info("Admin hard deleting user with ID: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Không cho phép xóa tài khoản admin
+        boolean isAdmin = user.getRoles().stream()
+                .anyMatch(role -> "ADMIN".equals(role.getName()));
+        if (isAdmin) {
+            throw new AppException(ErrorCode.CANNOT_DELETE_ADMIN);
+        }
+
+        String username = user.getUsername();
+        String email = user.getEmail();
+
+        // Gửi event trước khi xóa để các services khác cleanup
+        UserDeletedEvent event = UserDeletedEvent.builder()
+                .id(userId)
+                .username(username)
+                .email(email)
+                .deletedAt(LocalDateTime.now())
+                .isAdminAction(true)
+                .build();
+        messagePublisher.publish(MessageType.USER_DELETED, event);
+
+        // Hard delete - xóa vĩnh viễn
+        userRepository.delete(user);
+
+        log.info("User {} permanently deleted by admin", userId);
+        return "User has been permanently deleted.";
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public String recoverUser(String userId) {
+        log.info("Admin recovering user with ID: {}", userId);
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Kiểm tra user phải đang trong trạng thái đã xóa mềm
+        if (!user.isDeleted()) {
+            throw new AppException(ErrorCode.USER_NOT_DELETED);
+        }
+
+        // Khôi phục tài khoản
+        user.setDeleted(false);
+        user.setDeletionRequestedAt(null);
+        user.setDeletedAt(null);
+        user.setEnabled(true);
+        userRepository.save(user);
+
+        // Gửi event thông báo khôi phục
+        UserRecoveredEvent event = UserRecoveredEvent.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .recoveredAt(LocalDateTime.now())
+                .build();
+        messagePublisher.publish(MessageType.USER_RECOVERED, event);
+
+        log.info("User {} recovered by admin", userId);
+        return "User has been recovered successfully.";
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public Page<UserResponse> getDeletedUsers(Pageable pageable) {
+        log.info("Fetching deleted users");
+        return userRepository.findByIsDeletedTrue(pageable)
+                .map(userMapper::toUserResponse);
     }
 
 }

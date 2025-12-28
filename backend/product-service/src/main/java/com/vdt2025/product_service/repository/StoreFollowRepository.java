@@ -49,6 +49,11 @@ public interface StoreFollowRepository extends JpaRepository<StoreFollow, String
     List<String> findFollowerUserIdsByStoreId(@Param("storeId") String storeId);
     
     /**
+     * Lấy danh sách follower của store (phân trang)
+     */
+    Page<StoreFollow> findByStoreIdOrderByCreatedAtDesc(String storeId, Pageable pageable);
+    
+    /**
      * Lấy danh sách storeId mà user đang follow
      */
     @Query("SELECT sf.store.id FROM StoreFollow sf WHERE sf.userId = :userId")

@@ -69,6 +69,15 @@ public class User {
     @Column(name = "is_verified", nullable = false)
     boolean isVerified; // Trạng thái xác thực email
 
+    @Column(name = "is_deleted", nullable = false)
+    boolean isDeleted; // Trạng thái xóa mềm
+
+    @Column(name = "deleted_at")
+    LocalDateTime deletedAt; // Thời điểm xóa
+
+    @Column(name = "deletion_requested_at")
+    LocalDateTime deletionRequestedAt; // Thời điểm yêu cầu xóa (bắt đầu grace period)
+
     @ManyToMany
     @JoinTable(
             name = "user_role", // tên bảng trung gian
