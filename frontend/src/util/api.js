@@ -1652,6 +1652,125 @@ const getUserStatisticsApi = () => {
   });
 };
 
+// ==================== Admin Dashboard Statistics APIs ====================
+
+/**
+ * Lấy thống kê đơn hàng cho Admin Dashboard
+ * @param {number} topSellersLimit - Số lượng top sellers (default: 10)
+ */
+const getAdminOrderStatisticsApi = (topSellersLimit = 10) => {
+  const URL_API = "/api/order/api/v1/orders/admin/statistics";
+  return axios.get(URL_API, {
+    params: { topSellersLimit },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+/**
+ * Lấy top sellers theo doanh thu
+ * @param {number} limit - Số lượng (default: 10)
+ */
+const getTopSellersApi = (limit = 10) => {
+  const URL_API = "/api/order/api/v1/orders/admin/statistics/top-sellers";
+  return axios.get(URL_API, {
+    params: { limit },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+/**
+ * Lấy doanh thu theo khoảng thời gian
+ * @param {string} period - 'daily' hoặc 'monthly'
+ * @param {number} months - Số tháng (default: 12)
+ */
+const getRevenueByPeriodApi = (period = "monthly", months = 12) => {
+  const URL_API = "/api/order/api/v1/orders/admin/statistics/revenue";
+  return axios.get(URL_API, {
+    params: { period, months },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+/**
+ * Lấy thống kê sản phẩm cho Admin Dashboard
+ * @param {number} topProductsLimit - Số lượng top products (default: 10)
+ * @param {number} topStoresLimit - Số lượng top stores (default: 10)
+ */
+const getAdminProductStatisticsApi = (
+  topProductsLimit = 10,
+  topStoresLimit = 10
+) => {
+  const URL_API = "/api/product/admin/statistics";
+  return axios.get(URL_API, {
+    params: { topProductsLimit, topStoresLimit },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+/**
+ * Lấy top sản phẩm bán chạy
+ * @param {number} limit - Số lượng (default: 10)
+ */
+const getTopSellingProductsApi = (limit = 10) => {
+  const URL_API = "/api/product/admin/statistics/top-products";
+  return axios.get(URL_API, {
+    params: { limit },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+/**
+ * Lấy thống kê sản phẩm theo category
+ * @param {boolean} includeEmpty - Bao gồm category không có sản phẩm
+ */
+const getProductStatsByCategoryApi = (includeEmpty = false) => {
+  const URL_API = "/api/product/admin/statistics/by-category";
+  return axios.get(URL_API, {
+    params: { includeEmpty },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+/**
+ * Lấy thống kê sản phẩm theo brand
+ * @param {boolean} includeEmpty - Bao gồm brand không có sản phẩm
+ */
+const getProductStatsByBrandApi = (includeEmpty = false) => {
+  const URL_API = "/api/product/admin/statistics/by-brand";
+  return axios.get(URL_API, {
+    params: { includeEmpty },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+/**
+ * Lấy top stores theo số lượng sản phẩm
+ * @param {number} limit - Số lượng (default: 10)
+ */
+const getTopStoresByProductsApi = (limit = 10) => {
+  const URL_API = "/api/product/admin/statistics/top-stores";
+  return axios.get(URL_API, {
+    params: { limit },
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // Admin User Deletion APIs
 const softDeleteUserAdminApi = (userId, reason = "") => {
   const URL_API = `/api/user/admin/${userId}/soft-delete`;
@@ -2961,4 +3080,13 @@ export {
   getCouponByCodeApi,
   createCouponApi,
   deleteCouponApi,
+  // Admin Dashboard Statistics APIs
+  getAdminOrderStatisticsApi,
+  getTopSellersApi,
+  getRevenueByPeriodApi,
+  getAdminProductStatisticsApi,
+  getTopSellingProductsApi,
+  getProductStatsByCategoryApi,
+  getProductStatsByBrandApi,
+  getTopStoresByProductsApi,
 };
