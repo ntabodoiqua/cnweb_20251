@@ -352,28 +352,37 @@ public class ProductServiceImpl implements ProductService {
         // Xử lý Sort direction
         if (filter.getSortBy() != null && !filter.getSortBy().isBlank()) {
             String sortField = filter.getSortBy();
+            String sortFieldLower = sortField.toLowerCase();
 
-            // 1. Mapping 'price' từ FE sang 'minPrice' trong Entity
-            if ("price".equalsIgnoreCase(sortField)) {
-                sortField = "minPrice";
+            // Với averageRating và ratingCount, để Specification xử lý ORDER BY với COALESCE
+            // vì nullsLast() của Spring Data JPA không hoạt động đúng với tất cả DB
+            boolean isRatingSort = "averagerating".equals(sortFieldLower) || "ratingcount".equals(sortFieldLower);
+            
+            if (!isRatingSort) {
+                // 1. Mapping 'price' từ FE sang 'minPrice' trong Entity
+                if ("price".equalsIgnoreCase(sortField)) {
+                    sortField = "minPrice";
+                }
+
+                // 2. Mapping các trường khác (nếu cần) để tránh lỗi tương tự
+                // Ví dụ FE gửi 'sold' nhưng Entity là 'soldCount'
+                if ("sold".equalsIgnoreCase(sortField)) {
+                    sortField = "soldCount";
+                }
+                Sort.Direction direction = "asc".equalsIgnoreCase(filter.getSortDirection())
+                        ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+                // Fix: Null values should be at the bottom (NULLS_LAST)
+                Sort.Order order = (direction == Sort.Direction.ASC)
+                        ? Sort.Order.asc(sortField)
+                        : Sort.Order.desc(sortField);
+
+                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                        Sort.by(order.nullsLast()));
+            } else {
+                // Với rating sort, tạo Pageable không có Sort để Specification xử lý
+                pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
             }
-
-            // 2. Mapping các trường khác (nếu cần) để tránh lỗi tương tự
-            // Ví dụ FE gửi 'sold' nhưng Entity là 'soldCount'
-            if ("sold".equalsIgnoreCase(sortField)) {
-                sortField = "soldCount";
-            }
-            Sort.Direction direction = "asc".equalsIgnoreCase(filter.getSortDirection())
-                    ? Sort.Direction.ASC : Sort.Direction.DESC;
-
-            // Fix: Null values should be at the bottom (NULLS_LAST)
-            // Đặc biệt quan trọng với averageRating, nếu null mà sort DESC thì nó lên đầu (Postgres/Default)
-            Sort.Order order = (direction == Sort.Direction.ASC)
-                    ? Sort.Order.asc(sortField)
-                    : Sort.Order.desc(sortField);
-
-            pageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
-                    Sort.by(order.nullsLast()));
         }
 
         // Query DB (Nặng nhất -> Cần Cache)

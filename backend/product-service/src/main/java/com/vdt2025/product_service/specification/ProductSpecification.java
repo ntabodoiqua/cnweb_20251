@@ -154,8 +154,10 @@ public class ProductSpecification {
                         sortExpression = cb.coalesce(root.get(fieldName).as(Double.class), isDesc ? -1.0 : 999999.0);
                     }
                     
-                    Order order = isDesc ? cb.desc(sortExpression) : cb.asc(sortExpression);
-                    query.orderBy(order);
+                    Order primaryOrder = isDesc ? cb.desc(sortExpression) : cb.asc(sortExpression);
+                    // Secondary sort: khi rating bằng nhau, sort theo createdAt desc (mới nhất trước)
+                    Order secondaryOrder = cb.desc(root.get("createdAt"));
+                    query.orderBy(primaryOrder, secondaryOrder);
                 }
             }
 

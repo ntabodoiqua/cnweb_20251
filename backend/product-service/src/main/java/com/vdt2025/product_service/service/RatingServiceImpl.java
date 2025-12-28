@@ -43,6 +43,7 @@ public class RatingServiceImpl implements RatingService {
     ProductVariantRepository variantRepository;
     OrderClient orderClient;
     UserClient userClient;
+    CacheEvictService cacheEvictService;
 
     private static final int MAX_IMAGES_PER_RATING = 5;
 
@@ -365,6 +366,10 @@ public class RatingServiceImpl implements RatingService {
         product.setAverageRating(averageRating);
         product.setRatingCount((int) ratingCount);
         productRepository.save(product);
+
+        // Evict product search cache to reflect new rating stats
+        cacheEvictService.evictProductSearchCache();
+        cacheEvictService.evictProductDetails(productId);
 
         log.info("Updated product {} stats: averageRating={}, ratingCount={}", 
                 productId, averageRating, ratingCount);
