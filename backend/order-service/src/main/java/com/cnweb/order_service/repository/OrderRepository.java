@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -57,4 +58,76 @@ public interface OrderRepository extends JpaRepository<Order, String>, JpaSpecif
             @Param("username") String username,
             @Param("productId") String productId,
             @Param("status") OrderStatus status);
+
+    // ==================== Admin Statistics Queries ====================
+
+    /**
+     * Đếm số đơn hàng theo trạng thái
+     */
+    long countByStatus(OrderStatus status);
+
+    /**
+     * Đếm số đơn hàng sau một thời điểm
+     */
+    long countByCreatedAtAfter(LocalDateTime dateTime);
+
+    /**
+     * Đếm số đơn hàng trong khoảng thời gian
+     */
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
+    /**
+     * Tính tổng doanh thu theo trạng thái
+     */
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status = :status")
+    BigDecimal sumTotalAmountByStatus(@Param("status") OrderStatus status);
+
+    /**
+     * Tính tổng doanh thu theo trạng thái và sau một thời điểm
+     */
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status = :status AND o.createdAt >= :dateTime")
+    BigDecimal sumTotalAmountByStatusAndCreatedAtAfter(
+            @Param("status") OrderStatus status,
+            @Param("dateTime") LocalDateTime dateTime);
+
+    /**
+     * Tính tổng doanh thu theo trạng thái và trong khoảng thời gian
+     */
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE o.status = :status AND o.createdAt >= :start AND o.createdAt < :end")
+    BigDecimal sumTotalAmountByStatusAndCreatedAtBetween(
+            @Param("status") OrderStatus status,
+            @Param("start") LocalDateTime start,
+            @Param("end") LocalDateTime end);
+
+    /**
+     * Lấy top sellers theo doanh thu (đơn DELIVERED)
+     * Returns: storeId, storeName, storeOwnerUsername, totalOrders, totalRevenue, deliveredOrders
+     */
+    @Query("""
+        SELECT o.storeId, o.storeName, o.storeOwnerUsername, 
+               COUNT(o) as totalOrders,
+               SUM(CASE WHEN o.status = :deliveredStatus THEN o.totalAmount ELSE 0 END) as totalRevenue,
+               SUM(CASE WHEN o.status = :deliveredStatus THEN 1 ELSE 0 END) as deliveredOrders
+        FROM Order o
+        GROUP BY o.storeId, o.storeName, o.storeOwnerUsername
+        ORDER BY totalRevenue DESC
+    """)
+    List<Object[]> findTopSellersByRevenue(
+            @Param("deliveredStatus") OrderStatus deliveredStatus,
+            Pageable pageable);
+
+    /**
+     * Thống kê doanh thu theo tháng
+     */
+    @Query("""
+        SELECT FUNCTION('TO_CHAR', o.createdAt, 'YYYY-MM') as month, 
+               COALESCE(SUM(o.totalAmount), 0) as revenue
+        FROM Order o
+        WHERE o.status = :status AND o.createdAt >= :startDate
+        GROUP BY FUNCTION('TO_CHAR', o.createdAt, 'YYYY-MM')
+        ORDER BY month
+    """)
+    List<Object[]> getRevenueByMonth(
+            @Param("status") OrderStatus status,
+            @Param("startDate") LocalDateTime startDate);
 }

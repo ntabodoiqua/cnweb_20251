@@ -165,4 +165,116 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
         WHERE p.id = :productId
     """)
     java.util.Optional<Product> findByIdForElasticsearch(@Param("productId") String productId);
+
+    // ==================== Admin Statistics Queries ====================
+
+    /**
+     * Đếm sản phẩm chưa bị xóa
+     */
+    long countByIsDeletedFalse();
+
+    /**
+     * Đếm sản phẩm active và chưa bị xóa
+     */
+    long countByIsActiveTrueAndIsDeletedFalse();
+
+    /**
+     * Đếm sản phẩm inactive và chưa bị xóa
+     */
+    long countByIsActiveFalseAndIsDeletedFalse();
+
+    /**
+     * Đếm sản phẩm hết hàng (soldCount >= một ngưỡng hoặc không có variant active)
+     */
+    @Query("""
+        SELECT COUNT(DISTINCT p) FROM Product p
+        LEFT JOIN p.variants v
+        WHERE p.isDeleted = false 
+          AND p.isActive = true
+          AND (v IS NULL OR NOT EXISTS (
+              SELECT 1 FROM ProductVariant pv 
+              WHERE pv.product = p AND pv.isActive = true
+          ))
+    """)
+    long countOutOfStockProducts();
+
+    /**
+     * Đếm sản phẩm mới trong khoảng thời gian
+     */
+    long countByCreatedAtAfterAndIsDeletedFalse(java.time.LocalDateTime dateTime);
+
+    /**
+     * Top sản phẩm bán chạy nhất
+     * Returns: productId, productName, storeName, categoryName, brandName, imageUrl, 
+     *          minPrice, maxPrice, soldCount, viewCount, averageRating, ratingCount
+     */
+    @Query("""
+        SELECT p.id, p.name, s.storeName, c.name, b.name,
+               (SELECT pi.imageUrl FROM ProductImage pi WHERE pi.product = p AND pi.isPrimary = true),
+               p.minPrice, p.maxPrice, p.soldCount, p.viewCount, p.averageRating, p.ratingCount
+        FROM Product p
+        LEFT JOIN p.store s
+        LEFT JOIN p.category c
+        LEFT JOIN p.brand b
+        WHERE p.isDeleted = false AND p.isActive = true
+        ORDER BY p.soldCount DESC NULLS LAST
+    """)
+    List<Object[]> findTopSellingProducts(Pageable pageable);
+
+    /**
+     * Thống kê sản phẩm theo Category
+     * Returns: categoryId, categoryName, parentCategoryName, level, productCount, 
+     *          totalSoldCount, totalViewCount, avgRating
+     */
+    @Query("""
+        SELECT c.id, c.name, pc.name, c.level,
+               COUNT(p), 
+               COALESCE(SUM(p.soldCount), 0),
+               COALESCE(SUM(p.viewCount), 0),
+               AVG(p.averageRating)
+        FROM Category c
+        LEFT JOIN c.parentCategory pc
+        LEFT JOIN Product p ON p.category = c AND p.isDeleted = false AND p.isActive = true
+        WHERE c.categoryType = 'PLATFORM' AND c.isActive = true
+        GROUP BY c.id, c.name, pc.name, c.level
+        ORDER BY COUNT(p) DESC
+    """)
+    List<Object[]> getProductStatsByCategory();
+
+    /**
+     * Thống kê sản phẩm theo Brand
+     * Returns: brandId, brandName, logoUrl, productCount, totalSoldCount, totalViewCount, avgRating
+     */
+    @Query("""
+        SELECT b.id, b.name, b.logoUrl,
+               COUNT(p),
+               COALESCE(SUM(p.soldCount), 0),
+               COALESCE(SUM(p.viewCount), 0),
+               AVG(p.averageRating)
+        FROM Brand b
+        LEFT JOIN Product p ON p.brand = b AND p.isDeleted = false AND p.isActive = true
+        WHERE b.isActive = true
+        GROUP BY b.id, b.name, b.logoUrl
+        ORDER BY COUNT(p) DESC
+    """)
+    List<Object[]> getProductStatsByBrand();
+
+    /**
+     * Top Stores theo số lượng sản phẩm
+     * Returns: storeId, storeName, ownerUsername, logoUrl, productCount, 
+     *          totalSoldCount, followerCount, avgRating
+     */
+    @Query("""
+        SELECT s.id, s.storeName, s.userName, s.logoUrl,
+               COUNT(p),
+               COALESCE(SUM(p.soldCount), 0),
+               s.followerCount,
+               s.averageRating
+        FROM Store s
+        LEFT JOIN Product p ON p.store = s AND p.isDeleted = false AND p.isActive = true
+        WHERE s.isActive = true
+        GROUP BY s.id, s.storeName, s.userName, s.logoUrl, s.followerCount, s.averageRating
+        ORDER BY COUNT(p) DESC
+    """)
+    List<Object[]> getTopStoresByProducts(Pageable pageable);
 }
