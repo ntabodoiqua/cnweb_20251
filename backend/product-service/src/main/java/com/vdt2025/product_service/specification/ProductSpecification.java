@@ -149,18 +149,26 @@ public class ProductSpecification {
                     hasCustomOrderBy = true;
                     String fieldName = "averagerating".equals(sortBy) ? "averageRating" : "ratingCount";
                     
-                    // Với PostgreSQL và DISTINCT, không thể dùng COALESCE trong ORDER BY
-                    // Thay vào đó, sử dụng NULLS LAST/NULLS FIRST native
-                    // Tuy nhiên JPA Criteria không hỗ trợ trực tiếp NULLS LAST
-                    // Giải pháp: Sort trực tiếp theo field, NULL sẽ tự động xử lý theo DB default
-                    // PostgreSQL: NULL được coi là lớn nhất khi ASC, nhỏ nhất khi DESC
-                    // Để đảm bảo NULLS LAST trong mọi trường hợp, dùng CASE WHEN
+                    // PostgreSQL: NULL được coi là lớn nhất khi ASC, và cũng lớn nhất khi DESC
+                    // Để đảm bảo sản phẩm có rating xếp trước sản phẩm không có rating:
+                    // 1. Sort theo isNull (false = 0 xếp trước, true = 1 xếp sau) -> NULLS LAST
+                    // 2. Sort theo giá trị rating thực tế
                     
-                    // Sort primary by field (NULL handling by database)
+                    // Tạo expression: CASE WHEN field IS NULL THEN 1 ELSE 0 END
+                    // Để NULL luôn xếp cuối bất kể ASC hay DESC
+                    Expression<Integer> nullsLastExpression = cb.selectCase()
+                            .when(cb.isNull(root.get(fieldName)), 1)
+                            .otherwise(0)
+                            .as(Integer.class);
+                    
+                    // Sort: 
+                    // 1. nullsLastExpression ASC (0 trước, 1 sau) -> Non-null values first
+                    // 2. actual field value (ASC/DESC based on user request)
+                    // 3. createdAt DESC (secondary sort)
+                    Order nullsLastOrder = cb.asc(nullsLastExpression);
                     Order primaryOrder = isDesc ? cb.desc(root.get(fieldName)) : cb.asc(root.get(fieldName));
-                    // Secondary sort: khi rating bằng nhau, sort theo createdAt desc (mới nhất trước)
                     Order secondaryOrder = cb.desc(root.get("createdAt"));
-                    query.orderBy(primaryOrder, secondaryOrder);
+                    query.orderBy(nullsLastOrder, primaryOrder, secondaryOrder);
                 }
             }
 
