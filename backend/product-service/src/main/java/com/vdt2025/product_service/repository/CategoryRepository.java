@@ -76,4 +76,9 @@ public interface CategoryRepository extends JpaRepository<Category, String>, Jpa
         WHERE c.id = :categoryId
     """)
     Optional<Category> findByIdWithParentHierarchy(@Param("categoryId") String categoryId);
+
+    /**
+     * Đếm số category platform đang active
+     */
+    long countByCategoryTypeAndIsActiveTrue(Category.CategoryType categoryType);
 }

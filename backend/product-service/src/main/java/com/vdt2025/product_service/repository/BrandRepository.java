@@ -14,4 +14,8 @@ public interface BrandRepository extends JpaRepository<Brand, String>, JpaSpecif
 
     Optional<Brand> findByIdAndIsActiveTrue(String id);
 
+    /**
+     * Đếm số brand đang active
+     */
+    long countByIsActiveTrue();
 }

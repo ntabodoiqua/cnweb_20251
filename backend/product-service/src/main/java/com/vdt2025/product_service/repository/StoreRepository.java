@@ -27,4 +27,9 @@ public interface StoreRepository extends JpaRepository<Store, String> {
     @Modifying
     @Query("UPDATE Store s SET s.totalSold = s.totalSold + :quantity WHERE s.id = :storeId")
     int updateTotalSold(@Param("storeId") String storeId, @Param("quantity") Integer quantity);
+
+    /**
+     * Đếm số store đang active
+     */
+    long countByIsActiveTrue();
 }
