@@ -102,14 +102,15 @@ public interface OrderRepository extends JpaRepository<Order, String>, JpaSpecif
     /**
      * Lấy top sellers theo doanh thu (đơn DELIVERED)
      * Returns: storeId, storeName, storeOwnerUsername, totalOrders, totalRevenue, deliveredOrders
+     * Chỉ GROUP BY storeId để tránh lặp cửa hàng
      */
     @Query("""
-        SELECT o.storeId, o.storeName, o.storeOwnerUsername, 
+        SELECT o.storeId, MAX(o.storeName) as storeName, MAX(o.storeOwnerUsername) as storeOwnerUsername, 
                COUNT(o) as totalOrders,
                SUM(CASE WHEN o.status = :deliveredStatus THEN o.totalAmount ELSE 0 END) as totalRevenue,
                SUM(CASE WHEN o.status = :deliveredStatus THEN 1 ELSE 0 END) as deliveredOrders
         FROM Order o
-        GROUP BY o.storeId, o.storeName, o.storeOwnerUsername
+        GROUP BY o.storeId
         ORDER BY totalRevenue DESC
     """)
     List<Object[]> findTopSellersByRevenue(
