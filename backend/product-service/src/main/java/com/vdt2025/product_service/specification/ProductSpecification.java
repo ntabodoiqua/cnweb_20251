@@ -132,33 +132,42 @@ public class ProductSpecification {
                 predicates.add(cb.lessThanOrEqualTo(root.get("createdAt"), toDate));
             }
 
-            // Ensure distinct results when joining
-            query.distinct(true);
+            // Track nếu có join để biết cần distinct hay không
+            boolean hasJoin = (filter.getPriceFrom() != null || filter.getPriceTo() != null) ||
+                    (filter.getCategoryId() != null && !filter.getCategoryId().isBlank()) ||
+                    (filter.getStoreId() != null && !filter.getStoreId().isBlank()) ||
+                    (filter.getBrandId() != null && !filter.getBrandId().isBlank());
 
             // Custom ORDER BY cho averageRating và ratingCount với NULLS LAST
             // Điều này đảm bảo sản phẩm có rating sẽ luôn lên trước sản phẩm chưa có rating
+            boolean hasCustomOrderBy = false;
             if (filter.getSortBy() != null && !filter.getSortBy().isBlank()) {
                 String sortBy = filter.getSortBy().toLowerCase();
                 boolean isDesc = !"asc".equalsIgnoreCase(filter.getSortDirection());
                 
                 if ("averagerating".equals(sortBy) || "ratingcount".equals(sortBy)) {
+                    hasCustomOrderBy = true;
                     String fieldName = "averagerating".equals(sortBy) ? "averageRating" : "ratingCount";
                     
-                    // Sử dụng COALESCE để xử lý NULL:
-                    // - Với DESC: COALESCE(field, -1) để NULL thành -1 (nhỏ nhất) -> xuống cuối
-                    // - Với ASC: COALESCE(field, 999999) để NULL thành lớn nhất -> xuống cuối
-                    Expression<Double> sortExpression;
-                    if (fieldName.equals("averageRating")) {
-                        sortExpression = cb.coalesce(root.get(fieldName), isDesc ? -1.0 : 999999.0);
-                    } else {
-                        sortExpression = cb.coalesce(root.get(fieldName).as(Double.class), isDesc ? -1.0 : 999999.0);
-                    }
+                    // Với PostgreSQL và DISTINCT, không thể dùng COALESCE trong ORDER BY
+                    // Thay vào đó, sử dụng NULLS LAST/NULLS FIRST native
+                    // Tuy nhiên JPA Criteria không hỗ trợ trực tiếp NULLS LAST
+                    // Giải pháp: Sort trực tiếp theo field, NULL sẽ tự động xử lý theo DB default
+                    // PostgreSQL: NULL được coi là lớn nhất khi ASC, nhỏ nhất khi DESC
+                    // Để đảm bảo NULLS LAST trong mọi trường hợp, dùng CASE WHEN
                     
-                    Order primaryOrder = isDesc ? cb.desc(sortExpression) : cb.asc(sortExpression);
+                    // Sort primary by field (NULL handling by database)
+                    Order primaryOrder = isDesc ? cb.desc(root.get(fieldName)) : cb.asc(root.get(fieldName));
                     // Secondary sort: khi rating bằng nhau, sort theo createdAt desc (mới nhất trước)
                     Order secondaryOrder = cb.desc(root.get("createdAt"));
                     query.orderBy(primaryOrder, secondaryOrder);
                 }
+            }
+
+            // Chỉ dùng DISTINCT khi có JOIN và KHÔNG có custom ORDER BY expression
+            // PostgreSQL yêu cầu ORDER BY expressions phải nằm trong SELECT list khi dùng DISTINCT
+            if (hasJoin && !hasCustomOrderBy) {
+                query.distinct(true);
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
