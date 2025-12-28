@@ -43,4 +43,41 @@ public interface UserService {
      * Sử dụng cho internal service-to-service communication
      */
     Map<String, UserInfoSimpleResponse> getUsersByUsernames(List<String> usernames);
+
+    // ==================== Account Deletion Methods ====================
+
+    /**
+     * Yêu cầu xóa tài khoản - Gửi OTP để xác nhận
+     * @return Message thông báo đã gửi OTP
+     */
+    String requestAccountDeletion();
+
+    /**
+     * Xác nhận xóa tài khoản với OTP - Bắt đầu grace period 30 ngày
+     * @param otpCode Mã OTP xác nhận
+     * @param reason Lý do xóa (optional)
+     * @return Message thông báo đã xóa mềm và bắt đầu grace period
+     */
+    String confirmAccountDeletion(String otpCode, String reason);
+
+    /**
+     * Hủy yêu cầu xóa tài khoản trong grace period
+     * @return Message thông báo đã hủy yêu cầu xóa
+     */
+    String cancelAccountDeletion();
+
+    /**
+     * Khôi phục tài khoản đã xóa mềm (trong grace period)
+     * @param username Username của tài khoản cần khôi phục
+     * @param otpCode Mã OTP xác nhận (gửi qua email)
+     * @return Message thông báo đã khôi phục
+     */
+    String recoverAccount(String username, String otpCode);
+
+    /**
+     * Gửi OTP để khôi phục tài khoản đã xóa
+     * @param username Username của tài khoản cần khôi phục
+     * @return Message thông báo đã gửi OTP
+     */
+    String sendRecoveryOtp(String username);
 }

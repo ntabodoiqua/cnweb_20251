@@ -3,6 +3,8 @@ package com.cnweb2025.user_service.service;
 import com.vdt2025.common_dto.dto.MessageType;
 import com.vdt2025.common_dto.dto.UserCreatedEvent;
 import com.vdt2025.common_dto.dto.UserForgotPasswordEvent;
+import com.vdt2025.common_dto.dto.UserDeletionRequestedEvent;
+import com.vdt2025.common_dto.dto.UserRecoveredEvent;
 import com.vdt2025.common_dto.dto.response.FileInfoResponse;
 import com.vdt2025.common_dto.service.FileServiceClient;
 import com.cnweb2025.user_service.constant.PredefinedRole;
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -408,6 +411,220 @@ public class UserServiceImp implements UserService{
                                 .build(),
                         (existing, replacement) -> existing
                 ));
+    }
+
+    // ==================== Account Deletion Methods ====================
+
+    @Override
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SELLER')")
+    public String requestAccountDeletion() {
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        log.info("User {} requesting account deletion", username);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Kiểm tra nếu user đã bị xóa
+        if (user.isDeleted()) {
+            throw new AppException(ErrorCode.USER_ALREADY_DELETED);
+        }
+
+        // Kiểm tra nếu đã có yêu cầu xóa đang pending
+        if (user.getDeletionRequestedAt() != null) {
+            throw new AppException(ErrorCode.USER_DELETION_REQUESTED);
+        }
+
+        // Không cho phép xóa tài khoản admin
+        boolean isAdmin = user.getRoles().stream()
+                .anyMatch(role -> "ADMIN".equals(role.getName()));
+        if (isAdmin) {
+            throw new AppException(ErrorCode.CANNOT_DELETE_ADMIN);
+        }
+
+        // Tạo OTP để xác nhận xóa tài khoản
+        String otpCode = otpService.createOtpCode(user.getId(), OtpType.ACCOUNT_DELETION);
+
+        // Gửi email chứa OTP
+        UserForgotPasswordEvent event = UserForgotPasswordEvent.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .otpCode(otpCode)
+                .build();
+        messagePublisher.publish(MessageType.USER_DELETION_REQUESTED, event);
+
+        log.info("Account deletion OTP sent to user: {}", username);
+        return "Account deletion OTP has been sent to your email. Please verify within 15 minutes.";
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SELLER')")
+    @CacheEvict(value = "userCache",
+            key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()")
+    public String confirmAccountDeletion(String otpCode, String reason) {
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        log.info("User {} confirming account deletion", username);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Kiểm tra nếu user đã bị xóa
+        if (user.isDeleted()) {
+            throw new AppException(ErrorCode.USER_ALREADY_DELETED);
+        }
+
+        // Không cho phép xóa tài khoản admin
+        boolean isAdmin = user.getRoles().stream()
+                .anyMatch(role -> "ADMIN".equals(role.getName()));
+        if (isAdmin) {
+            throw new AppException(ErrorCode.CANNOT_DELETE_ADMIN);
+        }
+
+        // Xác thực OTP
+        otpService.verifyOtpCode(user.getId(), otpCode, OtpType.ACCOUNT_DELETION);
+
+        // Soft delete: đánh dấu tài khoản đã xóa và bắt đầu grace period
+        LocalDateTime now = LocalDateTime.now();
+        user.setDeleted(true);
+        user.setDeletionRequestedAt(now);
+        user.setDeletedAt(now);
+        user.setEnabled(false);
+        userRepository.save(user);
+
+        // Gửi event thông báo cho các services khác
+        UserDeletionRequestedEvent event = UserDeletionRequestedEvent.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .deletionRequestedAt(now)
+                .scheduledDeletionAt(now.plusDays(30))
+                .reason(reason)
+                .build();
+        messagePublisher.publish(MessageType.USER_DELETION_REQUESTED, event);
+
+        log.info("User {} account marked for deletion. Grace period ends at: {}", 
+                username, now.plusDays(30));
+        return "Your account has been marked for deletion. You have 30 days to recover it before permanent deletion.";
+    }
+
+    @Override
+    @Transactional
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER', 'SELLER')")
+    @CacheEvict(value = "userCache",
+            key = "T(org.springframework.security.core.context.SecurityContextHolder).getContext().getAuthentication().getName()")
+    public String cancelAccountDeletion() {
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        log.info("User {} canceling account deletion", username);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Kiểm tra nếu không có yêu cầu xóa
+        if (!user.isDeleted() || user.getDeletionRequestedAt() == null) {
+            throw new AppException(ErrorCode.USER_DELETION_NOT_REQUESTED);
+        }
+
+        // Khôi phục tài khoản
+        user.setDeleted(false);
+        user.setDeletionRequestedAt(null);
+        user.setDeletedAt(null);
+        user.setEnabled(true);
+        userRepository.save(user);
+
+        // Gửi event thông báo khôi phục
+        UserRecoveredEvent event = UserRecoveredEvent.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .recoveredAt(LocalDateTime.now())
+                .build();
+        messagePublisher.publish(MessageType.USER_RECOVERED, event);
+
+        log.info("User {} canceled account deletion successfully", username);
+        return "Account deletion has been canceled. Your account is now active.";
+    }
+
+    @Override
+    public String sendRecoveryOtp(String username) {
+        log.info("Sending recovery OTP to user: {}", username);
+
+        // Tìm user đã bị xóa mềm
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Kiểm tra user phải đang trong trạng thái đã xóa mềm
+        if (!user.isDeleted()) {
+            throw new AppException(ErrorCode.USER_NOT_DELETED);
+        }
+
+        // Kiểm tra grace period còn hạn (30 ngày)
+        if (user.getDeletionRequestedAt() == null ||
+                user.getDeletionRequestedAt().plusDays(30).isBefore(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.GRACE_PERIOD_NOT_EXPIRED);
+        }
+
+        // Tạo OTP để khôi phục
+        String otpCode = otpService.createOtpCode(user.getId(), OtpType.ACCOUNT_RECOVERY);
+
+        // Gửi email chứa OTP
+        UserForgotPasswordEvent event = UserForgotPasswordEvent.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .otpCode(otpCode)
+                .build();
+        messagePublisher.publish(MessageType.USER_RECOVERED, event);
+
+        log.info("Recovery OTP sent to user: {}", username);
+        return "Recovery OTP has been sent to your email. Please verify within 15 minutes.";
+    }
+
+    @Override
+    @Transactional
+    public String recoverAccount(String username, String otpCode) {
+        log.info("Recovering account for user: {}", username);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_FOUND));
+
+        // Kiểm tra user phải đang trong trạng thái đã xóa mềm
+        if (!user.isDeleted()) {
+            throw new AppException(ErrorCode.USER_NOT_DELETED);
+        }
+
+        // Kiểm tra grace period còn hạn (30 ngày)
+        if (user.getDeletionRequestedAt() == null ||
+                user.getDeletionRequestedAt().plusDays(30).isBefore(LocalDateTime.now())) {
+            throw new AppException(ErrorCode.GRACE_PERIOD_NOT_EXPIRED);
+        }
+
+        // Xác thực OTP
+        otpService.verifyOtpCode(user.getId(), otpCode, OtpType.ACCOUNT_RECOVERY);
+
+        // Khôi phục tài khoản
+        user.setDeleted(false);
+        user.setDeletionRequestedAt(null);
+        user.setDeletedAt(null);
+        user.setEnabled(true);
+        userRepository.save(user);
+
+        // Gửi event thông báo khôi phục
+        UserRecoveredEvent event = UserRecoveredEvent.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .recoveredAt(LocalDateTime.now())
+                .build();
+        messagePublisher.publish(MessageType.USER_RECOVERED, event);
+
+        log.info("User {} recovered their account successfully", username);
+        return "Your account has been recovered successfully. You can now log in.";
     }
 
 }

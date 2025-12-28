@@ -17,7 +17,13 @@ import {
   CheckOutlined,
   CloseOutlined,
 } from "@ant-design/icons";
-import { getUsersAdminApi } from "../../util/api";
+import {
+  getUsersAdminApi,
+  softDeleteUserAdminApi,
+  enableUserAdminApi,
+  disableUserAdminApi,
+  recoverUserAdminApi,
+} from "../../util/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import styles from "./AdminUsersPage.module.css";
 
@@ -152,44 +158,140 @@ const AdminUsersPage = () => {
     setShowUserDetail(true);
   };
 
-  const handleDeleteUser = (userId) => {
+  const handleDeleteUser = (userId, username) => {
+    // Kiểm tra không được xóa admin
+    const userToDelete = users.find((u) => u.id === userId);
+    const isAdmin = userToDelete?.roles?.some((r) => r.name === "ADMIN");
+
+    if (isAdmin) {
+      notification.error({
+        message: "Không thể xóa",
+        description: "Không thể xóa tài khoản quản trị viên!",
+        placement: "topRight",
+      });
+      return;
+    }
+
     Modal.confirm({
-      title: "Xác nhận xóa",
-      content: "Bạn có chắc chắn muốn xóa người dùng này?",
+      title: "Xác nhận xóa tài khoản",
+      content: (
+        <div>
+          <p>
+            Bạn có chắc chắn muốn xóa người dùng <strong>{username}</strong>?
+          </p>
+          <p style={{ color: "#666", fontSize: "13px" }}>
+            Tài khoản sẽ bị đánh dấu xóa và có 30 ngày để khôi phục trước khi bị
+            xóa vĩnh viễn.
+          </p>
+        </div>
+      ),
       okText: "Xóa",
       cancelText: "Hủy",
       okType: "danger",
-      onOk: () => {
-        // TODO: Call API to delete user
-        console.log("Delete user:", userId);
-        notification.success({
-          message: "Thành công",
-          description: "Xóa người dùng thành công!",
-          placement: "topRight",
-        });
+      onOk: async () => {
+        try {
+          const response = await softDeleteUserAdminApi(userId, "Admin action");
+          if (response && response.code === 1000) {
+            notification.success({
+              message: "Thành công",
+              description:
+                "Đã đánh dấu xóa người dùng. Tài khoản sẽ bị xóa vĩnh viễn sau 30 ngày.",
+              placement: "topRight",
+            });
+            fetchUsers(); // Refresh danh sách
+          }
+        } catch (error) {
+          console.error("Error deleting user:", error);
+          notification.error({
+            message: "Lỗi",
+            description:
+              error.response?.data?.message || "Không thể xóa người dùng!",
+            placement: "topRight",
+          });
+        }
       },
     });
   };
 
-  const handleToggleStatus = (userId, currentStatus) => {
+  const handleRecoverUser = (userId, username) => {
+    Modal.confirm({
+      title: "Xác nhận khôi phục",
+      content: `Bạn có chắc chắn muốn khôi phục tài khoản "${username}"?`,
+      okText: "Khôi phục",
+      cancelText: "Hủy",
+      okType: "primary",
+      onOk: async () => {
+        try {
+          const response = await recoverUserAdminApi(userId);
+          if (response && response.code === 1000) {
+            notification.success({
+              message: "Thành công",
+              description: "Đã khôi phục tài khoản thành công!",
+              placement: "topRight",
+            });
+            fetchUsers();
+          }
+        } catch (error) {
+          console.error("Error recovering user:", error);
+          notification.error({
+            message: "Lỗi",
+            description:
+              error.response?.data?.message || "Không thể khôi phục tài khoản!",
+            placement: "topRight",
+          });
+        }
+      },
+    });
+  };
+
+  const handleToggleStatus = (userId, currentStatus, username) => {
+    // Kiểm tra không được disable admin
+    const userToToggle = users.find((u) => u.id === userId);
+    const isAdmin = userToToggle?.roles?.some((r) => r.name === "ADMIN");
+
+    if (isAdmin && currentStatus) {
+      notification.error({
+        message: "Không thể khóa",
+        description: "Không thể khóa tài khoản quản trị viên!",
+        placement: "topRight",
+      });
+      return;
+    }
+
     Modal.confirm({
       title: "Xác nhận",
       content: `Bạn có chắc chắn muốn ${
         currentStatus ? "khóa" : "mở khóa"
-      } tài khoản này?`,
+      } tài khoản "${username}"?`,
       okText: currentStatus ? "Khóa" : "Mở khóa",
       cancelText: "Hủy",
       okType: currentStatus ? "danger" : "primary",
-      onOk: () => {
-        // TODO: Call API to toggle user status
-        console.log("Toggle status for user:", userId);
-        notification.success({
-          message: "Thành công",
-          description: `${
-            currentStatus ? "Khóa" : "Mở khóa"
-          } tài khoản thành công!`,
-          placement: "topRight",
-        });
+      onOk: async () => {
+        try {
+          const response = currentStatus
+            ? await disableUserAdminApi(userId)
+            : await enableUserAdminApi(userId);
+
+          if (response && response.code === 1000) {
+            notification.success({
+              message: "Thành công",
+              description: `${
+                currentStatus ? "Khóa" : "Mở khóa"
+              } tài khoản thành công!`,
+              placement: "topRight",
+            });
+            fetchUsers(); // Refresh danh sách
+          }
+        } catch (error) {
+          console.error("Error toggling user status:", error);
+          notification.error({
+            message: "Lỗi",
+            description:
+              error.response?.data?.message ||
+              `Không thể ${currentStatus ? "khóa" : "mở khóa"} tài khoản!`,
+            placement: "topRight",
+          });
+        }
       },
     });
   };
@@ -476,7 +578,11 @@ const AdminUsersPage = () => {
                                 : "Mở khóa tài khoản"
                             }
                             onClick={() =>
-                              handleToggleStatus(user.id, user.enabled)
+                              handleToggleStatus(
+                                user.id,
+                                user.enabled,
+                                user.username
+                              )
                             }
                           >
                             {user.enabled ? (
@@ -488,7 +594,9 @@ const AdminUsersPage = () => {
                           <button
                             className={`${styles.adminActionBtn} ${styles.delete}`}
                             title="Xóa"
-                            onClick={() => handleDeleteUser(user.id)}
+                            onClick={() =>
+                              handleDeleteUser(user.id, user.username)
+                            }
                           >
                             <DeleteOutlined />
                           </button>
