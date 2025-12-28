@@ -1,0 +1,227 @@
+/* ========================================
+   Seller Customers Page Styles
+   ======================================== */
+
+.container {
+  animation: fadeIn 0.5s ease-out;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+/* Header Section */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid rgba(238, 77, 45, 0.1);
+  gap: 24px;
+}
+
+.headerContent {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+}
+
+.headerIcon {
+  font-size: 48px;
+  color: #ee4d2d;
+}
+
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 4px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #888;
+  margin: 0;
+}
+
+/* Stats Card */
+.statsCard {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  padding: 24px 32px;
+  border-radius: 12px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.2);
+  min-width: 180px;
+}
+
+.statsNumber {
+  font-size: 36px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 4px;
+}
+
+.statsLabel {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+/* Table Container */
+.tableContainer {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.table :global(.ant-table) {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table :global(.ant-table-thead > tr > th) {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  color: white;
+  font-weight: 600;
+  border: none;
+  padding: 16px;
+}
+
+.table :global(.ant-table-thead > tr > th::before) {
+  display: none;
+}
+
+.table :global(.ant-table-tbody > tr) {
+  transition: all 0.3s ease;
+}
+
+.table :global(.ant-table-tbody > tr:hover) {
+  background: rgba(238, 77, 45, 0.04);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.table :global(.ant-table-tbody > tr > td) {
+  padding: 16px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+/* Customer Info */
+.customerInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  flex-shrink: 0;
+  border: 2px solid #ee4d2d;
+  box-shadow: 0 2px 8px rgba(238, 77, 45, 0.2);
+}
+
+.customerDetails {
+  flex: 1;
+}
+
+.customerName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+}
+
+.customerEmail {
+  font-size: 13px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.customerEmail :global(.anticon) {
+  font-size: 12px;
+}
+
+/* Date Info */
+.dateInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666;
+  font-size: 14px;
+}
+
+.dateInfo :global(.anticon) {
+  color: #ee4d2d;
+  font-size: 16px;
+}
+
+/* Pagination */
+.table :global(.ant-pagination) {
+  margin-top: 24px;
+}
+
+.table :global(.ant-pagination-item-active) {
+  border-color: #ee4d2d;
+  background: #ee4d2d;
+}
+
+.table :global(.ant-pagination-item-active a) {
+  color: white;
+}
+
+.table :global(.ant-pagination-item:hover) {
+  border-color: #ee4d2d;
+}
+
+.table :global(.ant-pagination-item:hover a) {
+  color: #ee4d2d;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .statsCard {
+    width: 100%;
+  }
+
+  .headerIcon {
+    font-size: 36px;
+  }
+
+  .title {
+    font-size: 24px;
+  }
+
+  .customerInfo {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .tableContainer {
+    padding: 16px;
+    overflow-x: auto;
+  }
+}

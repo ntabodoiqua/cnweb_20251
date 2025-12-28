@@ -238,11 +238,24 @@ html {
   gap: 12px;
 }
 
+.section-title .title-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .section-title h2 {
   font-size: 28px;
   font-weight: 700;
   color: #333;
   margin: 0;
+}
+
+.section-subtitle {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  font-weight: 400;
 }
 
 .section-title .icon {

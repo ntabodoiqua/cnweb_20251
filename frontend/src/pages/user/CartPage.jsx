@@ -112,51 +112,9 @@ const CartPage = () => {
     }
   };
 
-  // Mock data voucher sàn
-  const availablePlatformVouchers = [
-    {
-      code: "HUSTBUY100K",
-      discount: 100000,
-      type: "fixed",
-      minOrder: 500000,
-      description: "Giảm 100K cho đơn từ 500K",
-      expiry: "31/12/2025",
-    },
-    {
-      code: "SALE20",
-      discount: 20,
-      type: "percent",
-      minOrder: 300000,
-      maxDiscount: 200000,
-      description: "Giảm 20% tối đa 200K cho đơn từ 300K",
-      expiry: "31/12/2025",
-    },
-  ];
-
-  // Mock data voucher shop
-  const availableShopVouchers = {
-    "Dell Official Store": [
-      {
-        code: "DELL50K",
-        discount: 50000,
-        type: "fixed",
-        minOrder: 2000000,
-        description: "Giảm 50K cho đơn từ 2tr",
-        expiry: "31/12/2025",
-      },
-    ],
-    "Apple Store": [
-      {
-        code: "APPLE10",
-        discount: 10,
-        type: "percent",
-        minOrder: 1000000,
-        maxDiscount: 100000,
-        description: "Giảm 10% tối đa 100K",
-        expiry: "31/12/2025",
-      },
-    ],
-  };
+  // Danh sách voucher có sẵn (sẽ được fetch từ API nếu cần)
+  const availablePlatformVouchers = [];
+  const availableShopVouchers = {};
 
   // Format currency VND
   const formatCurrency = (amount) => {
@@ -899,7 +857,7 @@ const CartPage = () => {
                           </button>
                         </div>
 
-                        <Link 
+                        <Link
                           to={`/product/${item.productId}`}
                           className={styles.itemImage}
                         >
@@ -912,10 +870,10 @@ const CartPage = () => {
                         </Link>
 
                         <div className={styles.itemInfo}>
-                          <Link 
+                          <Link
                             to={`/product/${item.productId}`}
                             className={styles.itemName}
-                            style={{ textDecoration: 'none' }}
+                            style={{ textDecoration: "none" }}
                           >
                             <h3 className={styles.itemNameText}>
                               {item.name}
@@ -1071,190 +1029,6 @@ const CartPage = () => {
                 </div>
               )}
 
-              {/* Voucher sàn */}
-              <div className={styles.voucherSection}>
-                <div className={styles.voucherHeader}>
-                  <GiftOutlined className={styles.voucherIcon} />
-                  <span className={styles.voucherLabel}>Mã giảm giá sàn</span>
-                </div>
-
-                {!platformVoucher ? (
-                  <div className={styles.voucherInputWrapper}>
-                    <input
-                      type="text"
-                      className={styles.voucherInput}
-                      placeholder="Nhập mã voucher sàn"
-                      value={voucherInput}
-                      onChange={(e) =>
-                        setVoucherInput(e.target.value.toUpperCase())
-                      }
-                    />
-                    <button
-                      className={styles.applyButton}
-                      onClick={() => handleApplyPlatformVoucher(voucherInput)}
-                      disabled={!voucherInput.trim()}
-                    >
-                      Áp dụng
-                    </button>
-                  </div>
-                ) : (
-                  <div className={styles.appliedVoucher}>
-                    <div className={styles.voucherInfo}>
-                      <TagOutlined className={styles.voucherTag} />
-                      <div>
-                        <div className={styles.voucherCode}>
-                          {platformVoucher.code}
-                        </div>
-                        <div className={styles.voucherDesc}>
-                          {platformVoucher.description}
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      className={styles.removeVoucherButton}
-                      onClick={handleRemovePlatformVoucher}
-                    >
-                      <CloseOutlined />
-                    </button>
-                  </div>
-                )}
-
-                {/* Danh sách voucher sàn có sẵn */}
-                {!platformVoucher && (
-                  <div className={styles.availableVouchers}>
-                    {availablePlatformVouchers.map((voucher) => (
-                      <div
-                        key={voucher.code}
-                        className={styles.voucherCard}
-                        onClick={() => handleApplyPlatformVoucher(voucher.code)}
-                      >
-                        <div className={styles.voucherCardIcon}>
-                          <GiftOutlined />
-                        </div>
-                        <div className={styles.voucherCardContent}>
-                          <div className={styles.voucherCardCode}>
-                            {voucher.code}
-                          </div>
-                          <div className={styles.voucherCardDesc}>
-                            {voucher.description}
-                          </div>
-                        </div>
-                        <CheckCircleOutlined
-                          className={styles.voucherCardCheck}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Voucher shop */}
-              {getSelectedSellers().length > 0 && (
-                <div className={styles.voucherSection}>
-                  <div className={styles.voucherHeader}>
-                    <TagOutlined className={styles.voucherIcon} />
-                    <span className={styles.voucherLabel}>
-                      Mã giảm giá shop
-                    </span>
-                  </div>
-
-                  {getSelectedSellers().map((seller) => {
-                    const appliedVoucher = shopVouchers[seller];
-                    const shopVoucherList = availableShopVouchers[seller] || [];
-
-                    return (
-                      <div key={seller} className={styles.shopVoucherItem}>
-                        <div className={styles.shopName}>{seller}</div>
-
-                        {!appliedVoucher ? (
-                          <>
-                            <div className={styles.voucherInputWrapper}>
-                              <input
-                                type="text"
-                                className={styles.voucherInput}
-                                placeholder="Nhập mã voucher shop"
-                                value={shopVoucherInputs[seller] || ""}
-                                onChange={(e) =>
-                                  setShopVoucherInputs((prev) => ({
-                                    ...prev,
-                                    [seller]: e.target.value.toUpperCase(),
-                                  }))
-                                }
-                              />
-                              <button
-                                className={styles.applyButton}
-                                onClick={() =>
-                                  handleApplyShopVoucher(
-                                    seller,
-                                    shopVoucherInputs[seller]
-                                  )
-                                }
-                                disabled={!shopVoucherInputs[seller]?.trim()}
-                              >
-                                Áp dụng
-                              </button>
-                            </div>
-
-                            {/* Danh sách voucher shop có sẵn */}
-                            {shopVoucherList.length > 0 && (
-                              <div className={styles.availableVouchers}>
-                                {shopVoucherList.map((voucher) => (
-                                  <div
-                                    key={voucher.code}
-                                    className={styles.voucherCard}
-                                    onClick={() =>
-                                      handleApplyShopVoucher(
-                                        seller,
-                                        voucher.code
-                                      )
-                                    }
-                                  >
-                                    <div className={styles.voucherCardIcon}>
-                                      <TagOutlined />
-                                    </div>
-                                    <div className={styles.voucherCardContent}>
-                                      <div className={styles.voucherCardCode}>
-                                        {voucher.code}
-                                      </div>
-                                      <div className={styles.voucherCardDesc}>
-                                        {voucher.description}
-                                      </div>
-                                    </div>
-                                    <CheckCircleOutlined
-                                      className={styles.voucherCardCheck}
-                                    />
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </>
-                        ) : (
-                          <div className={styles.appliedVoucher}>
-                            <div className={styles.voucherInfo}>
-                              <TagOutlined className={styles.voucherTag} />
-                              <div>
-                                <div className={styles.voucherCode}>
-                                  {appliedVoucher.code}
-                                </div>
-                                <div className={styles.voucherDesc}>
-                                  {appliedVoucher.description}
-                                </div>
-                              </div>
-                            </div>
-                            <button
-                              className={styles.removeVoucherButton}
-                              onClick={() => handleRemoveShopVoucher(seller)}
-                            >
-                              <CloseOutlined />
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-
               <div className={styles.summaryItem}>
                 <span>
                   Tạm tính (
@@ -1271,30 +1045,6 @@ const CartPage = () => {
                   )}
                 </span>
               </div>
-
-              {/* Hiển thị giảm giá từ voucher shop */}
-              {calculateShopDiscounts() > 0 && (
-                <div className={styles.summaryItem}>
-                  <span className={styles.discountLabel}>
-                    <TagOutlined /> Giảm giá shop
-                  </span>
-                  <span className={styles.discountAmount}>
-                    -{formatCurrency(calculateShopDiscounts())}
-                  </span>
-                </div>
-              )}
-
-              {/* Hiển thị giảm giá từ voucher sàn */}
-              {calculatePlatformDiscount() > 0 && (
-                <div className={styles.summaryItem}>
-                  <span className={styles.discountLabel}>
-                    <GiftOutlined /> Giảm giá sàn
-                  </span>
-                  <span className={styles.discountAmount}>
-                    -{formatCurrency(calculatePlatformDiscount())}
-                  </span>
-                </div>
-              )}
 
               <div className={styles.summaryItem}>
                 <span>Phí vận chuyển</span>
@@ -1313,16 +1063,6 @@ const CartPage = () => {
                   )}
                 </span>
               </div>
-
-              {(calculateShopDiscounts() > 0 ||
-                calculatePlatformDiscount() > 0) && (
-                <div className={styles.savingsBadge}>
-                  🎉 Bạn tiết kiệm được{" "}
-                  {formatCurrency(
-                    calculateShopDiscounts() + calculatePlatformDiscount()
-                  )}
-                </div>
-              )}
 
               <button
                 className={styles.checkoutButton}

@@ -14,6 +14,8 @@ import {
   PictureOutlined,
   MessageOutlined,
   GiftOutlined,
+  DownOutlined,
+  RightOutlined,
 } from "@ant-design/icons";
 import { PROTECTED_ROUTES } from "../../constants/routes";
 import styles from "./seller-dashboard.module.css";
@@ -25,80 +27,132 @@ import styles from "./seller-dashboard.module.css";
 const SellerDashboardLayout = () => {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const [expandedGroups, setExpandedGroups] = useState([
+    "catalog",
+    "business",
+    "communication",
+  ]);
 
-  // Menu items configuration for seller
-  const menuItems = [
+  // Toggle group expansion
+  const toggleGroup = (groupKey) => {
+    setExpandedGroups((prev) =>
+      prev.includes(groupKey)
+        ? prev.filter((key) => key !== groupKey)
+        : [...prev, groupKey]
+    );
+  };
+
+  // Menu items configuration for seller - Grouped
+  const menuGroups = [
     {
-      key: "overview",
+      key: "main",
+      label: "Chính",
       icon: <DashboardOutlined />,
-      label: "Tổng quan",
-      path: PROTECTED_ROUTES.SELLER_DASHBOARD,
+      items: [
+        {
+          key: "overview",
+          icon: <DashboardOutlined />,
+          label: "Tổng quan",
+          path: PROTECTED_ROUTES.SELLER_DASHBOARD,
+        },
+      ],
     },
     {
-      key: "products",
+      key: "catalog",
+      label: "Sản phẩm & Danh mục",
       icon: <ShopOutlined />,
-      label: "Quản lý sản phẩm",
-      path: PROTECTED_ROUTES.SELLER_PRODUCTS,
+      items: [
+        {
+          key: "products",
+          icon: <ShopOutlined />,
+          label: "Quản lý sản phẩm",
+          path: PROTECTED_ROUTES.SELLER_PRODUCTS,
+        },
+        {
+          key: "categories",
+          icon: <TagsOutlined />,
+          label: "Danh mục sản phẩm",
+          path: PROTECTED_ROUTES.SELLER_CATEGORIES,
+        },
+        {
+          key: "product-attributes",
+          icon: <AppstoreOutlined />,
+          label: "Thuộc tính sản phẩm",
+          path: PROTECTED_ROUTES.SELLER_PRODUCT_ATTRIBUTES,
+        },
+        {
+          key: "banners",
+          icon: <PictureOutlined />,
+          label: "Quản lý Banner",
+          path: PROTECTED_ROUTES.SELLER_BANNERS,
+        },
+      ],
     },
     {
-      key: "orders",
+      key: "business",
+      label: "Kinh doanh",
       icon: <ShoppingOutlined />,
-      label: "Quản lý đơn hàng",
-      path: PROTECTED_ROUTES.SELLER_ORDERS,
+      items: [
+        {
+          key: "orders",
+          icon: <ShoppingOutlined />,
+          label: "Quản lý đơn hàng",
+          path: PROTECTED_ROUTES.SELLER_ORDERS,
+        },
+        {
+          key: "coupons",
+          icon: <GiftOutlined />,
+          label: "Mã giảm giá",
+          path: PROTECTED_ROUTES.SELLER_COUPONS,
+        },
+        {
+          key: "statistics",
+          icon: <BarChartOutlined />,
+          label: "Thống kê & Báo cáo",
+          path: PROTECTED_ROUTES.SELLER_STATISTICS,
+        },
+      ],
     },
     {
-      key: "categories",
-      icon: <TagsOutlined />,
-      label: "Danh mục sản phẩm",
-      path: PROTECTED_ROUTES.SELLER_CATEGORIES,
-    },
-    {
-      key: "banners",
-      icon: <PictureOutlined />,
-      label: "Quản lý Banner",
-      path: PROTECTED_ROUTES.SELLER_BANNERS,
-    },
-    {
-      key: "product-attributes",
-      icon: <AppstoreOutlined />,
-      label: "Thuộc tính sản phẩm",
-      path: PROTECTED_ROUTES.SELLER_PRODUCT_ATTRIBUTES,
-    },
-    {
-      key: "coupons",
-      icon: <GiftOutlined />,
-      label: "Mã giảm giá",
-      path: PROTECTED_ROUTES.SELLER_COUPONS,
-    },
-    {
-      key: "customers",
-      icon: <TeamOutlined />,
-      label: "Khách hàng",
-      path: PROTECTED_ROUTES.SELLER_CUSTOMERS,
-    },
-    {
-      key: "chat",
+      key: "communication",
+      label: "Giao tiếp",
       icon: <MessageOutlined />,
-      label: "Tin nhắn",
-      path: PROTECTED_ROUTES.SELLER_CHAT,
-    },
-    {
-      key: "statistics",
-      icon: <BarChartOutlined />,
-      label: "Thống kê & Báo cáo",
-      path: PROTECTED_ROUTES.SELLER_STATISTICS,
+      items: [
+        {
+          key: "customers",
+          icon: <TeamOutlined />,
+          label: "Khách hàng",
+          path: PROTECTED_ROUTES.SELLER_CUSTOMERS,
+        },
+        {
+          key: "chat",
+          icon: <MessageOutlined />,
+          label: "Tin nhắn",
+          path: PROTECTED_ROUTES.SELLER_CHAT,
+        },
+      ],
     },
     {
       key: "settings",
+      label: "Cài đặt",
       icon: <SettingOutlined />,
-      label: "Cài đặt cửa hàng",
-      path: PROTECTED_ROUTES.SELLER_SETTINGS,
+      items: [
+        {
+          key: "settings",
+          icon: <SettingOutlined />,
+          label: "Cài đặt cửa hàng",
+          path: PROTECTED_ROUTES.SELLER_SETTINGS,
+        },
+      ],
     },
   ];
 
+  // Flatten all items for finding active item
+  const allItems = menuGroups.flatMap((group) => group.items);
+
   // Get active menu item based on current path
   const activeItem =
-    menuItems.find((item) => item.path === location.pathname) || menuItems[0];
+    allItems.find((item) => item.path === location.pathname) || allItems[0];
 
   const toggleSidebar = () => {
     setCollapsed(!collapsed);
@@ -130,20 +184,70 @@ const SellerDashboardLayout = () => {
             {/* Sidebar Menu */}
             <nav>
               <ul className={styles.menu}>
-                {menuItems.map((item) => (
-                  <li key={item.key} className={styles.menuItem}>
-                    <Link
-                      to={item.path}
-                      className={`${styles.menuLink} ${
-                        location.pathname === item.path ? styles.active : ""
+                {menuGroups.map((group) => (
+                  <li key={group.key} className={styles.menuGroup}>
+                    {/* Group Header - Only show if more than 1 item or not collapsed */}
+                    {group.items.length > 1 && (
+                      <div
+                        className={`${styles.menuGroupHeader} ${
+                          expandedGroups.includes(group.key)
+                            ? styles.expanded
+                            : ""
+                        }`}
+                        onClick={() => !collapsed && toggleGroup(group.key)}
+                        title={collapsed ? group.label : ""}
+                      >
+                        <span className={styles.menuIcon}>{group.icon}</span>
+                        {!collapsed && (
+                          <>
+                            <span className={styles.menuLabel}>
+                              {group.label}
+                            </span>
+                            <span className={styles.menuArrow}>
+                              {expandedGroups.includes(group.key) ? (
+                                <DownOutlined />
+                              ) : (
+                                <RightOutlined />
+                              )}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Group Items */}
+                    <ul
+                      className={`${styles.menuSubitems} ${
+                        group.items.length === 1 ||
+                        expandedGroups.includes(group.key) ||
+                        collapsed
+                          ? styles.expanded
+                          : ""
                       }`}
-                      title={collapsed ? item.label : ""}
                     >
-                      <span className={styles.menuIcon}>{item.icon}</span>
-                      {!collapsed && (
-                        <span className={styles.menuLabel}>{item.label}</span>
-                      )}
-                    </Link>
+                      {group.items.map((item) => (
+                        <li key={item.key} className={styles.menuItem}>
+                          <Link
+                            to={item.path}
+                            className={`${styles.menuLink} ${
+                              location.pathname === item.path
+                                ? styles.active
+                                : ""
+                            } ${
+                              group.items.length > 1 ? styles.submenuItem : ""
+                            }`}
+                            title={collapsed ? item.label : ""}
+                          >
+                            <span className={styles.menuIcon}>{item.icon}</span>
+                            {!collapsed && (
+                              <span className={styles.menuLabel}>
+                                {item.label}
+                              </span>
+                            )}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
                   </li>
                 ))}
               </ul>
