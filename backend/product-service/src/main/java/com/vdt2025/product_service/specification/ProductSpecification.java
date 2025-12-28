@@ -135,6 +135,30 @@ public class ProductSpecification {
             // Ensure distinct results when joining
             query.distinct(true);
 
+            // Custom ORDER BY cho averageRating và ratingCount với NULLS LAST
+            // Điều này đảm bảo sản phẩm có rating sẽ luôn lên trước sản phẩm chưa có rating
+            if (filter.getSortBy() != null && !filter.getSortBy().isBlank()) {
+                String sortBy = filter.getSortBy().toLowerCase();
+                boolean isDesc = !"asc".equalsIgnoreCase(filter.getSortDirection());
+                
+                if ("averagerating".equals(sortBy) || "ratingcount".equals(sortBy)) {
+                    String fieldName = "averagerating".equals(sortBy) ? "averageRating" : "ratingCount";
+                    
+                    // Sử dụng COALESCE để xử lý NULL:
+                    // - Với DESC: COALESCE(field, -1) để NULL thành -1 (nhỏ nhất) -> xuống cuối
+                    // - Với ASC: COALESCE(field, 999999) để NULL thành lớn nhất -> xuống cuối
+                    Expression<Double> sortExpression;
+                    if (fieldName.equals("averageRating")) {
+                        sortExpression = cb.coalesce(root.get(fieldName), isDesc ? -1.0 : 999999.0);
+                    } else {
+                        sortExpression = cb.coalesce(root.get(fieldName).as(Double.class), isDesc ? -1.0 : 999999.0);
+                    }
+                    
+                    Order order = isDesc ? cb.desc(sortExpression) : cb.asc(sortExpression);
+                    query.orderBy(order);
+                }
+            }
+
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
