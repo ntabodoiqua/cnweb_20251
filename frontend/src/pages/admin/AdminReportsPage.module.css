@@ -627,3 +627,242 @@
 .loading {
   animation: pulse 1.5s ease-in-out infinite;
 }
+
+/* Page Header */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.pageHeader h1 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pageHeader h1 :global(.anticon) {
+  color: #ee4d2d;
+}
+
+.pageHeader p {
+  margin: 4px 0 0 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.refreshBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.refreshBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.3);
+}
+
+.refreshBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+/* Stat Trend */
+.statTrend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.trendUp {
+  color: #52c41a;
+}
+
+.trendDown {
+  color: #ff4d4f;
+}
+
+/* Stat Sub Label */
+.statSubLabel {
+  font-size: 12px;
+  color: #999;
+  margin-top: 4px;
+}
+
+/* Top Sellers List */
+.topSellersList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.topSellerItem {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #fafafa;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.topSellerItem:hover {
+  background: #f0f0f0;
+  transform: translateX(4px);
+}
+
+.topSellerRank {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.topSellerInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.topSellerName {
+  font-size: 15px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topSellerMeta {
+  font-size: 12px;
+  color: #999;
+  margin-top: 2px;
+}
+
+.topSellerRevenue {
+  font-size: 16px;
+  font-weight: 700;
+  color: #ee4d2d;
+  white-space: nowrap;
+}
+
+/* Top Products List */
+.topProductsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.topProductItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fafafa;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.topProductItem:hover {
+  background: #f0f0f0;
+  transform: translateX(4px);
+}
+
+.topProductRank {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.topProductImage {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.topProductInfo {
+  flex: 1;
+  min-width: 0;
+}
+
+.topProductName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topProductMeta {
+  font-size: 12px;
+  color: #999;
+  margin-top: 2px;
+}
+
+.topProductPrice {
+  font-size: 14px;
+  font-weight: 600;
+  color: #ee4d2d;
+  white-space: nowrap;
+}
+
+/* Responsive for new components */
+@media (max-width: 768px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .pageHeader h1 {
+    font-size: 22px;
+  }
+
+  .refreshBtn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .topSellerItem,
+  .topProductItem {
+    flex-wrap: wrap;
+  }
+
+  .topSellerRevenue,
+  .topProductPrice {
+    width: 100%;
+    text-align: right;
+    margin-top: 8px;
+  }
+}
