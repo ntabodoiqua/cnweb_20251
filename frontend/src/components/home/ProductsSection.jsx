@@ -11,6 +11,7 @@ import ProductCard from "./ProductCard";
  */
 const ProductsSection = ({
   title,
+  subtitle,
   icon,
   products,
   onProductClick,
@@ -27,7 +28,10 @@ const ProductsSection = ({
       <div className="section-header">
         <div className="section-title">
           <span className="icon">{icon}</span>
-          <h2>{title}</h2>
+          <div className="title-content">
+            <h2>{title}</h2>
+            {subtitle && <p className="section-subtitle">{subtitle}</p>}
+          </div>
         </div>
         {showViewAll && (
           <Button
@@ -57,6 +61,7 @@ const ProductsSection = ({
 
 ProductsSection.propTypes = {
   title: PropTypes.string.isRequired,
+  subtitle: PropTypes.string,
   icon: PropTypes.node.isRequired,
   products: PropTypes.array.isRequired,
   onProductClick: PropTypes.func.isRequired,

@@ -1,7 +1,12 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Helmet } from "react-helmet-async";
 import { useNavigate } from "react-router-dom";
-import { FireOutlined, StarOutlined } from "@ant-design/icons";
+import {
+  FireOutlined,
+  StarOutlined,
+  CrownOutlined,
+  LikeOutlined,
+} from "@ant-design/icons";
 import { bannerSlides, testimonials, homePageMeta } from "../data/mockdata";
 import LoadingSpinner from "../components/LoadingSpinner";
 import NoImage from "../assets/NoImages.webp";
@@ -15,7 +20,6 @@ import {
 import {
   HeroBanner,
   CategoriesSection,
-  FlashSaleSection,
   ProductsSection,
   BrandsSection,
   TestimonialsSection,
@@ -76,9 +80,9 @@ const HomePage = () => {
   const [imagesLoaded, setImagesLoaded] = useState(false);
 
   // Product data from API
-  const [flashSaleProducts, setFlashSaleProducts] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
   const [dailyDeals, setDailyDeals] = useState([]);
+  const [topRatedProducts, setTopRatedProducts] = useState([]);
 
   // Categories data from API
   const [categories, setCategories] = useState([]);
@@ -95,9 +99,9 @@ const HomePage = () => {
   // Track which sections have been loaded
   const [loadedSections, setLoadedSections] = useState({
     categories: false,
-    flashSale: false,
     featured: false,
     dailyDeals: false,
+    topRated: false,
     brands: false,
     banners: false,
     reviews: false,
@@ -107,13 +111,13 @@ const HomePage = () => {
   const [categoriesRef, categoriesVisible] = useIntersectionObserver({
     rootMargin: "400px 0px",
   });
-  const [flashSaleRef, flashSaleVisible] = useIntersectionObserver({
-    rootMargin: "400px 0px",
-  });
   const [featuredRef, featuredVisible] = useIntersectionObserver({
     rootMargin: "400px 0px",
   });
   const [dailyDealsRef, dailyDealsVisible] = useIntersectionObserver({
+    rootMargin: "400px 0px",
+  });
+  const [topRatedRef, topRatedVisible] = useIntersectionObserver({
     rootMargin: "400px 0px",
   });
   const [brandsRef, brandsVisible] = useIntersectionObserver({
@@ -150,34 +154,13 @@ const HomePage = () => {
     }
   }, [loadedSections.categories]);
 
-  // Fetch flash sale products when visible
-  const fetchFlashSale = useCallback(async () => {
-    if (loadedSections.flashSale) return;
-    try {
-      const flashSaleResponse = await getPublicProductsApi({
-        isActive: true,
-        sortBy: "createdAt",
-        sortDirection: "desc",
-        page: 0,
-        size: 8,
-      });
-      if (flashSaleResponse.code === 1000) {
-        setFlashSaleProducts(flashSaleResponse.result.content || []);
-      }
-    } catch (error) {
-      console.error("Error fetching flash sale:", error);
-    } finally {
-      setLoadedSections((prev) => ({ ...prev, flashSale: true }));
-    }
-  }, [loadedSections.flashSale]);
-
-  // Fetch featured products when visible
+  // Fetch featured products (best selling) when visible
   const fetchFeatured = useCallback(async () => {
     if (loadedSections.featured) return;
     try {
       const featuredResponse = await getPublicProductsApi({
         isActive: true,
-        sortBy: "createdAt",
+        sortBy: "soldCount",
         sortDirection: "desc",
         page: 0,
         size: 8,
@@ -192,15 +175,15 @@ const HomePage = () => {
     }
   }, [loadedSections.featured]);
 
-  // Fetch daily deals when visible
+  // Fetch daily deals (today's best selling) when visible
   const fetchDailyDeals = useCallback(async () => {
     if (loadedSections.dailyDeals) return;
     try {
       const dealsResponse = await getPublicProductsApi({
         isActive: true,
-        sortBy: "price",
-        sortDirection: "asc",
-        page: 0,
+        sortBy: "soldCount",
+        sortDirection: "desc",
+        page: 1,
         size: 8,
       });
       if (dealsResponse.code === 1000) {
@@ -212,6 +195,27 @@ const HomePage = () => {
       setLoadedSections((prev) => ({ ...prev, dailyDeals: true }));
     }
   }, [loadedSections.dailyDeals]);
+
+  // Fetch top rated products when visible
+  const fetchTopRated = useCallback(async () => {
+    if (loadedSections.topRated) return;
+    try {
+      const topRatedResponse = await getPublicProductsApi({
+        isActive: true,
+        sortBy: "averageRating",
+        sortDirection: "desc",
+        page: 0,
+        size: 8,
+      });
+      if (topRatedResponse.code === 1000) {
+        setTopRatedProducts(topRatedResponse.result.content || []);
+      }
+    } catch (error) {
+      console.error("Error fetching top rated:", error);
+    } finally {
+      setLoadedSections((prev) => ({ ...prev, topRated: true }));
+    }
+  }, [loadedSections.topRated]);
 
   // Fetch brands when visible
   const fetchBrands = useCallback(async () => {
@@ -292,23 +296,23 @@ const HomePage = () => {
   // Consolidated effect for triggering fetches
   useEffect(() => {
     if (categoriesVisible && !loadedSections.categories) fetchCategories();
-    if (flashSaleVisible && !loadedSections.flashSale) fetchFlashSale();
     if (featuredVisible && !loadedSections.featured) fetchFeatured();
     if (dailyDealsVisible && !loadedSections.dailyDeals) fetchDailyDeals();
+    if (topRatedVisible && !loadedSections.topRated) fetchTopRated();
     if (brandsVisible && !loadedSections.brands) fetchBrands();
     if (reviewsVisible && !loadedSections.reviews) fetchReviews();
   }, [
     categoriesVisible,
-    flashSaleVisible,
     featuredVisible,
     dailyDealsVisible,
+    topRatedVisible,
     brandsVisible,
     reviewsVisible,
     loadedSections,
     fetchCategories,
-    fetchFlashSale,
     fetchFeatured,
     fetchDailyDeals,
+    fetchTopRated,
     fetchBrands,
     fetchReviews,
   ]);
@@ -385,30 +389,18 @@ const HomePage = () => {
             )}
           </section>
 
-          {/* Flash Sale Section - Lazy Loaded */}
-          <section ref={flashSaleRef} className="lazy-section">
-            {loadedSections.flashSale ? (
-              <FlashSaleSection
-                products={flashSaleProducts}
-                onProductClick={handleProductClick}
-                formatPrice={formatPrice}
-              />
-            ) : (
-              <div className="section-placeholder" style={{ minHeight: 450 }} />
-            )}
-          </section>
-
-          {/* Featured Products Section - Lazy Loaded */}
+          {/* Featured Products Section (Best Selling) - Lazy Loaded */}
           <section ref={featuredRef} className="lazy-section">
             {loadedSections.featured ? (
               <ProductsSection
                 title="Sản Phẩm Nổi Bật"
+                subtitle="Sản phẩm có nhiều lượt bán nhất"
                 icon={<FireOutlined />}
                 products={featuredProducts}
                 onProductClick={handleProductClick}
                 formatPrice={formatPrice}
                 showViewAll={true}
-                viewAllLink="/products"
+                viewAllLink="/products?sortBy=soldCount&sortDirection=desc"
                 viewAllText="Xem thêm"
               />
             ) : (
@@ -416,16 +408,38 @@ const HomePage = () => {
             )}
           </section>
 
-          {/* Daily Deals Section - Lazy Loaded */}
+          {/* Daily Deals Section (Today's Best Selling) - Lazy Loaded */}
           <section ref={dailyDealsRef} className="lazy-section">
             {loadedSections.dailyDeals ? (
               <ProductsSection
                 title="Gợi Ý Hôm Nay"
+                subtitle="Sản phẩm bán chạy hôm nay"
                 icon={<StarOutlined />}
                 products={dailyDeals}
                 onProductClick={handleProductClick}
                 formatPrice={formatPrice}
-                showProgress={true}
+                showViewAll={true}
+                viewAllLink="/products?sortBy=soldCount&sortDirection=desc"
+                viewAllText="Xem thêm"
+              />
+            ) : (
+              <div className="section-placeholder" style={{ minHeight: 450 }} />
+            )}
+          </section>
+
+          {/* Top Rated Products Section - Lazy Loaded */}
+          <section ref={topRatedRef} className="lazy-section">
+            {loadedSections.topRated ? (
+              <ProductsSection
+                title="Sản Phẩm Được Đánh Giá Cao"
+                subtitle="Sản phẩm có rating trung bình cao nhất"
+                icon={<CrownOutlined />}
+                products={topRatedProducts}
+                onProductClick={handleProductClick}
+                formatPrice={formatPrice}
+                showViewAll={true}
+                viewAllLink="/products?sortBy=averageRating&sortDirection=desc"
+                viewAllText="Xem thêm"
               />
             ) : (
               <div className="section-placeholder" style={{ minHeight: 450 }} />
