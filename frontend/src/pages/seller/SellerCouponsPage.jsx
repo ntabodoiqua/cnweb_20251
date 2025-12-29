@@ -362,8 +362,8 @@ const SellerCouponsPage = () => {
         // Always store-specific for seller
         storeId: selectedStoreId,
         isStoreSpecific: true,
-        validFrom: new Date(formData.validFrom).toISOString(),
-        validTo: new Date(formData.validTo).toISOString(),
+        validFrom: formData.validFrom + ":00",
+        validTo: formData.validTo + ":00",
       };
 
       await createCouponApi(couponData);

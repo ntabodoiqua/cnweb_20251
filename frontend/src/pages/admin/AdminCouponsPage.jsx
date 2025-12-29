@@ -345,8 +345,8 @@ const AdminCouponsPage = () => {
         maxUsagePerUser: parseInt(formData.maxUsagePerUser) || 1,
         storeId: formData.isStoreSpecific ? formData.storeId : null,
         isStoreSpecific: formData.isStoreSpecific,
-        validFrom: new Date(formData.validFrom).toISOString(),
-        validTo: new Date(formData.validTo).toISOString(),
+        validFrom: formData.validFrom + ":00",
+        validTo: formData.validTo + ":00",
       };
 
       await createCouponApi(couponData);
