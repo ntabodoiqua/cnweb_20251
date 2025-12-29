@@ -196,6 +196,12 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         
+        // Check if product is soft deleted
+        if (product.isDeleted()) {
+            log.warn("Product {} has been deleted", id);
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+        
         return mapToProductResponse(product);
     }
 
