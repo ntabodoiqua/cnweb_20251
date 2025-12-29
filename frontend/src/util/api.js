@@ -1610,7 +1610,7 @@ const bulkUpdateProductStatusApi = (productIds, isActive) => {
     URL_API,
     {
       productIds,
-      isActive: isActive.toString(),
+      isActive: Boolean(isActive),
     },
     {
       headers: {
