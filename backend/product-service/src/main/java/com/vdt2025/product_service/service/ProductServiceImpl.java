@@ -860,9 +860,13 @@ public class ProductServiceImpl implements ProductService {
         productRepository.bulkUpdateStatusNative(productIds, request.getIsActive());
         variantRepository.bulkUpdateVariantStatusNative(productIds, request.getIsActive());
         log.info("Bulk status update completed for {} products", request.getProductIds().size());
+        
+        // Evict caches
         for (String productId : productIds) {
             cacheEvictService.evictProductDetails(productId);
         }
+        // Evict product search cache để refresh danh sách sản phẩm
+        cacheEvictService.evictProductSearchCache();
     }
 
     @Override
