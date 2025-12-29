@@ -196,6 +196,12 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
         
+        // Check if product is soft deleted
+        if (product.isDeleted()) {
+            log.warn("Product {} has been deleted", id);
+            throw new AppException(ErrorCode.PRODUCT_NOT_FOUND);
+        }
+        
         return mapToProductResponse(product);
     }
 
@@ -304,8 +310,9 @@ public class ProductServiceImpl implements ProductService {
         // Soft delete tất cả variants
         List<ProductVariant> variants = variantRepository.findByProductId(id);
         for (ProductVariant variant : variants) {
-            variant.setDeleted(false);
+            variant.setDeleted(true);
         }
+        variantRepository.saveAll(variants);
         
         // Evict product search cache khi xóa sản phẩm
         cacheEvictService.evictProductSearchCache();
@@ -859,9 +866,13 @@ public class ProductServiceImpl implements ProductService {
         productRepository.bulkUpdateStatusNative(productIds, request.getIsActive());
         variantRepository.bulkUpdateVariantStatusNative(productIds, request.getIsActive());
         log.info("Bulk status update completed for {} products", request.getProductIds().size());
+        
+        // Evict caches
         for (String productId : productIds) {
             cacheEvictService.evictProductDetails(productId);
         }
+        // Evict product search cache để refresh danh sách sản phẩm
+        cacheEvictService.evictProductSearchCache();
     }
 
     @Override
