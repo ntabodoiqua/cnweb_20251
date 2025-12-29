@@ -16,6 +16,7 @@ import { getSellerOrderStatisticsApi } from "../../util/api";
 import { PROTECTED_ROUTES } from "../../constants/routes";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import styles from "./seller-overview.module.css";
+import dashboardStyles from "./seller-dashboard.module.css";
 
 /**
  * SellerOverviewPage - Trang tổng quan dashboard người bán
@@ -191,16 +192,18 @@ const SellerOverviewPage = () => {
       </div>
 
       {/* Stats Cards */}
-      <div className="seller-stats-grid">
+      <div className={dashboardStyles.statsGrid}>
         {stats.map((stat) => (
-          <div key={stat.id} className="seller-stat-card">
-            <div className="seller-stat-header">
-              <span className="seller-stat-title">{stat.title}</span>
-              <div className="seller-stat-icon">{stat.icon}</div>
+          <div key={stat.id} className={dashboardStyles.statCard}>
+            <div className={dashboardStyles.statHeader}>
+              <span className={dashboardStyles.statTitle}>{stat.title}</span>
+              <div className={dashboardStyles.statIcon}>{stat.icon}</div>
             </div>
-            <h2 className="seller-stat-value">{stat.value}</h2>
-            <div className="seller-stat-label">
-              <span className={`seller-stat-trend ${stat.trend.type}`}>
+            <h2 className={dashboardStyles.statValue}>{stat.value}</h2>
+            <div className={dashboardStyles.statLabel}>
+              <span
+                className={`${dashboardStyles.statTrend} ${stat.trend.type}`}
+              >
                 {stat.trend.type === "up" ? (
                   <ArrowUpOutlined />
                 ) : (
@@ -219,9 +222,9 @@ const SellerOverviewPage = () => {
         {/* Recent Orders */}
         <div className={styles.section}>
           <h2 className={styles.sectionTitle}>Đơn hàng gần đây</h2>
-          <div className="seller-table-container">
+          <div className={dashboardStyles.tableContainer}>
             {recentOrders.length > 0 ? (
-              <table className="seller-table">
+              <table className={dashboardStyles.table}>
                 <thead>
                   <tr>
                     <th>Mã đơn</th>
@@ -258,7 +261,7 @@ const SellerOverviewPage = () => {
                       </td>
                       <td>
                         <button
-                          className={`seller-btn seller-btn-secondary ${styles.btnSmall}`}
+                          className={`${dashboardStyles.btn} ${dashboardStyles.btnSecondary} ${styles.btnSmall}`}
                           onClick={() =>
                             navigate(
                               `${PROTECTED_ROUTES.SELLER_ORDERS}?orderId=${order.orderId}`
@@ -287,9 +290,9 @@ const SellerOverviewPage = () => {
             <TrophyOutlined style={{ color: "#faad14" }} />
             Sản phẩm bán chạy
           </h2>
-          <div className="seller-table-container">
+          <div className={dashboardStyles.tableContainer}>
             {topProducts.length > 0 ? (
-              <table className="seller-table">
+              <table className={dashboardStyles.table}>
                 <thead>
                   <tr>
                     <th>Sản phẩm</th>
@@ -348,28 +351,28 @@ const SellerOverviewPage = () => {
         <h2 className={styles.sectionTitle}>Thao tác nhanh</h2>
         <div className={styles.quickActions}>
           <button
-            className="seller-btn seller-btn-primary"
+            className={`${dashboardStyles.btn} ${dashboardStyles.btnPrimary}`}
             onClick={() => navigate(PROTECTED_ROUTES.SELLER_PRODUCTS)}
           >
             <ShopOutlined />
             Quản lý sản phẩm
           </button>
           <button
-            className="seller-btn seller-btn-primary"
+            className={`${dashboardStyles.btn} ${dashboardStyles.btnPrimary}`}
             onClick={() => navigate(PROTECTED_ROUTES.SELLER_ORDERS)}
           >
             <ShoppingOutlined />
             Xem tất cả đơn hàng
           </button>
           <button
-            className="seller-btn seller-btn-secondary"
+            className={`${dashboardStyles.btn} ${dashboardStyles.btnSecondary}`}
             onClick={() => navigate(PROTECTED_ROUTES.SELLER_STATISTICS)}
           >
             <DollarOutlined />
             Xem báo cáo chi tiết
           </button>
           <button
-            className="seller-btn seller-btn-secondary"
+            className={`${dashboardStyles.btn} ${dashboardStyles.btnSecondary}`}
             onClick={() => navigate(PROTECTED_ROUTES.SELLER_PROMOTIONS)}
           >
             <RiseOutlined />
