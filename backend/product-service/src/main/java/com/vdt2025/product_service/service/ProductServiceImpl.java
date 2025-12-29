@@ -304,8 +304,9 @@ public class ProductServiceImpl implements ProductService {
         // Soft delete tất cả variants
         List<ProductVariant> variants = variantRepository.findByProductId(id);
         for (ProductVariant variant : variants) {
-            variant.setDeleted(false);
+            variant.setDeleted(true);
         }
+        variantRepository.saveAll(variants);
         
         // Evict product search cache khi xóa sản phẩm
         cacheEvictService.evictProductSearchCache();
