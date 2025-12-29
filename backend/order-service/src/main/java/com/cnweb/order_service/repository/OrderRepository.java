@@ -234,10 +234,10 @@ public interface OrderRepository extends JpaRepository<Order, String>, JpaSpecif
      */
     @Query(value = """
         SELECT COUNT(*) FROM (
-            SELECT o.username 
+            SELECT o.user_id 
             FROM orders o 
             WHERE o.store_id = :storeId AND o.status = :status
-            GROUP BY o.username
+            GROUP BY o.user_id
             HAVING COUNT(o.id) > 1
         ) AS returning_customers
     """, nativeQuery = true)
