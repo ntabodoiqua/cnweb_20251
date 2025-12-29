@@ -343,6 +343,9 @@ public class ProductServiceImpl implements ProductService {
         // Evict product search cache khi xóa vĩnh viễn sản phẩm
         cacheEvictService.evictProductSearchCache();
         
+        // Publish event để xóa khỏi Elasticsearch
+        productEventPublisher.publishProductDeleted(id);
+        
         log.info("Product {} permanently deleted", product.getName());
     }
 
@@ -873,6 +876,11 @@ public class ProductServiceImpl implements ProductService {
         }
         // Evict product search cache để refresh danh sách sản phẩm
         cacheEvictService.evictProductSearchCache();
+        
+        // Publish events to sync Elasticsearch for each product
+        for (String productId : productIds) {
+            productEventPublisher.publishProductStatusChanged(productId);
+        }
     }
 
     @Override
