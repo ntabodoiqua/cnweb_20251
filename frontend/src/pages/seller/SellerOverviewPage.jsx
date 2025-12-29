@@ -1,159 +1,195 @@
+import { useState, useEffect, useCallback } from "react";
+import { notification } from "antd";
+import { useNavigate } from "react-router-dom";
 import {
   ShoppingOutlined,
   DollarOutlined,
   RiseOutlined,
-  EyeOutlined,
+  UserOutlined,
   ArrowUpOutlined,
   ArrowDownOutlined,
   ShopOutlined,
+  ReloadOutlined,
+  TrophyOutlined,
 } from "@ant-design/icons";
+import { getSellerOrderStatisticsApi } from "../../util/api";
+import { PROTECTED_ROUTES } from "../../constants/routes";
+import LoadingSpinner from "../../components/LoadingSpinner";
+import styles from "./seller-overview.module.css";
 
 /**
  * SellerOverviewPage - Trang tổng quan dashboard người bán
  * Hiển thị các thống kê quan trọng về cửa hàng
  */
 const SellerOverviewPage = () => {
-  // Mock data - sẽ thay thế bằng API sau
-  const stats = [
-    {
-      id: 1,
-      title: "Đơn hàng hôm nay",
-      value: "45",
-      icon: <ShoppingOutlined />,
-      trend: { type: "up", value: "+15.2%" },
-      label: "So với hôm qua",
-    },
-    {
-      id: 2,
-      title: "Doanh thu hôm nay",
-      value: "₫12,450,000",
-      icon: <DollarOutlined />,
-      trend: { type: "up", value: "+22.5%" },
-      label: "So với hôm qua",
-    },
-    {
-      id: 3,
-      title: "Sản phẩm",
-      value: "156",
-      icon: <ShopOutlined />,
-      trend: { type: "up", value: "+5" },
-      label: "Sản phẩm mới",
-    },
-    {
-      id: 4,
-      title: "Lượt xem cửa hàng",
-      value: "2,543",
-      icon: <EyeOutlined />,
-      trend: { type: "down", value: "-3.2%" },
-      label: "So với hôm qua",
-    },
-  ];
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [statistics, setStatistics] = useState(null);
 
-  const recentOrders = [
-    {
-      id: "ORD-2024-156",
-      customer: "Nguyễn Văn A",
-      product: "Laptop Dell XPS 13",
-      quantity: 1,
-      amount: "₫25,000,000",
-      status: "Chờ xác nhận",
-      date: "2024-11-14 10:30",
-    },
-    {
-      id: "ORD-2024-157",
-      customer: "Trần Thị B",
-      product: "iPhone 15 Pro Max",
-      quantity: 1,
-      amount: "₫35,000,000",
-      status: "Đang chuẩn bị",
-      date: "2024-11-14 09:15",
-    },
-    {
-      id: "ORD-2024-158",
-      customer: "Lê Văn C",
-      product: "Samsung Galaxy S24",
-      quantity: 2,
-      amount: "₫44,000,000",
-      status: "Đang giao",
-      date: "2024-11-14 08:45",
-    },
-    {
-      id: "ORD-2024-159",
-      customer: "Phạm Thị D",
-      product: "MacBook Pro M3",
-      quantity: 1,
-      amount: "₫45,000,000",
-      status: "Hoàn thành",
-      date: "2024-11-13 16:20",
-    },
-    {
-      id: "ORD-2024-160",
-      customer: "Hoàng Văn E",
-      product: "AirPods Pro 2",
-      quantity: 3,
-      amount: "₫19,500,000",
-      status: "Hoàn thành",
-      date: "2024-11-13 14:10",
-    },
-  ];
+  // Fetch dữ liệu thống kê
+  const fetchStatistics = useCallback(async (showLoading = true) => {
+    if (showLoading) setLoading(true);
+    else setRefreshing(true);
 
-  const topProducts = [
-    {
-      id: 1,
-      name: "iPhone 15 Pro Max 256GB",
-      sold: 45,
-      revenue: "₫1,575,000,000",
-      stock: 23,
-    },
-    {
-      id: 2,
-      name: "Samsung Galaxy S24 Ultra",
-      sold: 38,
-      revenue: "₫1,140,000,000",
-      stock: 15,
-    },
-    {
-      id: 3,
-      name: "MacBook Pro M3 14 inch",
-      sold: 27,
-      revenue: "₫1,215,000,000",
-      stock: 8,
-    },
-    {
-      id: 4,
-      name: "Dell XPS 13 Plus",
-      sold: 22,
-      revenue: "₫550,000,000",
-      stock: 12,
-    },
-    {
-      id: 5,
-      name: "AirPods Pro 2nd Gen",
-      sold: 156,
-      revenue: "₫1,014,000,000",
-      stock: 45,
-    },
-  ];
+    try {
+      const response = await getSellerOrderStatisticsApi(null, 5);
+
+      if (response?.code === 1000) {
+        setStatistics(response.result);
+      } else {
+        notification.error({
+          message: "Lỗi",
+          description: response?.message || "Không thể tải thống kê",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching statistics:", error);
+      notification.error({
+        message: "Lỗi tải dữ liệu",
+        description: "Không thể tải thống kê. Vui lòng thử lại sau.",
+      });
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStatistics();
+  }, [fetchStatistics]);
+
+  // Format số tiền VND
+  const formatCurrency = (amount) => {
+    if (!amount && amount !== 0) return "₫0";
+    return new Intl.NumberFormat("vi-VN", {
+      style: "currency",
+      currency: "VND",
+    }).format(amount);
+  };
+
+  // Format số lớn
+  const formatNumber = (num) => {
+    if (!num && num !== 0) return "0";
+    return new Intl.NumberFormat("vi-VN").format(num);
+  };
+
+  // Get status label
+  const getStatusLabel = (status) => {
+    const labelMap = {
+      PENDING: "Chờ xử lý",
+      PAID: "Đã thanh toán",
+      CONFIRMED: "Đã xác nhận",
+      SHIPPING: "Đang giao",
+      DELIVERED: "Hoàn thành",
+      CANCELLED: "Đã hủy",
+      RETURNED: "Đã trả hàng",
+    };
+    return labelMap[status] || status;
+  };
 
   const getStatusClass = (status) => {
     switch (status) {
-      case "Hoàn thành":
-        return "status-completed";
-      case "Chờ xác nhận":
-        return "status-pending";
-      case "Đang chuẩn bị":
-        return "status-preparing";
-      case "Đang giao":
-        return "status-shipping";
-      case "Đã hủy":
-        return "status-cancelled";
+      case "DELIVERED":
+        return styles.statusCompleted;
+      case "PENDING":
+        return styles.statusPending;
+      case "PAID":
+      case "CONFIRMED":
+        return styles.statusPreparing;
+      case "SHIPPING":
+        return styles.statusShipping;
+      case "CANCELLED":
+        return styles.statusCancelled;
+      case "RETURNED":
+        return styles.statusReturned;
       default:
         return "";
     }
   };
 
+  if (loading) {
+    return <LoadingSpinner tip="Đang tải thống kê..." fullScreen={false} />;
+  }
+
+  // Build stats array từ API data
+  const stats = [
+    {
+      id: 1,
+      title: "Đơn hàng hôm nay",
+      value: formatNumber(statistics?.todayOrders || 0),
+      icon: <ShoppingOutlined />,
+      trend: {
+        type: statistics?.orderGrowthPercent >= 0 ? "up" : "down",
+        value: `${statistics?.orderGrowthPercent >= 0 ? "+" : ""}${(
+          statistics?.orderGrowthPercent || 0
+        ).toFixed(1)}%`,
+      },
+      label: "So với tháng trước",
+    },
+    {
+      id: 2,
+      title: "Doanh thu hôm nay",
+      value: formatCurrency(statistics?.todayRevenue || 0),
+      icon: <DollarOutlined />,
+      trend: {
+        type: statistics?.revenueGrowthPercent >= 0 ? "up" : "down",
+        value: `${statistics?.revenueGrowthPercent >= 0 ? "+" : ""}${(
+          statistics?.revenueGrowthPercent || 0
+        ).toFixed(1)}%`,
+      },
+      label: "So với tháng trước",
+    },
+    {
+      id: 3,
+      title: "Tổng đơn hàng",
+      value: formatNumber(statistics?.totalOrders || 0),
+      icon: <ShopOutlined />,
+      trend: {
+        type: "up",
+        value: `+${statistics?.thisMonthOrders || 0}`,
+      },
+      label: "Đơn tháng này",
+    },
+    {
+      id: 4,
+      title: "Khách hàng",
+      value: formatNumber(statistics?.totalCustomers || 0),
+      icon: <UserOutlined />,
+      trend: {
+        type: statistics?.newCustomersThisMonth > 0 ? "up" : "down",
+        value: `+${statistics?.newCustomersThisMonth || 0}`,
+      },
+      label: "Khách mới tháng này",
+    },
+  ];
+
+  // Recent orders từ API
+  const recentOrders = statistics?.recentOrders?.slice(0, 5) || [];
+
+  // Top products từ API
+  const topProducts = statistics?.topProducts || [];
+
   return (
-    <div className="seller-overview">
+    <div className={styles.sellerOverview}>
+      {/* Header với nút refresh */}
+      <div className={styles.overviewHeader}>
+        <div>
+          <h1>Tổng quan</h1>
+          {statistics?.storeName && (
+            <p className={styles.storeName}>{statistics.storeName}</p>
+          )}
+        </div>
+        <button
+          className={styles.refreshBtn}
+          onClick={() => fetchStatistics(false)}
+          disabled={refreshing}
+        >
+          <ReloadOutlined spin={refreshing} />
+          {refreshing ? "Đang tải..." : "Làm mới"}
+        </button>
+      </div>
+
       {/* Stats Cards */}
       <div className="seller-stats-grid">
         {stats.map((stat) => (
@@ -179,243 +215,168 @@ const SellerOverviewPage = () => {
       </div>
 
       {/* Two column layout for orders and products */}
-      <div className="seller-content-grid">
+      <div className={styles.contentGrid}>
         {/* Recent Orders */}
-        <div className="seller-section">
-          <h2 className="seller-section-title">Đơn hàng gần đây</h2>
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>Đơn hàng gần đây</h2>
           <div className="seller-table-container">
-            <table className="seller-table">
-              <thead>
-                <tr>
-                  <th>Mã đơn</th>
-                  <th>Khách hàng</th>
-                  <th>Sản phẩm</th>
-                  <th>SL</th>
-                  <th>Giá trị</th>
-                  <th>Trạng thái</th>
-                  <th>Thao tác</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentOrders.map((order) => (
-                  <tr key={order.id}>
-                    <td>
-                      <strong>{order.id}</strong>
-                    </td>
-                    <td>{order.customer}</td>
-                    <td className="product-cell">{order.product}</td>
-                    <td>{order.quantity}</td>
-                    <td>
-                      <strong style={{ color: "#ee4d2d" }}>
-                        {order.amount}
-                      </strong>
-                    </td>
-                    <td>
-                      <span
-                        className={`status-badge ${getStatusClass(
-                          order.status
-                        )}`}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
-                    <td>
-                      <button className="seller-btn seller-btn-secondary seller-btn-small">
-                        Xem
-                      </button>
-                    </td>
+            {recentOrders.length > 0 ? (
+              <table className="seller-table">
+                <thead>
+                  <tr>
+                    <th>Mã đơn</th>
+                    <th>Khách hàng</th>
+                    <th>SL</th>
+                    <th>Giá trị</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {recentOrders.map((order) => (
+                    <tr key={order.orderId}>
+                      <td>
+                        <strong>{order.orderNumber}</strong>
+                      </td>
+                      <td>
+                        {order.customerFullName || order.customerUsername}
+                      </td>
+                      <td>{order.itemCount}</td>
+                      <td>
+                        <strong className={styles.priceHighlight}>
+                          {formatCurrency(order.totalAmount)}
+                        </strong>
+                      </td>
+                      <td>
+                        <span
+                          className={`${styles.statusBadge} ${getStatusClass(
+                            order.status
+                          )}`}
+                        >
+                          {getStatusLabel(order.status)}
+                        </span>
+                      </td>
+                      <td>
+                        <button
+                          className={`seller-btn seller-btn-secondary ${styles.btnSmall}`}
+                          onClick={() =>
+                            navigate(
+                              `${PROTECTED_ROUTES.SELLER_ORDERS}?orderId=${order.orderId}`
+                            )
+                          }
+                        >
+                          Xem
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className={styles.emptyState}>
+                <ShoppingOutlined style={{ fontSize: 48, color: "#ccc" }} />
+                <p>Chưa có đơn hàng nào</p>
+              </div>
+            )}
           </div>
         </div>
 
         {/* Top Products */}
-        <div className="seller-section">
-          <h2 className="seller-section-title">Sản phẩm bán chạy</h2>
+        <div className={styles.section}>
+          <h2 className={styles.sectionTitle}>
+            <TrophyOutlined style={{ color: "#faad14" }} />
+            Sản phẩm bán chạy
+          </h2>
           <div className="seller-table-container">
-            <table className="seller-table">
-              <thead>
-                <tr>
-                  <th>Sản phẩm</th>
-                  <th>Đã bán</th>
-                  <th>Doanh thu</th>
-                  <th>Tồn kho</th>
-                </tr>
-              </thead>
-              <tbody>
-                {topProducts.map((product) => (
-                  <tr key={product.id}>
-                    <td className="product-cell">
-                      <strong>{product.name}</strong>
-                    </td>
-                    <td>{product.sold}</td>
-                    <td>
-                      <strong style={{ color: "#ee4d2d" }}>
-                        {product.revenue}
-                      </strong>
-                    </td>
-                    <td>
-                      <span
-                        className={`stock-badge ${
-                          product.stock < 10 ? "low-stock" : ""
-                        }`}
-                      >
-                        {product.stock}
-                      </span>
-                    </td>
+            {topProducts.length > 0 ? (
+              <table className="seller-table">
+                <thead>
+                  <tr>
+                    <th>Sản phẩm</th>
+                    <th>Đã bán</th>
+                    <th>Doanh thu</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {topProducts.map((product, index) => (
+                    <tr key={product.productId}>
+                      <td className={styles.productCell}>
+                        <div className={styles.productInfo}>
+                          {product.productImage && (
+                            <img
+                              src={product.productImage}
+                              alt={product.productName}
+                              className={styles.productThumb}
+                            />
+                          )}
+                          <div>
+                            <strong>{product.productName}</strong>
+                            {index < 3 && (
+                              <span
+                                className={`${styles.rankBadge} ${
+                                  styles[`rank${index + 1}`]
+                                }`}
+                              >
+                                #{index + 1}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </td>
+                      <td>{formatNumber(product.soldCount)}</td>
+                      <td>
+                        <strong className={styles.priceHighlight}>
+                          {formatCurrency(product.totalRevenue)}
+                        </strong>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <div className={styles.emptyState}>
+                <TrophyOutlined style={{ fontSize: 48, color: "#ccc" }} />
+                <p>Chưa có dữ liệu sản phẩm</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="seller-section">
-        <h2 className="seller-section-title">Thao tác nhanh</h2>
-        <div className="seller-quick-actions">
-          <button className="seller-btn seller-btn-primary">
+      <div className={styles.section}>
+        <h2 className={styles.sectionTitle}>Thao tác nhanh</h2>
+        <div className={styles.quickActions}>
+          <button
+            className="seller-btn seller-btn-primary"
+            onClick={() => navigate(PROTECTED_ROUTES.SELLER_PRODUCTS)}
+          >
             <ShopOutlined />
-            Thêm sản phẩm mới
+            Quản lý sản phẩm
           </button>
-          <button className="seller-btn seller-btn-primary">
+          <button
+            className="seller-btn seller-btn-primary"
+            onClick={() => navigate(PROTECTED_ROUTES.SELLER_ORDERS)}
+          >
             <ShoppingOutlined />
             Xem tất cả đơn hàng
           </button>
-          <button className="seller-btn seller-btn-secondary">
+          <button
+            className="seller-btn seller-btn-secondary"
+            onClick={() => navigate(PROTECTED_ROUTES.SELLER_STATISTICS)}
+          >
             <DollarOutlined />
-            Xem báo cáo doanh thu
+            Xem báo cáo chi tiết
           </button>
-          <button className="seller-btn seller-btn-secondary">
+          <button
+            className="seller-btn seller-btn-secondary"
+            onClick={() => navigate(PROTECTED_ROUTES.SELLER_PROMOTIONS)}
+          >
             <RiseOutlined />
             Chạy khuyến mãi
           </button>
         </div>
       </div>
-
-      <style jsx>{`
-        .seller-overview {
-          animation: fadeIn 0.5s ease-out;
-        }
-
-        .seller-content-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-          gap: 24px;
-          margin-bottom: 32px;
-        }
-
-        .seller-section {
-          margin-bottom: 32px;
-        }
-
-        .seller-section-title {
-          font-size: 20px;
-          font-weight: 700;
-          color: #333;
-          margin-bottom: 20px;
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .seller-section-title::before {
-          content: "";
-          width: 4px;
-          height: 24px;
-          background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
-          border-radius: 2px;
-        }
-
-        .product-cell {
-          max-width: 200px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .status-badge {
-          padding: 6px 12px;
-          border-radius: 6px;
-          font-size: 12px;
-          font-weight: 600;
-          display: inline-block;
-          white-space: nowrap;
-        }
-
-        .status-completed {
-          background: rgba(82, 196, 26, 0.1);
-          color: #52c41a;
-        }
-
-        .status-pending {
-          background: rgba(250, 173, 20, 0.1);
-          color: #faad14;
-        }
-
-        .status-preparing {
-          background: rgba(24, 144, 255, 0.1);
-          color: #1890ff;
-        }
-
-        .status-shipping {
-          background: rgba(114, 46, 209, 0.1);
-          color: #722ed1;
-        }
-
-        .status-cancelled {
-          background: rgba(255, 77, 79, 0.1);
-          color: #ff4d4f;
-        }
-
-        .stock-badge {
-          padding: 4px 10px;
-          border-radius: 6px;
-          font-weight: 600;
-          background: rgba(82, 196, 26, 0.1);
-          color: #52c41a;
-        }
-
-        .stock-badge.low-stock {
-          background: rgba(255, 77, 79, 0.1);
-          color: #ff4d4f;
-        }
-
-        .seller-quick-actions {
-          display: flex;
-          gap: 16px;
-          flex-wrap: wrap;
-        }
-
-        .seller-btn-small {
-          padding: 6px 12px;
-          font-size: 13px;
-        }
-
-        @media (max-width: 1200px) {
-          .seller-content-grid {
-            grid-template-columns: 1fr;
-          }
-        }
-
-        @media (max-width: 768px) {
-          .seller-quick-actions {
-            flex-direction: column;
-          }
-
-          .seller-quick-actions .seller-btn {
-            width: 100%;
-            justify-content: center;
-          }
-
-          .product-cell {
-            max-width: 150px;
-          }
-        }
-      `}</style>
     </div>
   );
 };

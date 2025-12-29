@@ -33,12 +33,12 @@ const SellerStatisticsPage = () => {
     try {
       const response = await getSellerOrderStatisticsApi(null, 10);
 
-      if (response?.data?.code === 1000) {
-        setStatistics(response.data.result);
+      if (response?.code === 1000) {
+        setStatistics(response.result);
       } else {
         notification.error({
           message: "Lỗi",
-          description: response?.data?.message || "Không thể tải thống kê",
+          description: response?.message || "Không thể tải thống kê",
         });
       }
     } catch (error) {
