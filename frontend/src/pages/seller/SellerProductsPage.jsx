@@ -5,6 +5,8 @@ import {
   SearchOutlined,
   EyeOutlined,
   ShopOutlined,
+  DeleteOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { notification, Modal, Switch } from "antd";
@@ -12,6 +14,7 @@ import AddProductModal from "../../components/seller/AddProductModal";
 import {
   getProductsByStoreApi,
   bulkUpdateProductStatusApi,
+  deleteProductApi,
   getMyStoresApi,
 } from "../../util/api";
 import NoImages from "../../assets/NoImages.webp";
@@ -448,6 +451,95 @@ const SellerProductsPage = () => {
     }
   };
 
+  // Xóa sản phẩm (soft delete)
+  const handleDeleteProduct = (product) => {
+    // Kiểm tra nếu sản phẩm đang bán, cần vô hiệu hóa trước
+    if (product.status === "active") {
+      Modal.warning({
+        title: "Không thể xóa sản phẩm đang bán",
+        icon: <ExclamationCircleOutlined />,
+        content: (
+          <div>
+            <p>
+              Sản phẩm <strong>{product.name}</strong> đang ở trạng thái{" "}
+              <strong>Đang bán</strong>.
+            </p>
+            <p style={{ marginTop: "8px", color: "#666" }}>
+              Vui lòng <strong>vô hiệu hóa</strong> sản phẩm trước khi xóa để
+              đảm bảo không ảnh hưởng đến khách hàng đang xem sản phẩm.
+            </p>
+          </div>
+        ),
+        okText: "Đã hiểu",
+        width: 450,
+      });
+      return;
+    }
+
+    Modal.confirm({
+      title: "Xác nhận xóa sản phẩm",
+      icon: <ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />,
+      content: (
+        <div>
+          <p>
+            Bạn có chắc chắn muốn xóa sản phẩm{" "}
+            <strong>&quot;{product.name}&quot;</strong>?
+          </p>
+          <div
+            style={{
+              marginTop: "12px",
+              padding: "12px",
+              backgroundColor: "#fff7e6",
+              border: "1px solid #ffd591",
+              borderRadius: "8px",
+            }}
+          >
+            <p style={{ margin: 0, color: "#d46b08", fontWeight: 600 }}>
+              ⚠️ Lưu ý:
+            </p>
+            <ul
+              style={{
+                margin: "8px 0 0 0",
+                paddingLeft: "20px",
+                color: "#595959",
+              }}
+            >
+              <li>Sản phẩm sẽ được ẩn khỏi cửa hàng</li>
+              <li>Toàn bộ biến thể của sản phẩm cũng sẽ bị xóa</li>
+              <li>Lịch sử đơn hàng liên quan vẫn được giữ lại</li>
+              <li>Liên hệ Admin nếu cần khôi phục</li>
+            </ul>
+          </div>
+        </div>
+      ),
+      okText: "Xóa sản phẩm",
+      cancelText: "Hủy",
+      okButtonProps: { danger: true },
+      width: 500,
+      onOk: async () => {
+        try {
+          await deleteProductApi(product.id);
+          notification.success({
+            message: "Xóa thành công",
+            description: `Sản phẩm "${product.name}" đã được xóa`,
+            placement: "topRight",
+            duration: 3,
+          });
+          fetchProducts();
+        } catch (error) {
+          console.error("Error deleting product:", error);
+          const errorMsg =
+            error.response?.data?.message || "Không thể xóa sản phẩm";
+          notification.error({
+            message: "Lỗi xóa sản phẩm",
+            description: errorMsg,
+            placement: "topRight",
+          });
+        }
+      },
+    });
+  };
+
   // Loading khi đang fetch stores
   if (storeLoading) {
     return (
@@ -700,6 +792,13 @@ const SellerProductsPage = () => {
                         onClick={() => handleViewProduct(product.id)}
                       >
                         <EyeOutlined />
+                      </button>
+                      <button
+                        className={`${styles.actionBtn} ${styles.deleteBtn}`}
+                        title="Xóa sản phẩm"
+                        onClick={() => handleDeleteProduct(product)}
+                      >
+                        <DeleteOutlined />
                       </button>
                     </div>
                   </td>

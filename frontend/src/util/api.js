@@ -801,6 +801,20 @@ const uploadProductImageApi = (productId, file, displayOrder = 1) => {
   });
 };
 
+/**
+ * Xóa sản phẩm (soft delete)
+ * Sản phẩm sẽ được đánh dấu đã xóa, không hiển thị cho khách hàng
+ * nhưng vẫn giữ lại trong database để bảo toàn lịch sử đơn hàng
+ */
+const deleteProductApi = (productId) => {
+  const URL_API = `/api/product/products/${productId}`;
+  return axios.delete(URL_API, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 const deleteProductImageApi = (productId, imageId) => {
   const URL_API = `/api/product/products/${productId}/images/${imageId}`;
   return axios.delete(URL_API, {
@@ -2904,6 +2918,7 @@ export {
   getProductsByStoreApi,
   getProductDetailApi,
   updateProductApi,
+  deleteProductApi,
   uploadProductImageApi,
   deleteProductImageApi,
   updateProductImageOrderApi,
