@@ -1771,6 +1771,51 @@ const getTopStoresByProductsApi = (limit = 10) => {
   });
 };
 
+// ==================== Seller Dashboard Statistics APIs ====================
+
+/**
+ * Lấy thống kê đơn hàng cho Seller Dashboard
+ * @param {string} storeId - ID cửa hàng (optional, sẽ lấy tự động từ token nếu không truyền)
+ * @param {number} topProductsLimit - Số lượng top products (default: 10)
+ */
+const getSellerOrderStatisticsApi = (storeId = null, topProductsLimit = 10) => {
+  const URL_API = "/api/order/api/v1/orders/seller/statistics";
+  const params = { topProductsLimit };
+  if (storeId) {
+    params.storeId = storeId;
+  }
+  return axios.get(URL_API, {
+    params,
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+/**
+ * Lấy doanh thu của seller theo khoảng thời gian
+ * @param {string} storeId - ID cửa hàng (optional)
+ * @param {string} period - 'daily' hoặc 'monthly'
+ * @param {number} months - Số tháng (default: 12)
+ */
+const getSellerRevenueByPeriodApi = (
+  storeId = null,
+  period = "monthly",
+  months = 12
+) => {
+  const URL_API = "/api/order/api/v1/orders/seller/statistics/revenue";
+  const params = { period, months };
+  if (storeId) {
+    params.storeId = storeId;
+  }
+  return axios.get(URL_API, {
+    params,
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // Admin User Deletion APIs
 const softDeleteUserAdminApi = (userId, reason = "") => {
   const URL_API = `/api/user/admin/${userId}/soft-delete`;
@@ -3089,4 +3134,7 @@ export {
   getProductStatsByCategoryApi,
   getProductStatsByBrandApi,
   getTopStoresByProductsApi,
+  // Seller Dashboard Statistics APIs
+  getSellerOrderStatisticsApi,
+  getSellerRevenueByPeriodApi,
 };
