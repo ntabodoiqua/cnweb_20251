@@ -230,19 +230,20 @@ public interface OrderRepository extends JpaRepository<Order, String>, JpaSpecif
             @Param("startDate") LocalDateTime startDate);
 
     /**
-     * Đếm số khách hàng quay lại (mua > 1 lần)
+     * Đếm số khách hàng quay lại (mua > 1 lần) - sử dụng native query
      */
-    @Query("""
+    @Query(value = """
         SELECT COUNT(*) FROM (
-            SELECT o.username FROM Order o 
-            WHERE o.storeId = :storeId AND o.status = :status
+            SELECT o.username 
+            FROM orders o 
+            WHERE o.store_id = :storeId AND o.status = :status
             GROUP BY o.username
-            HAVING COUNT(o) > 1
-        )
-    """)
+            HAVING COUNT(o.id) > 1
+        ) AS returning_customers
+    """, nativeQuery = true)
     long countReturningCustomersByStoreIdAndStatus(
             @Param("storeId") String storeId,
-            @Param("status") OrderStatus status);
+            @Param("status") String status);
 
     /**
      * Lấy thông tin cửa hàng từ đơn hàng

@@ -121,7 +121,7 @@ public class SellerOrderStatisticsServiceImpl implements SellerOrderStatisticsSe
         
         try {
             returningCustomers = orderRepository.countReturningCustomersByStoreIdAndStatus(
-                    storeId, OrderStatus.DELIVERED);
+                    storeId, OrderStatus.DELIVERED.name());
         } catch (Exception e) {
             log.warn("Could not calculate returning customers: {}", e.getMessage());
         }
