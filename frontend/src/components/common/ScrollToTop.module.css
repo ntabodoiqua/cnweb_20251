@@ -1,7 +1,7 @@
 .scrollToTop {
   position: fixed;
-  bottom: 30px;
-  right: 100px; /* Moved left to avoid overlap with chat widget */
+  bottom: 170px; /* Positioned above chat widget (100px + 60px button + 10px gap) */
+  right: 24px; /* Same column as chat widget */
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -18,7 +18,7 @@
   visibility: hidden;
   transform: translateY(20px);
   transition: all 0.3s ease;
-  z-index: 999; /* Lower than chat widget */
+  z-index: 999;
 }
 
 .scrollToTop:hover {
@@ -39,8 +39,8 @@
 
 @media (max-width: 576px) {
   .scrollToTop {
-    bottom: 20px;
-    right: 90px; /* Keep offset from chat widget on mobile */
+    bottom: 150px; /* Keep above chat widget on mobile */
+    right: 24px; /* Same column as chat widget */
     width: 42px;
     height: 42px;
     font-size: 18px;
