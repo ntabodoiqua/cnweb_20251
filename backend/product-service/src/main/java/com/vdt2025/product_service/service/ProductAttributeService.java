@@ -78,4 +78,21 @@ public interface ProductAttributeService {
      * @return ProductAttributeResponse
      */
     ProductAttributeResponse deleteAttribute(String attributeId);
+
+    /**
+     * Toggle trạng thái active của thuộc tính
+     * Không cascade - chỉ ẩn thuộc tính khỏi form tạo/sửa product
+     * @param attributeId ID thuộc tính sản phẩm
+     * @return ProductAttributeResponse
+     */
+    ProductAttributeResponse toggleAttributeStatus(String attributeId);
+
+    /**
+     * Toggle trạng thái active của giá trị thuộc tính
+     * Không cascade - chỉ ẩn giá trị khỏi dropdown
+     * @param attributeId ID thuộc tính sản phẩm
+     * @param valueId ID giá trị cần toggle
+     * @return ProductAttributeResponse
+     */
+    ProductAttributeResponse toggleAttributeValueStatus(String attributeId, String valueId);
 }

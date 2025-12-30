@@ -159,4 +159,37 @@ public class ProductAttributeController {
                 .result(result)
                 .build();
     }
+
+    /**
+     * Toggle trạng thái active của thuộc tính
+     * PATCH /product-attributes/{attributeId}/toggle-status
+     */
+    @PatchMapping("/{attributeId}/toggle-status")
+    public ApiResponse<ProductAttributeResponse> toggleAttributeStatus(@PathVariable String attributeId){
+        log.info("Toggling product attribute status for attributeId: {}", attributeId);
+        var result = productAttributeService.toggleAttributeStatus(attributeId);
+        String message = Boolean.TRUE.equals(result.getIsActive()) 
+                ? "Attribute has been activated" 
+                : "Attribute has been deactivated";
+        return ApiResponse.<ProductAttributeResponse>builder()
+                .message(message)
+                .result(result)
+                .build();
+    }
+
+    /**
+     * Toggle trạng thái active của giá trị thuộc tính
+     * PATCH /product-attributes/{attributeId}/values/{valueId}/toggle-status
+     */
+    @PatchMapping("/{attributeId}/values/{valueId}/toggle-status")
+    public ApiResponse<ProductAttributeResponse> toggleAttributeValueStatus(
+            @PathVariable String attributeId,
+            @PathVariable String valueId){
+        log.info("Toggling attribute value status for attributeId: {}, valueId: {}", attributeId, valueId);
+        var result = productAttributeService.toggleAttributeValueStatus(attributeId, valueId);
+        return ApiResponse.<ProductAttributeResponse>builder()
+                .message("Attribute value status toggled successfully")
+                .result(result)
+                .build();
+    }
 }

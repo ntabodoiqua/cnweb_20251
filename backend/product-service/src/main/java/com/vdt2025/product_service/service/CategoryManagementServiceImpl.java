@@ -11,6 +11,7 @@ import com.vdt2025.product_service.entity.Store;
 import com.vdt2025.product_service.exception.AppException;
 import com.vdt2025.product_service.exception.ErrorCode;
 import com.vdt2025.product_service.repository.CategoryRepository;
+import com.vdt2025.product_service.repository.ProductRepository;
 import com.vdt2025.product_service.repository.StoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ public class CategoryManagementServiceImpl implements CategoryManagementService 
     private final CategoryRepository categoryRepository;
     private final StoreRepository storeRepository;
     private final FileServiceClient fileServiceClient;
+    private final ProductRepository productRepository;
 
     // PLATFORM CATEGORIES (Admin)
 
@@ -343,5 +345,74 @@ public class CategoryManagementServiceImpl implements CategoryManagementService 
     public Category findCategoryById(String categoryId) {
         return categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+    }
+
+    // ===== TOGGLE STATUS =====
+
+    @Override
+    @Transactional
+    public CategoryResponse togglePlatformCategoryStatus(String categoryId) {
+        log.info("Toggling platform category status: {}", categoryId);
+
+        Category category = categoryRepository.findByIdAndCategoryType(
+                categoryId,
+                Category.CategoryType.PLATFORM
+        ).orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        boolean newStatus = !category.isActive();
+        category.setActive(newStatus);
+
+        if (!newStatus) {
+            // Cascade: Disable tất cả products thuộc category này
+            productRepository.deactivateProductsByCategoryId(categoryId);
+            log.info("Category {} disabled, products deactivated", category.getName());
+
+            // Cascade: Disable tất cả sub-categories
+            for (Category subCategory : category.getSubCategories()) {
+                subCategory.setActive(false);
+                categoryRepository.save(subCategory);
+                // Disable products của sub-category
+                productRepository.deactivateProductsByCategoryId(subCategory.getId());
+                log.info("Sub-category {} disabled, products deactivated", subCategory.getName());
+            }
+        } else {
+            // Khi enable category: chỉ enable category gốc
+            // Sub-categories và products giữ nguyên trạng thái - admin/seller tự quyết định
+            log.info("Category {} enabled. Sub-categories and products remain unchanged", category.getName());
+        }
+
+        Category savedCategory = categoryRepository.save(category);
+        log.info("Platform category {} status toggled to: {}", categoryId, newStatus);
+
+        return CategoryResponse.fromEntityWithSubCategories(savedCategory);
+    }
+
+    @Override
+    @Transactional
+    public CategoryResponse toggleStoreCategoryStatus(String storeId, String categoryId, String sellerName) {
+        log.info("Seller {} toggling store category {} status for store {}", sellerName, categoryId, storeId);
+
+        // Validate: Store tồn tại và thuộc về seller này
+        Store store = storeRepository.findById(storeId)
+                .orElseThrow(() -> new AppException(ErrorCode.STORE_NOT_FOUND));
+
+        if (!store.getUserName().equals(sellerName)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        Category category = categoryRepository.findByIdAndStoreId(categoryId, storeId)
+                .orElseThrow(() -> new AppException(ErrorCode.CATEGORY_NOT_FOUND));
+
+        boolean newStatus = !category.isActive();
+        category.setActive(newStatus);
+
+        // Store category là optional cho products (ManyToMany)
+        // Không cần cascade disable products khi disable store category
+        // Products vẫn thuộc platform category (required)
+
+        Category savedCategory = categoryRepository.save(category);
+        log.info("Store category {} status toggled to: {}", categoryId, newStatus);
+
+        return CategoryResponse.fromEntity(savedCategory);
     }
 }

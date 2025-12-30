@@ -93,6 +93,34 @@ public class SellerCategoryController {
     }
 
     /**
+     * Seller toggle trạng thái active của store category
+     * PATCH /seller/stores/{storeId}/categories/{categoryId}/toggle-status
+     */
+    @PatchMapping("/{categoryId}/toggle-status")
+    @PreAuthorize("hasRole('SELLER')")
+    public ApiResponse<CategoryResponse> toggleStoreCategoryStatus(
+            @PathVariable String storeId,
+            @PathVariable String categoryId,
+            Authentication authentication) {
+
+        log.info("Seller {} toggling store category {} status for store {}",
+                authentication.getName(), categoryId, storeId);
+
+        CategoryResponse response = categoryManagementService.toggleStoreCategoryStatus(
+                storeId,
+                categoryId,
+                authentication.getName()
+        );
+        String message = response.isActive()
+                ? "Store category has been activated"
+                : "Store category has been deactivated";
+        return ApiResponse.<CategoryResponse>builder()
+                .result(response)
+                .message(message)
+                .build();
+    }
+
+    /**
      * Lấy tất cả store categories của một store
      * GET /seller/stores/{storeId}/categories
      */

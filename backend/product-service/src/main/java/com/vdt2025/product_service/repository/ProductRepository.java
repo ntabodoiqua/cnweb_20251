@@ -59,6 +59,14 @@ public interface ProductRepository extends JpaRepository<Product, String>, JpaSp
     @Query("UPDATE Product p SET p.isActive = false WHERE p.brand.id = :brandId")
     void deactivateProductsByBrandId(@Param("brandId") String brandId);
 
+    // Tìm sản phẩm thuộc category và set active = false
+    @Modifying
+    @Query("UPDATE Product p SET p.isActive = false WHERE p.category.id = :categoryId")
+    void deactivateProductsByCategoryId(@Param("categoryId") String categoryId);
+
+    // Đếm số lượng products theo category
+    long countByCategoryId(String categoryId);
+
 
     /**
      * Kiểm tra sản phẩm tồn tại theo tên

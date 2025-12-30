@@ -225,6 +225,54 @@ public class ProductAttributeServiceImpl implements ProductAttributeService {
         return productAttributeMapper.toResponse(attribute);
     }
 
+    @Override
+    @CacheEvict(value = {"attributeById", "attributesByCategory"}, allEntries = true)
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public ProductAttributeResponse toggleAttributeStatus(String attributeId) {
+        var attribute = productAttributeRepository.findById(attributeId)
+                .orElseThrow(() -> new AppException(ErrorCode.ATTRIBUTE_NOT_FOUND));
+
+        // Toggle trạng thái
+        boolean newStatus = !attribute.isActive();
+        attribute.setActive(newStatus);
+        productAttributeRepository.save(attribute);
+
+        // Không cascade - chỉ ẩn/hiện thuộc tính khỏi form tạo/sửa product
+        // Products hiện tại vẫn giữ nguyên data attribute trong specs
+        log.info("Attribute {} status toggled to: {}", attribute.getName(), newStatus);
+
+        return productAttributeMapper.toResponse(attribute);
+    }
+
+    @Override
+    @CacheEvict(value = {"attributeById", "attributesByCategory"}, allEntries = true)
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    public ProductAttributeResponse toggleAttributeValueStatus(String attributeId, String valueId) {
+        var attribute = productAttributeRepository.findById(attributeId)
+                .orElseThrow(() -> new AppException(ErrorCode.ATTRIBUTE_NOT_FOUND));
+
+        var value = attributeValueRepository.findById(valueId)
+                .orElseThrow(() -> new AppException(ErrorCode.ATTRIBUTE_VALUE_NOT_FOUND));
+
+        // Validate value thuộc attribute này
+        if (!value.getAttribute().getId().equals(attributeId)) {
+            throw new AppException(ErrorCode.ATTRIBUTE_VALUE_NOT_FOUND);
+        }
+
+        // Toggle trạng thái
+        boolean newStatus = !value.isActive();
+        value.setActive(newStatus);
+        attributeValueRepository.save(value);
+
+        // Không cascade - chỉ ẩn/hiện giá trị khỏi dropdown khi tạo/sửa product
+        // Products hiện tại vẫn giữ nguyên data
+        log.info("Attribute value {} status toggled to: {}", value.getValue(), newStatus);
+
+        return productAttributeMapper.toResponse(attribute);
+    }
+
     // Helper methods valid danh mục
     void validateCategoryIds(List<String> categoryIds) {
         if (categoryIds != null && !categoryIds.isEmpty()) {
