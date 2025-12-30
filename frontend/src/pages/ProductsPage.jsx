@@ -203,7 +203,7 @@ const ProductsPage = () => {
       newFilters.hasOwnProperty("ratingTo");
 
     if (isSliderFilter) {
-      // Skip the useEffect fetch for slider changes
+      // Skip the useEffect fetch for slider changes temporarily
       skipFetchRef.current = true;
 
       // Clear existing timer
@@ -211,10 +211,11 @@ const ProductsPage = () => {
         clearTimeout(debounceTimerRef.current);
       }
 
-      // Set new timer - only fetch after 1000ms (1 second) of no changes
+      // Set new timer - trigger re-render after debounce to let useEffect fetch
       debounceTimerRef.current = setTimeout(() => {
         skipFetchRef.current = false;
-        fetchProducts();
+        // Force a state update to trigger useEffect with latest filters
+        setFilters((prev) => ({ ...prev }));
       }, 1000);
     }
 

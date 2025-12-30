@@ -132,7 +132,7 @@ const ProductFilters = ({
               range
               min={0}
               max={50000000}
-              step={100000}
+              step={10000}
               value={[filters.priceFrom || 0, filters.priceTo || 50000000]}
               onChange={handlePriceChange}
               disabled={loading}
@@ -150,7 +150,7 @@ const ProductFilters = ({
                   style={{ width: "100%" }}
                   min={0}
                   max={50000000}
-                  step={100000}
+                  step={1000}
                   value={filters.priceFrom}
                   onChange={(value) => onFilterChange({ priceFrom: value })}
                   formatter={(value) =>
@@ -166,7 +166,7 @@ const ProductFilters = ({
                   style={{ width: "100%" }}
                   min={0}
                   max={50000000}
-                  step={100000}
+                  step={1000}
                   value={filters.priceTo}
                   onChange={(value) => onFilterChange({ priceTo: value })}
                   formatter={(value) =>
