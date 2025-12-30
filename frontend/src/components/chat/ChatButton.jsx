@@ -1,7 +1,8 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import { Button, Tooltip, message } from "antd";
 import { MessageOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import { useChat } from "../../contexts/ChatContext";
 import { AuthContext } from "../context/auth.context";
 
 /**
@@ -31,6 +32,8 @@ const ChatButton = ({
 }) => {
   const navigate = useNavigate();
   const { auth } = useContext(AuthContext);
+  const { openChatWithShop } = useChat();
+  const [loading, setLoading] = useState(false);
 
   const handleClick = async (e) => {
     e.stopPropagation();
@@ -54,8 +57,20 @@ const ChatButton = ({
       return;
     }
 
-    // Điều hướng tới trang chat với shopId
-    navigate(`/chat?shopId=${shopId}${shopName ? `&shopName=${encodeURIComponent(shopName)}` : ''}`);
+    // Mở chat với shop
+    setLoading(true);
+    try {
+      await openChatWithShop(shopId, shopName);
+    } catch (error) {
+      console.error("Error opening chat:", error);
+      if (error?.message?.includes("own shop")) {
+        message.warning("Bạn không thể chat với shop của chính mình");
+      } else {
+        message.error("Không thể mở cuộc trò chuyện");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -66,6 +81,7 @@ const ChatButton = ({
         block={block}
         icon={<MessageOutlined />}
         onClick={handleClick}
+        loading={loading}
         className={className}
         style={style}
         {...rest}
