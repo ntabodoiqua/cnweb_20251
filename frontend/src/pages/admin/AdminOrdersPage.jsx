@@ -303,8 +303,6 @@ const AdminOrdersPage = () => {
     switch (method) {
       case "ZALO_PAY":
         return "ZaloPay";
-      case "COD":
-        return "Thanh toán khi nhận hàng";
       case "BANK_TRANSFER":
         return "Chuyển khoản";
       default:

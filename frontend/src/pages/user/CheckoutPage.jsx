@@ -693,7 +693,7 @@ const CheckoutPage = () => {
         shippingAddress: shippingAddressStr,
         shippingProvince: selectedProvince?.fullName || "",
         shippingWard: selectedWard?.nameWithType || "",
-        paymentMethod: paymentMethod === "zalopay" ? "ZALO_PAY" : "COD",
+        paymentMethod: "ZALO_PAY",
         couponCode: appliedCoupon?.code || "",
         note: values.note || "",
       };
@@ -722,80 +722,43 @@ const CheckoutPage = () => {
         }
 
         // Nếu chọn thanh toán ZaloPay
-        if (paymentMethod === "zalopay") {
-          console.log("Initiating payment for orders:", orderIds);
+        console.log("Initiating payment for orders:", orderIds);
 
-          // Gọi API khởi tạo thanh toán với thời gian hết hạn 15 phút (900 giây)
-          const paymentResponse = await initiateOrderPaymentApi(orderIds, 900);
+        // Gọi API khởi tạo thanh toán với thời gian hết hạn 15 phút (900 giây)
+        const paymentResponse = await initiateOrderPaymentApi(orderIds, 900);
 
-          hideLoading();
+        hideLoading();
 
-          console.log("Payment initiation response:", paymentResponse);
+        console.log("Payment initiation response:", paymentResponse);
 
-          if (
-            paymentResponse?.code === 200 &&
-            paymentResponse?.result?.paymentUrl
-          ) {
-            message.success(
-              "Đơn hàng đã được tạo! Đang chuyển đến cổng thanh toán...",
-              1.5
-            );
-
-            // Lưu thông tin đơn hàng với thời gian hết hạn (15 phút = 900 giây)
-            sessionStorage.setItem(
-              "pendingOrders",
-              JSON.stringify({
-                orders: orders,
-                orderIds: orderIds,
-                appTransId: paymentResponse.result.appTransId,
-                timestamp: Date.now(),
-                expirySeconds: 15 * 60, // 15 phút
-              })
-            );
-
-            // Chuyển hướng đến trang thanh toán ZaloPay
-            window.open(paymentResponse.result.paymentUrl, "_self");
-          } else {
-            throw new Error(
-              paymentResponse?.message ||
-                "Không thể khởi tạo thanh toán. Vui lòng thử lại!"
-            );
-          }
-        } else {
-          // Thanh toán khi nhận hàng (COD)
-          hideLoading();
-
-          const orderCount = orders.length;
-          const totalAmount = orders.reduce(
-            (sum, order) => sum + parseFloat(order.totalAmount || 0),
-            0
+        if (
+          paymentResponse?.code === 200 &&
+          paymentResponse?.result?.paymentUrl
+        ) {
+          message.success(
+            "Đơn hàng đã được tạo! Đang chuyển đến cổng thanh toán...",
+            1.5
           );
 
-          Modal.success({
-            title: "Đặt hàng thành công!",
-            content: (
-              <div>
-                <p>
-                  {orderCount > 1
-                    ? `${orderCount} đơn hàng của bạn đã được tạo thành công.`
-                    : "Đơn hàng của bạn đã được ghi nhận."}
-                </p>
-                <p>Phương thức thanh toán: Thanh toán khi nhận hàng (COD)</p>
-                <p>
-                  Tổng tiền: <strong>{formatCurrency(totalAmount)}</strong>
-                </p>
-                {orders.map((order) => (
-                  <p key={order.id} style={{ fontSize: "12px", color: "#666" }}>
-                    Mã đơn: {order.orderNumber} - {order.storeName}
-                  </p>
-                ))}
-              </div>
-            ),
-            okText: "Xem đơn hàng",
-            onOk: () => {
-              navigate(PROTECTED_ROUTES.USER_ORDERS);
-            },
-          });
+          // Lưu thông tin đơn hàng với thời gian hết hạn (15 phút = 900 giây)
+          sessionStorage.setItem(
+            "pendingOrders",
+            JSON.stringify({
+              orders: orders,
+              orderIds: orderIds,
+              appTransId: paymentResponse.result.appTransId,
+              timestamp: Date.now(),
+              expirySeconds: 15 * 60, // 15 phút
+            })
+          );
+
+          // Chuyển hướng đến trang thanh toán ZaloPay
+          window.open(paymentResponse.result.paymentUrl, "_self");
+        } else {
+          throw new Error(
+            paymentResponse?.message ||
+              "Không thể khởi tạo thanh toán. Vui lòng thử lại!"
+          );
         }
       } else {
         throw new Error(
@@ -1061,19 +1024,6 @@ const CheckoutPage = () => {
                         <div className={styles.paymentName}>ZaloPay</div>
                         <div className={styles.paymentDesc}>
                           Thanh toán qua ví điện tử ZaloPay
-                        </div>
-                      </div>
-                    </div>
-                  </Radio>
-                  <Radio value="cod" className={styles.paymentOption}>
-                    <div className={styles.paymentOptionContent}>
-                      <div className={styles.paymentIcon}>💵</div>
-                      <div>
-                        <div className={styles.paymentName}>
-                          Thanh toán khi nhận hàng (COD)
-                        </div>
-                        <div className={styles.paymentDesc}>
-                          Thanh toán bằng tiền mặt khi nhận hàng
                         </div>
                       </div>
                     </div>

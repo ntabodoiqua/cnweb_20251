@@ -5,7 +5,6 @@ import {
   CreditCardOutlined,
   BankOutlined,
   WalletOutlined,
-  DollarOutlined,
   SafetyOutlined,
   CheckCircleOutlined,
   PhoneOutlined,
@@ -24,14 +23,15 @@ const PaymentPage = () => {
       id: "credit-card",
       name: "Thẻ tín dụng/Ghi nợ",
       icon: <CreditCardOutlined />,
-      description: "Thanh toán nhanh chóng và bảo mật với thẻ Visa, MasterCard, JCB",
+      description:
+        "Thanh toán nhanh chóng và bảo mật với thẻ Visa, MasterCard, JCB",
       fee: "Miễn phí",
       processingTime: "Tức thì",
       features: [
         "Bảo mật SSL 256-bit",
         "Xác thực 3D Secure",
-        "Hoàn tiền trong 24h nếu hủy đơn"
-      ]
+        "Hoàn tiền trong 24h nếu hủy đơn",
+      ],
     },
     {
       id: "bank-transfer",
@@ -43,8 +43,8 @@ const PaymentPage = () => {
       features: [
         "Hỗ trợ tất cả ngân hàng trong nước",
         "Chuyển khoản 24/7",
-        "Tự động xác nhận thanh toán"
-      ]
+        "Tự động xác nhận thanh toán",
+      ],
     },
     {
       id: "e-wallet",
@@ -56,21 +56,8 @@ const PaymentPage = () => {
       features: [
         "Quét mã QR nhanh chóng",
         "Tích điểm thưởng",
-        "Ưu đãi từ ví điện tử"
-      ]
-    },
-    {
-      id: "cod",
-      name: "Thanh toán khi nhận hàng (COD)",
-      icon: <DollarOutlined />,
-      description: "Thanh toán tiền mặt khi nhận hàng tại nhà",
-      fee: "20.000đ - 30.000đ",
-      processingTime: "Khi giao hàng",
-      features: [
-        "Kiểm tra hàng trước khi thanh toán",
-        "Thanh toán bằng tiền mặt",
-        "Áp dụng cho đơn hàng dưới 5 triệu"
-      ]
+        "Ưu đãi từ ví điện tử",
+      ],
     },
     {
       id: "installment",
@@ -82,54 +69,60 @@ const PaymentPage = () => {
       features: [
         "Duyệt nhanh trong 5 phút",
         "Kỳ hạn linh hoạt 3-12 tháng",
-        "Hồ sơ đơn giản"
-      ]
-    }
+        "Hồ sơ đơn giản",
+      ],
+    },
   ];
 
   const paymentGuide = [
     {
       step: 1,
       title: "Chọn sản phẩm",
-      description: "Thêm sản phẩm vào giỏ hàng và tiến hành thanh toán"
+      description: "Thêm sản phẩm vào giỏ hàng và tiến hành thanh toán",
     },
     {
       step: 2,
       title: "Điền thông tin",
-      description: "Nhập địa chỉ giao hàng và thông tin liên hệ"
+      description: "Nhập địa chỉ giao hàng và thông tin liên hệ",
     },
     {
       step: 3,
       title: "Chọn phương thức",
-      description: "Lựa chọn phương thức thanh toán phù hợp"
+      description: "Lựa chọn phương thức thanh toán phù hợp",
     },
     {
       step: 4,
       title: "Xác nhận thanh toán",
-      description: "Hoàn tất giao dịch và nhận mã đơn hàng"
-    }
+      description: "Hoàn tất giao dịch và nhận mã đơn hàng",
+    },
   ];
 
   const faqs = [
     {
       question: "Có được đổi phương thức thanh toán sau khi đặt hàng không?",
-      answer: "Bạn có thể liên hệ hotline trong vòng 1 giờ sau khi đặt hàng để thay đổi phương thức thanh toán."
+      answer:
+        "Bạn có thể liên hệ hotline trong vòng 1 giờ sau khi đặt hàng để thay đổi phương thức thanh toán.",
     },
     {
       question: "Thanh toán có an toàn không?",
-      answer: "Tất cả giao dịch đều được mã hóa SSL và tuân thủ tiêu chuẩn bảo mật PCI DSS."
+      answer:
+        "Tất cả giao dịch đều được mã hóa SSL và tuân thủ tiêu chuẩn bảo mật PCI DSS.",
     },
     {
       question: "Khi nào tiền sẽ được hoàn lại nếu hủy đơn?",
-      answer: "Tiền sẽ được hoàn về tài khoản/ví trong vòng 3-7 ngày làm việc tùy theo phương thức thanh toán."
+      answer:
+        "Tiền sẽ được hoàn về tài khoản/ví trong vòng 3-7 ngày làm việc tùy theo phương thức thanh toán.",
     },
     {
-      question: "Có được sử dụng nhiều phương thức thanh toán cho 1 đơn hàng không?",
-      answer: "Hiện tại chỉ hỗ trợ 1 phương thức thanh toán cho mỗi đơn hàng."
-    }
+      question:
+        "Có được sử dụng nhiều phương thức thanh toán cho 1 đơn hàng không?",
+      answer: "Hiện tại chỉ hỗ trợ 1 phương thức thanh toán cho mỗi đơn hàng.",
+    },
   ];
 
-  const selectedMethodInfo = paymentMethods.find(m => m.id === selectedMethod);
+  const selectedMethodInfo = paymentMethods.find(
+    (m) => m.id === selectedMethod
+  );
 
   return (
     <div className="payment-page-container">
@@ -157,10 +150,12 @@ const PaymentPage = () => {
         </div>
 
         <div className="payment-methods-grid">
-          {paymentMethods.map(method => (
+          {paymentMethods.map((method) => (
             <div
               key={method.id}
-              className={`payment-method-card ${selectedMethod === method.id ? "active" : ""}`}
+              className={`payment-method-card ${
+                selectedMethod === method.id ? "active" : ""
+              }`}
               onClick={() => setSelectedMethod(method.id)}
             >
               <div className="method-icon">{method.icon}</div>
@@ -270,13 +265,17 @@ const PaymentPage = () => {
           </p>
           <div className="contact-methods">
             <div className="contact-method">
-              <PhoneOutlined style={{ fontSize: "24px", marginBottom: "10px" }} />
+              <PhoneOutlined
+                style={{ fontSize: "24px", marginBottom: "10px" }}
+              />
               <strong>Hotline</strong>
               <span>0966 277 109</span>
               <span className="time">(8:00 - 21:00)</span>
             </div>
             <div className="contact-method">
-              <MailOutlined style={{ fontSize: "24px", marginBottom: "10px" }} />
+              <MailOutlined
+                style={{ fontSize: "24px", marginBottom: "10px" }}
+              />
               <strong>Email</strong>
               <span>anhnta2004@gmail.com</span>
               <span className="time">Phản hồi trong 24h</span>
