@@ -1887,6 +1887,21 @@ const disableUserAdminApi = (userId) => {
   });
 };
 
+// Update user roles (Admin)
+const updateUserRolesAdminApi = (userId, roles) => {
+  const URL_API = `/api/user/admin/${userId}`;
+  return axios.put(
+    URL_API,
+    { roles },
+    {
+      headers: {
+        "Accept-Language": "vi",
+        "Content-Type": "application/json",
+      },
+    }
+  );
+};
+
 // ============================================
 // Brand Management APIs (Admin)
 // ============================================
@@ -3051,6 +3066,7 @@ export {
   getDeletedUsersAdminApi,
   enableUserAdminApi,
   disableUserAdminApi,
+  updateUserRolesAdminApi,
   // Brand Management APIs
   getBrandsAdminApi,
   createBrandApi,

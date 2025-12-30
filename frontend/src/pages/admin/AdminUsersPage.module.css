@@ -643,6 +643,174 @@
   text-align: center;
 }
 
+/* Role Edit Modal Styles */
+.roleEditContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.roleEditUser {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.userAvatarSmall {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.userAvatarSmall img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.roleEditSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.roleEditLabel {
+  font-weight: 600;
+  color: #333;
+  font-size: 15px;
+}
+
+.roleCheckboxList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.roleCheckboxItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 2px solid #e8e8e8;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.roleCheckboxItem:hover {
+  border-color: #ee4d2d;
+  background: rgba(238, 77, 45, 0.05);
+}
+
+.roleCheckboxItem.active {
+  border-color: #ee4d2d;
+  background: rgba(238, 77, 45, 0.1);
+}
+
+.roleCheckbox {
+  width: 18px;
+  height: 18px;
+  accent-color: #ee4d2d;
+  cursor: pointer;
+}
+
+.roleLabel {
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.roleLabelAdmin {
+  color: #722ed1;
+}
+
+.roleLabelSeller {
+  color: #1890ff;
+}
+
+.roleLabelUser {
+  color: #52c41a;
+}
+
+.roleDescription {
+  background: #fff7e6;
+  border: 1px solid #ffd591;
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.roleDescription h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #d46b08;
+}
+
+.roleDescription ul {
+  margin: 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.roleDescription li {
+  font-size: 13px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.roleDescription li:last-child {
+  margin-bottom: 0;
+}
+
+.roleDescription li strong {
+  color: #333;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px;
+  border-top: 2px solid #f0f0f0;
+}
+
+.modalBtn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: none;
+}
+
+.modalBtnCancel {
+  background: #f0f0f0;
+  color: #666;
+}
+
+.modalBtnCancel:hover {
+  background: #e0e0e0;
+}
+
+.modalBtnSave {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  color: white;
+}
+
+.modalBtnSave:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.4);
+}
+
+.modalBtnSave:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 @media (max-width: 768px) {
   .adminToolbar {
     flex-direction: column;

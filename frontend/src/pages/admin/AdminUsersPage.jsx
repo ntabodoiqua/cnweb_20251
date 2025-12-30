@@ -16,6 +16,7 @@ import {
   CloseCircleOutlined,
   CheckOutlined,
   CloseOutlined,
+  SafetyOutlined,
 } from "@ant-design/icons";
 import {
   getUsersAdminApi,
@@ -23,6 +24,7 @@ import {
   enableUserAdminApi,
   disableUserAdminApi,
   recoverUserAdminApi,
+  updateUserRolesAdminApi,
 } from "../../util/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import styles from "./AdminUsersPage.module.css";
@@ -55,6 +57,13 @@ const AdminUsersPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [showUserDetail, setShowUserDetail] = useState(false);
+  const [showRoleModal, setShowRoleModal] = useState(false);
+  const [editingUser, setEditingUser] = useState(null);
+  const [selectedRoles, setSelectedRoles] = useState([]);
+  const [updatingRoles, setUpdatingRoles] = useState(false);
+
+  // Available roles
+  const availableRoles = ["USER", "SELLER", "ADMIN"];
 
   // Fetch users from API
   useEffect(() => {
@@ -156,6 +165,73 @@ const AdminUsersPage = () => {
   const handleViewUser = (user) => {
     setSelectedUser(user);
     setShowUserDetail(true);
+  };
+
+  // Handle Edit Roles
+  const handleEditRoles = (user) => {
+    setEditingUser(user);
+    setSelectedRoles(user.roles?.map((r) => r.name) || ["USER"]);
+    setShowRoleModal(true);
+  };
+
+  const handleRoleChange = (roleName) => {
+    setSelectedRoles((prev) => {
+      if (prev.includes(roleName)) {
+        // Đảm bảo ít nhất có 1 role
+        if (prev.length === 1) {
+          notification.warning({
+            message: "Cảnh báo",
+            description: "Người dùng phải có ít nhất một quyền!",
+            placement: "topRight",
+          });
+          return prev;
+        }
+        return prev.filter((r) => r !== roleName);
+      } else {
+        return [...prev, roleName];
+      }
+    });
+  };
+
+  const handleSaveRoles = async () => {
+    if (!editingUser || selectedRoles.length === 0) {
+      notification.error({
+        message: "Lỗi",
+        description: "Vui lòng chọn ít nhất một quyền!",
+        placement: "topRight",
+      });
+      return;
+    }
+
+    setUpdatingRoles(true);
+    try {
+      const response = await updateUserRolesAdminApi(
+        editingUser.id,
+        selectedRoles
+      );
+
+      if (response && response.data && response.data.code === 1000) {
+        notification.success({
+          message: "Thành công",
+          description: `Đã cập nhật quyền cho người dùng "${editingUser.username}"!`,
+          placement: "topRight",
+        });
+        setShowRoleModal(false);
+        setEditingUser(null);
+        setSelectedRoles([]);
+        fetchUsers();
+      }
+    } catch (error) {
+      console.error("Error updating roles:", error);
+      notification.error({
+        message: "Lỗi",
+        description:
+          error.response?.data?.message || "Không thể cập nhật quyền!",
+        placement: "topRight",
+      });
+    } finally {
+      setUpdatingRoles(false);
+    }
   };
 
   const handleDeleteUser = (userId, username) => {
@@ -566,9 +642,10 @@ const AdminUsersPage = () => {
                           </button>
                           <button
                             className={`${styles.adminActionBtn} ${styles.edit}`}
-                            title="Chỉnh sửa"
+                            title="Sửa quyền"
+                            onClick={() => handleEditRoles(user)}
                           >
-                            <EditOutlined />
+                            <SafetyOutlined />
                           </button>
                           <button
                             className={`${styles.adminActionBtn} ${styles.lock}`}
@@ -781,6 +858,138 @@ const AdminUsersPage = () => {
                     )}
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Role Edit Modal */}
+      {showRoleModal && editingUser && (
+        <div
+          className={styles.modalOverlay}
+          onClick={() => {
+            setShowRoleModal(false);
+            setEditingUser(null);
+            setSelectedRoles([]);
+          }}
+        >
+          <div
+            className={styles.modalContent}
+            style={{ maxWidth: "500px" }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h3>Sửa quyền người dùng</h3>
+              <button
+                className={styles.modalClose}
+                onClick={() => {
+                  setShowRoleModal(false);
+                  setEditingUser(null);
+                  setSelectedRoles([]);
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.roleEditContainer}>
+                <div className={styles.roleEditUser}>
+                  <div className={styles.userAvatarSmall}>
+                    {editingUser.avatarUrl ? (
+                      <img
+                        src={editingUser.avatarUrl}
+                        alt={editingUser.username}
+                      />
+                    ) : (
+                      <div className={styles.userAvatarPlaceholder}>
+                        <UserOutlined />
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <strong>{editingUser.username}</strong>
+                    <p style={{ margin: 0, color: "#666", fontSize: "14px" }}>
+                      {editingUser.email}
+                    </p>
+                  </div>
+                </div>
+
+                <div className={styles.roleEditSection}>
+                  <label className={styles.roleEditLabel}>
+                    Chọn quyền cho người dùng:
+                  </label>
+                  <div className={styles.roleCheckboxList}>
+                    {availableRoles.map((role) => (
+                      <label
+                        key={role}
+                        className={`${styles.roleCheckboxItem} ${
+                          selectedRoles.includes(role) ? styles.active : ""
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedRoles.includes(role)}
+                          onChange={() => handleRoleChange(role)}
+                          className={styles.roleCheckbox}
+                        />
+                        <span
+                          className={`${styles.roleLabel} ${
+                            role === "ADMIN"
+                              ? styles.roleLabelAdmin
+                              : role === "SELLER"
+                              ? styles.roleLabelSeller
+                              : styles.roleLabelUser
+                          }`}
+                        >
+                          {role === "ADMIN"
+                            ? "👑 Quản trị viên (ADMIN)"
+                            : role === "SELLER"
+                            ? "🏪 Người bán (SELLER)"
+                            : "👤 Người dùng (USER)"}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={styles.roleDescription}>
+                  <h4>Mô tả quyền:</h4>
+                  <ul>
+                    <li>
+                      <strong>USER:</strong> Quyền cơ bản - xem, mua hàng, đánh
+                      giá sản phẩm
+                    </li>
+                    <li>
+                      <strong>SELLER:</strong> Quyền bán hàng - quản lý cửa
+                      hàng, sản phẩm, đơn hàng
+                    </li>
+                    <li>
+                      <strong>ADMIN:</strong> Quyền quản trị - quản lý toàn bộ
+                      hệ thống
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <div className={styles.modalFooter}>
+              <button
+                className={`${styles.modalBtn} ${styles.modalBtnCancel}`}
+                onClick={() => {
+                  setShowRoleModal(false);
+                  setEditingUser(null);
+                  setSelectedRoles([]);
+                }}
+                disabled={updatingRoles}
+              >
+                Hủy
+              </button>
+              <button
+                className={`${styles.modalBtn} ${styles.modalBtnSave}`}
+                onClick={handleSaveRoles}
+                disabled={updatingRoles || selectedRoles.length === 0}
+              >
+                {updatingRoles ? "Đang lưu..." : "Lưu thay đổi"}
+              </button>
             </div>
           </div>
         </div>
