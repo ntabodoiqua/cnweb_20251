@@ -132,15 +132,30 @@ const CategoryPage = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
+      // Reset filters when category changes
+      setSelectedSubCategory(null);
+      setSelectedBrand(null);
+      setPagination((prev) => ({ ...prev, current: 1 }));
+
       await Promise.all([fetchCategory(), fetchBrands()]);
       setLoading(false);
     };
     loadData();
-    // Reset filters when category changes
-    setSelectedSubCategory(null);
-    setSelectedBrand(null);
-    setPagination((prev) => ({ ...prev, current: 1 }));
   }, [categoryId]);
+
+  // Tự động chọn danh mục con đầu tiên khi có danh mục cha và có subcategories
+  useEffect(() => {
+    if (
+      category &&
+      category.subCategories &&
+      category.subCategories.length > 0
+    ) {
+      // Nếu chưa chọn danh mục con nào, tự động chọn cái đầu tiên
+      if (!selectedSubCategory) {
+        setSelectedSubCategory(category.subCategories[0].id);
+      }
+    }
+  }, [category]);
 
   // Fetch products when filters change
   useEffect(() => {
