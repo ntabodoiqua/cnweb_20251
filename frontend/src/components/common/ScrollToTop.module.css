@@ -1,6 +1,6 @@
 .scrollToTop {
   position: fixed;
-  bottom: 170px; /* Positioned above chat widget (100px + 60px button + 10px gap) */
+  bottom: 30px; /* Positioned below chat widget */
   right: 24px; /* Same column as chat widget */
   width: 48px;
   height: 48px;
@@ -39,7 +39,7 @@
 
 @media (max-width: 576px) {
   .scrollToTop {
-    bottom: 150px; /* Keep above chat widget on mobile */
+    bottom: 24px; /* Keep below chat widget on mobile */
     right: 24px; /* Same column as chat widget */
     width: 42px;
     height: 42px;
