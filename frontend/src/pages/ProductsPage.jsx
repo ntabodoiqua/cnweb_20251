@@ -65,11 +65,9 @@ const ProductsPage = () => {
     categoryId: searchParams.get("categoryId") || undefined,
     storeId: searchParams.get("storeId") || undefined,
     brandId: searchParams.get("brandId") || undefined,
-    isActive: true,
     priceFrom: Number(searchParams.get("priceFrom")) || undefined,
     priceTo: Number(searchParams.get("priceTo")) || undefined,
-    stockFrom: Number(searchParams.get("stockFrom")) || undefined,
-    stockTo: Number(searchParams.get("stockTo")) || undefined,
+    inStockOnly: searchParams.get("inStockOnly") === "true" || false,
     ratingFrom: Number(searchParams.get("ratingFrom")) || undefined,
     ratingTo: Number(searchParams.get("ratingTo")) || undefined,
     sortBy: searchParams.get("sortBy") || "createdAt",
@@ -197,12 +195,10 @@ const ProductsPage = () => {
   };
 
   const handleFilterChange = (newFilters) => {
-    // Debounce for slider filters (price, stock, rating) to prevent API spam
+    // Debounce for slider filters (price, rating) to prevent API spam
     const isSliderFilter =
       newFilters.hasOwnProperty("priceFrom") ||
       newFilters.hasOwnProperty("priceTo") ||
-      newFilters.hasOwnProperty("stockFrom") ||
-      newFilters.hasOwnProperty("stockTo") ||
       newFilters.hasOwnProperty("ratingFrom") ||
       newFilters.hasOwnProperty("ratingTo");
 
@@ -232,11 +228,9 @@ const ProductsPage = () => {
       categoryId: undefined,
       storeId: undefined,
       brandId: undefined,
-      isActive: true,
       priceFrom: undefined,
       priceTo: undefined,
-      stockFrom: undefined,
-      stockTo: undefined,
+      inStockOnly: false,
       ratingFrom: undefined,
       ratingTo: undefined,
       sortBy: "createdAt",

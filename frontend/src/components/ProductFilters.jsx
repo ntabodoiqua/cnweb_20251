@@ -4,7 +4,6 @@ import {
   Slider,
   InputNumber,
   Select,
-  DatePicker,
   Checkbox,
   Space,
   Button,
@@ -18,7 +17,6 @@ import { FilterOutlined, ClearOutlined } from "@ant-design/icons";
 import "./ProductFilters.css";
 
 const { Title, Text } = Typography;
-const { RangePicker } = DatePicker;
 const { Panel } = Collapse;
 
 const ProductFilters = ({
@@ -37,32 +35,11 @@ const ProductFilters = ({
     });
   };
 
-  const handleStockChange = (value) => {
-    onFilterChange({
-      stockFrom: value[0],
-      stockTo: value[1],
-    });
-  };
-
   const handleRatingChange = (value) => {
     onFilterChange({
       ratingFrom: value[0],
       ratingTo: value[1],
     });
-  };
-
-  const handleDateChange = (dates) => {
-    if (dates && dates[0] && dates[1]) {
-      onFilterChange({
-        createdFrom: dates[0].format("YYYY-MM-DDTHH:mm:ss"),
-        createdTo: dates[1].format("YYYY-MM-DDTHH:mm:ss"),
-      });
-    } else {
-      onFilterChange({
-        createdFrom: undefined,
-        createdTo: undefined,
-      });
-    }
   };
 
   return (
@@ -86,7 +63,7 @@ const ProductFilters = ({
       }
     >
       <Collapse defaultActiveKey={["1", "2", "3"]} ghost>
-        {/* Category Filter */}
+        {/* Category Filter - Only show child categories (level === 1) */}
         <Panel header="Danh mục" key="1">
           <Select
             style={{ width: "100%" }}
@@ -98,12 +75,13 @@ const ProductFilters = ({
             onChange={(value) => onFilterChange({ categoryId: value })}
             disabled={loading}
           >
-            {categories.map((cat) => (
-              <Select.Option key={cat.id} value={cat.id}>
-                {cat.level === 1 ? `  └─ ${cat.name}` : cat.name}
-                {cat.productCount > 0 && ` (${cat.productCount})`}
-              </Select.Option>
-            ))}
+            {categories
+              .filter((cat) => cat.level === 1)
+              .map((cat) => (
+                <Select.Option key={cat.id} value={cat.id}>
+                  {cat.name}
+                </Select.Option>
+              ))}
           </Select>
         </Panel>
 
@@ -203,43 +181,15 @@ const ProductFilters = ({
           </Space>
         </Panel>
 
-        {/* Stock Range Filter */}
-        <Panel header="Số lượng tồn kho" key="5">
-          <Space direction="vertical" style={{ width: "100%" }}>
-            <Slider
-              range
-              min={0}
-              max={10000}
-              step={10}
-              value={[filters.stockFrom || 0, filters.stockTo || 10000]}
-              onChange={handleStockChange}
-              disabled={loading}
-            />
-            <Row gutter={8}>
-              <Col span={12}>
-                <InputNumber
-                  style={{ width: "100%" }}
-                  min={0}
-                  max={10000}
-                  value={filters.stockFrom}
-                  onChange={(value) => onFilterChange({ stockFrom: value })}
-                  placeholder="Từ"
-                  disabled={loading}
-                />
-              </Col>
-              <Col span={12}>
-                <InputNumber
-                  style={{ width: "100%" }}
-                  min={0}
-                  max={10000}
-                  value={filters.stockTo}
-                  onChange={(value) => onFilterChange({ stockTo: value })}
-                  placeholder="Đến"
-                  disabled={loading}
-                />
-              </Col>
-            </Row>
-          </Space>
+        {/* Stock Filter */}
+        <Panel header="Tồn kho" key="5">
+          <Checkbox
+            checked={filters.inStockOnly}
+            onChange={(e) => onFilterChange({ inStockOnly: e.target.checked })}
+            disabled={loading}
+          >
+            Chỉ hiện sản phẩm còn hàng
+          </Checkbox>
         </Panel>
 
         {/* Rating Filter */}
@@ -261,28 +211,6 @@ const ProductFilters = ({
               5: "5",
             }}
           />
-        </Panel>
-
-        {/* Date Range Filter */}
-        <Panel header="Ngày tạo" key="7">
-          <RangePicker
-            style={{ width: "100%" }}
-            showTime
-            format="YYYY-MM-DD HH:mm:ss"
-            onChange={handleDateChange}
-            disabled={loading}
-          />
-        </Panel>
-
-        {/* Active Status Filter */}
-        <Panel header="Trạng thái" key="8">
-          <Checkbox
-            checked={filters.isActive}
-            onChange={(e) => onFilterChange({ isActive: e.target.checked })}
-            disabled={loading}
-          >
-            Chỉ hiển thị sản phẩm đang hoạt động
-          </Checkbox>
         </Panel>
       </Collapse>
     </Card>
