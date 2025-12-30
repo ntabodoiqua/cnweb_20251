@@ -92,7 +92,6 @@ const ChatPage = () => {
   const messagesContainerRef = useRef(null);
   const inputRef = useRef(null);
   const typingTimeoutRef = useRef(null);
-  const processedShopIdRef = useRef(null); // Track đã xử lý shopId nào rồi
 
   // Xác định user là seller hay buyer
   const isSeller = getHighestRole(auth.user?.role) === ROLES.SELLER;
@@ -129,25 +128,17 @@ const ChatPage = () => {
     fetchSellerStore();
   }, [isSeller, auth.isAuthenticated]);
 
-  // Mở conversation từ URL param - tạo mới nếu chưa có
+  // Mở conversation từ URL param
   useEffect(() => {
     const shopId = searchParams.get("shopId");
     const conversationId = searchParams.get("conversationId");
 
-    // Chỉ xử lý khi đã authenticated và không đang loading
-    if (!auth.isAuthenticated || isLoading) return;
-
-    if (shopId && !isSeller) {
-      // Kiểm tra nếu đã xử lý shopId này rồi thì không xử lý lại
-      if (processedShopIdRef.current === shopId) return;
-      processedShopIdRef.current = shopId;
-      
-      // Tạo hoặc lấy conversation với shop và mở luôn
+    if (shopId && auth.isAuthenticated && !isSeller) {
       openConversationWithShop(shopId);
-    } else if (conversationId) {
+    } else if (conversationId && auth.isAuthenticated) {
       selectConversation(conversationId);
     }
-  }, [searchParams, auth.isAuthenticated, isSeller, isLoading]);
+  }, [searchParams, auth.isAuthenticated, isSeller]);
 
   // Responsive
   useEffect(() => {
