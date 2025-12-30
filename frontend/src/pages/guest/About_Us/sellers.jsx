@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "../../../styles/sellers.module.css";
 import useScrollToTop from "../../../hooks/useScrollToTop";
 import {
@@ -15,14 +16,12 @@ import {
   GlobalOutlined,
   ThunderboltOutlined,
 } from "@ant-design/icons";
-import { Button, Form, Input, notification } from "antd";
+import { Button } from "antd";
 import logo from "../../../assets/logo.png";
 
 const Sellers = () => {
   useScrollToTop();
-
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const benefits = [
     {
@@ -136,33 +135,6 @@ const Sellers = () => {
     },
   ];
 
-  const onFinish = async (values) => {
-    setLoading(true);
-    try {
-      // TODO: Implement API call to register seller
-      console.log("Seller registration:", values);
-
-      notification.success({
-        message: "Đăng ký thành công!",
-        description:
-          "Chúng tôi sẽ liên hệ với bạn trong vòng 24h. Cảm ơn bạn đã quan tâm!",
-        placement: "topRight",
-        duration: 5,
-      });
-
-      form.resetFields();
-    } catch (error) {
-      notification.error({
-        message: "Đăng ký thất bại",
-        description: "Đã có lỗi xảy ra. Vui lòng thử lại sau.",
-        placement: "topRight",
-        duration: 3,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className={styles.container}>
       {/* Hero Section */}
@@ -183,15 +155,19 @@ const Sellers = () => {
               size="large"
               icon={<RocketOutlined />}
               className={styles.heroCtaPrimary}
-              onClick={() => {
-                document
-                  .getElementById("register-form")
-                  ?.scrollIntoView({ behavior: "smooth" });
-              }}
+              onClick={() => navigate("/login")}
             >
               Đăng ký ngay
             </Button>
-            <Button size="large" className={styles.heroCtaSecondary}>
+            <Button
+              size="large"
+              className={styles.heroCtaSecondary}
+              onClick={() => {
+                document
+                  .querySelector(".${styles.benefitsSection}")
+                  ?.scrollIntoView({ behavior: "smooth" });
+              }}
+            >
               Tìm hiểu thêm
             </Button>
           </div>
@@ -255,126 +231,6 @@ const Sellers = () => {
               </div>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Registration Form */}
-      <div className={styles.registrationSection} id="register-form">
-        <div className={styles.registrationContent}>
-          <div className={styles.registrationInfo}>
-            <h2>Đăng Ký Trở Thành Người Bán</h2>
-            <p>
-              Điền thông tin bên dưới và chúng tôi sẽ liên hệ với bạn trong
-              vòng 24 giờ để hỗ trợ quá trình đăng ký.
-            </p>
-            <div className={styles.infoHighlights}>
-              <div className={styles.highlightItem}>
-                <CheckCircleOutlined className={styles.highlightIcon} />
-                <span>Miễn phí đăng ký</span>
-              </div>
-              <div className={styles.highlightItem}>
-                <CheckCircleOutlined className={styles.highlightIcon} />
-                <span>Hỗ trợ tận tình</span>
-              </div>
-              <div className={styles.highlightItem}>
-                <CheckCircleOutlined className={styles.highlightIcon} />
-                <span>Hoa hồng hấp dẫn</span>
-              </div>
-            </div>
-          </div>
-          <div className={styles.registrationForm}>
-            <Form
-              form={form}
-              layout="vertical"
-              onFinish={onFinish}
-              requiredMark={false}
-            >
-              <Form.Item
-                label="Họ và tên"
-                name="fullName"
-                rules={[
-                  { required: true, message: "Vui lòng nhập họ và tên!" },
-                ]}
-              >
-                <Input size="large" placeholder="Nhập họ và tên" />
-              </Form.Item>
-
-              <Form.Item
-                label="Email"
-                name="email"
-                rules={[
-                  { required: true, message: "Vui lòng nhập email!" },
-                  { type: "email", message: "Email không hợp lệ!" },
-                ]}
-              >
-                <Input size="large" placeholder="Nhập email" />
-              </Form.Item>
-
-              <Form.Item
-                label="Số điện thoại"
-                name="phone"
-                rules={[
-                  { required: true, message: "Vui lòng nhập số điện thoại!" },
-                  {
-                    pattern: /^[0-9]{10}$/,
-                    message: "Số điện thoại phải có 10 chữ số!",
-                  },
-                ]}
-              >
-                <Input size="large" placeholder="Nhập số điện thoại" />
-              </Form.Item>
-
-              <Form.Item
-                label="Tên cửa hàng/doanh nghiệp"
-                name="shopName"
-                rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng nhập tên cửa hàng/doanh nghiệp!",
-                  },
-                ]}
-              >
-                <Input size="large" placeholder="Nhập tên cửa hàng" />
-              </Form.Item>
-
-              <Form.Item
-                label="Loại sản phẩm kinh doanh"
-                name="productCategory"
-                rules={[
-                  {
-                    required: true,
-                    message: "Vui lòng nhập loại sản phẩm!",
-                  },
-                ]}
-              >
-                <Input
-                  size="large"
-                  placeholder="VD: Thời trang, Điện tử, Mỹ phẩm..."
-                />
-              </Form.Item>
-
-              <Form.Item label="Ghi chú" name="note">
-                <Input.TextArea
-                  rows={4}
-                  placeholder="Thông tin bổ sung (nếu có)"
-                />
-              </Form.Item>
-
-              <Form.Item>
-                <Button
-                  type="primary"
-                  htmlType="submit"
-                  size="large"
-                  block
-                  loading={loading}
-                  className={styles.submitBtn}
-                  icon={<RocketOutlined />}
-                >
-                  Đăng ký ngay
-                </Button>
-              </Form.Item>
-            </Form>
-          </div>
         </div>
       </div>
 
