@@ -183,6 +183,25 @@
   transform: scale(1.1);
 }
 
+.adminActionBtn.restore {
+  background: rgba(24, 144, 255, 0.1);
+  color: #1890ff;
+}
+
+.adminActionBtn.restore:hover {
+  background: #1890ff;
+  color: white;
+  transform: scale(1.1);
+}
+
+.statusDeleted {
+  color: #ff4d4f;
+}
+
+.statusNotDeleted {
+  color: #52c41a;
+}
+
 .pagination {
   display: flex;
   justify-content: center;

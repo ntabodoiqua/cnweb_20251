@@ -11,8 +11,14 @@ import {
   ReloadOutlined,
   CheckCircleOutlined,
   CloseCircleOutlined,
+  UndoOutlined,
 } from "@ant-design/icons";
 import axios from "../../util/axios.customize";
+import {
+  getPlatformCategoriesApi,
+  getPublicStoresApi,
+  getBrandsApi,
+} from "../../util/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import styles from "./AdminProductsPage.module.css";
 
@@ -24,6 +30,11 @@ const AdminProductsPage = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+
+  // Dropdown options data
+  const [categories, setCategories] = useState([]);
+  const [stores, setStores] = useState([]);
+  const [brands, setBrands] = useState([]);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(0);
@@ -40,6 +51,7 @@ const AdminProductsPage = () => {
     brandId: "",
     createdBy: "",
     isActive: "",
+    isDeleted: "", // Filter for deleted products
     priceFrom: "",
     priceTo: "",
     stockFrom: "",
@@ -103,7 +115,49 @@ const AdminProductsPage = () => {
   // Initial load
   useEffect(() => {
     fetchProducts(currentPage);
+    fetchDropdownData();
   }, []);
+
+  // Fetch categories, stores, brands for dropdown
+  const fetchDropdownData = async () => {
+    try {
+      // Fetch categories
+      const categoriesRes = await getPlatformCategoriesApi();
+      if (categoriesRes.code === 1000 && categoriesRes.result) {
+        // Flatten nested categories for dropdown
+        const flattenCategories = (cats, prefix = "") => {
+          let result = [];
+          cats.forEach((cat) => {
+            result.push({
+              id: cat.id,
+              name: prefix + cat.name,
+            });
+            if (cat.children && cat.children.length > 0) {
+              result = result.concat(
+                flattenCategories(cat.children, prefix + "-- ")
+              );
+            }
+          });
+          return result;
+        };
+        setCategories(flattenCategories(categoriesRes.result));
+      }
+
+      // Fetch stores
+      const storesRes = await getPublicStoresApi(0, 1000);
+      if (storesRes.code === 1000 && storesRes.result) {
+        setStores(storesRes.result.content || []);
+      }
+
+      // Fetch brands
+      const brandsRes = await getBrandsApi(0, 1000);
+      if (brandsRes.code === 1000 && brandsRes.result) {
+        setBrands(brandsRes.result.content || brandsRes.result || []);
+      }
+    } catch (err) {
+      console.error("Error fetching dropdown data:", err);
+    }
+  };
 
   const getStatusBadgeClass = (isActive) => {
     return isActive ? styles.statusActive : styles.statusInactive;
@@ -141,6 +195,34 @@ const AdminProductsPage = () => {
     });
   };
 
+  const handleRestoreProduct = async (productId) => {
+    Modal.confirm({
+      title: "Xác nhận khôi phục",
+      content: "Bạn có chắc chắn muốn khôi phục sản phẩm này?",
+      okText: "Khôi phục",
+      cancelText: "Hủy",
+      okType: "primary",
+      onOk: async () => {
+        try {
+          await axios.post(`/api/product/products/${productId}/restore`);
+          notification.success({
+            message: "Thành công",
+            description: "Khôi phục sản phẩm thành công!",
+            placement: "topRight",
+          });
+          fetchProducts(currentPage);
+        } catch (err) {
+          console.error("Error restoring product:", err);
+          notification.error({
+            message: "Lỗi",
+            description: "Không thể khôi phục sản phẩm. Vui lòng thử lại.",
+            placement: "topRight",
+          });
+        }
+      },
+    });
+  };
+
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({
       ...prev,
@@ -162,6 +244,7 @@ const AdminProductsPage = () => {
       brandId: "",
       createdBy: "",
       isActive: "",
+      isDeleted: "",
       priceFrom: "",
       priceTo: "",
       stockFrom: "",
@@ -221,6 +304,15 @@ const AdminProductsPage = () => {
               <option value="true">Đang hoạt động</option>
               <option value="false">Ngừng hoạt động</option>
             </select>
+            <select
+              value={filters.isDeleted}
+              onChange={(e) => handleFilterChange("isDeleted", e.target.value)}
+              className={styles.adminSelect}
+            >
+              <option value="">Chưa xóa</option>
+              <option value="true">Đã xóa</option>
+              <option value="false">Chưa xóa</option>
+            </select>
             <button
               className="admin-btn admin-btn-secondary"
               onClick={() => setShowFilters(!showFilters)}
@@ -257,40 +349,55 @@ const AdminProductsPage = () => {
                 />
               </div>
               <div className={styles.filterGroup}>
-                <label className={styles.filterLabel}>ID danh mục</label>
-                <input
-                  type="text"
-                  placeholder="ID danh mục..."
+                <label className={styles.filterLabel}>Danh mục</label>
+                <select
                   value={filters.categoryId}
                   onChange={(e) =>
                     handleFilterChange("categoryId", e.target.value)
                   }
                   className={styles.filterInput}
-                />
+                >
+                  <option value="">-- Tất cả danh mục --</option>
+                  {categories.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className={styles.filterGroup}>
-                <label className={styles.filterLabel}>ID cửa hàng</label>
-                <input
-                  type="text"
-                  placeholder="ID cửa hàng..."
+                <label className={styles.filterLabel}>Cửa hàng</label>
+                <select
                   value={filters.storeId}
                   onChange={(e) =>
                     handleFilterChange("storeId", e.target.value)
                   }
                   className={styles.filterInput}
-                />
+                >
+                  <option value="">-- Tất cả cửa hàng --</option>
+                  {stores.map((store) => (
+                    <option key={store.id} value={store.id}>
+                      {store.storeName}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className={styles.filterGroup}>
-                <label className={styles.filterLabel}>ID thương hiệu</label>
-                <input
-                  type="text"
-                  placeholder="ID thương hiệu..."
+                <label className={styles.filterLabel}>Thương hiệu</label>
+                <select
                   value={filters.brandId}
                   onChange={(e) =>
                     handleFilterChange("brandId", e.target.value)
                   }
                   className={styles.filterInput}
-                />
+                >
+                  <option value="">-- Tất cả thương hiệu --</option>
+                  {brands.map((brand) => (
+                    <option key={brand.id} value={brand.id}>
+                      {brand.name}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className={styles.filterGroup}>
                 <label className={styles.filterLabel}>Người tạo</label>
@@ -476,6 +583,7 @@ const AdminProductsPage = () => {
                     <th>Đánh giá</th>
                     <th>Ngày tạo</th>
                     <th>Trạng thái</th>
+                    <th>Đã xóa</th>
                     <th className={styles.stickyColumn}>Thao tác</th>
                   </tr>
                 </thead>
@@ -592,6 +700,26 @@ const AdminProductsPage = () => {
                             )}
                           </span>
                         </td>
+                        <td>
+                          <span
+                            className={`status-badge ${
+                              product.deleted
+                                ? styles.statusDeleted
+                                : styles.statusNotDeleted
+                            }`}
+                            title={product.deleted ? "Đã xóa" : "Chưa xóa"}
+                          >
+                            {product.deleted ? (
+                              <CloseCircleOutlined
+                                style={{ color: "#ff4d4f" }}
+                              />
+                            ) : (
+                              <CheckCircleOutlined
+                                style={{ color: "#52c41a" }}
+                              />
+                            )}
+                          </span>
+                        </td>
                         <td className={styles.stickyColumn}>
                           <div className={styles.adminActionButtons}>
                             <button
@@ -603,13 +731,23 @@ const AdminProductsPage = () => {
                             >
                               <EyeOutlined />
                             </button>
-                            <button
-                              className={`${styles.adminActionBtn} ${styles.delete}`}
-                              title="Xóa"
-                              onClick={() => handleDeleteProduct(product.id)}
-                            >
-                              <DeleteOutlined />
-                            </button>
+                            {product.deleted ? (
+                              <button
+                                className={`${styles.adminActionBtn} ${styles.restore}`}
+                                title="Khôi phục"
+                                onClick={() => handleRestoreProduct(product.id)}
+                              >
+                                <UndoOutlined />
+                              </button>
+                            ) : (
+                              <button
+                                className={`${styles.adminActionBtn} ${styles.delete}`}
+                                title="Xóa"
+                                onClick={() => handleDeleteProduct(product.id)}
+                              >
+                                <DeleteOutlined />
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
@@ -617,7 +755,7 @@ const AdminProductsPage = () => {
                   ) : (
                     <tr>
                       <td
-                        colSpan="11"
+                        colSpan="12"
                         style={{ textAlign: "center", padding: "40px" }}
                       >
                         <div className="admin-empty-state">
