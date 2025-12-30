@@ -290,8 +290,8 @@ const SearchPage = () => {
         }
         setSearchParams(newParams);
 
-        // Trigger fetch
-        fetchProducts();
+        // Trigger useEffect by forcing a re-render with latest filters
+        setFilters((prev) => ({ ...prev }));
       }, 800);
     } else {
       // Non-debounced filters (checkboxes, etc.)
@@ -345,8 +345,8 @@ const SearchPage = () => {
       }
       setSearchParams(newParams);
 
-      // Trigger fetch
-      fetchProducts();
+      // Trigger useEffect by forcing a re-render with latest filters
+      setFilters((prev) => ({ ...prev }));
     }, 100); // Short delay since user clicked a preset
   };
 
@@ -644,84 +644,6 @@ const SearchPage = () => {
             ))}
           </Space>
         </Panel>
-
-        {/* Categories from Aggregations */}
-        {aggregations?.categories && aggregations.categories.length > 0 && (
-          <Panel header="Danh mục" key="category">
-            <Space direction="vertical" style={{ width: "100%" }}>
-              {aggregations.categories.slice(0, 10).map((cat) => (
-                <Checkbox
-                  key={cat.id}
-                  checked={filters.categoryId === cat.id}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      "categoryId",
-                      e.target.checked ? cat.id : ""
-                    )
-                  }
-                >
-                  {cat.name}{" "}
-                  <Badge
-                    count={cat.count}
-                    style={{ backgroundColor: "#52c41a" }}
-                  />
-                </Checkbox>
-              ))}
-            </Space>
-          </Panel>
-        )}
-
-        {/* Brands from Aggregations */}
-        {aggregations?.brands && aggregations.brands.length > 0 && (
-          <Panel header="Thương hiệu" key="brand">
-            <Space direction="vertical" style={{ width: "100%" }}>
-              {aggregations.brands.slice(0, 10).map((brand) => (
-                <Checkbox
-                  key={brand.id}
-                  checked={filters.brandId === brand.id}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      "brandId",
-                      e.target.checked ? brand.id : ""
-                    )
-                  }
-                >
-                  {brand.name}{" "}
-                  <Badge
-                    count={brand.count}
-                    style={{ backgroundColor: "#1890ff" }}
-                  />
-                </Checkbox>
-              ))}
-            </Space>
-          </Panel>
-        )}
-
-        {/* Stores from Aggregations */}
-        {aggregations?.stores && aggregations.stores.length > 0 && (
-          <Panel header="Cửa hàng" key="store">
-            <Space direction="vertical" style={{ width: "100%" }}>
-              {aggregations.stores.slice(0, 10).map((store) => (
-                <Checkbox
-                  key={store.id}
-                  checked={filters.storeId === store.id}
-                  onChange={(e) =>
-                    handleFilterChange(
-                      "storeId",
-                      e.target.checked ? store.id : ""
-                    )
-                  }
-                >
-                  {store.name}{" "}
-                  <Badge
-                    count={store.count}
-                    style={{ backgroundColor: "#faad14" }}
-                  />
-                </Checkbox>
-              ))}
-            </Space>
-          </Panel>
-        )}
       </Collapse>
     </Card>
   );
