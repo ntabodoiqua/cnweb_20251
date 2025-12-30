@@ -536,6 +536,16 @@ const deleteStoreCategoryApi = (storeId, categoryId) => {
   });
 };
 
+// Toggle Store Category Status API (Seller)
+const toggleStoreCategoryStatusApi = (storeId, categoryId) => {
+  const URL_API = `/api/product/seller/stores/${storeId}/categories/${categoryId}/toggle-status`;
+  return axios.patch(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 const uploadCategoryImageApi = (storeId, categoryId, file) => {
   const URL_API = `/api/product/seller/stores/${storeId}/categories/${categoryId}/thumbnail`;
   const formData = new FormData();
@@ -1394,6 +1404,26 @@ const deleteValueFromAttributeApi = (attributeId, value) => {
   });
 };
 
+// Toggle Attribute Status API
+const toggleAttributeStatusApi = (attributeId) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}/toggle-status`;
+  return axios.patch(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
+// Toggle Attribute Value Status API
+const toggleAttributeValueStatusApi = (attributeId, valueId) => {
+  const URL_API = `/api/product/product-attributes/${attributeId}/values/${valueId}/toggle-status`;
+  return axios.patch(URL_API, null, {
+    headers: {
+      "Accept-Language": "vi",
+    },
+  });
+};
+
 // Product Variants APIs
 const getProductVariantsApi = (productId) => {
   const URL_API = `/api/product/products/${productId}/variants`;
@@ -2018,7 +2048,7 @@ const deleteCategoryAdminApi = (categoryId) => {
 
 const toggleCategoryStatusApi = (categoryId) => {
   const URL_API = `/api/product/admin/categories/${categoryId}/toggle-status`;
-  return axios.put(URL_API, null, {
+  return axios.patch(URL_API, null, {
     headers: {
       "Accept-Language": "vi",
     },
@@ -2958,6 +2988,7 @@ export {
   createStoreCategoryApi,
   updateStoreCategoryApi,
   deleteStoreCategoryApi,
+  toggleStoreCategoryStatusApi,
   uploadCategoryImageApi,
   createProductApi,
   getProductsApi,
@@ -3032,6 +3063,8 @@ export {
   deleteCategoriesFromAttributeApi,
   addValueToAttributeApi,
   deleteValueFromAttributeApi,
+  toggleAttributeStatusApi,
+  toggleAttributeValueStatusApi,
   // Product Variants APIs
   getProductVariantsApi,
   createVariantApi,

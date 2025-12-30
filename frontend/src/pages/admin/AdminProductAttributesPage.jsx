@@ -24,6 +24,8 @@ import {
   addCategoriesToAttributeApi,
   deleteCategoriesFromAttributeApi,
   getCategoriesAdminApi,
+  toggleAttributeStatusApi,
+  toggleAttributeValueStatusApi,
 } from "../../util/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import styles from "./AdminProductAttributesPage.module.css";
@@ -150,6 +152,63 @@ const AdminProductAttributesPage = () => {
   const handleRefresh = () => {
     if (selectedCategoryId) {
       fetchAttributesByCategory(selectedCategoryId);
+    }
+  };
+
+  // Toggle attribute status
+  const handleToggleAttributeStatus = async (attributeId) => {
+    try {
+      const response = await toggleAttributeStatusApi(attributeId);
+      if (response && response.code === 1000) {
+        notification.success({
+          message: "Thành công",
+          description: response.message || "Cập nhật trạng thái thành công!",
+          placement: "topRight",
+        });
+        handleRefresh();
+      }
+    } catch (error) {
+      console.error("Error toggling attribute status:", error);
+      notification.error({
+        message: "Lỗi",
+        description:
+          error.response?.data?.message || "Không thể cập nhật trạng thái",
+        placement: "topRight",
+      });
+    }
+  };
+
+  // Toggle attribute value status
+  const handleToggleValueStatus = async (attributeId, valueId) => {
+    try {
+      const response = await toggleAttributeValueStatusApi(
+        attributeId,
+        valueId
+      );
+      if (response && response.code === 1000) {
+        notification.success({
+          message: "Thành công",
+          description: "Cập nhật trạng thái giá trị thành công!",
+          placement: "topRight",
+        });
+        // Refresh attribute detail if modal is open
+        if (showAttributeDetail && selectedAttribute) {
+          const detailResponse = await getProductAttributeByIdApi(attributeId);
+          if (detailResponse && detailResponse.code === 1000) {
+            setSelectedAttribute(detailResponse.result);
+          }
+        }
+        handleRefresh();
+      }
+    } catch (error) {
+      console.error("Error toggling value status:", error);
+      notification.error({
+        message: "Lỗi",
+        description:
+          error.response?.data?.message ||
+          "Không thể cập nhật trạng thái giá trị",
+        placement: "topRight",
+      });
     }
   };
 
@@ -591,6 +650,23 @@ const AdminProductAttributesPage = () => {
                               <EditOutlined />
                             </button>
                             <button
+                              className={`${styles.adminActionBtn} ${styles.lock}`}
+                              title={
+                                attribute.isActive
+                                  ? "Ngừng hoạt động"
+                                  : "Kích hoạt"
+                              }
+                              onClick={() =>
+                                handleToggleAttributeStatus(attribute.id)
+                              }
+                            >
+                              {attribute.isActive ? (
+                                <CloseCircleOutlined />
+                              ) : (
+                                <CheckCircleOutlined />
+                              )}
+                            </button>
+                            <button
                               className={`${styles.adminActionBtn} ${styles.delete}`}
                               title="Xóa"
                               onClick={() =>
@@ -702,16 +778,31 @@ const AdminProductAttributesPage = () => {
                       {selectedAttribute.values &&
                       selectedAttribute.values.length > 0 ? (
                         selectedAttribute.values.map((val) => (
-                          <Tag
+                          <Tooltip
                             key={val.id}
-                            color={val.isActive ? "blue" : "default"}
-                            icon={
-                              !val.isActive ? <CloseCircleOutlined /> : null
+                            title={
+                              val.isActive
+                                ? "Click để tắt"
+                                : "Click để kích hoạt"
                             }
                           >
-                            {val.value}
-                            {!val.isActive && " (Đã tắt)"}
-                          </Tag>
+                            <Tag
+                              color={val.isActive ? "blue" : "default"}
+                              icon={
+                                !val.isActive ? <CloseCircleOutlined /> : null
+                              }
+                              style={{ cursor: "pointer" }}
+                              onClick={() =>
+                                handleToggleValueStatus(
+                                  selectedAttribute.id,
+                                  val.id
+                                )
+                              }
+                            >
+                              {val.value}
+                              {!val.isActive && " (Đã tắt)"}
+                            </Tag>
+                          </Tooltip>
                         ))
                       ) : (
                         <span>Chưa có giá trị</span>

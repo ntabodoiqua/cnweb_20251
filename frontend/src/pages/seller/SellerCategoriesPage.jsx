@@ -16,6 +16,7 @@ import {
   FolderOutlined,
   AppstoreOutlined,
   CheckCircleOutlined,
+  CloseCircleOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { notification, Modal, Tooltip } from "antd";
@@ -29,6 +30,7 @@ import {
   deleteStoreCategoryApi,
   uploadCategoryImageApi,
   getMyStoresApi,
+  toggleStoreCategoryStatusApi,
 } from "../../util/api";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import styles from "./SellerCategoriesPage.module.css";
@@ -309,6 +311,43 @@ const SellerCategoriesPage = () => {
         }
       },
     });
+  };
+
+  // Toggle category status
+  const handleToggleCategoryStatus = async (categoryId) => {
+    if (!selectedStoreId) return;
+
+    try {
+      const response = await toggleStoreCategoryStatusApi(
+        selectedStoreId,
+        categoryId
+      );
+      if (response?.code === 1000) {
+        notification.success({
+          message: "Thành công",
+          description: response?.message || "Cập nhật trạng thái thành công!",
+          placement: "topRight",
+          duration: 3,
+        });
+        fetchCategories();
+      } else {
+        notification.error({
+          message: "Cập nhật thất bại",
+          description: response?.message || "Không thể cập nhật trạng thái",
+          placement: "topRight",
+          duration: 3,
+        });
+      }
+    } catch (error) {
+      console.error("Error toggling category status:", error);
+      notification.error({
+        message: "Cập nhật thất bại",
+        description:
+          error.response?.data?.message || "Không thể cập nhật trạng thái",
+        placement: "topRight",
+        duration: 3,
+      });
+    }
   };
 
   const handleImageUpload = async (categoryId, file) => {
@@ -833,6 +872,35 @@ const SellerCategoriesPage = () => {
                                 className={`${styles.profileBtn} ${styles.profileBtnSecondary}`}
                               >
                                 <EditOutlined /> Chỉnh sửa
+                              </button>
+                            </Tooltip>
+                            <Tooltip
+                              title={
+                                category.active
+                                  ? "Ngừng hoạt động"
+                                  : "Kích hoạt"
+                              }
+                            >
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleCategoryStatus(category.id);
+                                }}
+                                className={`${styles.profileBtn} ${
+                                  category.active
+                                    ? styles.profileBtnWarning
+                                    : styles.profileBtnSuccess
+                                }`}
+                              >
+                                {category.active ? (
+                                  <>
+                                    <CloseCircleOutlined /> Tắt
+                                  </>
+                                ) : (
+                                  <>
+                                    <CheckCircleOutlined /> Bật
+                                  </>
+                                )}
                               </button>
                             </Tooltip>
                             <Tooltip title="Xóa danh mục">
