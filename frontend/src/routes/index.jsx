@@ -21,7 +21,9 @@ const HomePage = lazy(() => import("../pages/home"));
 const ProductsPage = lazy(() => import("../pages/ProductsPage"));
 const ProductDetailPage = lazy(() => import("../pages/ProductDetailPage"));
 const CategoryPage = lazy(() => import("../pages/CategoryPage"));
+const AllCategoriesPage = lazy(() => import("../pages/AllCategoriesPage"));
 const BrandPage = lazy(() => import("../pages/BrandPage"));
+const AllBrandsPage = lazy(() => import("../pages/AllBrandsPage"));
 const StorePage = lazy(() => import("../pages/StorePage"));
 const SearchPage = lazy(() => import("../pages/SearchPage"));
 const LoginPage = lazy(() => import("../pages/login"));
@@ -236,10 +238,26 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: PUBLIC_ROUTES.CATEGORIES,
+        element: (
+          <SuspenseWrapper>
+            <AllCategoriesPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
         path: PUBLIC_ROUTES.BRAND,
         element: (
           <SuspenseWrapper>
             <BrandPage />
+          </SuspenseWrapper>
+        ),
+      },
+      {
+        path: PUBLIC_ROUTES.BRANDS,
+        element: (
+          <SuspenseWrapper>
+            <AllBrandsPage />
           </SuspenseWrapper>
         ),
       },

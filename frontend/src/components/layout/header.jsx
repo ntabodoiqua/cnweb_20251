@@ -369,58 +369,25 @@ const Header = () => {
   };
 
   // Build dynamic category menu items from API - memoized to prevent re-renders
+  // Chỉ hiển thị danh mục cha (parent categories) trong dropdown
   const categoryMenuItems = useMemo(() => {
     if (loadingCategories) {
       return [{ key: "loading", label: <Spin size="small" />, disabled: true }];
     }
 
-    const items = categories.slice(0, 8).map((category) => {
-      const hasSubCategories =
-        category.subCategories && category.subCategories.length > 0;
-
-      if (hasSubCategories) {
-        return {
-          key: `cat-${category.id}`,
-          label: (
-            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-              {getCategoryIcon(category.name)}
-              <span>{category.name}</span>
-            </div>
-          ),
-          children: [
-            {
-              key: `cat-all-${category.id}`,
-              label: (
-                <Link
-                  to={`/category/${category.id}`}
-                  style={{ fontWeight: 600, display: "block" }}
-                >
-                  Xem tất cả {category.name}
-                </Link>
-              ),
-            },
-            { type: "divider" },
-            ...category.subCategories.map((sub) => ({
-              key: `subcat-${sub.id}`,
-              label: <Link to={`/category/${sub.id}`}>{sub.name}</Link>,
-            })),
-          ],
-        };
-      }
-
-      return {
-        key: `cat-${category.id}`,
-        label: (
-          <Link
-            to={`/category/${category.id}`}
-            style={{ display: "flex", alignItems: "center", gap: "12px" }}
-          >
-            {getCategoryIcon(category.name)}
-            <span>{category.name}</span>
-          </Link>
-        ),
-      };
-    });
+    // Chỉ hiển thị danh mục cha, không hiển thị submenu với danh mục con
+    const items = categories.slice(0, 10).map((category) => ({
+      key: `cat-${category.id}`,
+      label: (
+        <Link
+          to={`/category/${category.id}`}
+          style={{ display: "flex", alignItems: "center", gap: "12px" }}
+        >
+          {getCategoryIcon(category.name)}
+          <span>{category.name}</span>
+        </Link>
+      ),
+    }));
 
     return [
       ...items,

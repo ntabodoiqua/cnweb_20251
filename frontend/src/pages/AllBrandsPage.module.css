@@ -1,0 +1,221 @@
+.allBrandsPage {
+  min-height: calc(100vh - 120px);
+  background: linear-gradient(135deg, #f5f7fa 0%, #fef5f1 100%);
+  padding-bottom: 40px;
+}
+
+/* Breadcrumb */
+.breadcrumbWrapper {
+  background: #fff;
+  padding: 16px 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.breadcrumbWrapper a {
+  color: #666;
+  transition: color 0.3s;
+}
+
+.breadcrumbWrapper a:hover {
+  color: #ee4d2d;
+}
+
+/* Page Header */
+.pageHeader {
+  background: linear-gradient(135deg, #ee4d2d 0%, #ff6b35 100%);
+  padding: 40px 24px;
+  color: #fff;
+  margin-bottom: 24px;
+}
+
+.headerContent {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.headerInfo {
+  flex: 1;
+}
+
+.pageTitle {
+  color: #fff !important;
+  margin-bottom: 8px !important;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pageDescription {
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 16px;
+}
+
+.searchWrapper {
+  width: 400px;
+  max-width: 100%;
+}
+
+.searchInput :global(.ant-input-search-button) {
+  background: #fff;
+  border-color: #fff;
+  color: #ee4d2d;
+}
+
+.searchInput :global(.ant-input-search-button:hover) {
+  background: #f5f5f5;
+  border-color: #f5f5f5;
+  color: #ee4d2d;
+}
+
+/* Brands Container */
+.brandsContainer {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Brand Card */
+.brandCard {
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  text-align: center;
+  padding: 16px 8px;
+}
+
+.brandCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+.brandCard :global(.ant-card-body) {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.brandLogoWrapper {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f9f9f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #f0f0f0;
+  transition: all 0.3s ease;
+}
+
+.brandCard:hover .brandLogoWrapper {
+  border-color: #ee4d2d;
+  box-shadow: 0 4px 12px rgba(238, 77, 45, 0.2);
+}
+
+.brandLogo {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+}
+
+.brandContent {
+  flex: 1;
+}
+
+.brandName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 4px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brandStats {
+  font-size: 12px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.brandOverlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(238, 77, 45, 0.9));
+  color: white;
+  padding: 20px 12px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.brandCard:hover .brandOverlay {
+  opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .headerContent {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .searchWrapper {
+    width: 100%;
+  }
+
+  .pageHeader {
+    padding: 24px 16px;
+  }
+
+  .brandsContainer {
+    padding: 0 16px;
+  }
+
+  .brandLogoWrapper {
+    width: 60px;
+    height: 60px;
+  }
+
+  .brandLogo {
+    width: 45px;
+    height: 45px;
+  }
+
+  .brandName {
+    font-size: 12px;
+  }
+
+  .brandStats {
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 576px) {
+  .brandCard {
+    padding: 12px 6px;
+  }
+}
