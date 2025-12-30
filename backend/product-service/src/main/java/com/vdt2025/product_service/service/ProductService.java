@@ -53,9 +53,14 @@ public interface ProductService {
     List<ProductImageResponse> updateProductImageOrder(String productId, List<ImageOrderUpdateRequest> imageOrders);
 
     /**
-     * Xóa sản phẩm (soft delete - chuyển isActive = false)
+     * Xóa sản phẩm (soft delete - chuyển isDeleted = true)
      */
     void deleteProduct(String id);
+
+    /**
+     * Khôi phục sản phẩm đã xóa (restore - chuyển isDeleted = false)
+     */
+    ProductResponse restoreProduct(String id);
 
     /**
      * Xóa vĩnh viễn sản phẩm (hard delete)

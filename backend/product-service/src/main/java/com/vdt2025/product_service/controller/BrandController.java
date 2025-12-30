@@ -76,6 +76,19 @@ public class BrandController {
                 .build();
     }
 
+    // Toggle trạng thái active của brand
+    @PatchMapping("/{id}/toggle-status")
+    public ApiResponse<BrandResponse> toggleBrandStatus(@PathVariable String id) {
+        BrandResponse brand = brandService.toggleBrandStatus(id);
+        String message = brand.getIsActive() 
+                ? "Brand has been activated" 
+                : "Brand has been deactivated";
+        return ApiResponse.<BrandResponse>builder()
+                .result(brand)
+                .message(message)
+                .build();
+    }
+
     //Xóa brand
     @DeleteMapping("/{id}")
     public ApiResponse<String> deleteBrand(@PathVariable String id) {

@@ -187,6 +187,23 @@ public class ProductManagementController {
                 .build();
     }
 
+    /**
+     * Khôi phục sản phẩm đã xóa (restore)
+     * POST /products/{productId}/restore
+     * Required: ADMIN role only
+     */
+    @PostMapping("/{productId}/restore")
+    public ApiResponse<ProductResponse> restoreProduct(@PathVariable String productId) {
+        log.info("Restoring product with ID: {}", productId);
+
+        ProductResponse response = productService.restoreProduct(productId);
+
+        return ApiResponse.<ProductResponse>builder()
+                .message("Product restored successfully")
+                .result(response)
+                .build();
+    }
+
     // ========== Search & Filter ==========
 
     /**

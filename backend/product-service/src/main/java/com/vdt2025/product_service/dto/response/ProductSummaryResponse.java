@@ -38,6 +38,8 @@ public class ProductSummaryResponse {
 
     boolean isActive;
 
+    boolean isDeleted;
+
     String storeName;
 
     String storeId;

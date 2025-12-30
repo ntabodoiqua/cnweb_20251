@@ -33,6 +33,13 @@ public interface CategoryManagementService {
     void deletePlatformCategory(String categoryId);
 
     /**
+     * Admin toggle trạng thái active của platform category
+     * Khi disable: cascade disable products + subcategories
+     * Khi enable: chỉ enable category, products và subcategories giữ nguyên
+     */
+    CategoryResponse togglePlatformCategoryStatus(String categoryId);
+
+    /**
      * Lấy tất cả platform categories (cấu trúc cây)
      */
     List<CategoryResponse> getAllPlatformCategories();
@@ -63,6 +70,12 @@ public interface CategoryManagementService {
      * Seller xóa store category của mình
      */
     void deleteStoreCategory(String storeId, String categoryId, String sellerId);
+
+    /**
+     * Seller toggle trạng thái active của store category
+     * Khi disable: chỉ disable category (products giữ nguyên vì store category là optional)
+     */
+    CategoryResponse toggleStoreCategoryStatus(String storeId, String categoryId, String sellerName);
 
     /**
      * Lấy tất cả store categories của một store

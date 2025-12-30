@@ -32,6 +32,9 @@ public class ProductFilterRequest {
 
     // Status filter
     Boolean isActive;
+    
+    // Deleted status filter (for admin only - to view deleted products)
+    Boolean isDeleted;
 
     // Price range filter
     BigDecimal priceFrom;

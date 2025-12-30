@@ -327,6 +327,43 @@ public class ProductServiceImpl implements ProductService {
     @PreAuthorize("hasRole('ADMIN')")
     @CacheEvict(value = "products", key = "#id")
     @Transactional
+    public ProductResponse restoreProduct(String id) {
+        log.info("Restoring product with ID: {}", id);
+        
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.PRODUCT_NOT_FOUND));
+        
+        if (!product.isDeleted()) {
+            log.warn("Product {} is not deleted, no need to restore", id);
+            throw new AppException(ErrorCode.PRODUCT_NOT_DELETED);
+        }
+        
+        // Restore product: set isDeleted = false
+        product.setDeleted(false);
+        productRepository.save(product);
+        
+        // Restore tất cả variants
+        List<ProductVariant> variants = variantRepository.findByProductId(id);
+        for (ProductVariant variant : variants) {
+            variant.setDeleted(false);
+        }
+        variantRepository.saveAll(variants);
+        
+        // Evict product search cache khi khôi phục sản phẩm
+        cacheEvictService.evictProductSearchCache();
+        
+        // Publish event qua RabbitMQ để sync với Elasticsearch
+        productEventPublisher.publishProductUpdated(id);
+        
+        log.info("Product {} restored successfully", product.getName());
+        
+        return mapToProductResponse(product);
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "products", key = "#id")
+    @Transactional
     public void permanentDeleteProduct(String id) {
         log.info("Permanently deleting product with ID: {}", id);
         
@@ -1120,6 +1157,7 @@ public class ProductServiceImpl implements ProductService {
                 .averageRating(product.getAverageRating())
                 .ratingCount(product.getRatingCount())
                 .isActive(product.isActive())
+                .isDeleted(product.isDeleted())
                 .storeName(product.getStore().getStoreName())
                 .storeId(product.getStore().getId())
                 .platformCategoryName(product.getCategory().getName())

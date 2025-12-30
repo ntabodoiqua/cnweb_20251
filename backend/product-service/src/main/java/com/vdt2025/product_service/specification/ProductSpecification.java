@@ -19,9 +19,15 @@ public class ProductSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            // ALWAYS filter out deleted products (soft delete)
-            // Sản phẩm đã xóa không bao giờ hiển thị trong kết quả tìm kiếm
-            predicates.add(cb.equal(root.get("isDeleted"), false));
+            // Filter by deleted status
+            // Nếu isDeleted được chỉ định (admin muốn xem sản phẩm đã xóa), sử dụng giá trị đó
+            // Ngược lại, mặc định chỉ hiển thị sản phẩm chưa xóa
+            if (filter.getIsDeleted() != null) {
+                predicates.add(cb.equal(root.get("isDeleted"), filter.getIsDeleted()));
+            } else {
+                // Mặc định: chỉ hiển thị sản phẩm chưa xóa
+                predicates.add(cb.equal(root.get("isDeleted"), false));
+            }
 
             // Keyword search (tìm trong tên và mô tả)
             if (filter.getKeyword() != null && !filter.getKeyword().isBlank()) {

@@ -559,6 +559,7 @@ public class ProductSearchServiceImpl implements ProductSearchService {
                 .averageRating(doc.getAverageRating())
                 .ratingCount(doc.getRatingCount())
                 .isActive(doc.isActive())
+                .isDeleted(doc.isDeleted())
                 .storeName(doc.getStoreName())
                 .storeId(doc.getStoreId())
                 .platformCategoryName(doc.getCategoryName())

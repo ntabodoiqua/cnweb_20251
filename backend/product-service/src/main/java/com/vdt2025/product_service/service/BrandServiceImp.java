@@ -133,4 +133,28 @@ public class BrandServiceImp implements BrandService{
         log.info("Soft deleted brand {} and its products", brandId);
     }
 
+    @Override
+    @Transactional
+    @PreAuthorize("hasRole('ADMIN')")
+    @CacheEvict(value = "brands", key = "#brandId")
+    public BrandResponse toggleBrandStatus(String brandId) {
+        Brand brand = brandRepository.findById(brandId)
+                .orElseThrow(() -> new AppException(ErrorCode.BRAND_NOT_FOUND));
+
+        boolean newStatus = !brand.isActive();
+        brand.setActive(newStatus);
+
+        // Khi disable brand: cascade disable tất cả products thuộc brand
+        if (!newStatus) {
+            productRepository.deactivateProductsByBrandId(brandId);
+            log.info("Brand {} disabled, all products deactivated", brand.getName());
+        } else {
+            // Khi enable brand: chỉ enable brand, seller tự quyết định enable products
+            log.info("Brand {} enabled. Products remain unchanged - sellers can enable them manually", brand.getName());
+        }
+
+        brandRepository.save(brand);
+        return brandMapper.toBrandResponse(brand);
+    }
+
 }

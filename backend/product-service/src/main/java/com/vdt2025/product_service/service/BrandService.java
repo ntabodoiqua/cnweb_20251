@@ -21,4 +21,11 @@ public interface BrandService {
     String setBrandThumbnail(String id, MultipartFile file);
 
     Page<BrandResponse> searchBrands(BrandFilterRequest filter, Pageable pageable);
+
+    /**
+     * Toggle trạng thái active của brand
+     * Khi disable: cascade disable tất cả products thuộc brand
+     * Khi enable: chỉ enable brand, không auto-enable products
+     */
+    BrandResponse toggleBrandStatus(String id);
 }

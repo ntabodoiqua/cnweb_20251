@@ -80,6 +80,27 @@ public class AdminCategoryController {
     }
 
     /**
+     * Admin toggle trạng thái active của platform category
+     * PATCH /admin/categories/{categoryId}/toggle-status
+     */
+    @PatchMapping("/{categoryId}/toggle-status")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<CategoryResponse> togglePlatformCategoryStatus(
+            @PathVariable String categoryId,
+            Authentication authentication) {
+
+        log.info("Admin {} toggling platform category status: {}", authentication.getName(), categoryId);
+        CategoryResponse response = categoryManagementService.togglePlatformCategoryStatus(categoryId);
+        String message = response.isActive()
+                ? "Platform category has been activated"
+                : "Platform category has been deactivated";
+        return ApiResponse.<CategoryResponse>builder()
+                .result(response)
+                .message(message)
+                .build();
+    }
+
+    /**
      * Lấy tất cả platform categories (cấu trúc cây 2 cấp)
      * GET /admin/categories
      */
