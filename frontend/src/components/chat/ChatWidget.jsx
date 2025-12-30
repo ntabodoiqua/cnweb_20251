@@ -250,8 +250,16 @@ const ChatWidget = () => {
       if (!activeConversation || !product) return;
 
       try {
-        await sendProductMessage(activeConversation.id, product);
-        setShowProductPicker(false);
+        const success = await sendProductMessage(
+          activeConversation.id,
+          product.id || product
+        );
+        if (success) {
+          message.success("Đã gửi sản phẩm");
+          setShowProductPicker(false);
+        } else {
+          message.error("Không thể gửi sản phẩm");
+        }
       } catch (error) {
         console.error("Error sending product:", error);
         message.error("Không thể gửi sản phẩm");
@@ -266,8 +274,16 @@ const ChatWidget = () => {
       if (!activeConversation || !order) return;
 
       try {
-        await sendOrderMessage(activeConversation.id, order);
-        setShowOrderPicker(false);
+        const success = await sendOrderMessage(
+          activeConversation.id,
+          order.id || order
+        );
+        if (success) {
+          message.success("Đã gửi đơn hàng");
+          setShowOrderPicker(false);
+        } else {
+          message.error("Không thể gửi đơn hàng");
+        }
       } catch (error) {
         console.error("Error sending order:", error);
         message.error("Không thể gửi đơn hàng");
@@ -286,7 +302,15 @@ const ChatWidget = () => {
     }
 
     // If user is buyer, use store from conversation
-    return activeConversation.storeId;
+    // Try shopId first, then storeId
+    if (activeConversation.shopId) return activeConversation.shopId;
+    if (activeConversation.storeId) return activeConversation.storeId;
+
+    // Or get from participant with type SHOP
+    const shopParticipant = activeConversation.participants?.find(
+      (p) => p.type === "SHOP" || p.shopId
+    );
+    return shopParticipant?.shopId || shopParticipant?.userId || null;
   }, [activeConversation, isSeller, sellerStoreId]);
 
   // Chọn conversation
@@ -687,17 +711,16 @@ const ChatWidget = () => {
           icon={<SmileOutlined />}
           className={styles.inputActionBtn}
         />
-        {/* Product picker button - chỉ hiện cho seller */}
-        {isSeller && sellerStoreId && (
-          <Button
-            type="text"
-            icon={<AppstoreOutlined />}
-            className={styles.inputActionBtn}
-            onClick={() => setShowProductPicker(true)}
-            title="Gửi sản phẩm"
-          />
-        )}
-        {/* Order picker button */}
+        {/* Product picker button - Cả buyer và seller đều có thể gửi sản phẩm */}
+        <Button
+          type="text"
+          icon={<AppstoreOutlined />}
+          className={styles.inputActionBtn}
+          onClick={() => setShowProductPicker(true)}
+          title="Gửi sản phẩm"
+          disabled={!isSeller && !getConversationStoreId()}
+        />
+        {/* Order picker button - Cả buyer và seller đều có thể gửi */}
         <Button
           type="text"
           icon={<ShoppingCartOutlined />}
@@ -824,15 +847,13 @@ const ChatWidget = () => {
         </div>
       )}
 
-      {/* Product Picker Modal - chỉ cho seller */}
-      {isSeller && sellerStoreId && (
-        <ProductPickerModal
-          open={showProductPicker}
-          onClose={() => setShowProductPicker(false)}
-          onSelect={handleSendProduct}
-          storeId={sellerStoreId}
-        />
-      )}
+      {/* Product Picker Modal - Cả buyer và seller */}
+      <ProductPickerModal
+        open={showProductPicker}
+        onClose={() => setShowProductPicker(false)}
+        onSelect={handleSendProduct}
+        storeId={isSeller ? sellerStoreId : getConversationStoreId()}
+      />
 
       {/* Order Picker Modal */}
       <OrderPickerModal
